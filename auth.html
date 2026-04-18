@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monvy — Entrar</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <style>
@@ -451,6 +453,25 @@
     @media (max-width: 900px) {
       .left-panel { display: none; }
       .right-panel { width: 100%; padding: 40px 28px; }
+    }
+
+    @media (max-width: 600px) {
+      body { overflow: auto; }
+      .right-panel {
+        width: 100%;
+        min-height: 100vh;
+        padding: 60px 20px 48px;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .auth-box { max-width: 100%; }
+      .back-link { top: 16px; left: 16px; }
+      .tab-btn { font-size: 0.8rem; padding: 8px 6px; }
+      .auth-title { font-size: 1.2rem; }
+      .btn-submit { font-size: 0.88rem; padding: 12px; }
+      .btn-google { font-size: 0.82rem; padding: 10px; }
+      .form-input { font-size: 0.95rem; }
+      .toast { bottom: 16px; right: 12px; left: 12px; font-size: 0.82rem; }
     }
   </style>
 </head>

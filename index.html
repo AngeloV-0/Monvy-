@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monvy 💰</title>
+  <title>Monvy</title>
+  <link rel="icon" type="image/png" href="logo2.png">
+  <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script>
-    // Auth guard — redireciona para auth.html se não estiver logado
-    const _user = localStorage.getItem('monvy_logado');
-    if (!_user) window.location.href = 'auth.html';
-  </script>
+
 </head>
 <body>
 
@@ -55,8 +53,14 @@
     <header class="topbar">
       <div class="topbar-left">
         <div class="topbar-logo-mobile">
+          <button class="hamburger-btn" onclick="abrirDrawer()" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
           <img src="logo.png" alt="Monvy" style="height:26px;width:auto;">
-          <span>Monvy</span>
+          <div class="topbar-mobile-user">
+            <span class="topbar-mobile-brand">Monvy</span>
+            <span class="topbar-mobile-name" id="topbar-mobile-name">Olá, Usuário</span>
+          </div>
         </div>
         <div class="topbar-desktop-title">
           <h2 class="page-title" id="page-title">Dashboard</h2>
@@ -100,7 +104,7 @@
             <div class="kpi-label">Saldo Atual</div>
             <div class="kpi-value" id="saldo-display">R$ 0,00</div>
             <div class="kpi-sub" id="saldo-mes">Este mês: +R$ 0,00 entrou</div>
-            <div class="kpi-bg-icon">💰</div>
+
           </div>
           <div class="kpi-card">
             <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
@@ -158,12 +162,12 @@
       <!-- ===== TELA: GASTOS ===== -->
       <section id="tela-gastos" class="tela">
         <div class="categorias-grid">
-          <div class="cat-card"><div class="cat-icon">🏠</div><div class="cat-nome">Casa</div><div class="cat-valor" id="cat-casa">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon">🍔</div><div class="cat-nome">Alimentação</div><div class="cat-valor" id="cat-alimentacao">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon">🚗</div><div class="cat-nome">Transporte</div><div class="cat-valor" id="cat-transporte">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon">🎮</div><div class="cat-nome">Lazer</div><div class="cat-valor" id="cat-lazer">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon">💊</div><div class="cat-nome">Saúde</div><div class="cat-valor" id="cat-saude">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon">📦</div><div class="cat-nome">Outros</div><div class="cat-valor" id="cat-outros">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-casa.png" alt="Casa" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Casa</div><div class="cat-valor" id="cat-casa">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-alimentacao.png" alt="Alimentação" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Alimentação</div><div class="cat-valor" id="cat-alimentacao">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-carro.png" alt="Transporte" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Transporte</div><div class="cat-valor" id="cat-transporte">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-cartao02.png" alt="Lazer" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Lazer</div><div class="cat-valor" id="cat-lazer">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-saude.png" alt="Saúde" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Saúde</div><div class="cat-valor" id="cat-saude">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-caixa.png" alt="Outros" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Outros</div><div class="cat-valor" id="cat-outros">R$ 0,00</div></div>
         </div>
 
         <!-- Table -->
@@ -194,7 +198,7 @@
       <section id="tela-metas" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px">🎯 Nova Meta</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-meta.png" alt="Meta" style="width:36px;height:36px;object-fit:contain;"> Nova Meta</div>
             <input type="text" id="meta-nome" placeholder="Nome da meta">
             <input type="number" id="meta-valor" placeholder="Valor objetivo (R$)">
             <button class="btn-primary" onclick="criarMeta()">Criar meta</button>
@@ -212,7 +216,7 @@
       <section id="tela-dividas" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px">💳 Simular Dívida</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-cartao.png" alt="Dívida" style="width:40px;height:40px;object-fit:contain;"> Simular Dívida</div>
             <input type="number" id="div-valor" placeholder="Valor da dívida (R$)">
             <input type="number" id="div-juros" placeholder="Juros ao mês (%)">
             <input type="number" id="div-parcelas" placeholder="Número de parcelas">
@@ -233,45 +237,45 @@
       <section id="tela-investimentos" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px">📈 Simular Investimento</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-investimento.png" alt="Investimento" style="width:36px;height:36px;object-fit:contain;"> Simular Investimento</div>
             <input type="number" id="inv-valor" placeholder="Valor a investir (R$)">
             <input type="number" id="inv-meses" placeholder="Prazo (meses)">
             <button class="btn-primary" onclick="calcularInvestimentos()">Comparar</button>
           </div>
           <div id="resultado-inv" class="inv-cards hidden">
             <div class="inv-card poupanca">
-              <div class="inv-nome">🏦 Poupança</div>
+              <div class="inv-nome"><img src="icone-bolsa.png" alt="Poupança" style="width:28px;height:28px;object-fit:contain;"> Poupança</div>
               <div class="inv-taxa">~0,5% ao mês</div>
               <div class="inv-total" id="inv-poupanca">—</div>
               <div class="inv-ganho" id="inv-poupanca-ganho">—</div>
             </div>
             <div class="inv-card selic">
-              <div class="inv-badge">⭐ Recomendado</div>
-              <div class="inv-nome">🏛️ Tesouro Selic</div>
+              <div class="inv-badge">Recomendado</div>
+              <div class="inv-nome"><img src="icone-escudo.png" alt="Selic" style="width:28px;height:28px;object-fit:contain;"> Tesouro Selic</div>
               <div class="inv-taxa">~0,9% ao mês</div>
               <div class="inv-total" id="inv-selic">—</div>
               <div class="inv-ganho" id="inv-selic-ganho">—</div>
             </div>
             <div class="inv-card cdb">
-              <div class="inv-nome">💰 CDB 110%</div>
+              <div class="inv-nome"><img src="icone-grafico.png" alt="CDB" style="width:28px;height:28px;object-fit:contain;"> CDB 110%</div>
               <div class="inv-taxa">~1,0% ao mês</div>
               <div class="inv-total" id="inv-cdb">—</div>
               <div class="inv-ganho" id="inv-cdb-ganho">—</div>
             </div>
           </div>
         </div>
-        <div class="dica-inv">💡 <strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos.</div>
+        <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos.</div>
       </section>
 
       <!-- ===== TELA: APRENDER ===== -->
       <section id="tela-aprender" class="tela">
         <div class="artigos-grid">
-          <div class="artigo-card" onclick="abrirArtigo(0)"><div class="artigo-emoji">🛡️</div><h3>Reserva de emergência</h3><p>Por que esse é o primeiro passo para sua saúde financeira.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji">💳</div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji">🔓</div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji">🧠</div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji">📊</div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji">🌱</div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(0)"><div class="artigo-emoji"><img src="icone-escudo.png" alt="Reserva" style="width:48px;height:48px;object-fit:contain;"></div><h3>Reserva de emergência</h3><p>Por que esse é o primeiro passo para sua saúde financeira.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji"><img src="icone-cartao.png" alt="Cartão" style="width:48px;height:48px;object-fit:contain;"></div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji"><img src="icone-cadeado.png" alt="Dívidas" style="width:48px;height:48px;object-fit:contain;"></div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji"><img src="icone-cerebro.png" alt="Mente" style="width:48px;height:48px;object-fit:contain;"></div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji"><img src="icone-grafico.png" alt="Gráfico" style="width:48px;height:48px;object-fit:contain;"></div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji"><img src="icone-planta.png" alt="Investir" style="width:48px;height:48px;object-fit:contain;"></div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
         </div>
       </section>
 
@@ -281,7 +285,7 @@
   <!-- MODAL: REGISTRAR -->
   <div id="modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <button class="modal-fechar" onclick="fecharModal()">✕</button>
+      <button class="modal-fechar" onclick="fecharModal()">×</button>
       <h2 id="modal-titulo">Registrar</h2>
       <div class="modal-body">
         <input type="number" id="modal-valor" placeholder="Valor (R$)">
@@ -289,19 +293,19 @@
         <div id="modal-categoria-area">
           <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
           <select id="modal-categoria">
-            <option value="Casa">🏠 Casa</option>
-            <option value="Alimentação">🍔 Alimentação</option>
-            <option value="Transporte">🚗 Transporte</option>
-            <option value="Lazer">🎮 Lazer</option>
-            <option value="Saúde">💊 Saúde</option>
-            <option value="Outros">📦 Outros</option>
+            <option value="Casa">Casa</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Outros">Outros</option>
           </select>
         </div>
         <div id="modal-pergunta" class="pergunta-box hidden">
-          <div class="pergunta-texto">🤔 Isso é necessidade ou desejo?</div>
+          <div class="pergunta-texto">Isso é necessidade ou desejo?</div>
           <div class="pergunta-botoes">
-            <button class="btn-necessidade" onclick="responderPergunta('necessidade')">✅ Necessidade</button>
-            <button class="btn-desejo" onclick="responderPergunta('desejo')">🛍️ Desejo</button>
+            <button class="btn-necessidade" onclick="responderPergunta('necessidade')">Necessidade</button>
+            <button class="btn-desejo" onclick="responderPergunta('desejo')">Desejo</button>
           </div>
         </div>
         <button class="btn-primary" id="btn-confirmar" onclick="confirmarModal()">Confirmar</button>
@@ -312,7 +316,7 @@
   <!-- MODAL: ARTIGO -->
   <div id="modal-artigo" class="modal-overlay hidden">
     <div class="modal-box artigo-box">
-      <button class="modal-fechar" onclick="fecharArtigo()">✕</button>
+      <button class="modal-fechar" onclick="fecharArtigo()">×</button>
       <div id="artigo-conteudo"></div>
     </div>
   </div>
@@ -320,7 +324,7 @@
   <!-- MODAL: META -->
   <div id="modal-meta" class="modal-overlay hidden">
     <div class="modal-box">
-      <button class="modal-fechar" onclick="fecharModalMeta()">✕</button>
+      <button class="modal-fechar" onclick="fecharModalMeta()">×</button>
       <h2>Adicionar à meta</h2>
       <p id="modal-meta-nome-display" style="color:var(--gray);margin-bottom:16px;font-size:.9rem"></p>
       <input type="number" id="modal-meta-valor" placeholder="Valor a adicionar (R$)">
@@ -356,52 +360,92 @@
     </a>
   </nav>
 
+  <!-- MOBILE DRAWER -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-avatar" id="drawer-avatar">U</div>
+      <div class="drawer-user-info">
+        <div class="drawer-user-name" id="drawer-user-name">Usuário</div>
+        <div class="drawer-user-sub">Minha conta</div>
+      </div>
+      <button class="drawer-close" onclick="fecharDrawer()">✕</button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="#" class="drawer-item active" data-tela="inicio" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Início</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="gastos" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Gastos</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="metas" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>Metas</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="dividas" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Dívidas</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="investimentos" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <span>Investimentos</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="aprender" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <span>Aprender</span>
+      </a>
+    </nav>
+    <div class="drawer-footer">
+      <a href="#" class="drawer-item drawer-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sair da conta</span>
+      </a>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script>
-    // Auth guard
+    // Drawer mobile
+    function abrirDrawer() {
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function navegarDrawer(el) {
+      fecharDrawer();
+      const tela = el.getAttribute('data-tela');
+      document.querySelectorAll('.drawer-item[data-tela]').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      if (typeof mostrarTela === 'function') mostrarTela(tela);
+      else {
+        document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
+        const telaEl = document.getElementById('tela-' + tela);
+        if (telaEl) telaEl.classList.add('active');
+      }
+      document.querySelectorAll('.bottom-nav-item').forEach(i => {
+        i.classList.toggle('active', i.getAttribute('data-tela') === tela);
+      });
+    }
+    // Preencher nome no mobile topbar e no drawer
     (function() {
-      const logged = JSON.parse(localStorage.getItem('monvy_logged') || 'null');
-      if (!logged) { window.location.href = 'landing.html'; return; }
-      // Set avatar letter and greeting
-      const initial = (logged.name || 'U')[0].toUpperCase();
-      const avatarEl = document.getElementById('user-avatar');
-      if (avatarEl) avatarEl.textContent = initial;
-      // Greeting in topbar
-      const greetEl = document.getElementById('topbar-greeting');
-      if (greetEl) greetEl.textContent = 'Olá, ' + logged.name.split(' ')[0] + ' 👋';
+      const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
+      if (!raw) return;
+      let user; try { user = JSON.parse(raw); } catch(e) { return; }
+      const nome = user.nome || user.name || '';
+      const mobileNameEl = document.getElementById('topbar-mobile-name');
+      if (mobileNameEl && nome) mobileNameEl.textContent = 'Olá, ' + nome.split(' ')[0] + ' 👋';
+      const drawerAvatar = document.getElementById('drawer-avatar');
+      if (drawerAvatar && nome) drawerAvatar.textContent = nome[0].toUpperCase();
+      const drawerName = document.getElementById('drawer-user-name');
+      if (drawerName && nome) drawerName.textContent = nome;
     })();
-
-    function logout() {
-      if (confirm('Deseja sair da sua conta?')) {
-        localStorage.removeItem('monvy_logged');
-        window.location.href = 'landing.html';
-      }
-    }
-
-    // Theme toggle
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      const moon = document.getElementById('theme-icon-moon');
-      const sun = document.getElementById('theme-icon-sun');
-      if (theme === 'light') {
-        if (moon) moon.style.display = 'none';
-        if (sun) sun.style.display = 'block';
-      } else {
-        if (moon) moon.style.display = 'block';
-        if (sun) sun.style.display = 'none';
-      }
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('monvy_theme', next);
-      applyTheme(next);
-    }
-
-    // Load saved theme
-    const savedTheme = localStorage.getItem('monvy_theme') || 'dark';
-    applyTheme(savedTheme);
   </script>
 </body>
 </html>

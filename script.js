@@ -294,7 +294,7 @@ function renderizarMetas() {
     return `
       <div class="meta-card">
         <div class="meta-topo">
-          <span class="meta-nome">🎯 ${m.nome}</span>
+          <span class="meta-nome">${m.nome}</span>
           <span class="meta-valores">${fmt(m.atual)} / ${fmt(m.objetivo)}</span>
         </div>
         <div class="meta-barra-bg"><div class="meta-barra-fill" style="width:${pct}%"></div></div>
@@ -308,7 +308,7 @@ function renderizarMetas() {
 
 function abrirModalMeta(index) {
   metaAtualIndex = index;
-  document.getElementById('modal-meta-nome-display').textContent = '🎯 ' + metas[index].nome;
+  document.getElementById('modal-meta-nome-display').textContent = metas[index].nome;
   document.getElementById('modal-meta-valor').value = '';
   document.getElementById('modal-meta').classList.remove('hidden');
 }
@@ -340,7 +340,7 @@ function calcularDivida() {
   document.getElementById('div-total').textContent       = fmt(total);
   document.getElementById('div-parcela').textContent     = fmt(parcela) + '/mês';
   document.getElementById('div-alerta').textContent      =
-    `⚠️ Você vai pagar ${pct}% a mais do valor original! Em ${parcelas} meses, ${fmt(jurosTotal)} vai direto para o banco.`;
+    `Você vai pagar ${pct}% a mais do valor original! Em ${parcelas} meses, ${fmt(jurosTotal)} vai direto para o banco.`;
   document.getElementById('resultado-divida').classList.remove('hidden');
 }
 
@@ -391,29 +391,56 @@ function fecharArtigo() { document.getElementById('modal-artigo').classList.add(
   });
 });
 
-// ---------- AUTH ----------
+// ---------- AUTH & TEMA ----------
 function logout() {
   if (confirm('Deseja sair da sua conta?')) {
     localStorage.removeItem('monvy_logado');
+    localStorage.removeItem('monvy_logged');
     window.location.href = 'auth.html';
   }
 }
 
-// Inicializar usuário logado
-(function initUser() {
-  const raw = localStorage.getItem('monvy_logado');
-  if (!raw) return;
-  const user = JSON.parse(raw);
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const moon = document.getElementById('theme-icon-moon');
+  const sun = document.getElementById('theme-icon-sun');
+  if (theme === 'light') {
+    if (moon) moon.style.display = 'none';
+    if (sun) sun.style.display = 'block';
+  } else {
+    if (moon) moon.style.display = 'block';
+    if (sun) sun.style.display = 'none';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('monvy_theme', next);
+  applyTheme(next);
+}
+
+// Inicializar
+(function init() {
+  // Tema
+  const savedTheme = localStorage.getItem('monvy_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  // Auth — tenta as duas chaves para compatibilidade
+  const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
+  if (!raw) { window.location.href = 'auth.html'; return; }
+
+  let user;
+  try { user = JSON.parse(raw); } catch(e) { window.location.href = 'auth.html'; return; }
+
+  const nome = user.nome || user.name || '';
   const avatarEl = document.getElementById('user-avatar');
-  if (avatarEl && user.nome) {
-    avatarEl.textContent = user.nome.charAt(0).toUpperCase();
-    avatarEl.title = user.nome;
+  if (avatarEl && nome) {
+    avatarEl.textContent = nome.charAt(0).toUpperCase();
+    avatarEl.title = nome;
   }
-  // Saudação no topbar
-  const titleEl = document.getElementById('page-title');
-  if (titleEl && user.nome) {
-    // Nome curto na topbar ao iniciar
-  }
+  const greetEl = document.getElementById('topbar-greeting');
+  if (greetEl && nome) greetEl.textContent = 'Olá, ' + nome.split(' ')[0];
 })();
 const script = document.createElement('script');
 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
