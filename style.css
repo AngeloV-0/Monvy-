@@ -831,7 +831,7 @@ select option { background: var(--surface-2); }
   border-radius: 20px;
 }
 
-.inv-nome { font-weight: 700; font-size: 0.9rem; flex: 1; }
+.inv-nome { display:flex; align-items:center; gap:8px; font-weight: 700; font-size: 0.9rem; flex: 1; }
 .inv-taxa { font-size: 0.75rem; color: var(--gray); }
 
 .inv-total {
@@ -1097,7 +1097,7 @@ select option { background: var(--surface-2); }
 
   /* Investimentos */
   .inv-card { flex-wrap: wrap; gap: 10px; }
-  .inv-nome { min-width: 100%; }
+  .inv-nome { display:flex; align-items:center; gap:8px; min-width: 100%; }
 
   /* Modal: sheet inferior */
   .modal-overlay { align-items: flex-end; padding: 0; }

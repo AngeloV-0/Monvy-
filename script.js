@@ -217,11 +217,7 @@ function responderPergunta(resposta) {
   const categoria = document.getElementById('modal-categoria').value;
 
   if (resposta === 'desejo') {
-    const continuar = confirm('Isso é um desejo!
-
-Você tem certeza que quer gastar?
-
-Pense bem antes de confirmar');
+    const continuar = confirm('Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar');
     if (!continuar) { fecharModal(); return; }
   }
 
@@ -395,29 +391,56 @@ function fecharArtigo() { document.getElementById('modal-artigo').classList.add(
   });
 });
 
-// ---------- AUTH ----------
+// ---------- AUTH & TEMA ----------
 function logout() {
   if (confirm('Deseja sair da sua conta?')) {
     localStorage.removeItem('monvy_logado');
+    localStorage.removeItem('monvy_logged');
     window.location.href = 'auth.html';
   }
 }
 
-// Inicializar usuário logado
-(function initUser() {
-  const raw = localStorage.getItem('monvy_logado');
-  if (!raw) return;
-  const user = JSON.parse(raw);
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const moon = document.getElementById('theme-icon-moon');
+  const sun = document.getElementById('theme-icon-sun');
+  if (theme === 'light') {
+    if (moon) moon.style.display = 'none';
+    if (sun) sun.style.display = 'block';
+  } else {
+    if (moon) moon.style.display = 'block';
+    if (sun) sun.style.display = 'none';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('monvy_theme', next);
+  applyTheme(next);
+}
+
+// Inicializar
+(function init() {
+  // Tema
+  const savedTheme = localStorage.getItem('monvy_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  // Auth — tenta as duas chaves para compatibilidade
+  const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
+  if (!raw) { window.location.href = 'auth.html'; return; }
+
+  let user;
+  try { user = JSON.parse(raw); } catch(e) { window.location.href = 'auth.html'; return; }
+
+  const nome = user.nome || user.name || '';
   const avatarEl = document.getElementById('user-avatar');
-  if (avatarEl && user.nome) {
-    avatarEl.textContent = user.nome.charAt(0).toUpperCase();
-    avatarEl.title = user.nome;
+  if (avatarEl && nome) {
+    avatarEl.textContent = nome.charAt(0).toUpperCase();
+    avatarEl.title = nome;
   }
-  // Saudação no topbar
-  const titleEl = document.getElementById('page-title');
-  if (titleEl && user.nome) {
-    // Nome curto na topbar ao iniciar
-  }
+  const greetEl = document.getElementById('topbar-greeting');
+  if (greetEl && nome) greetEl.textContent = 'Olá, ' + nome.split(' ')[0];
 })();
 const script = document.createElement('script');
 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';

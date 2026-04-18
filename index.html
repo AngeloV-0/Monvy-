@@ -7,11 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script>
-    // Auth guard — redireciona para auth.html se não estiver logado
-    const _user = localStorage.getItem('monvy_logado');
-    if (!_user) window.location.href = 'auth.html';
-  </script>
+
 </head>
 <body>
 
@@ -100,7 +96,7 @@
             <div class="kpi-label">Saldo Atual</div>
             <div class="kpi-value" id="saldo-display">R$ 0,00</div>
             <div class="kpi-sub" id="saldo-mes">Este mês: +R$ 0,00 entrou</div>
-            <div class="kpi-bg-icon"><img src="icone-bolsa_de_dinheiro.png" alt="Finanças" style="width:100%;height:100%;object-fit:contain;"></div>
+            <div class="kpi-bg-icon"><img src="icone-bolsa.jpg" alt="Finanças" style="width:100%;height:100%;object-fit:contain;"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
@@ -158,12 +154,12 @@
       <!-- ===== TELA: GASTOS ===== -->
       <section id="tela-gastos" class="tela">
         <div class="categorias-grid">
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-casa" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1z" fill="url(#g-casa)"/><path d="M9 22V12h6v10" fill="#1a2e1a" opacity="0.6"/></svg></div><div class="cat-nome">Casa</div><div class="cat-valor" id="cat-casa">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-ali" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M3 2v7c0 2.2 1.8 4 4 4h1v9h2V13h1c2.2 0 4-1.8 4-4V2h-2v5H9V2H7v5H5V2z" fill="url(#g-ali)"/><path d="M18 2c0 3.3-1.3 5.8-2 7v11h2V9.1c.7-1.2 2-3.7 2-7z" fill="url(#g-ali)"/></svg></div><div class="cat-nome">Alimentação</div><div class="cat-valor" id="cat-alimentacao">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-trans" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M5 11l1.5-4.5h11L19 11M5 11H3v3h1v2a1 1 0 002 0v-2h12v2a1 1 0 002 0v-2h1v-3h-2M5 11h14" stroke="url(#g-trans)" stroke-width="0" fill="url(#g-trans)"/><rect x="2" y="10" width="20" height="7" rx="2" fill="url(#g-trans)"/><path d="M4 10l2-6h12l2 6" fill="url(#g-trans)" opacity="0.8"/><circle cx="7" cy="18" r="1.5" fill="#1e3a2e"/><circle cx="17" cy="18" r="1.5" fill="#1e3a2e"/><rect x="8" y="12" width="8" height="3" rx="1" fill="#1e3a2e" opacity="0.5"/></svg></div><div class="cat-nome">Transporte</div><div class="cat-valor" id="cat-transporte">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-laz" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><rect x="2" y="7" width="20" height="12" rx="3" fill="url(#g-laz)"/><circle cx="7" cy="13" r="2" fill="#1e3a2e" opacity="0.6"/><circle cx="17" cy="13" r="2" fill="#1e3a2e" opacity="0.6"/><rect x="10" y="11" width="4" height="4" rx="1" fill="#1e3a2e" opacity="0.5"/><circle cx="12" cy="6" r="2" fill="url(#g-laz)"/><rect x="11" y="6" width="2" height="3" fill="url(#g-laz)"/></svg></div><div class="cat-nome">Lazer</div><div class="cat-valor" id="cat-lazer">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-sau" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M12 2L4.5 5.5v5C4.5 15.2 7.7 19.8 12 22c4.3-2.2 7.5-6.8 7.5-11.5v-5z" fill="url(#g-sau)"/><path d="M10 10v-2h4v2h2v4h-2v2h-4v-2H8v-4z" fill="#1e3a2e" opacity="0.7"/></svg></div><div class="cat-nome">Saúde</div><div class="cat-valor" id="cat-saude">R$ 0,00</div></div>
-          <div class="cat-card"><div class="cat-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><defs><linearGradient id="g-out" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M12 2L2 7l10 5 10-5z" fill="url(#g-out)"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#g-out)" stroke-width="2" fill="none"/></svg></div><div class="cat-nome">Outros</div><div class="cat-valor" id="cat-outros">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-casa.jpg" alt="Casa" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Casa</div><div class="cat-valor" id="cat-casa">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-alimentacao.jpg" alt="Alimentação" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Alimentação</div><div class="cat-valor" id="cat-alimentacao">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-carro.jpg" alt="Transporte" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Transporte</div><div class="cat-valor" id="cat-transporte">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-cartao02.jpg" alt="Lazer" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Lazer</div><div class="cat-valor" id="cat-lazer">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-saude.jpg" alt="Saúde" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Saúde</div><div class="cat-valor" id="cat-saude">R$ 0,00</div></div>
+          <div class="cat-card"><div class="cat-icon"><img src="icone-caixa.jpg" alt="Outros" style="width:48px;height:48px;object-fit:contain;"></div><div class="cat-nome">Outros</div><div class="cat-valor" id="cat-outros">R$ 0,00</div></div>
         </div>
 
         <!-- Table -->
@@ -194,7 +190,7 @@
       <section id="tela-metas" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-meta.png" alt="Meta" style="width:36px;height:36px;object-fit:contain;"> Nova Meta</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-meta.jpg" alt="Meta" style="width:36px;height:36px;object-fit:contain;"> Nova Meta</div>
             <input type="text" id="meta-nome" placeholder="Nome da meta">
             <input type="number" id="meta-valor" placeholder="Valor objetivo (R$)">
             <button class="btn-primary" onclick="criarMeta()">Criar meta</button>
@@ -212,7 +208,7 @@
       <section id="tela-dividas" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-divida.png" alt="Dívida" style="width:40px;height:40px;object-fit:contain;"> Simular Dívida</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-cadeado.jpg" alt="Dívida" style="width:40px;height:40px;object-fit:contain;"> Simular Dívida</div>
             <input type="number" id="div-valor" placeholder="Valor da dívida (R$)">
             <input type="number" id="div-juros" placeholder="Juros ao mês (%)">
             <input type="number" id="div-parcelas" placeholder="Número de parcelas">
@@ -233,27 +229,27 @@
       <section id="tela-investimentos" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px">📈 Simular Investimento</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-investimento.jpg" alt="Investimento" style="width:36px;height:36px;object-fit:contain;"> Simular Investimento</div>
             <input type="number" id="inv-valor" placeholder="Valor a investir (R$)">
             <input type="number" id="inv-meses" placeholder="Prazo (meses)">
             <button class="btn-primary" onclick="calcularInvestimentos()">Comparar</button>
           </div>
           <div id="resultado-inv" class="inv-cards hidden">
             <div class="inv-card poupanca">
-              <div class="inv-nome">🏦 Poupança</div>
+              <div class="inv-nome"><img src="icone-bolsa.jpg" alt="Poupança" style="width:28px;height:28px;object-fit:contain;"> Poupança</div>
               <div class="inv-taxa">~0,5% ao mês</div>
               <div class="inv-total" id="inv-poupanca">—</div>
               <div class="inv-ganho" id="inv-poupanca-ganho">—</div>
             </div>
             <div class="inv-card selic">
-              <div class="inv-badge">⭐ Recomendado</div>
-              <div class="inv-nome">🏛️ Tesouro Selic</div>
+              <div class="inv-badge">Recomendado</div>
+              <div class="inv-nome"><img src="icone-escudo.jpg" alt="Selic" style="width:28px;height:28px;object-fit:contain;"> Tesouro Selic</div>
               <div class="inv-taxa">~0,9% ao mês</div>
               <div class="inv-total" id="inv-selic">—</div>
               <div class="inv-ganho" id="inv-selic-ganho">—</div>
             </div>
             <div class="inv-card cdb">
-              <div class="inv-nome">💰 CDB 110%</div>
+              <div class="inv-nome"><img src="icone-grafico.jpg" alt="CDB" style="width:28px;height:28px;object-fit:contain;"> CDB 110%</div>
               <div class="inv-taxa">~1,0% ao mês</div>
               <div class="inv-total" id="inv-cdb">—</div>
               <div class="inv-ganho" id="inv-cdb-ganho">—</div>
@@ -266,12 +262,12 @@
       <!-- ===== TELA: APRENDER ===== -->
       <section id="tela-aprender" class="tela">
         <div class="artigos-grid">
-          <div class="artigo-card" onclick="abrirArtigo(0)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5z" fill="url(#ag0)"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e3a2e">$</text></svg></div><h3>Reserva de emergência</h3><p>Por que esse é o primeiro passo para sua saúde financeira.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><rect x="2" y="5" width="20" height="14" rx="3" fill="url(#ag1)"/><rect x="2" y="9" width="20" height="3" fill="#1e3a2e" opacity="0.5"/><rect x="5" y="15" width="6" height="2" rx="1" fill="#1e3a2e" opacity="0.6"/></svg></div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><rect x="5" y="3" width="14" height="18" rx="2" fill="#2a3a2a" stroke="url(#ag2)" stroke-width="1.5"/><path d="M8 8h8M8 12h5" stroke="url(#ag2)" stroke-width="1.5" stroke-linecap="round"/><circle cx="15" cy="17" r="4" fill="#0d1a0d"/><path d="M13 17l1.5 1.5L17 15" stroke="url(#ag2)" stroke-width="1.5" stroke-linecap="round"/></svg></div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f87171"/><stop offset="100%" stop-color="#dc2626"/></linearGradient></defs><ellipse cx="12" cy="9" rx="7" ry="6" fill="url(#ag3)"/><circle cx="9" cy="8" r="1.2" fill="#1e0a0a" opacity="0.7"/><circle cx="15" cy="8" r="1.2" fill="#1e0a0a" opacity="0.7"/><path d="M9 12c1 1.5 5 1.5 6 0" stroke="#1e0a0a" stroke-width="1" fill="none" opacity="0.6"/><path d="M6 5c-2-1-3 1-3 2" stroke="url(#ag3)" stroke-width="1.5" fill="none"/><path d="M18 5c2-1 3 1 3 2" stroke="url(#ag3)" stroke-width="1.5" fill="none"/></svg></div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient></defs><rect x="3" y="14" width="4" height="7" rx="1" fill="url(#ag4)" opacity="0.6"/><rect x="10" y="9" width="4" height="12" rx="1" fill="url(#ag4)" opacity="0.8"/><rect x="17" y="4" width="4" height="17" rx="1" fill="url(#ag4)"/></svg></div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:48px;height:48px"><defs><linearGradient id="ag5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#059669"/></linearGradient><linearGradient id="ag5b" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a3e635"/><stop offset="100%" stop-color="#65a30d"/></linearGradient></defs><ellipse cx="12" cy="19" rx="6" ry="2" fill="#2a4a1a" opacity="0.7"/><path d="M12 17c0 0-5-5-5-10a5 5 0 0110 0c0 5-5 10-5 10z" fill="url(#ag5b)"/><path d="M12 7v6M9 10l3-3 3 3" stroke="#1e3a0e" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(0)"><div class="artigo-emoji"><img src="icone-escudo.jpg" alt="Reserva" style="width:48px;height:48px;object-fit:contain;"></div><h3>Reserva de emergência</h3><p>Por que esse é o primeiro passo para sua saúde financeira.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji"><img src="icone-cartao.jpg" alt="Cartão" style="width:48px;height:48px;object-fit:contain;"></div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji"><img src="icone-cadeado.jpg" alt="Dívidas" style="width:48px;height:48px;object-fit:contain;"></div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji"><img src="icone-cerebro.jpg" alt="Mente" style="width:48px;height:48px;object-fit:contain;"></div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji"><img src="icone-grafico.jpg" alt="Gráfico" style="width:48px;height:48px;object-fit:contain;"></div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji"><img src="icone-planta.jpg" alt="Investir" style="width:48px;height:48px;object-fit:contain;"></div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
         </div>
       </section>
 
@@ -281,7 +277,7 @@
   <!-- MODAL: REGISTRAR -->
   <div id="modal" class="modal-overlay hidden">
     <div class="modal-box">
-      <button class="modal-fechar" onclick="fecharModal()">✕</button>
+      <button class="modal-fechar" onclick="fecharModal()">×</button>
       <h2 id="modal-titulo">Registrar</h2>
       <div class="modal-body">
         <input type="number" id="modal-valor" placeholder="Valor (R$)">
@@ -298,10 +294,10 @@
           </select>
         </div>
         <div id="modal-pergunta" class="pergunta-box hidden">
-          <div class="pergunta-texto">🤔 Isso é necessidade ou desejo?</div>
+          <div class="pergunta-texto">Isso é necessidade ou desejo?</div>
           <div class="pergunta-botoes">
-            <button class="btn-necessidade" onclick="responderPergunta('necessidade')">✅ Necessidade</button>
-            <button class="btn-desejo" onclick="responderPergunta('desejo')">🛍️ Desejo</button>
+            <button class="btn-necessidade" onclick="responderPergunta('necessidade')">Necessidade</button>
+            <button class="btn-desejo" onclick="responderPergunta('desejo')">Desejo</button>
           </div>
         </div>
         <button class="btn-primary" id="btn-confirmar" onclick="confirmarModal()">Confirmar</button>
@@ -312,7 +308,7 @@
   <!-- MODAL: ARTIGO -->
   <div id="modal-artigo" class="modal-overlay hidden">
     <div class="modal-box artigo-box">
-      <button class="modal-fechar" onclick="fecharArtigo()">✕</button>
+      <button class="modal-fechar" onclick="fecharArtigo()">×</button>
       <div id="artigo-conteudo"></div>
     </div>
   </div>
@@ -320,7 +316,7 @@
   <!-- MODAL: META -->
   <div id="modal-meta" class="modal-overlay hidden">
     <div class="modal-box">
-      <button class="modal-fechar" onclick="fecharModalMeta()">✕</button>
+      <button class="modal-fechar" onclick="fecharModalMeta()">×</button>
       <h2>Adicionar à meta</h2>
       <p id="modal-meta-nome-display" style="color:var(--gray);margin-bottom:16px;font-size:.9rem"></p>
       <input type="number" id="modal-meta-valor" placeholder="Valor a adicionar (R$)">
@@ -357,51 +353,5 @@
   </nav>
 
   <script src="script.js"></script>
-  <script>
-    // Auth guard
-    (function() {
-      const logged = JSON.parse(localStorage.getItem('monvy_logged') || 'null');
-      if (!logged) { window.location.href = 'landing.html'; return; }
-      // Set avatar letter and greeting
-      const initial = (logged.name || 'U')[0].toUpperCase();
-      const avatarEl = document.getElementById('user-avatar');
-      if (avatarEl) avatarEl.textContent = initial;
-      // Greeting in topbar
-      const greetEl = document.getElementById('topbar-greeting');
-      if (greetEl) greetEl.textContent = 'Olá, ' + logged.name.split(' ')[0];
-    })();
-
-    function logout() {
-      if (confirm('Deseja sair da sua conta?')) {
-        localStorage.removeItem('monvy_logged');
-        window.location.href = 'landing.html';
-      }
-    }
-
-    // Theme toggle
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      const moon = document.getElementById('theme-icon-moon');
-      const sun = document.getElementById('theme-icon-sun');
-      if (theme === 'light') {
-        if (moon) moon.style.display = 'none';
-        if (sun) sun.style.display = 'block';
-      } else {
-        if (moon) moon.style.display = 'block';
-        if (sun) sun.style.display = 'none';
-      }
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('monvy_theme', next);
-      applyTheme(next);
-    }
-
-    // Load saved theme
-    const savedTheme = localStorage.getItem('monvy_theme') || 'dark';
-    applyTheme(savedTheme);
-  </script>
 </body>
 </html>
