@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monvy 💰</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script>
     // Auth guard — redireciona para auth.html se não estiver logado
@@ -18,7 +18,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-icon">M</div>
+      <div class="logo-icon"><img src="logo.png" alt="Monvy" style="width:100%;height:100%;object-fit:contain;border-radius:0;background:none;box-shadow:none;"></div>
     </div>
     <nav>
       <a href="#" class="nav-item active" data-tela="inicio" title="Início">
@@ -72,6 +72,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Novo gasto
         </button>
+        <div class="notif-btn" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+          <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </div>
         <div class="notif-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         </div>
@@ -339,6 +343,31 @@
         window.location.href = 'landing.html';
       }
     }
+
+    // Theme toggle
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const moon = document.getElementById('theme-icon-moon');
+      const sun = document.getElementById('theme-icon-sun');
+      if (theme === 'light') {
+        if (moon) moon.style.display = 'none';
+        if (sun) sun.style.display = 'block';
+      } else {
+        if (moon) moon.style.display = 'block';
+        if (sun) sun.style.display = 'none';
+      }
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('monvy_theme', next);
+      applyTheme(next);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('monvy_theme') || 'dark';
+    applyTheme(savedTheme);
   </script>
 </body>
 </html>

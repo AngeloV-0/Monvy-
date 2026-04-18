@@ -28,12 +28,51 @@
   --yellow: #F59E0B;
   --yellow-dim: rgba(245, 158, 11, 0.15);
 
-  --font-title: 'Syne', sans-serif;
+  --font-title: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --sidebar-w: 72px;
   --topbar-h: 70px;
   --radius: 16px;
 }
+
+/* ==============================
+   LIGHT THEME
+   ============================== */
+[data-theme="light"] {
+  --bg: #F0F4F8;
+  --sidebar-bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F1F5F9;
+  --surface-3: #E2E8F0;
+  --border: rgba(0, 0, 0, 0.07);
+  --border-hover: rgba(0, 0, 0, 0.14);
+  --white: #0F172A;
+  --gray: #94A3B8;
+  --gray-2: #64748B;
+  --gray-3: #334155;
+  --red-dim: rgba(239, 68, 68, 0.10);
+  --yellow-dim: rgba(245, 158, 11, 0.10);
+}
+
+[data-theme="light"] body {
+  color: #0F172A;
+}
+
+[data-theme="light"] .topbar {
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(0,0,0,0.07);
+}
+
+[data-theme="light"] .search-bar input { color: #0F172A; }
+[data-theme="light"] .search-bar input::placeholder { color: #94A3B8; }
+
+[data-theme="light"] .mov-table td { color: #334155; }
+[data-theme="light"] .mov-table tr:hover td { background: #F8FAFC; }
+[data-theme="light"] .modal-box { background: #FFFFFF; }
+[data-theme="light"] .nav-item::after { background: #334155; color: #FFFFFF; }
+[data-theme="light"] .sidebar { border-right-color: rgba(0,0,0,0.07); }
+[data-theme="light"] select option { background: #FFFFFF; color: #0F172A; }
+[data-theme="light"] input, [data-theme="light"] select { color: #0F172A; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
