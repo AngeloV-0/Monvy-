@@ -452,6 +452,25 @@
       .left-panel { display: none; }
       .right-panel { width: 100%; padding: 40px 28px; }
     }
+
+    @media (max-width: 600px) {
+      body { overflow: auto; }
+      .right-panel {
+        width: 100%;
+        min-height: 100vh;
+        padding: 60px 20px 48px;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .auth-box { max-width: 100%; }
+      .back-link { top: 16px; left: 16px; }
+      .tab-btn { font-size: 0.8rem; padding: 8px 6px; }
+      .auth-title { font-size: 1.2rem; }
+      .btn-submit { font-size: 0.88rem; padding: 12px; }
+      .btn-google { font-size: 0.82rem; padding: 10px; }
+      .form-input { font-size: 0.95rem; }
+      .toast { bottom: 16px; right: 12px; left: 12px; font-size: 0.82rem; }
+    }
   </style>
 </head>
 <body>
