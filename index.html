@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monvy</title>
+  <title>Monvy 💰</title>
   <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -52,8 +53,14 @@
     <header class="topbar">
       <div class="topbar-left">
         <div class="topbar-logo-mobile">
+          <button class="hamburger-btn" onclick="abrirDrawer()" aria-label="Menu">
+            <span></span><span></span><span></span>
+          </button>
           <img src="logo.png" alt="Monvy" style="height:26px;width:auto;">
-          <span>Monvy</span>
+          <div class="topbar-mobile-user">
+            <span class="topbar-mobile-brand">Monvy</span>
+            <span class="topbar-mobile-name" id="topbar-mobile-name">Olá, Usuário</span>
+          </div>
         </div>
         <div class="topbar-desktop-title">
           <h2 class="page-title" id="page-title">Dashboard</h2>
@@ -97,7 +104,7 @@
             <div class="kpi-label">Saldo Atual</div>
             <div class="kpi-value" id="saldo-display">R$ 0,00</div>
             <div class="kpi-sub" id="saldo-mes">Este mês: +R$ 0,00 entrou</div>
-            <div class="kpi-bg-icon"><img src="icone-bolsa.png" alt="Finanças" style="width:100%;height:100%;object-fit:contain;"></div>
+
           </div>
           <div class="kpi-card">
             <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
@@ -353,6 +360,92 @@
     </a>
   </nav>
 
+  <!-- MOBILE DRAWER -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-avatar" id="drawer-avatar">U</div>
+      <div class="drawer-user-info">
+        <div class="drawer-user-name" id="drawer-user-name">Usuário</div>
+        <div class="drawer-user-sub">Minha conta</div>
+      </div>
+      <button class="drawer-close" onclick="fecharDrawer()">✕</button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="#" class="drawer-item active" data-tela="inicio" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Início</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="gastos" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Gastos</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="metas" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>Metas</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="dividas" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Dívidas</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="investimentos" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <span>Investimentos</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="aprender" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <span>Aprender</span>
+      </a>
+    </nav>
+    <div class="drawer-footer">
+      <a href="#" class="drawer-item drawer-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sair da conta</span>
+      </a>
+    </div>
+  </div>
+
   <script src="script.js"></script>
+  <script>
+    // Drawer mobile
+    function abrirDrawer() {
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function navegarDrawer(el) {
+      fecharDrawer();
+      const tela = el.getAttribute('data-tela');
+      document.querySelectorAll('.drawer-item[data-tela]').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      if (typeof mostrarTela === 'function') mostrarTela(tela);
+      else {
+        document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
+        const telaEl = document.getElementById('tela-' + tela);
+        if (telaEl) telaEl.classList.add('active');
+      }
+      document.querySelectorAll('.bottom-nav-item').forEach(i => {
+        i.classList.toggle('active', i.getAttribute('data-tela') === tela);
+      });
+    }
+    // Preencher nome no mobile topbar e no drawer
+    (function() {
+      const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
+      if (!raw) return;
+      let user; try { user = JSON.parse(raw); } catch(e) { return; }
+      const nome = user.nome || user.name || '';
+      const mobileNameEl = document.getElementById('topbar-mobile-name');
+      if (mobileNameEl && nome) mobileNameEl.textContent = 'Olá, ' + nome.split(' ')[0] + ' 👋';
+      const drawerAvatar = document.getElementById('drawer-avatar');
+      if (drawerAvatar && nome) drawerAvatar.textContent = nome[0].toUpperCase();
+      const drawerName = document.getElementById('drawer-user-name');
+      if (drawerName && nome) drawerName.textContent = nome;
+    })();
+  </script>
 </body>
 </html>
