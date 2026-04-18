@@ -181,7 +181,7 @@ function atualizarListaInicio() {
 function abrirModal(tipo) {
   tipoAtual = tipo;
   respostaPergunta = '';
-  document.getElementById('modal-titulo').textContent = tipo === 'ganho' ? '💚 Registrar Entrada' : '❤️ Registrar Saída';
+  document.getElementById('modal-titulo').textContent = tipo === 'ganho' ? 'Registrar Entrada' : 'Registrar Saída';
   document.getElementById('modal-valor').value = '';
   document.getElementById('modal-descricao').value = '';
   document.getElementById('modal-categoria-area').style.display = tipo === 'gasto' ? 'block' : 'none';
@@ -217,7 +217,11 @@ function responderPergunta(resposta) {
   const categoria = document.getElementById('modal-categoria').value;
 
   if (resposta === 'desejo') {
-    const continuar = confirm('🛍️ Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar 💭');
+    const continuar = confirm('Isso é um desejo!
+
+Você tem certeza que quer gastar?
+
+Pense bem antes de confirmar');
     if (!continuar) { fecharModal(); return; }
   }
 
@@ -294,7 +298,7 @@ function renderizarMetas() {
     return `
       <div class="meta-card">
         <div class="meta-topo">
-          <span class="meta-nome">🎯 ${m.nome}</span>
+          <span class="meta-nome">${m.nome}</span>
           <span class="meta-valores">${fmt(m.atual)} / ${fmt(m.objetivo)}</span>
         </div>
         <div class="meta-barra-bg"><div class="meta-barra-fill" style="width:${pct}%"></div></div>
@@ -308,7 +312,7 @@ function renderizarMetas() {
 
 function abrirModalMeta(index) {
   metaAtualIndex = index;
-  document.getElementById('modal-meta-nome-display').textContent = '🎯 ' + metas[index].nome;
+  document.getElementById('modal-meta-nome-display').textContent = metas[index].nome;
   document.getElementById('modal-meta-valor').value = '';
   document.getElementById('modal-meta').classList.remove('hidden');
 }
@@ -340,7 +344,7 @@ function calcularDivida() {
   document.getElementById('div-total').textContent       = fmt(total);
   document.getElementById('div-parcela').textContent     = fmt(parcela) + '/mês';
   document.getElementById('div-alerta').textContent      =
-    `⚠️ Você vai pagar ${pct}% a mais do valor original! Em ${parcelas} meses, ${fmt(jurosTotal)} vai direto para o banco.`;
+    `Você vai pagar ${pct}% a mais do valor original! Em ${parcelas} meses, ${fmt(jurosTotal)} vai direto para o banco.`;
   document.getElementById('resultado-divida').classList.remove('hidden');
 }
 
@@ -369,12 +373,12 @@ function calcularInvestimentos() {
 
 // ---------- ARTIGOS ----------
 const artigos = [
-  { titulo: '🛡️ O que é reserva de emergência?', conteudo: `<h2>🛡️ O que é reserva de emergência?</h2><p>Reserva de emergência é um dinheiro guardado exclusivamente para imprevistos: perder o emprego, um problema de saúde, um conserto urgente.</p><p><strong>Quanto guardar?</strong> O ideal é ter de 3 a 6 meses dos seus gastos mensais guardados.</p><p>Exemplo: se você gasta R$ 2.000 por mês, sua reserva deve ser entre R$ 6.000 e R$ 12.000.</p><p><strong>Onde guardar?</strong></p><ul><li>Tesouro Selic (recomendado)</li><li>CDB com liquidez diária</li><li>Conta remunerada</li></ul><p><strong>Por que é tão importante?</strong> Sem reserva, qualquer imprevisto vira dívida. Com reserva, você tem tranquilidade.</p>` },
-  { titulo: '💳 Por que evitar o cartão de crédito?', conteudo: `<h2>💳 Por que evitar o cartão de crédito?</h2><p>O cartão de crédito não é dinheiro extra. É dinheiro adiantado que você vai ter que devolver.</p><p><strong>O perigo do rotativo:</strong> Se você não pagar a fatura completa, os juros podem ser de 15% a 20% ao mês.</p><p><strong>Como usar sem se prejudicar:</strong></p><ul><li>Nunca gaste mais do que você tem</li><li>Pague SEMPRE a fatura total</li><li>Evite parcelar compras desnecessárias</li></ul><p><strong>Regra de ouro:</strong> Se você precisa parcelar, provavelmente não pode comprar.</p>` },
-  { titulo: '🔓 Como sair das dívidas?', conteudo: `<h2>🔓 Como sair das dívidas?</h2><p>Sair das dívidas é possível. Mas exige disciplina e um plano claro.</p><p><strong>Passo 1:</strong> Liste todas as suas dívidas — valor, juros e prazo.</p><p><strong>Passo 2:</strong> Priorize as com maior juros. Cartão e cheque especial primeiro.</p><p><strong>Passo 3:</strong> Negocie. Muitas empresas oferecem desconto para quitar à vista.</p><p><strong>Passo 4:</strong> Corte gastos desnecessários temporariamente.</p><p><strong>Passo 5:</strong> Use o Monvy para acompanhar seu progresso!</p>` },
-  { titulo: '🧠 Necessidade vs Desejo', conteudo: `<h2>🧠 Necessidade vs Desejo</h2><p>Essa diferença é a base da educação financeira.</p><p><strong>Necessidade</strong> é o que você precisa para viver: alimentação, moradia, saúde, transporte.</p><p><strong>Desejo</strong> é o que você quer: roupas de marca, restaurante caro, o celular mais novo.</p><p>Desejos não são errados. O problema é quando tratamos desejos como necessidades.</p><p><strong>A regra das 24 horas:</strong> Esperou um dia e ainda quer? Talvez valha. Se esqueceu, era impulso.</p>` },
-  { titulo: '📊 Regra dos 50-30-20', conteudo: `<h2>📊 Regra dos 50-30-20</h2><p>É o jeito mais simples de organizar seu salário.</p><p><strong>50% — Necessidades:</strong> Aluguel, mercado, contas, transporte.</p><p><strong>30% — Desejos:</strong> Lazer, roupas, restaurante, streaming.</p><p><strong>20% — Futuro:</strong> Reserva de emergência, investimentos, pagamento de dívidas.</p><p><strong>Exemplo com R$ 2.000:</strong></p><ul><li>R$ 1.000 — Necessidades</li><li>R$ 600 — Desejos</li><li>R$ 400 — Futuro</li></ul>` },
-  { titulo: '🌱 Como começar a investir?', conteudo: `<h2>🌱 Como começar a investir?</h2><p>Você não precisa ser rico para investir. Pode começar com R$ 30.</p><p><strong>Antes de investir:</strong> Quite suas dívidas de alto juros e monte sua reserva primeiro.</p><p><strong>Primeiros passos:</strong></p><ul><li><strong>Tesouro Selic:</strong> O mais seguro. Ideal para reserva e primeiros investimentos.</li><li><strong>CDB:</strong> Seguro e com boa rentabilidade. Veja se tem liquidez diária.</li></ul><p><strong>O segredo:</strong> Consistência. Investir R$ 100 por mês todo mês é melhor que R$ 1.200 uma vez por ano.</p>` }
+  { titulo: 'O que é reserva de emergência?', conteudo: `<h2>O que é reserva de emergência?</h2><p>Reserva de emergência é um dinheiro guardado exclusivamente para imprevistos: perder o emprego, um problema de saúde, um conserto urgente.</p><p><strong>Quanto guardar?</strong> O ideal é ter de 3 a 6 meses dos seus gastos mensais guardados.</p><p>Exemplo: se você gasta R$ 2.000 por mês, sua reserva deve ser entre R$ 6.000 e R$ 12.000.</p><p><strong>Onde guardar?</strong></p><ul><li>Tesouro Selic (recomendado)</li><li>CDB com liquidez diária</li><li>Conta remunerada</li></ul><p><strong>Por que é tão importante?</strong> Sem reserva, qualquer imprevisto vira dívida. Com reserva, você tem tranquilidade.</p>` },
+  { titulo: 'Por que evitar o cartão de crédito?', conteudo: `<h2>Por que evitar o cartão de crédito?</h2><p>O cartão de crédito não é dinheiro extra. É dinheiro adiantado que você vai ter que devolver.</p><p><strong>O perigo do rotativo:</strong> Se você não pagar a fatura completa, os juros podem ser de 15% a 20% ao mês.</p><p><strong>Como usar sem se prejudicar:</strong></p><ul><li>Nunca gaste mais do que você tem</li><li>Pague SEMPRE a fatura total</li><li>Evite parcelar compras desnecessárias</li></ul><p><strong>Regra de ouro:</strong> Se você precisa parcelar, provavelmente não pode comprar.</p>` },
+  { titulo: 'Como sair das dívidas?', conteudo: `<h2>Como sair das dívidas?</h2><p>Sair das dívidas é possível. Mas exige disciplina e um plano claro.</p><p><strong>Passo 1:</strong> Liste todas as suas dívidas — valor, juros e prazo.</p><p><strong>Passo 2:</strong> Priorize as com maior juros. Cartão e cheque especial primeiro.</p><p><strong>Passo 3:</strong> Negocie. Muitas empresas oferecem desconto para quitar à vista.</p><p><strong>Passo 4:</strong> Corte gastos desnecessários temporariamente.</p><p><strong>Passo 5:</strong> Use o Monvy para acompanhar seu progresso!</p>` },
+  { titulo: 'Necessidade vs Desejo', conteudo: `<h2>Necessidade vs Desejo</h2><p>Essa diferença é a base da educação financeira.</p><p><strong>Necessidade</strong> é o que você precisa para viver: alimentação, moradia, saúde, transporte.</p><p><strong>Desejo</strong> é o que você quer: roupas de marca, restaurante caro, o celular mais novo.</p><p>Desejos não são errados. O problema é quando tratamos desejos como necessidades.</p><p><strong>A regra das 24 horas:</strong> Esperou um dia e ainda quer? Talvez valha. Se esqueceu, era impulso.</p>` },
+  { titulo: 'Regra dos 50-30-20', conteudo: `<h2>Regra dos 50-30-20</h2><p>É o jeito mais simples de organizar seu salário.</p><p><strong>50% — Necessidades:</strong> Aluguel, mercado, contas, transporte.</p><p><strong>30% — Desejos:</strong> Lazer, roupas, restaurante, streaming.</p><p><strong>20% — Futuro:</strong> Reserva de emergência, investimentos, pagamento de dívidas.</p><p><strong>Exemplo com R$ 2.000:</strong></p><ul><li>R$ 1.000 — Necessidades</li><li>R$ 600 — Desejos</li><li>R$ 400 — Futuro</li></ul>` },
+  { titulo: 'Como começar a investir?', conteudo: `<h2>Como começar a investir?</h2><p>Você não precisa ser rico para investir. Pode começar com R$ 30.</p><p><strong>Antes de investir:</strong> Quite suas dívidas de alto juros e monte sua reserva primeiro.</p><p><strong>Primeiros passos:</strong></p><ul><li><strong>Tesouro Selic:</strong> O mais seguro. Ideal para reserva e primeiros investimentos.</li><li><strong>CDB:</strong> Seguro e com boa rentabilidade. Veja se tem liquidez diária.</li></ul><p><strong>O segredo:</strong> Consistência. Investir R$ 100 por mês todo mês é melhor que R$ 1.200 uma vez por ano.</p>` }
 ];
 
 function abrirArtigo(index) {
