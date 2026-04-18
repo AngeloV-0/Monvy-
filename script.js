@@ -22,7 +22,7 @@ const pageTitles = {
 };
 
 // ---------- NAVEGAÇÃO ----------
-document.querySelectorAll('.nav-item').forEach(item => {
+document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(item => {
   item.addEventListener('click', function(e) {
     e.preventDefault();
     irPara(this.dataset.tela);
@@ -30,9 +30,9 @@ document.querySelectorAll('.nav-item').forEach(item => {
 });
 
 function irPara(tela) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
-  document.querySelector(`[data-tela="${tela}"]`).classList.add('active');
+  document.querySelectorAll(`[data-tela="${tela}"]`).forEach(el => el.classList.add('active'));
   document.getElementById('tela-' + tela).classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[tela] || 'Monvy';
   if (tela === 'gastos') atualizarTelaCategorias();
