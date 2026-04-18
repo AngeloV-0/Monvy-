@@ -109,17 +109,13 @@ body {
 }
 
 .logo-icon {
-  width: 42px; height: 42px;
-  background: var(--grad);
-  border-radius: 12px;
+  width: 48px; height: 48px;
+  background: none;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-title);
-  font-weight: 800;
-  font-size: 1.2rem;
-  color: #0A0F1A;
-  box-shadow: 0 0 20px var(--primary-glow);
+  box-shadow: none;
 }
 
 nav {
