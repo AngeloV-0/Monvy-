@@ -569,6 +569,34 @@ nav {
   padding: 18px 14px;
   text-align: center;
   transition: border-color 0.2s, transform 0.2s;
+
+  /* garante alinhamento interno */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cat-icon {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* centraliza horizontal */
+  align-items: center;     /* centraliza vertical */
+  margin-bottom: 8px;
+}
+
+.cat-icon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+.cat-nome {
+  margin-top: 4px;
+}
+
+.cat-valor {
+  margin-top: 4px;
 }
 
 .cat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
