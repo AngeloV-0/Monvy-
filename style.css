@@ -278,19 +278,19 @@ nav {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--surface-2);
-  border: 1.5px solid var(--border);
+  border: none;
   border-radius: 24px;
   padding: 0 16px;
   height: 42px;
   max-width: 400px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
+  box-shadow: inset 0 0 0 1.5px var(--border);
 }
 
 .search-bar:focus-within {
-  border-color: var(--primary-glow);
-  box-shadow: 0 0 0 3px rgba(0,200,100,0.10);
+  box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.5), 0 0 0 3px rgba(34,197,94,0.08);
 }
 
 .search-bar svg {
@@ -1157,10 +1157,11 @@ select option { background: var(--surface-2); }
     border-radius: 0;
     padding: 0;
     height: 100%;
-    box-shadow: none;
+    box-shadow: none !important;
   }
   .search-mobile-overlay .search-bar:focus-within {
     border: none;
+    box-shadow: none !important;
   }
   .search-mobile-close {
     background: none;
