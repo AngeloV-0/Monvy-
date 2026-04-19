@@ -82,13 +82,17 @@
         </div>
       </div>
       <div class="topbar-right">
+        <!-- Botão lupa: só aparece no mobile -->
+        <button class="search-mobile-btn" onclick="abrirBuscaMobile()" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
         <button class="topbar-btn" onclick="abrirModal('ganho')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nova entrada
+          <span>Nova entrada</span>
         </button>
         <button class="topbar-btn danger" onclick="abrirModal('gasto')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Novo gasto
+          <span>Novo gasto</span>
         </button>
         <div class="notif-btn theme-toggle-desktop" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
           <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
