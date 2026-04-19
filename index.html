@@ -59,9 +59,9 @@
           <button class="hamburger-btn" onclick="abrirDrawer()" aria-label="Menu">
             <span></span><span></span><span></span>
           </button>
-          <img src="logo.png" alt="Monvy" style="height:26px;width:auto;">
+          <img src="logo.png" alt="Logo" style="height:26px;width:auto;">
           <div class="topbar-mobile-user">
-            <span class="topbar-mobile-brand">Monvy</span>
+            <span class="topbar-mobile-brand" id="topbar-mobile-tela">Dashboard</span>
             <span class="topbar-mobile-name" id="topbar-mobile-name">Olá, Usuário</span>
           </div>
         </div>
@@ -90,7 +90,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Novo gasto
         </button>
-        <div class="notif-btn" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+        <div class="notif-btn theme-toggle-desktop" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
           <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
           <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </div>
@@ -100,7 +100,15 @@
       </div>
     </header>
 
-    <!-- MAIN CONTENT -->
+    <!-- BUSCA MOBILE OVERLAY -->
+    <div class="search-mobile-overlay" id="search-mobile-overlay" style="display:none">
+      <div class="search-bar" style="flex:1;max-width:100%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input-mobile" placeholder="Buscar movimentações..." oninput="buscarMovimentacoes(this.value)" autocomplete="off">
+        <button id="search-clear-mobile" onclick="limparBusca()" style="display:none;background:none;border:none;cursor:pointer;color:var(--gray);padding:0 4px;font-size:1.05rem;line-height:1;opacity:.7">✕</button>
+      </div>
+      <button class="search-mobile-close" onclick="fecharBuscaMobile()">✕</button>
+    </div>
     <main class="main">
 
       <!-- ===== TELA: INÍCIO ===== -->
@@ -195,6 +203,15 @@
               <div>
                 <div class="card-title">Por categoria</div>
                 <div class="card-sub">Distribuição dos gastos</div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <span style="font-size:.7rem;color:var(--gray);margin-right:2px">Tipo:</span>
+                <button id="btn-tipo-pizza" onclick="setTipoGrafico('doughnut')" title="Gráfico de pizza" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--primary);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                </button>
+                <button id="btn-tipo-coluna" onclick="setTipoGrafico('bar')" title="Gráfico de colunas" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>
+                </button>
               </div>
             </div>
             <div style="position:relative;display:flex;align-items:center;justify-content:center;height:200px">
@@ -591,7 +608,7 @@
       </div>
 
       <button class="btn-primary" style="width:100%" onclick="salvarPerfil()">Salvar alterações</button>
-      <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:12px;font-size:0.82rem;color:var(--primary)">✅ Perfil atualizado!</div>
+      <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:12px;font-size:0.82rem;color:var(--primary)">Perfil atualizado!</div>
     </div>
   </div>
 
@@ -613,8 +630,9 @@
       const tela = el.getAttribute('data-tela');
       document.querySelectorAll('.drawer-item[data-tela]').forEach(i => i.classList.remove('active'));
       el.classList.add('active');
-      if (typeof mostrarTela === 'function') mostrarTela(tela);
-      else {
+      if (typeof irPara === 'function') {
+        irPara(tela);
+      } else {
         document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
         const telaEl = document.getElementById('tela-' + tela);
         if (telaEl) telaEl.classList.add('active');

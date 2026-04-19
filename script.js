@@ -21,7 +21,10 @@ function irPara(tela) {
   document.querySelectorAll('[data-tela="'+tela+'"]').forEach(el => el.classList.add('active'));
   const telaEl = document.getElementById('tela-'+tela);
   if (telaEl) telaEl.classList.add('active');
-  document.getElementById('page-title').textContent = pageTitles[tela] || 'Monvy';
+  const titulo = pageTitles[tela] || 'Monvy';
+  document.getElementById('page-title').textContent = titulo;
+  const mobileTelaEl = document.getElementById('topbar-mobile-tela');
+  if (mobileTelaEl) mobileTelaEl.textContent = titulo;
   if (tela === 'gastos') atualizarTelaCategorias();
   if (tela === 'relatorio') atualizarRelatorio();
 }
@@ -65,6 +68,36 @@ function atualizarChart() {
 
 // CHART PIZZA
 let chartPizza = null;
+let tipoGraficoPizza = 'doughnut'; // 'doughnut' ou 'bar'
+
+function setTipoGrafico(tipo) {
+  tipoGraficoPizza = tipo;
+  // Atualizar estilos dos botões
+  const btnPizza = document.getElementById('btn-tipo-pizza');
+  const btnColuna = document.getElementById('btn-tipo-coluna');
+  if (btnPizza && btnColuna) {
+    if (tipo === 'doughnut') {
+      btnPizza.style.background = 'var(--primary)';
+      btnPizza.style.color = '#000';
+      btnColuna.style.background = 'transparent';
+      btnColuna.style.color = 'var(--gray)';
+    } else {
+      btnColuna.style.background = 'var(--primary)';
+      btnColuna.style.color = '#000';
+      btnPizza.style.background = 'transparent';
+      btnPizza.style.color = 'var(--gray)';
+    }
+  }
+  // Re-renderizar com os dados atuais
+  if (chartPizza) {
+    const labels = chartPizza.data.labels;
+    const data = chartPizza.data.datasets[0].data;
+    const cats = {};
+    labels.forEach((l, i) => cats[l] = data[i]);
+    atualizarChartPizza(cats);
+  }
+}
+
 function atualizarChartPizza(cats) {
   const canvas = document.getElementById('chart-pizza');
   const emptyEl = document.getElementById('pizza-empty');
@@ -77,11 +110,30 @@ function atualizarChartPizza(cats) {
   const data = labels.map(k=>cats[k]);
   const cores = ['#22C55E','#3B82F6','#F59E0B','#EF4444','#A855F7','#64748B'];
   if (chartPizza) chartPizza.destroy();
-  chartPizza = new Chart(canvas.getContext('2d'), { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:cores.slice(0,labels.length), borderWidth:0, hoverOffset:6}]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)+' ('+((c.raw/total)*100).toFixed(0)+'%)'}}}, cutout:'60%' }
-  });
-  if (legendaEl) {
-    legendaEl.innerHTML = labels.map((l,i)=>`<div class="pizza-leg-item"><span style="width:10px;height:10px;border-radius:50%;background:${cores[i]};flex-shrink:0;display:inline-block"></span><span style="font-size:.78rem;color:var(--gray)">${l}</span><span style="font-size:.78rem;font-weight:600;color:var(--white);margin-left:auto">${((data[i]/total)*100).toFixed(0)}%</span></div>`).join('');
+
+  if (tipoGraficoPizza === 'bar') {
+    // Gráfico de colunas
+    chartPizza = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: cores.slice(0, labels.length), borderWidth: 0, borderRadius: 6 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + fmt(c.raw) + ' (' + ((c.raw/total)*100).toFixed(0) + '%)' } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 10 }, callback: v => 'R$' + v } }
+        }
+      }
+    });
+    if (legendaEl) legendaEl.innerHTML = '';
+  } else {
+    // Gráfico de rosca (doughnut)
+    chartPizza = new Chart(canvas.getContext('2d'), { type:'doughnut', data:{ labels, datasets:[{data, backgroundColor:cores.slice(0,labels.length), borderWidth:0, hoverOffset:6}]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)+' ('+((c.raw/total)*100).toFixed(0)+'%)'}}}, cutout:'60%' }
+    });
+    if (legendaEl) {
+      legendaEl.innerHTML = labels.map((l,i)=>`<div class="pizza-leg-item"><span style="width:10px;height:10px;border-radius:50%;background:${cores[i]};flex-shrink:0;display:inline-block"></span><span style="font-size:.78rem;color:var(--gray)">${l}</span><span style="font-size:.78rem;font-weight:600;color:var(--white);margin-left:auto">${((data[i]/total)*100).toFixed(0)}%</span></div>`).join('');
+    }
   }
 }
 
@@ -149,7 +201,7 @@ function confirmarModal() {
 function responderPergunta(resposta) {
   respostaPergunta = resposta;
   const valor = parseFloat(document.getElementById('modal-valor').value);
-  if (resposta==='desejo') { if (!confirm('🛍️ Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar 💭')) { fecharModal(); return; } }
+  if (resposta==='desejo') { if (!confirm('Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar')) { fecharModal(); return; } }
   registrar(valor, document.getElementById('modal-descricao').value||'Saída', document.getElementById('modal-categoria').value, document.getElementById('modal-data').value||hojeISO(), document.getElementById('modal-recorrente').checked);
   fecharModal();
 }
@@ -422,21 +474,21 @@ function processarRecorrentes() {
   if (unicos.length===0) { alert('Nenhum lançamento recorrente cadastrado.'); return; }
   const jaSet=new Set(movimentacoes.filter(m=>{ if(!m.data||!m.recorrente)return false; const d=new Date(m.data+'T00:00:00'); return d.getMonth()===agora.getMonth()&&d.getFullYear()===agora.getFullYear(); }).map(m=>m.descricao+'|'+m.categoria+'|'+m.tipo));
   const pendentes=unicos.filter(m=>!jaSet.has(m.descricao+'|'+m.categoria+'|'+m.tipo));
-  if (pendentes.length===0) { alert('Todos os recorrentes já foram lançados neste mês! ✅'); return; }
+  if (pendentes.length===0) { alert('Todos os recorrentes já foram lançados neste mês!'); return; }
   if (!confirm('Lançar '+pendentes.length+' recorrente(s) para '+MESES[agora.getMonth()]+'?')) return;
   pendentes.forEach(m=>{ tipoAtual=m.tipo; movimentacoes.push({...m,data:hojeISO(),resposta:''}); });
   recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); atualizarRelatorio();
-  alert('✅ '+pendentes.length+' lançamento(s) adicionado(s)!');
+  alert(pendentes.length+' lançamento(s) adicionado(s)!');
 }
 
 // ARTIGOS
 const artigos=[
-  {titulo:'🛡️ Reserva de emergência',conteudo:`<h2>🛡️ O que é reserva de emergência?</h2><p>Reserva de emergência é um dinheiro guardado exclusivamente para imprevistos: perder o emprego, um problema de saúde, um conserto urgente.</p><p><strong>Quanto guardar?</strong> O ideal é ter de 3 a 6 meses dos seus gastos mensais guardados.</p><p><strong>Onde guardar?</strong></p><ul><li>Tesouro Selic (recomendado)</li><li>CDB com liquidez diária</li><li>Conta remunerada</li></ul>`},
-  {titulo:'💳 Cartão de crédito',conteudo:`<h2>💳 Por que evitar o cartão de crédito?</h2><p>O cartão de crédito não é dinheiro extra. É dinheiro adiantado que você vai ter que devolver.</p><p><strong>O perigo do rotativo:</strong> Juros de 15% a 20% ao mês.</p><p><strong>Regra de ouro:</strong> Se você precisa parcelar, provavelmente não pode comprar.</p>`},
-  {titulo:'🔓 Sair das dívidas',conteudo:`<h2>🔓 Como sair das dívidas?</h2><p><strong>Passo 1:</strong> Liste todas as suas dívidas.</p><p><strong>Passo 2:</strong> Priorize as com maior juros.</p><p><strong>Passo 3:</strong> Negocie desconto para quitar à vista.</p><p><strong>Passo 4:</strong> Corte gastos desnecessários.</p>`},
-  {titulo:'🧠 Necessidade vs Desejo',conteudo:`<h2>🧠 Necessidade vs Desejo</h2><p><strong>Necessidade</strong> é o que você precisa para viver: alimentação, moradia, saúde, transporte.</p><p><strong>Desejo</strong> é o que você quer: roupas de marca, restaurante caro, o celular mais novo.</p><p><strong>A regra das 24 horas:</strong> Esperou um dia e ainda quer? Talvez valha.</p>`},
-  {titulo:'📊 Regra 50-30-20',conteudo:`<h2>📊 Regra dos 50-30-20</h2><p><strong>50%</strong> — Necessidades: Aluguel, mercado, contas, transporte.</p><p><strong>30%</strong> — Desejos: Lazer, roupas, restaurante, streaming.</p><p><strong>20%</strong> — Futuro: Reserva de emergência, investimentos.</p>`},
-  {titulo:'🌱 Como começar a investir',conteudo:`<h2>🌱 Como começar a investir?</h2><p>Você não precisa ser rico para investir. Pode começar com R$ 30.</p><p><strong>Antes de investir:</strong> Quite suas dívidas de alto juros e monte sua reserva primeiro.</p><p><strong>O segredo:</strong> Consistência. Investir R$ 100 por mês todo mês é melhor que R$ 1.200 uma vez por ano.</p>`}
+  {titulo:'Reserva de emergência',conteudo:`<h2>O que é reserva de emergência?</h2><p>Reserva de emergência é um dinheiro guardado exclusivamente para imprevistos: perder o emprego, um problema de saúde, um conserto urgente.</p><p><strong>Quanto guardar?</strong> O ideal é ter de 3 a 6 meses dos seus gastos mensais guardados.</p><p><strong>Onde guardar?</strong></p><ul><li>Tesouro Selic (recomendado)</li><li>CDB com liquidez diária</li><li>Conta remunerada</li></ul>`},
+  {titulo:'Cartão de crédito',conteudo:`<h2>Por que evitar o cartão de crédito?</h2><p>O cartão de crédito não é dinheiro extra. É dinheiro adiantado que você vai ter que devolver.</p><p><strong>O perigo do rotativo:</strong> Juros de 15% a 20% ao mês.</p><p><strong>Regra de ouro:</strong> Se você precisa parcelar, provavelmente não pode comprar.</p>`},
+  {titulo:'Sair das dívidas',conteudo:`<h2>Como sair das dívidas?</h2><p><strong>Passo 1:</strong> Liste todas as suas dívidas.</p><p><strong>Passo 2:</strong> Priorize as com maior juros.</p><p><strong>Passo 3:</strong> Negocie desconto para quitar à vista.</p><p><strong>Passo 4:</strong> Corte gastos desnecessários.</p>`},
+  {titulo:'Necessidade vs Desejo',conteudo:`<h2>Necessidade vs Desejo</h2><p><strong>Necessidade</strong> é o que você precisa para viver: alimentação, moradia, saúde, transporte.</p><p><strong>Desejo</strong> é o que você quer: roupas de marca, restaurante caro, o celular mais novo.</p><p><strong>A regra das 24 horas:</strong> Esperou um dia e ainda quer? Talvez valha.</p>`},
+  {titulo:'Regra 50-30-20',conteudo:`<h2>Regra dos 50-30-20</h2><p><strong>50%</strong> — Necessidades: Aluguel, mercado, contas, transporte.</p><p><strong>30%</strong> — Desejos: Lazer, roupas, restaurante, streaming.</p><p><strong>20%</strong> — Futuro: Reserva de emergência, investimentos.</p>`},
+  {titulo:'Como começar a investir',conteudo:`<h2>Como começar a investir?</h2><p>Você não precisa ser rico para investir. Pode começar com R$ 30.</p><p><strong>Antes de investir:</strong> Quite suas dívidas de alto juros e monte sua reserva primeiro.</p><p><strong>O segredo:</strong> Consistência. Investir R$ 100 por mês todo mês é melhor que R$ 1.200 uma vez por ano.</p>`}
 ];
 
 function abrirArtigo(index) { document.getElementById('artigo-conteudo').innerHTML=artigos[index].conteudo; document.getElementById('modal-artigo').classList.remove('hidden'); }
@@ -529,7 +581,32 @@ function limparBusca() {
   if (input) input.value = '';
   const clearBtn = document.getElementById('search-clear');
   if (clearBtn) clearBtn.style.display = 'none';
+  const inputM = document.getElementById('search-input-mobile');
+  if (inputM) inputM.value = '';
+  const clearBtnM = document.getElementById('search-clear-mobile');
+  if (clearBtnM) clearBtnM.style.display = 'none';
   fecharDropdownBusca();
+}
+
+function abrirBuscaMobile() {
+  const overlay = document.getElementById('search-mobile-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    overlay.classList.add('open');
+    setTimeout(() => {
+      const input = document.getElementById('search-input-mobile');
+      if (input) input.focus();
+    }, 50);
+  }
+}
+
+function fecharBuscaMobile() {
+  const overlay = document.getElementById('search-mobile-overlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+  }
+  limparBusca();
 }
 
 document.addEventListener('click', function(e) {
