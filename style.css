@@ -279,16 +279,19 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
   padding: 0 16px;
   height: 42px;
   max-width: 400px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-bar:focus-within { border-color: var(--primary-glow); }
+.search-bar:focus-within {
+  border-color: var(--primary-glow);
+  box-shadow: 0 0 0 3px rgba(0,200,100,0.10);
+}
 
 .search-bar svg {
   width: 16px; height: 16px;
@@ -1135,8 +1138,9 @@ select option { background: var(--surface-2); }
     position: fixed;
     top: 0; left: 0; right: 0;
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 14px;
+    border-bottom: 1px solid var(--primary-glow);
+    padding: 0 14px;
+    height: 60px;
     z-index: 9999;
     gap: 10px;
     align-items: center;
@@ -1144,9 +1148,19 @@ select option { background: var(--surface-2); }
   .search-mobile-overlay.open {
     display: flex !important;
   }
+  /* Search-bar dentro do overlay: sem borda/bg próprio, vira transparente */
   .search-mobile-overlay .search-bar {
     flex: 1;
     max-width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    height: 100%;
+    box-shadow: none;
+  }
+  .search-mobile-overlay .search-bar:focus-within {
+    border: none;
   }
   .search-mobile-close {
     background: none;
@@ -1156,6 +1170,7 @@ select option { background: var(--surface-2); }
     cursor: pointer;
     padding: 4px;
     line-height: 1;
+    flex-shrink: 0;
   }
 
   .main { padding: 14px 12px 24px; overflow-x: hidden; }
