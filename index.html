@@ -334,11 +334,47 @@
 
       <!-- ===== TELA: RELATÓRIO ===== -->
       <section id="tela-relatorio" class="tela">
-        <!-- Seletor de mês -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-          <button onclick="mudarMesRelatorio(-1)" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">‹</button>
-          <span id="relatorio-mes-label" style="font-size:1rem;font-weight:700;color:var(--white);min-width:160px;text-align:center"></span>
-          <button onclick="mudarMesRelatorio(1)" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">›</button>
+
+        <!-- Seletor de período -->
+        <div class="relatorio-periodo-wrap">
+
+          <!-- Modo: Mês calendário -->
+          <div class="periodo-modo-tabs">
+            <button class="periodo-tab active" id="tab-mes" onclick="setPeriodoModo('mes')">Mês</button>
+            <button class="periodo-tab" id="tab-custom" onclick="setPeriodoModo('custom')">Período personalizado</button>
+          </div>
+
+          <!-- Navegação por mês -->
+          <div id="periodo-mes-nav" style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+            <button onclick="mudarMesRelatorio(-1)" class="btn-nav-mes">‹</button>
+            <span id="relatorio-mes-label" style="font-size:1rem;font-weight:700;color:var(--white);min-width:160px;text-align:center"></span>
+            <button onclick="mudarMesRelatorio(1)" class="btn-nav-mes">›</button>
+          </div>
+
+          <!-- Seletor de período personalizado -->
+          <div id="periodo-custom-nav" style="display:none;margin-top:14px">
+            <div class="periodo-custom-grid">
+              <div class="periodo-field">
+                <label>Data inicial</label>
+                <input type="date" id="periodo-inicio" onchange="aplicarPeriodoCustom()">
+              </div>
+              <div class="periodo-divider">→</div>
+              <div class="periodo-field">
+                <label>Data final</label>
+                <input type="date" id="periodo-fim" onchange="aplicarPeriodoCustom()">
+              </div>
+            </div>
+            <!-- Atalhos rápidos -->
+            <div class="periodo-atalhos">
+              <span class="periodo-atalho-label">Atalhos:</span>
+              <button class="periodo-atalho-btn" onclick="atalhoUltimos(7)">Últimos 7 dias</button>
+              <button class="periodo-atalho-btn" onclick="atalhoUltimos(15)">Últimos 15 dias</button>
+              <button class="periodo-atalho-btn" onclick="atalhoUltimos(30)">Últimos 30 dias</button>
+              <button class="periodo-atalho-btn" onclick="atalhoUltimos(90)">Últimos 3 meses</button>
+            </div>
+            <div id="periodo-custom-label" style="margin-top:10px;font-size:.82rem;color:var(--primary);font-weight:600;min-height:18px"></div>
+          </div>
+
         </div>
 
         <!-- KPIs do mês -->
@@ -480,32 +516,6 @@
   </div>
 
   <!-- BOTTOM NAV (mobile only) -->
-  <nav class="bottom-nav">
-    <a href="#" class="bottom-nav-item active" data-tela="inicio">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Início</span>
-    </a>
-    <a href="#" class="bottom-nav-item" data-tela="gastos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      <span>Gastos</span>
-    </a>
-    <a href="#" class="bottom-nav-item" data-tela="metas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-      <span>Metas</span>
-    </a>
-    <a href="#" class="bottom-nav-item" data-tela="dividas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <span>Dívidas</span>
-    </a>
-    <a href="#" class="bottom-nav-item" data-tela="investimentos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      <span>Invest.</span>
-    </a>
-    <a href="#" class="bottom-nav-item" data-tela="aprender">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-      <span>Aprender</span>
-    </a>
-  </nav>
 
   <!-- MOBILE DRAWER -->
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>

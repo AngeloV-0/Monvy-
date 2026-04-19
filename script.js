@@ -11,12 +11,12 @@ const pageTitles = { inicio:'Dashboard', gastos:'Gastos', metas:'Metas', dividas
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // NAVEGAÇÃO
-document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(item => {
+document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', function(e) { e.preventDefault(); irPara(this.dataset.tela); });
 });
 
 function irPara(tela) {
-  document.querySelectorAll('.nav-item,.bottom-nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('[data-tela="'+tela+'"]').forEach(el => el.classList.add('active'));
   const telaEl = document.getElementById('tela-'+tela);
@@ -283,21 +283,105 @@ let chartRelatorio = null;
 
 function mudarMesRelatorio(delta) { relatorioMesOffset+=delta; atualizarRelatorio(); }
 
+// Modo do período: 'mes' ou 'custom'
+let periodoModo = 'mes';
+let periodoCustomInicio = null, periodoCustomFim = null;
+
+function setPeriodoModo(modo) {
+  periodoModo = modo;
+  document.getElementById('tab-mes').classList.toggle('active', modo === 'mes');
+  document.getElementById('tab-custom').classList.toggle('active', modo === 'custom');
+  document.getElementById('periodo-mes-nav').style.display = modo === 'mes' ? 'flex' : 'none';
+  document.getElementById('periodo-custom-nav').style.display = modo === 'custom' ? 'block' : 'none';
+  if (modo === 'custom' && !periodoCustomInicio) {
+    // Pré-preencher com o mês atual
+    const agora = new Date();
+    const primeiro = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const ultimo = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
+    document.getElementById('periodo-inicio').value = primeiro.toISOString().split('T')[0];
+    document.getElementById('periodo-fim').value = ultimo.toISOString().split('T')[0];
+    periodoCustomInicio = primeiro.toISOString().split('T')[0];
+    periodoCustomFim = ultimo.toISOString().split('T')[0];
+  }
+  atualizarRelatorio();
+}
+
+function aplicarPeriodoCustom() {
+  periodoCustomInicio = document.getElementById('periodo-inicio').value;
+  periodoCustomFim = document.getElementById('periodo-fim').value;
+  if (periodoCustomInicio && periodoCustomFim) atualizarRelatorio();
+}
+
+function atalhoUltimos(dias) {
+  const fim = new Date();
+  const inicio = new Date();
+  inicio.setDate(inicio.getDate() - (dias - 1));
+  const fmt2 = d => d.toISOString().split('T')[0];
+  document.getElementById('periodo-inicio').value = fmt2(inicio);
+  document.getElementById('periodo-fim').value = fmt2(fim);
+  periodoCustomInicio = fmt2(inicio);
+  periodoCustomFim = fmt2(fim);
+  atualizarRelatorio();
+}
+
+function getMovimentacoesPeriodo() {
+  if (periodoModo === 'mes') {
+    const agora = new Date(), alvo = new Date(agora.getFullYear(), agora.getMonth() + relatorioMesOffset, 1);
+    return {
+      movs: movimentacoes.filter(m => {
+        if (!m.data) return false;
+        const d = new Date(m.data + 'T00:00:00');
+        return d.getMonth() === alvo.getMonth() && d.getFullYear() === alvo.getFullYear();
+      }),
+      alvo
+    };
+  } else {
+    const ini = periodoCustomInicio ? new Date(periodoCustomInicio + 'T00:00:00') : null;
+    const fim = periodoCustomFim ? new Date(periodoCustomFim + 'T23:59:59') : null;
+    return {
+      movs: movimentacoes.filter(m => {
+        if (!m.data) return false;
+        const d = new Date(m.data + 'T00:00:00');
+        return (!ini || d >= ini) && (!fim || d <= fim);
+      }),
+      alvo: ini || new Date()
+    };
+  }
+}
+
 function atualizarRelatorio() {
-  const agora=new Date(), alvo=new Date(agora.getFullYear(),agora.getMonth()+relatorioMesOffset,1);
-  document.getElementById('relatorio-mes-label').textContent=MESES[alvo.getMonth()]+' '+alvo.getFullYear();
-  const doMes=movimentacoes.filter(m=>{ if(!m.data)return false; const d=new Date(m.data+'T00:00:00'); return d.getMonth()===alvo.getMonth()&&d.getFullYear()===alvo.getFullYear(); });
-  const entradas=doMes.filter(m=>m.tipo==='ganho').reduce((a,m)=>a+m.valor,0);
-  const saidas=doMes.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+m.valor,0);
-  const saldoMes=entradas-saidas;
-  document.getElementById('rel-entradas').textContent=fmt(entradas);
-  document.getElementById('rel-saidas').textContent=fmt(saidas);
-  const saldoEl=document.getElementById('rel-saldo'); saldoEl.textContent=fmt(saldoMes); saldoEl.className='kpi-value '+(saldoMes>=0?'green':'red');
-  document.getElementById('rel-total').textContent=doMes.length;
-  const topEl=document.getElementById('relatorio-top-gastos');
-  const gastosMes=doMes.filter(m=>m.tipo==='gasto').sort((a,b)=>b.valor-a.valor).slice(0,5);
-  topEl.innerHTML=gastosMes.length===0?'<div class="vazio">Nenhum gasto neste mês.</div>':gastosMes.map(m=>`<div class="mov-item"><div class="mov-left"><div class="mov-dot r"></div><div class="mov-info"><span class="mov-desc">${m.descricao}</span><span class="mov-cat">${m.categoria} · ${fmtData(m.data)}</span></div></div><span class="mov-valor negativo">-${fmt(m.valor)}</span></div>`).join('');
-  atualizarChartRelatorio(alvo);
+  const agora = new Date(), alvo = new Date(agora.getFullYear(), agora.getMonth() + relatorioMesOffset, 1);
+  document.getElementById('relatorio-mes-label').textContent = MESES[alvo.getMonth()] + ' ' + alvo.getFullYear();
+
+  const { movs: doMes, alvo: alvoReal } = getMovimentacoesPeriodo();
+
+  // Label período custom
+  const labelEl = document.getElementById('periodo-custom-label');
+  if (labelEl && periodoModo === 'custom' && periodoCustomInicio && periodoCustomFim) {
+    const ini = periodoCustomInicio.split('-').reverse().join('/');
+    const fim = periodoCustomFim.split('-').reverse().join('/');
+    labelEl.textContent = ini === fim ? 'Dia ' + ini : 'De ' + ini + ' até ' + fim;
+  } else if (labelEl) {
+    labelEl.textContent = '';
+  }
+
+  const entradas = doMes.filter(m => m.tipo === 'ganho').reduce((a, m) => a + m.valor, 0);
+  const saidas = doMes.filter(m => m.tipo === 'gasto').reduce((a, m) => a + m.valor, 0);
+  const saldoMes = entradas - saidas;
+  document.getElementById('rel-entradas').textContent = fmt(entradas);
+  document.getElementById('rel-saidas').textContent = fmt(saidas);
+  const saldoEl = document.getElementById('rel-saldo');
+  saldoEl.textContent = fmt(saldoMes);
+  saldoEl.className = 'kpi-value ' + (saldoMes >= 0 ? 'green' : 'red');
+  document.getElementById('rel-total').textContent = doMes.length;
+
+  const topEl = document.getElementById('relatorio-top-gastos');
+  const gastosMes = doMes.filter(m => m.tipo === 'gasto').sort((a, b) => b.valor - a.valor).slice(0, 5);
+  topEl.innerHTML = gastosMes.length === 0
+    ? '<div class="vazio">Nenhum gasto no período.</div>'
+    : gastosMes.map(m => `<div class="mov-item"><div class="mov-left"><div class="mov-dot r"></div><div class="mov-info"><span class="mov-desc">${m.descricao}</span><span class="mov-cat">${m.categoria} · ${fmtData(m.data)}</span></div></div><span class="mov-valor negativo">-${fmt(m.valor)}</span></div>`).join('');
+
+  atualizarChartRelatorio(alvoReal);
   atualizarListaRecorrentes();
 }
 

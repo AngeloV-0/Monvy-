@@ -1094,7 +1094,6 @@ select option { background: var(--surface-2); }
 .hidden { display: none !important; }
 
 /* Elementos só no mobile */
-.bottom-nav { display: none; }
 .topbar-logo-mobile { display: none; }
 .topbar-desktop-title { display: block; }
 
@@ -1134,7 +1133,7 @@ select option { background: var(--surface-2); }
   .topbar-btn svg + * { display: none; }
   .notif-btn { width: 36px; height: 36px; }
 
-  .main { padding: 14px 12px 80px; overflow-x: hidden; }
+  .main { padding: 14px 12px 24px; overflow-x: hidden; }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -1180,51 +1179,6 @@ select option { background: var(--surface-2); }
     overflow-y: auto;
   }
   .artigo-box { max-height: 88vh; }
-
-  /* Bottom nav */
-  .bottom-nav {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 60px;
-    padding: 6px 4px !important;
-    padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
-    background: var(--sidebar-bg) !important;
-    border-top: 1px solid var(--border) !important;
-    z-index: 9999 !important;
-    align-items: center !important;
-    justify-content: space-around !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 0 !important;
-  }
-
-  .bottom-nav-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 3px;
-    flex: 1;
-    padding: 6px 2px;
-    color: var(--gray);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .bottom-nav-item svg { width: 20px; height: 20px; }
-
-  .bottom-nav-item span {
-    font-size: 0.55rem;
-    font-weight: 500;
-    font-family: var(--font-body);
-  }
-
-  .bottom-nav-item.active { color: var(--primary); }
 
   /* Ajustes de cards de meta */
   .meta-topo { flex-wrap: wrap; gap: 6px; }
@@ -1595,3 +1549,132 @@ input[type="date"] {
   color-scheme: light;
 }
 input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
+
+/* ==============================
+   RELATÓRIO — SELETOR DE PERÍODO
+   ============================== */
+.relatorio-periodo-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.periodo-modo-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.periodo-tab {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--gray);
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: .83rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.periodo-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+  font-weight: 700;
+}
+
+.btn-nav-mes {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--white);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+
+.btn-nav-mes:hover { background: var(--border); }
+
+.periodo-custom-grid {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.periodo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.periodo-field label {
+  font-size: .75rem;
+  color: var(--gray);
+  font-weight: 500;
+}
+
+.periodo-field input[type="date"] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--white);
+  font-size: .88rem;
+  font-family: var(--font-body);
+  outline: none;
+  width: 100%;
+  transition: border-color .2s;
+  cursor: pointer;
+}
+
+.periodo-field input[type="date"]:focus { border-color: var(--primary-glow); }
+
+[data-theme="light"] .periodo-field input[type="date"] { color: #0F172A; }
+
+.periodo-divider {
+  color: var(--gray);
+  font-size: 1.2rem;
+  padding-top: 18px;
+  flex-shrink: 0;
+}
+
+.periodo-atalhos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.periodo-atalho-label {
+  font-size: .75rem;
+  color: var(--gray);
+  flex-shrink: 0;
+}
+
+.periodo-atalho-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--gray);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: .75rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.periodo-atalho-btn:hover {
+  border-color: var(--primary-glow);
+  color: var(--primary);
+}
