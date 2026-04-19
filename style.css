@@ -310,34 +310,6 @@ nav {
 #search-clear { flex-shrink: 0; transition: opacity .15s; }
 #search-clear:hover { opacity: 1 !important; }
 
-/* Barra de busca mobile — fica logo abaixo do topbar */
-.mobile-search-bar-wrap {
-  display: none;
-  padding: 8px 12px 0;
-  background: var(--bg);
-  position: sticky;
-  top: var(--topbar-h);
-  z-index: 39;
-}
-
-.mobile-search-bar-wrap .search-bar {
-  width: 100%;
-  max-width: 100%;
-}
-
-#search-dropdown-mobile {
-  position: fixed;
-  top: calc(var(--topbar-h) + 58px);
-  left: 12px;
-  right: 12px;
-  background: var(--card-bg, #1a1a2e);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.5);
-  z-index: 9999;
-  overflow: hidden;
-  display: none;
-}
 
 .search-bar input::placeholder { color: var(--gray); }
 
@@ -1117,10 +1089,31 @@ select option { background: var(--surface-2); }
   .main-wrapper { margin-left: 0 !important; width: 100vw; max-width: 100vw; overflow-x: hidden; }
 
   .topbar { padding: 0 12px; gap: 8px; }
-  .topbar-center { display: none !important; }
   .topbar-desktop-title { display: none !important; }
-  .mobile-search-bar-wrap { display: flex !important; }
-  .topbar-logo-mobile {
+
+  .topbar-center {
+    position: fixed !important;
+    top: var(--topbar-h);
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    background: var(--bg);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    z-index: 38;
+    box-sizing: border-box;
+    justify-content: stretch !important;
+  }
+
+  .topbar-center .search-bar {
+    max-width: 100% !important;
+    width: 100%;
+  }
+
+  /* Empurra o conteúdo principal para baixo da barra de busca fixada */
+  .main { padding: calc(14px + 58px) 12px 24px !important; overflow-x: hidden; }
+
+
     display: flex !important;
     align-items: center;
     gap: 8px;
@@ -1132,8 +1125,6 @@ select option { background: var(--surface-2); }
   .topbar-btn { padding: 0 10px; height: 36px; font-size: 0.78rem; }
   .topbar-btn svg + * { display: none; }
   .notif-btn { width: 36px; height: 36px; }
-
-  .main { padding: 14px 12px 24px; overflow-x: hidden; }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -1191,6 +1182,14 @@ select option { background: var(--surface-2); }
 
   /* Card de gráfico: altura reduzida */
   #chart-fluxo { max-height: 160px; }
+
+  /* Dropdown de busca: largura total no mobile */
+  #search-dropdown {
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    border-radius: 0 0 14px 14px !important;
+  }
 }
 
 /* ==============================

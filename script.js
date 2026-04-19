@@ -458,7 +458,7 @@ function applyTheme(theme) {
 function toggleTheme() { const c=document.documentElement.getAttribute('data-theme')||'dark', n=c==='dark'?'light':'dark'; localStorage.setItem('monvy_theme',n); applyTheme(n); }
 
 // ===== BUSCA =====
-function _renderBuscaResultados(termo, header, lista, isMobile) {
+function _renderBuscaResultados(termo, header, lista) {
   const q = termo.trim().toLowerCase();
   const resultados = [...movimentacoes].filter(m => {
     return (
@@ -485,7 +485,7 @@ function _renderBuscaResultados(termo, header, lista, isMobile) {
         const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
         return txt.replace(re, '<mark style="background:rgba(57,255,121,0.25);color:inherit;border-radius:3px;padding:0 2px">$1</mark>');
       }
-      const closeCmd = isMobile ? 'fecharDropdownBuscaMobile()' : 'fecharDropdownBusca()';
+      const closeCmd = 'fecharDropdownBusca()';
       return `<div class="mov-item" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:default">
         <div class="mov-left">
           <div class="mov-dot ${isGanho?'g':'r'}"></div>
@@ -515,7 +515,7 @@ function mostrarDropdownBusca(termo) {
   const header = document.getElementById('search-results-header');
   const lista = document.getElementById('search-results-list');
   if (!dropdown || !header || !lista) return;
-  _renderBuscaResultados(termo, header, lista, false);
+  _renderBuscaResultados(termo, header, lista);
   dropdown.style.display = 'block';
 }
 
@@ -535,40 +535,7 @@ function limparBusca() {
 document.addEventListener('click', function(e) {
   const center = document.querySelector('.topbar-center');
   if (center && !center.contains(e.target)) fecharDropdownBusca();
-  const mobileWrap = document.querySelector('.mobile-search-bar-wrap');
-  const mobileDropdown = document.getElementById('search-dropdown-mobile');
-  if (mobileWrap && mobileDropdown && !mobileWrap.contains(e.target) && !mobileDropdown.contains(e.target)) fecharDropdownBuscaMobile();
 });
-
-// ===== BUSCA MOBILE =====
-function buscarMovimentacoesMobile(termo) {
-  const clearBtn = document.getElementById('search-clear-mobile');
-  if (clearBtn) clearBtn.style.display = termo.trim() ? 'inline-block' : 'none';
-  if (!termo.trim()) { fecharDropdownBuscaMobile(); return; }
-  mostrarDropdownBuscaMobile(termo);
-}
-
-function mostrarDropdownBuscaMobile(termo) {
-  const dropdown = document.getElementById('search-dropdown-mobile');
-  const header = document.getElementById('search-results-header-mobile');
-  const lista = document.getElementById('search-results-list-mobile');
-  if (!dropdown || !header || !lista) return;
-  _renderBuscaResultados(termo, header, lista, true);
-  dropdown.style.display = 'block';
-}
-
-function fecharDropdownBuscaMobile() {
-  const d = document.getElementById('search-dropdown-mobile');
-  if (d) d.style.display = 'none';
-}
-
-function limparBuscaMobile() {
-  const input = document.getElementById('search-input-mobile');
-  if (input) input.value = '';
-  const clearBtn = document.getElementById('search-clear-mobile');
-  if (clearBtn) clearBtn.style.display = 'none';
-  fecharDropdownBuscaMobile();
-}
 
 // INIT
 (function init(){
