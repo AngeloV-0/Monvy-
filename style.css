@@ -240,6 +240,7 @@ nav {
    ============================== */
 
 .topbar {
+  height: var(--topbar-h);
   min-height: var(--topbar-h);
   background: rgba(10, 15, 26, 0.8);
   backdrop-filter: blur(20px);
@@ -268,7 +269,7 @@ nav {
   align-items: center;
   justify-content: center;
   position: relative;
-  height: 100%;
+  align-self: center;
 }
 
 .topbar-center .search-bar {
