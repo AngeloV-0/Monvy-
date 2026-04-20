@@ -76,6 +76,8 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html { overflow-x: hidden; max-width: 100vw; }
+
 body {
   background: var(--bg);
   color: var(--white);
@@ -83,6 +85,8 @@ body {
   display: flex;
   min-height: 100vh;
   overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
 }
 
 /* ==============================
@@ -1251,10 +1255,10 @@ select option { background: var(--surface-2); }
 
   /* Botões: ícone + texto curto no mobile */
   .topbar-btn {
-    padding: 0 8px;
+    padding: 0 10px;
     height: 36px;
     width: auto;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     border-radius: 10px;
     flex-shrink: 0;
     gap: 4px;
@@ -1267,6 +1271,8 @@ select option { background: var(--surface-2); }
     gap: 5px;
     display: flex;
     align-items: center;
+    overflow: hidden;
+    max-width: fit-content;
   }
   .topbar-left { max-width: 130px !important; }
   .topbar-logo-mobile { max-width: 130px !important; }
@@ -1274,14 +1280,11 @@ select option { background: var(--surface-2); }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .kpi-card { padding: 12px 10px; display: flex; flex-direction: row; align-items: center; gap: 10px; }
-  .kpi-card.primary-card { flex-direction: column; align-items: flex-start; }
-  .kpi-icon { width: 32px; height: 32px; flex-shrink: 0; margin-bottom: 0; border-radius: 8px; }
-  .kpi-icon svg { width: 15px; height: 15px; }
-  .kpi-bg-icon { display: none; }
-  .kpi-value { font-size: 1.0rem; }
-  .kpi-label { font-size: 0.65rem; margin-bottom: 2px; }
-  .kpi-sub { font-size: 0.65rem; }
+  .kpi-card { padding: 14px 12px; }
+  .kpi-value { font-size: 1.05rem; }
+  .kpi-bg-icon { font-size: 2.2rem; }
+  .kpi-label { font-size: 0.7rem; }
+  .kpi-sub { font-size: 0.7rem; }
 
   /* Grids */
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
@@ -1851,4 +1854,33 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   outline: none !important;
   box-shadow: none !important;
   border-color: transparent !important;
+}
+
+/* ==============================
+   FIX OVERFLOW HORIZONTAL MOBILE
+   ============================== */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  .main-wrapper {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+  }
+  .main {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+  }
+  .topbar {
+    overflow: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+  /* Garante que nenhum elemento filho quebre o layout */
+  .kpi-row, .content-grid, .two-col, .categorias-grid {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
 }
