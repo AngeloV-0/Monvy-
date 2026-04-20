@@ -59,8 +59,8 @@
           <button class="hamburger-btn" onclick="abrirDrawer()" aria-label="Menu">
             <span></span><span></span><span></span>
           </button>
-          <div class="topbar-avatar-mobile" id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil">
-            <span id="topbar-avatar-letra" style="font-size:1rem;font-weight:800;color:#000;line-height:1">U</span>
+          <div id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" style="width:36px;height:36px;min-width:36px;max-width:36px;border-radius:50%;overflow:hidden;flex-shrink:0;cursor:pointer;border:2px solid rgba(255,255,255,0.3);background:var(--primary);display:flex;align-items:center;justify-content:center;">
+            <span id="topbar-avatar-letra" style="font-size:1rem;font-weight:800;color:#000;line-height:1;pointer-events:none;">U</span>
           </div>
           <div class="topbar-mobile-user">
             <span class="topbar-mobile-brand" id="topbar-mobile-tela">Dashboard</span>
@@ -748,19 +748,14 @@
       }
       // Topbar mobile
       const mobileNameEl = document.getElementById('topbar-mobile-name');
-      if (mobileNameEl) mobileNameEl.textContent = 'Olá, ' + nome.split(' ')[0] ;
-      // Avatar mobile (estilo Nubank)
-      const mobileAvatarLetra = document.getElementById('topbar-avatar-letra');
+      if (mobileNameEl) mobileNameEl.textContent = 'Olá, ' + nome.split(' ')[0];
+      // Avatar mobile
       const mobileAvatarDiv = document.getElementById('topbar-avatar-mobile');
       if (mobileAvatarDiv) {
         if (fotoSrc) {
-          mobileAvatarDiv.style.backgroundImage = `url(${fotoSrc})`;
-          mobileAvatarDiv.style.backgroundSize = 'cover';
-          mobileAvatarDiv.style.backgroundPosition = 'center';
-          if (mobileAvatarLetra) mobileAvatarLetra.style.display = 'none';
+          mobileAvatarDiv.innerHTML = `<img src="${fotoSrc}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`;
         } else {
-          mobileAvatarDiv.style.backgroundImage = '';
-          if (mobileAvatarLetra) { mobileAvatarLetra.style.display = 'block'; mobileAvatarLetra.textContent = inicial; }
+          mobileAvatarDiv.innerHTML = `<span style="font-size:1rem;font-weight:800;color:#000;line-height:1;pointer-events:none;">${inicial}</span>`;
         }
       }
     }
@@ -821,14 +816,13 @@
       if (drawerName && nome) drawerName.textContent = nome;
       // Inicializar avatar mobile
       const fotoSalva = localStorage.getItem('monvy_avatar_foto');
-      const mobileAvatarLetra = document.getElementById('topbar-avatar-letra');
       const mobileAvatarDiv = document.getElementById('topbar-avatar-mobile');
-      if (mobileAvatarLetra) mobileAvatarLetra.textContent = nome ? nome[0].toUpperCase() : 'U';
-      if (fotoSalva && mobileAvatarDiv) {
-        mobileAvatarDiv.style.backgroundImage = `url(${fotoSalva})`;
-        mobileAvatarDiv.style.backgroundSize = 'cover';
-        mobileAvatarDiv.style.backgroundPosition = 'center';
-        if (mobileAvatarLetra) mobileAvatarLetra.style.display = 'none';
+      if (mobileAvatarDiv) {
+        if (fotoSalva) {
+          mobileAvatarDiv.innerHTML = `<img src="${fotoSalva}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`;
+        } else if (nome) {
+          mobileAvatarDiv.innerHTML = `<span style="font-size:1rem;font-weight:800;color:#000;line-height:1;">${nome[0].toUpperCase()}</span>`;
+        }
       }
     })();
   </script>
