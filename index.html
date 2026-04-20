@@ -679,13 +679,33 @@
       if (!input.files || !input.files[0]) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        const imgEl = document.getElementById('perfil-avatar-img');
-        const letraEl = document.getElementById('perfil-avatar-letra');
-        const btnRemover = document.getElementById('perfil-remover-foto');
-        imgEl.src = e.target.result;
-        imgEl.style.display = 'block';
-        letraEl.style.display = 'none';
-        btnRemover.style.display = 'block';
+        const img = new Image();
+        img.onload = function() {
+          // Recortar centro da imagem em quadrado via canvas
+          const size = Math.min(img.width, img.height);
+          const offsetX = (img.width - size) / 2;
+          const offsetY = (img.height - size) / 2;
+          const canvas = document.createElement('canvas');
+          canvas.width = 200;
+          canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          // Recortar círculo direto no canvas
+          ctx.beginPath();
+          ctx.arc(100, 100, 100, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 200, 200);
+          const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+
+          const imgEl = document.getElementById('perfil-avatar-img');
+          const letraEl = document.getElementById('perfil-avatar-letra');
+          const btnRemover = document.getElementById('perfil-remover-foto');
+          imgEl.src = dataURL;
+          imgEl.style.display = 'block';
+          letraEl.style.display = 'none';
+          btnRemover.style.display = 'block';
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(input.files[0]);
     }
