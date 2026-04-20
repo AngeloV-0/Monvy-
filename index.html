@@ -76,7 +76,7 @@
           <input type="text" id="search-input" placeholder="Buscar movimentações..." oninput="buscarMovimentacoes(this.value)" autocomplete="off" onfocus="if(this.value.trim()) mostrarDropdownBusca(this.value)" style="background:transparent!important;border:none!important;outline:none!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important;width:100%;color:inherit;font-family:inherit;font-size:0.88rem;">
           <button id="search-clear" onclick="limparBusca()" style="display:none;background:none;border:none;cursor:pointer;color:var(--gray);padding:0 4px;font-size:1.05rem;line-height:1;opacity:.7">✕</button>
         </div>
-        <div id="search-dropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:440px;max-width:92vw;background:var(--card-bg,#1a1a2e);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;overflow:hidden">
+        <div id="search-dropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:440px;max-width:min(440px,90vw);background:var(--card-bg,#1a1a2e);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;overflow:hidden">
           <div id="search-results-header" style="padding:10px 16px 8px;font-size:.75rem;color:var(--gray);border-bottom:1px solid var(--border)"></div>
           <div id="search-results-list" style="max-height:360px;overflow-y:auto"></div>
         </div>
@@ -804,6 +804,26 @@
       const drawerName = document.getElementById('drawer-user-name');
       if (drawerName && nome) drawerName.textContent = nome;
     })();
+  </script>
+
+  <script>
+    // Previne scroll horizontal no mobile
+    document.addEventListener('touchmove', function(e) {
+      if (Math.abs(e.touches[0].clientX - (e.touches[0].screenX)) > Math.abs(e.touches[0].clientY - (e.touches[0].screenY))) {
+        // Só bloqueia se o elemento não for um scroll container intencional
+        var el = e.target;
+        while (el && el !== document.body) {
+          if (el.classList && (el.classList.contains('table-wrap') || el.classList.contains('search-mobile-overlay'))) return;
+          el = el.parentElement;
+        }
+      }
+    }, { passive: true });
+
+    // Detecta overflow ao carregar
+    if (window.innerWidth <= 768) {
+      document.documentElement.style.overflowX = 'hidden';
+      document.body.style.overflowX = 'hidden';
+    }
   </script>
 </body>
 </html>
