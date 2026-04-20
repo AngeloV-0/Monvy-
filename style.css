@@ -1274,11 +1274,14 @@ select option { background: var(--surface-2); }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .kpi-card { padding: 14px 12px; }
-  .kpi-value { font-size: 1.05rem; }
-  .kpi-bg-icon { font-size: 2.2rem; }
-  .kpi-label { font-size: 0.7rem; }
-  .kpi-sub { font-size: 0.7rem; }
+  .kpi-card { padding: 12px 10px; display: flex; flex-direction: row; align-items: center; gap: 10px; }
+  .kpi-card.primary-card { flex-direction: column; align-items: flex-start; }
+  .kpi-icon { width: 32px; height: 32px; flex-shrink: 0; margin-bottom: 0; border-radius: 8px; }
+  .kpi-icon svg { width: 15px; height: 15px; }
+  .kpi-bg-icon { display: none; }
+  .kpi-value { font-size: 1.0rem; }
+  .kpi-label { font-size: 0.65rem; margin-bottom: 2px; }
+  .kpi-sub { font-size: 0.65rem; }
 
   /* Grids */
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
