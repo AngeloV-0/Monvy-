@@ -1918,7 +1918,7 @@ html, body {
     box-sizing: border-box !important;
   }
 
-  /* Esquerda: hamburger + logo - tamanho fixo pequeno */
+  /* Esquerda: hamburger + avatar centralizados */
   .topbar-left {
     flex-shrink: 0 !important;
     max-width: none !important;
@@ -1928,9 +1928,10 @@ html, body {
   .topbar-logo-mobile {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 0 !important;
     max-width: none !important;
     overflow: visible !important;
+    justify-content: space-between !important;
   }
 
   /* Esconde o texto Dashboard/nome no topbar - economiza espaço */
