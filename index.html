@@ -59,9 +59,7 @@
           <button class="hamburger-btn" onclick="abrirDrawer()" aria-label="Menu">
             <span></span><span></span><span></span>
           </button>
-          <div id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" style="width:36px;height:36px;min-width:36px;max-width:36px;align-self:center;border-radius:50%;overflow:hidden;flex-shrink:0;cursor:pointer;border:2px solid rgba(255,255,255,0.3);background:var(--primary);display:flex;align-items:center;justify-content:center;position:relative;box-sizing:content-box;">
-            <span id="topbar-avatar-letra" style="font-size:1rem;font-weight:800;color:#000;line-height:1;pointer-events:none;">U</span>
-          </div>
+          <img id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" width="36" height="36" src="" alt="Perfil" style="width:36px;height:36px;min-width:36px;max-width:36px;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;align-self:center;border:2px solid rgba(255,255,255,0.3);display:block;">
           <div class="topbar-mobile-user">
             <span class="topbar-mobile-brand" id="topbar-mobile-tela">Dashboard</span>
             <span class="topbar-mobile-name" id="topbar-mobile-name">Olá, Usuário</span>
@@ -743,6 +741,10 @@
       document.getElementById('perfil-sucesso').style.display = 'block';
       setTimeout(() => fecharModalPerfil(), 1200);
     }
+    function gerarSvgInicial(letra) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="%2300c853"/><text x="18" y="24" text-anchor="middle" font-size="16" font-weight="800" font-family="Arial,sans-serif" fill="%23000000">${letra}</text></svg>`;
+      return 'data:image/svg+xml,' + svg;
+    }
     function aplicarPerfilUI(nome, fotoSrc) {
       const inicial = nome ? nome[0].toUpperCase() : 'U';
       // Drawer
@@ -769,13 +771,13 @@
       // Topbar mobile
       const mobileNameEl = document.getElementById('topbar-mobile-name');
       if (mobileNameEl) mobileNameEl.textContent = 'Olá, ' + nome.split(' ')[0];
-      // Avatar mobile
-      const mobileAvatarDiv = document.getElementById('topbar-avatar-mobile');
-      if (mobileAvatarDiv) {
+      // Avatar mobile — img com src direto (foto ou SVG com inicial)
+      const mobileAvatarImg = document.getElementById('topbar-avatar-mobile');
+      if (mobileAvatarImg) {
         if (fotoSrc) {
-          mobileAvatarDiv.innerHTML = `<img src="${fotoSrc}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">`;
+          mobileAvatarImg.src = fotoSrc;
         } else {
-          mobileAvatarDiv.innerHTML = `<span style="font-size:1rem;font-weight:800;color:#000;line-height:1;pointer-events:none;">${inicial}</span>`;
+          mobileAvatarImg.src = gerarSvgInicial(inicial);
         }
       }
     }
@@ -836,13 +838,10 @@
       if (drawerName && nome) drawerName.textContent = nome;
       // Inicializar avatar mobile
       const fotoSalva = localStorage.getItem('monvy_avatar_foto');
-      const mobileAvatarDiv = document.getElementById('topbar-avatar-mobile');
-      if (mobileAvatarDiv) {
-        if (fotoSalva) {
-          mobileAvatarDiv.innerHTML = `<img src="${fotoSalva}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">`;
-        } else if (nome) {
-          mobileAvatarDiv.innerHTML = `<span style="font-size:1rem;font-weight:800;color:#000;line-height:1;">${nome[0].toUpperCase()}</span>`;
-        }
+      const mobileAvatarImg = document.getElementById('topbar-avatar-mobile');
+      if (mobileAvatarImg) {
+        const inicial = nome ? nome[0].toUpperCase() : 'U';
+        mobileAvatarImg.src = fotoSalva ? fotoSalva : gerarSvgInicial(inicial);
       }
     })();
   </script>
