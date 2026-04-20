@@ -1884,3 +1884,34 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     overflow: hidden !important;
   }
 }
+
+/* ==============================
+   FIX DEFINITIVO OVERFLOW MOBILE
+   ============================== */
+html {
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 768px) {
+  /* Trava tudo que pode causar scroll lateral */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  /* Exceções para elementos que precisam de tamanho fixo */
+  .kpi-icon, .nav-item, .avatar-mini, .notif-btn,
+  .search-mobile-btn, .hamburger-btn, .topbar-btn,
+  svg, img, canvas {
+    max-width: none !important;
+  }
+  canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .chart-card, .recent-card, .content-grid,
+  .kpi-row, .main, .main-wrapper {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+}
