@@ -923,20 +923,38 @@ const CATEGORIAS_CONFIG = [
     novo: false,
   },
   {
+    id: 'cat-carro',
+    label: 'Carro',
+    icon: 'icone-carro.png',
+    ativo: (p) => (p.transporte || []).includes('carro'),
+    cat: () => 'Carro',
+    metaPct: 0.10,
+    novo: false,
+  },
+  {
+    id: 'cat-moto',
+    label: 'Moto',
+    icon: 'icone-moto.png',
+    ativo: (p) => (p.transporte || []).includes('moto'),
+    cat: () => 'Moto',
+    metaPct: 0.07,
+    novo: false,
+  },
+  {
     id: 'cat-transporte',
     label: 'Transporte',
     icon: 'icone-carro.png',
     iconFn: (p) => {
       const t = p.transporte || [];
-      if (t.includes('moto') && !t.includes('carro')) return 'icone-moto.png';
+      if (t.includes('app') && !t.includes('publico')) return 'icone-carro.png';
       return 'icone-carro.png';
     },
     ativo: (p) => {
       const t = p.transporte || [];
-      return t.some(x => ['carro','moto','app','publico'].includes(x));
+      return t.some(x => ['app','publico','bike'].includes(x));
     },
     cat: () => 'Transporte',
-    metaPct: 0.10,
+    metaPct: 0.05,
     novo: false,
   },
   {
