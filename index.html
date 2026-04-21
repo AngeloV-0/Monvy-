@@ -182,6 +182,18 @@
       <!-- ===== TELA: GASTOS ===== -->
       <section id="tela-gastos" class="tela">
 
+        <!-- Banner perfil adaptativo -->
+        <div id="gastos-perfil-banner" style="display:none;background:linear-gradient(135deg,rgba(0,200,83,0.08),rgba(0,200,83,0.03));border:1px solid rgba(0,200,83,0.18);border-radius:14px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.3rem">✨</span>
+            <div>
+              <div style="font-size:.82rem;font-weight:600;color:var(--white)">Categorias adaptadas ao seu perfil</div>
+              <div id="gastos-perfil-desc" style="font-size:.74rem;color:var(--gray);margin-top:1px"></div>
+            </div>
+          </div>
+          <button onclick="abrirModalPerfil();abrirTabPerfil('vida')" style="background:none;border:1px solid rgba(0,200,83,0.3);border-radius:8px;padding:5px 12px;font-size:.75rem;color:var(--primary);cursor:pointer;white-space:nowrap;font-family:inherit">Atualizar perfil →</button>
+        </div>
+
         <!-- Filtro de período -->
         <div class="filtro-periodo-bar">
           <button class="filtro-btn active" onclick="setFiltro('mes', this)">Este mês</button>
@@ -190,15 +202,10 @@
           <button class="filtro-btn" onclick="setFiltro('todos', this)">Tudo</button>
         </div>
 
-        <!-- Grid: categorias + gráfico pizza -->
+        <!-- Grid de categorias dinâmico + gráfico pizza -->
         <div class="gastos-grid-top">
-          <div class="categorias-grid">
-            <div class="cat-card"><div class="cat-icon"><img src="icone-casa.png" alt="Casa" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Casa</div><div class="cat-valor" id="cat-casa">R$ 0,00</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="icone-alimentacao.png" alt="Alimentação" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Alimentação</div><div class="cat-valor" id="cat-alimentacao">R$ 0,00</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="icone-carro.png" alt="Transporte" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Transporte</div><div class="cat-valor" id="cat-transporte">R$ 0,00</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="icone-cartao02.png" alt="Lazer" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Lazer</div><div class="cat-valor" id="cat-lazer">R$ 0,00</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="icone-saude.png" alt="Saúde" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Saúde</div><div class="cat-valor" id="cat-saude">R$ 0,00</div></div>
-            <div class="cat-card"><div class="cat-icon"><img src="icone-caixa.png" alt="Outros" style="width:64px;height:64px;object-fit:contain;"></div><div class="cat-nome">Outros</div><div class="cat-valor" id="cat-outros">R$ 0,00</div></div>
+          <div class="categorias-grid" id="categorias-grid-dinamico">
+            <!-- Renderizado dinamicamente pelo JS conforme perfil -->
           </div>
 
           <!-- Gráfico de pizza -->
@@ -228,6 +235,9 @@
             <div id="pizza-legenda" class="pizza-legenda"></div>
           </div>
         </div>
+
+        <!-- Sugestão de orçamento baseada em perfil -->
+        <div id="sugestao-orcamento" style="display:none;margin-bottom:20px"></div>
 
         <!-- Table -->
         <div class="table-card">
@@ -275,22 +285,99 @@
 
       <!-- ===== TELA: DÍVIDAS ===== -->
       <section id="tela-dividas" class="tela">
-        <div class="two-col">
+
+        <!-- KPIs de Dívidas -->
+        <div class="kpi-row" id="dividas-kpis">
+          <div class="kpi-card primary-card" style="border-color:rgba(239,68,68,0.3)">
+            <div class="kpi-label">Total em Dívidas</div>
+            <div class="kpi-value" id="div-kpi-total" style="color:#ef4444">R$ 0,00</div>
+            <div class="kpi-sub" id="div-kpi-qtd">Nenhuma dívida cadastrada</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#f59e0b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <div class="kpi-label">Cartão de crédito</div>
+            <div class="kpi-value" id="div-kpi-cartao" style="color:#f59e0b">R$ 0,00</div>
+            <div class="kpi-sub">fatura em aberto</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="kpi-label">Empréstimos</div>
+            <div class="kpi-value" id="div-kpi-emprest" style="color:#8b5cf6">R$ 0,00</div>
+            <div class="kpi-sub">saldo devedor</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#06b6d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="kpi-label">Terceiros</div>
+            <div class="kpi-value" id="div-kpi-terceiros" style="color:#06b6d4">R$ 0,00</div>
+            <div class="kpi-sub">a pessoas</div>
+          </div>
+        </div>
+
+        <div class="two-col" style="align-items:flex-start">
+
+          <!-- Formulário de nova dívida -->
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-cartao.png" alt="Dívida" style="width:40px;height:40px;object-fit:contain;"> Simular Dívida</div>
-            <input type="number" id="div-valor" placeholder="Valor da dívida (R$)">
-            <input type="number" id="div-juros" placeholder="Juros ao mês (%)">
-            <input type="number" id="div-parcelas" placeholder="Número de parcelas">
-            <button class="btn-primary" onclick="calcularDivida()">Calcular</button>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px">
+              <img src="icone-cartao.png" alt="Dívida" style="width:36px;height:36px;object-fit:contain;">
+              <span id="div-form-titulo">Cadastrar Dívida</span>
+            </div>
+            <div style="margin-bottom:12px">
+              <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Tipo de dívida</label>
+              <select id="div-tipo" onchange="atualizarFormDivida()" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;font-family:inherit">
+                <option value="cartao">💳 Cartão de crédito</option>
+                <option value="emprestimo">💸 Empréstimo pessoal</option>
+                <option value="financiamento">🏦 Financiamento (carro/casa)</option>
+                <option value="terceiros">🤝 Dívida com terceiros</option>
+                <option value="outros">📋 Outros</option>
+              </select>
+            </div>
+            <input type="text" id="div-descricao" placeholder="Descrição (ex: Cartão Nubank)">
+            <input type="number" id="div-valor" placeholder="Valor total da dívida (R$)" min="0">
+            <div id="div-juros-area">
+              <input type="number" id="div-juros" placeholder="Juros ao mês (%) — opcional" min="0" step="0.1">
+            </div>
+            <div id="div-parcelas-area">
+              <input type="number" id="div-parcelas" placeholder="Parcelas restantes — opcional" min="1">
+            </div>
+            <div id="div-terceiro-area" style="display:none">
+              <input type="text" id="div-credor" placeholder="Nome de quem você deve">
+            </div>
+            <button class="btn-primary" onclick="cadastrarDivida()">Cadastrar dívida</button>
+            <div id="div-form-sucesso" style="display:none;text-align:center;margin-top:10px;font-size:.82rem;color:var(--primary)">✓ Dívida cadastrada!</div>
+
+            <!-- Separador simulador -->
+            <div style="margin:24px 0 16px;border-top:1px solid var(--border)"></div>
+            <div class="card-title" style="margin-bottom:14px;font-size:.95rem">Simular juros</div>
+            <input type="number" id="sim-valor" placeholder="Valor (R$)" min="0">
+            <input type="number" id="sim-juros" placeholder="Juros ao mês (%)" min="0" step="0.1">
+            <input type="number" id="sim-parcelas" placeholder="Parcelas" min="1">
+            <button class="btn-primary" style="background:rgba(0,200,83,0.15);color:var(--primary);border:1px solid rgba(0,200,83,0.3)" onclick="calcularDivida()">Simular</button>
+            <div id="resultado-divida" class="resultado-card hidden" style="margin-top:14px;padding:0">
+              <div class="resultado-item"><span>Valor original</span><strong id="div-original">—</strong></div>
+              <div class="resultado-item vermelho"><span>Total de juros</span><strong id="div-juros-total">—</strong></div>
+              <div class="resultado-item destaque"><span>Total a pagar</span><strong id="div-total">—</strong></div>
+              <div class="resultado-item"><span>Parcela mensal</span><strong id="div-parcela">—</strong></div>
+              <div class="alerta-divida" id="div-alerta"></div>
+            </div>
           </div>
-          <div id="resultado-divida" class="resultado-card hidden">
-            <div class="card-title" style="margin-bottom:20px">Resultado</div>
-            <div class="resultado-item"><span>Valor original</span><strong id="div-original">—</strong></div>
-            <div class="resultado-item vermelho"><span>Total de juros</span><strong id="div-juros-total">—</strong></div>
-            <div class="resultado-item destaque"><span>Total que vai pagar</span><strong id="div-total">—</strong></div>
-            <div class="resultado-item"><span>Parcela mensal</span><strong id="div-parcela">—</strong></div>
-            <div class="alerta-divida" id="div-alerta"></div>
+
+          <!-- Lista de dívidas cadastradas -->
+          <div>
+            <div class="card-title" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+              <span>Minhas Dívidas</span>
+              <span id="div-lista-count" style="font-size:.78rem;color:var(--gray);font-weight:400">0 cadastradas</span>
+            </div>
+            <div id="lista-dividas-cadastradas">
+              <div class="vazio">Nenhuma dívida cadastrada ainda.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>
+            </div>
+
+            <!-- Estratégia de quitação -->
+            <div id="estrategia-card" style="display:none;margin-top:20px;background:var(--card-bg,#161b27);border:1px solid var(--border);border-radius:16px;padding:20px">
+              <div class="card-title" style="margin-bottom:10px;font-size:.95rem">💡 Estratégia sugerida</div>
+              <div id="estrategia-texto" style="font-size:.85rem;color:var(--gray);line-height:1.6"></div>
+            </div>
           </div>
+
         </div>
       </section>
 
@@ -449,7 +536,6 @@
         <div id="modal-categoria-area">
           <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
           <select id="modal-categoria">
-            <option value="Casa">Casa</option>
             <option value="Alimentação">Alimentação</option>
             <option value="Transporte">Transporte</option>
             <option value="Lazer">Lazer</option>
@@ -488,7 +574,6 @@
         <div id="edit-categoria-area">
           <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
           <select id="edit-categoria">
-            <option value="Casa">Casa</option>
             <option value="Alimentação">Alimentação</option>
             <option value="Transporte">Transporte</option>
             <option value="Lazer">Lazer</option>
@@ -585,34 +670,106 @@
 
   <!-- MODAL: PERSONALIZAR PERFIL -->
   <div id="modal-perfil" class="modal-overlay hidden">
-    <div class="modal-box" style="max-width:360px">
+    <div class="modal-box" style="max-width:480px;max-height:90vh;overflow-y:auto">
       <button class="modal-fechar" onclick="fecharModalPerfil()">×</button>
-      <h2 style="margin-bottom:20px;font-size:1.1rem">Personalizar perfil</h2>
+      <h2 style="margin-bottom:16px;font-size:1.1rem">Personalizar perfil</h2>
 
-      <!-- Preview do avatar -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px">
-        <div id="perfil-avatar-preview" style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#000;font-size:2rem;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid var(--primary);position:relative">
-          <span id="perfil-avatar-letra">U</span>
-          <img id="perfil-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+      <!-- Abas -->
+      <div style="display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px">
+        <button class="perfil-tab active" id="tab-conta" onclick="abrirTabPerfil('conta')">👤 Conta</button>
+        <button class="perfil-tab" id="tab-vida" onclick="abrirTabPerfil('vida')">🏠 Minha vida</button>
+        <button class="perfil-tab" id="tab-financas" onclick="abrirTabPerfil('financas')">💰 Finanças</button>
+      </div>
+
+      <!-- Tab: Conta -->
+      <div id="perfil-tab-conta">
+        <!-- Preview do avatar -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px">
+          <div id="perfil-avatar-preview" style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#000;font-size:2rem;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid var(--primary);position:relative">
+            <span id="perfil-avatar-letra">U</span>
+            <img id="perfil-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+          </div>
+          <label class="btn-upload-foto" for="perfil-foto-input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Trocar foto
+          </label>
+          <input type="file" id="perfil-foto-input" accept="image/*" style="display:none" onchange="previewFoto(this)">
+          <button id="perfil-remover-foto" onclick="removerFoto()" style="display:none;background:none;border:none;color:#ff5555;font-size:0.78rem;cursor:pointer;padding:0">✕ Remover foto</button>
         </div>
-        <label class="btn-upload-foto" for="perfil-foto-input">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Trocar foto
-        </label>
-        <input type="file" id="perfil-foto-input" accept="image/*" style="display:none" onchange="previewFoto(this)">
-        <button id="perfil-remover-foto" onclick="removerFoto()" style="display:none;background:none;border:none;color:#ff5555;font-size:0.78rem;cursor:pointer;padding:0">✕ Remover foto</button>
+        <!-- Nome -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">Seu nome</label>
+          <input type="text" id="perfil-nome-input" placeholder="Como quer ser chamado?" maxlength="30"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit"
+            oninput="atualizarPreviewNome(this.value)">
+        </div>
+        <button class="btn-primary" style="width:100%" onclick="salvarPerfil()">Salvar alterações</button>
+        <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:12px;font-size:0.82rem;color:var(--primary)">✓ Perfil atualizado!</div>
       </div>
 
-      <!-- Nome -->
-      <div style="margin-bottom:16px">
-        <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">Seu nome</label>
-        <input type="text" id="perfil-nome-input" placeholder="Como quer ser chamado?" maxlength="30"
-          style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit"
-          oninput="atualizarPreviewNome(this.value)">
+      <!-- Tab: Minha vida -->
+      <div id="perfil-tab-vida" style="display:none">
+        <div style="font-size:.8rem;color:var(--gray);margin-bottom:16px;line-height:1.5">Atualize sua situação de vida. O Monvy ajusta as categorias e sugestões automaticamente.</div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">MORADIA</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="vida-moradia-opts">
+            <div class="vida-opt" onclick="selecionarVida(this,'moradia','aluguel')"><span>🏠</span>Aluguel</div>
+            <div class="vida-opt" onclick="selecionarVida(this,'moradia','propria')"><span>🏡</span>Casa própria</div>
+            <div class="vida-opt" onclick="selecionarVida(this,'moradia','financiada')"><span>🏗</span>Financiada</div>
+            <div class="vida-opt" onclick="selecionarVida(this,'moradia','outros')"><span>🤝</span>Outros</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">TRANSPORTE <span style="font-weight:400;font-size:.7rem">(múltiplos)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="vida-transporte-opts">
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','carro')"><span><img src="icone-carro.png" style="width:22px;height:22px;object-fit:contain"></span>Carro</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','moto')"><span><img src="icone-moto.png" style="width:22px;height:22px;object-fit:contain"></span>Moto</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','publico')"><span>🚌</span>Público</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','app')"><span>📱</span>App</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','bike')"><span>🚲</span>Bike</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','nenhum')"><span>🚶</span>A pé</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">FAMÍLIA</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="vida-opt" onclick="selecionarVida(this,'filhos','sim')" id="vida-filhos-sim"><span>👶</span>Tenho filhos</div>
+            <div class="vida-opt" onclick="selecionarVida(this,'filhos','nao')" id="vida-filhos-nao"><span>🙋</span>Sem filhos</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'familia','dependentes')"><span>👴</span>Dependentes</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'familia','pets')"><span>🐾</span>Pets</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" style="width:100%;margin-top:8px" onclick="salvarPerfilVida()">Salvar situação de vida</button>
+        <div id="vida-sucesso" style="display:none;text-align:center;margin-top:10px;font-size:.82rem;color:var(--primary)">✓ Situação atualizada!</div>
       </div>
 
-      <button class="btn-primary" style="width:100%" onclick="salvarPerfil()">Salvar alterações</button>
-      <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:12px;font-size:0.82rem;color:var(--primary)">Perfil atualizado!</div>
+      <!-- Tab: Finanças -->
+      <div id="perfil-tab-financas" style="display:none">
+        <div style="margin-bottom:14px">
+          <label style="font-size:.78rem;color:var(--gray);display:block;margin-bottom:6px;font-weight:600">RENDA MENSAL</label>
+          <div style="position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:.9rem">R$</span>
+            <input type="number" id="perfil-renda" placeholder="0,00" min="0"
+              style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:11px 12px 11px 36px;color:var(--white);font-size:1rem;font-weight:600;outline:none;font-family:inherit">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.78rem;color:var(--gray);display:block;margin-bottom:8px;font-weight:600">META DE ECONOMIA MENSAL</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px" id="meta-eco-opts">
+            <div class="vida-opt" onclick="setMetaEco(this,10)"><span>😊</span>10% da renda</div>
+            <div class="vida-opt" onclick="setMetaEco(this,20)"><span>💪</span>20% da renda</div>
+            <div class="vida-opt" onclick="setMetaEco(this,30)"><span>🚀</span>30% da renda</div>
+            <div class="vida-opt" onclick="setMetaEco(this,0)"><span>🎯</span>Definir depois</div>
+          </div>
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:4px" onclick="salvarPerfilFinancas()">Salvar</button>
+        <div id="financas-sucesso" style="display:none;text-align:center;margin-top:10px;font-size:.82rem;color:var(--primary)">✓ Salvo!</div>
+      </div>
+
     </div>
   </div>
 

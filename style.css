@@ -2031,3 +2031,235 @@ html, body {
     overflow-x: hidden !important;
   }
 }
+
+/* ==============================
+   NOVOS MÓDULOS v17
+   ============================== */
+
+/* Abas do perfil */
+.perfil-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 6px;
+  font-size: .78rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.perfil-tab.active {
+  background: var(--card-bg, #1a1f2e);
+  color: var(--white);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* Opções de vida (perfil) */
+.vida-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--gray);
+  text-align: center;
+  transition: all .2s;
+  line-height: 1.2;
+}
+.vida-opt:hover { border-color: rgba(0,200,83,0.3); color: var(--white); }
+.vida-opt.selected {
+  border-color: var(--primary, #00c853);
+  background: rgba(0,200,83,0.1);
+  color: var(--primary, #00c853);
+}
+.vida-opt span { font-size: 1.2rem; }
+
+/* KPIs de Dívidas */
+#dividas-kpis .kpi-card { cursor: default; }
+
+/* Cards de dívidas cadastradas */
+.divida-item {
+  background: var(--card-bg, #161b27);
+  border: 1px solid var(--border, rgba(255,255,255,0.07));
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.divida-item:last-child { margin-bottom: 0; }
+.divida-item-icon { font-size: 1.4rem; flex-shrink: 0; }
+.divida-item-info { flex: 1; min-width: 0; }
+.divida-item-nome {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.divida-item-sub { font-size: .75rem; color: var(--gray); }
+.divida-item-valor {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+.divida-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.divida-btn-del {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: .75rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.divida-btn-del:hover { background: rgba(239,68,68,0.2); }
+
+/* Estratégia de quitação */
+#estrategia-card { animation: fadeUp .3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* Progress bar de dívida */
+.divida-progress {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.divida-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  transition: width .4s ease;
+}
+
+/* Badge de tipo de dívida */
+.divida-badge {
+  display: inline-block;
+  font-size: .65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.badge-cartao { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.badge-emprestimo { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+.badge-financiamento { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.badge-terceiros { background: rgba(6,182,212,0.15); color: #06b6d4; }
+.badge-outros { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+
+/* ==============================
+   MÓDULO 2 — GASTOS ADAPTATIVOS
+   ============================== */
+
+/* Cat card com barra de meta */
+.cat-card { position: relative; overflow: hidden; }
+.cat-meta-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+}
+.cat-meta-fill {
+  height: 100%;
+  border-radius: 0 0 3px 3px;
+  background: var(--primary, #00c853);
+  transition: width .5s ease;
+}
+.cat-meta-fill.warn { background: #f59e0b; }
+.cat-meta-fill.danger { background: #ef4444; }
+.cat-meta-label {
+  font-size: .64rem;
+  color: var(--gray);
+  margin-top: 3px;
+  line-height: 1;
+}
+.cat-meta-label.warn { color: #f59e0b; }
+.cat-meta-label.danger { color: #ef4444; }
+
+/* Sugestão de orçamento 50-30-20 */
+.orcamento-sugestao {
+  background: var(--card-bg, #161b27);
+  border: 1px solid var(--border, rgba(255,255,255,0.07));
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.orcamento-sugestao-titulo {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.orcamento-sugestao-titulo span { font-size: 1rem; }
+.orcamento-regras {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.orcamento-regra {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 10px 10px 8px;
+  text-align: center;
+}
+.orcamento-regra-pct {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.orcamento-regra-label {
+  font-size: .68rem;
+  color: var(--gray);
+  line-height: 1.3;
+}
+.orcamento-regra-val {
+  font-size: .78rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.or-verde { color: #22c55e; }
+.or-azul { color: #3b82f6; }
+.or-amarelo { color: #f59e0b; }
+
+/* Cat novo (categoria adicionada pelo perfil) — brilho sutil */
+.cat-card.cat-novo {
+  border-color: rgba(0,200,83,0.25);
+}
+.cat-card.cat-novo::after {
+  content: 'novo';
+  position: absolute;
+  top: 8px; right: 8px;
+  font-size: .55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--primary);
+  background: rgba(0,200,83,0.12);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
