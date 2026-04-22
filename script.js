@@ -1346,3 +1346,51 @@ window.addEventListener('load', () => {
   renderizarGridCategorias();
   atualizarBannerPerfil();
 });
+
+// ==============================
+// EXPOR FUNÇÕES GLOBALMENTE
+// Necessário porque script.js usa type="module"
+// e funções de módulo não ficam no escopo window
+// ==============================
+window.irPara           = window.irPara || irPara;
+window.abrirModal       = abrirModal;
+window.fecharModal      = fecharModal;
+window.confirmarModal   = confirmarModal;
+window.responderPergunta = responderPergunta;
+window.abrirModalEditar = abrirModalEditar;
+window.fecharModalEditar = fecharModalEditar;
+window.salvarEdicao     = salvarEdicao;
+window.excluirMovimentacao = excluirMovimentacao;
+window.setFiltro        = setFiltro;
+window.setTipoGrafico   = setTipoGrafico;
+window.criarMeta        = criarMeta;
+window.abrirModalMeta   = abrirModalMeta;
+window.fecharModalMeta  = fecharModalMeta;
+window.adicionarValorMeta = adicionarValorMeta;
+window.calcularDivida   = calcularDivida;
+window.calcularInvestimentos = calcularInvestimentos;
+window.abrirArtigo      = abrirArtigo;
+window.fecharArtigo     = fecharArtigo;
+window.logout           = logout;
+window.toggleTheme      = toggleTheme;
+window.applyTheme       = applyTheme;
+window.mudarMesRelatorio = mudarMesRelatorio;
+window.setPeriodoModo   = setPeriodoModo;
+window.aplicarPeriodoCustom = aplicarPeriodoCustom;
+window.atalhoUltimos    = atalhoUltimos;
+window.processarRecorrentes = processarRecorrentes;
+window.buscarMovimentacoes = buscarMovimentacoes;
+window.limparBusca      = limparBusca;
+window.abrirBuscaMobile = abrirBuscaMobile;
+window.fecharBuscaMobile = fecharBuscaMobile;
+window.fecharDropdownBusca = fecharDropdownBusca;
+window.mostrarDropdownBusca = mostrarDropdownBusca;
+window.atualizarFormDivida  = atualizarFormDivida;
+window.cadastrarDivida      = cadastrarDivida;
+window.excluirDivida        = excluirDivida;
+window.abrirTabPerfil       = abrirTabPerfil;
+window.selecionarVida       = selecionarVida;
+window.selecionarVidaMulti  = selecionarVidaMulti;
+window.setMetaEco           = setMetaEco;
+window.salvarPerfilVida     = window.salvarPerfilVida || salvarPerfilVida;
+window.salvarPerfilFinancas = salvarPerfilFinancas;

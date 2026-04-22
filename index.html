@@ -989,14 +989,21 @@
       }
     }
     // Sobrescrever toggleTheme para também atualizar o drawer
-    const _originalToggleTheme = typeof toggleTheme === 'function' ? toggleTheme : null;
-    window.toggleTheme = function() {
+    // Usa setTimeout para garantir que o módulo já carregou e definiu window.toggleTheme
+    window._syncDrawerThemeIcon = syncDrawerThemeIcon;
+    window._toggleThemeWithDrawer = function() {
       const current = document.documentElement.getAttribute('data-theme') || 'dark';
       const next = current === 'dark' ? 'light' : 'dark';
       localStorage.setItem('monvy_theme', next);
       if (typeof applyTheme === 'function') applyTheme(next);
       syncDrawerThemeIcon();
     };
+    // Substituir após o módulo carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        window.toggleTheme = window._toggleThemeWithDrawer;
+      }, 200);
+    });
     // Sincronizar ao abrir drawer
     const _originalAbrirDrawer = abrirDrawer;
     window.abrirDrawer = function() {
