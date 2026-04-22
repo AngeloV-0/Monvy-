@@ -612,8 +612,30 @@
       </div>
       <div class="auth-field">
         <label>Senha</label>
-        <input type="password" id="auth-password" placeholder="Mínimo 6 caracteres">
+        <div style="position:relative">
+          <input type="password" id="auth-password" placeholder="Mínimo 6 caracteres" style="padding-right:44px;width:100%;box-sizing:border-box">
+          <button type="button" onclick="toggleSenha()" id="btn-toggle-senha" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);padding:0;display:flex;align-items:center" title="Mostrar senha">
+            <svg id="icon-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="icon-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
       </div>
+      <script>
+      function toggleSenha() {
+        const input = document.getElementById('auth-password');
+        const eyeShow = document.getElementById('icon-eye-show');
+        const eyeHide = document.getElementById('icon-eye-hide');
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeShow.style.display = 'none';
+          eyeHide.style.display = 'block';
+        } else {
+          input.type = 'password';
+          eyeShow.style.display = 'block';
+          eyeHide.style.display = 'none';
+        }
+      }
+      </script>
 
       <div class="auth-error" id="auth-error"></div>
       <button class="auth-submit" id="auth-submit" onclick="handleAuth()">Criar minha conta →</button>
