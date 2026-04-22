@@ -208,28 +208,63 @@ function fecharModal() { document.getElementById('modal').classList.add('hidden'
 async function confirmarModal() {
   const valor = parseFloat(document.getElementById('modal-valor').value);
   if (!valor||valor<=0) { alert('Digite um valor válido!'); return; }
-  if (tipoAtual==='gasto'&&respostaPergunta==='') { document.getElementById('modal-pergunta').classList.remove('hidden'); document.getElementById('btn-confirmar').classList.add('hidden'); return; }
-  registrar(valor, document.getElementById('modal-descricao').value||(tipoAtual==='ganho'?'Entrada':'Saída'), document.getElementById('modal-categoria').value, document.getElementById('modal-data').value||hojeISO(), document.getElementById('modal-recorrente').checked);
+  if (tipoAtual==='gasto'&&respostaPergunta==='') {
+    document.getElementById('modal-pergunta').classList.remove('hidden');
+    document.getElementById('btn-confirmar').classList.add('hidden');
+    return;
+  }
+  const catEl = document.getElementById('modal-categoria');
+  const categoria = (tipoAtual === 'gasto' && catEl) ? (catEl.value || 'Outros') : '';
+  await registrar(
+    valor,
+    document.getElementById('modal-descricao').value || (tipoAtual==='ganho' ? 'Entrada' : 'Saída'),
+    categoria,
+    document.getElementById('modal-data').value || hojeISO(),
+    document.getElementById('modal-recorrente').checked
+  );
   fecharModal();
 }
 
 async function responderPergunta(resposta) {
   respostaPergunta = resposta;
   const valor = parseFloat(document.getElementById('modal-valor').value);
-  if (resposta==='desejo') { if (!confirm('Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar')) { fecharModal(); return; } }
-  await registrar(valor, document.getElementById('modal-descricao').value||'Saída', document.getElementById('modal-categoria').value, document.getElementById('modal-data').value||hojeISO(), document.getElementById('modal-recorrente').checked);
+  if (resposta==='desejo') {
+    if (!confirm('Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar')) {
+      fecharModal(); return;
+    }
+  }
+  const catEl = document.getElementById('modal-categoria');
+  const categoria = catEl ? (catEl.value || 'Outros') : 'Outros';
+  await registrar(
+    valor,
+    document.getElementById('modal-descricao').value || 'Saída',
+    categoria,
+    document.getElementById('modal-data').value || hojeISO(),
+    document.getElementById('modal-recorrente').checked
+  );
   fecharModal();
 }
 
 async function registrar(valor, descricao, categoria, data, recorrente) {
-  if (!currentUser) return;
-  const mov = { tipo:tipoAtual, valor, descricao, categoria, data:data||hojeISO(), recorrente:!!recorrente, resposta:respostaPergunta };
+  if (!currentUser) { alert('Você precisa estar logado.'); return; }
+  // Garantir que nenhum campo seja undefined (Firestore rejeita undefined)
+  const mov = {
+    tipo: tipoAtual,
+    valor: Number(valor),
+    descricao: descricao || (tipoAtual === 'ganho' ? 'Entrada' : 'Saída'),
+    categoria: categoria || '',
+    data: data || hojeISO(),
+    recorrente: !!recorrente,
+    resposta: respostaPergunta || ''
+  };
   try {
     await adicionarMovimentacao(currentUser.uid, mov);
-    // onSnapshot atualiza automaticamente
   } catch(e) {
     console.error('Erro ao salvar movimentação:', e);
-    alert('Erro ao salvar. Verifique sua conexão.');
+    const msg = e && e.code === 'permission-denied'
+      ? 'Sem permissão para salvar. Verifique as regras do Firestore.'
+      : 'Erro ao salvar. Tente novamente.';
+    alert(msg);
   }
 }
 
@@ -263,19 +298,24 @@ async function salvarEdicao() {
   if (!currentUser) return;
   const m = movimentacoes[editandoIndex];
   if (!m || !m.id) return;
+  const catEl = document.getElementById('edit-categoria');
   const dados = {
-    valor,
-    descricao: document.getElementById('edit-descricao').value||(m.tipo==='ganho'?'Entrada':'Saída'),
-    data: document.getElementById('edit-data').value||hojeISO(),
-    categoria: m.tipo==='gasto' ? document.getElementById('edit-categoria').value : m.categoria
+    valor: Number(valor),
+    descricao: document.getElementById('edit-descricao').value || (m.tipo==='ganho' ? 'Entrada' : 'Saída'),
+    data: document.getElementById('edit-data').value || hojeISO(),
+    categoria: m.tipo==='gasto' ? (catEl ? catEl.value || 'Outros' : 'Outros') : (m.categoria || ''),
+    recorrente: !!m.recorrente,
+    resposta: m.resposta || ''
   };
   try {
-    // Deletar e recriar para simplificar (mantém compatibilidade com onSnapshot)
     await deletarMovimentacao(currentUser.uid, m.id);
     const tipo = m.tipo;
     tipoAtual = tipo;
-    await adicionarMovimentacao(currentUser.uid, { ...m, ...dados, tipo });
-  } catch(e) { console.error('Erro ao editar:', e); }
+    await adicionarMovimentacao(currentUser.uid, { tipo, ...dados });
+  } catch(e) {
+    console.error('Erro ao editar:', e);
+    alert('Erro ao salvar edição. Tente novamente.');
+  }
   fecharModalEditar();
 }
 
@@ -687,7 +727,19 @@ onAuth(async (user) => {
   // Verificar onboarding
   try {
     const perfil = await getPerfil(user.uid);
-    if (!perfil.onboardingDone) { window.location.href = 'onboarding.html'; return; }
+    // Checar onboarding: Firestore é a fonte principal, localStorage é o fallback
+    const onboardingLocal = localStorage.getItem('monvy_onboarding_done') === '1';
+    if (!perfil.onboardingDone && !onboardingLocal) {
+      window.location.href = 'onboarding.html';
+      return;
+    }
+    // Se localStorage indica feito mas Firestore não, sincronizar
+    if (!perfil.onboardingDone && onboardingLocal) {
+      try {
+        const { marcarOnboardingFeito } = await import('./firebase.js');
+        await marcarOnboardingFeito(user.uid);
+      } catch(e) { console.warn('Erro ao sincronizar onboarding:', e); }
+    }
 
     // Carregar perfil de vida para categorias
     if (perfil.perfilVida) {
