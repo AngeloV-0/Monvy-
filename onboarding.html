@@ -478,7 +478,16 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { onAuth, salvarPerfilVida, marcarOnboardingFeito } from './firebase.js';
+
+    // Verificar se usuário está logado
+    let currentUser = null;
+    onAuth(user => {
+      if (!user) { window.location.href = 'auth.html'; return; }
+      currentUser = user;
+    });
+
     // Aplicar tema salvo
     const tema = localStorage.getItem('monvy_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', tema);
@@ -487,14 +496,14 @@
     const totalSteps = 5;
     const perfil = { moradia: null, transporte: [], filhos: null, familia: [], dividas: {}, renda: null };
 
-    function selecionar(el, campo, valor) {
+    window.selecionar = function(el, campo, valor) {
       const parent = el.closest('.ob-options');
       parent.querySelectorAll('.ob-opt').forEach(o => o.classList.remove('selected'));
       el.classList.add('selected');
       perfil[campo] = valor;
-    }
+    };
 
-    function selecionarMulti(el, campo, valor) {
+    window.selecionarMulti = function(el, campo, valor) {
       el.classList.toggle('selected');
       if (!perfil[campo]) perfil[campo] = [];
       if (el.classList.contains('selected')) {
@@ -502,32 +511,31 @@
       } else {
         perfil[campo] = perfil[campo].filter(v => v !== valor);
       }
-    }
+    };
 
-    function toggleDivida(tipo) {
-      const btn = document.getElementById('btn-' + tipo);
+    window.toggleDivida = function(tipo) {
+      const btn    = document.getElementById('btn-' + tipo);
       const expand = document.getElementById('div-' + tipo + '-expand');
-      const ativo = btn.classList.toggle('ativo');
+      const ativo  = btn.classList.toggle('ativo');
       btn.textContent = ativo ? '−' : '+';
-      if (ativo) {
-        expand.classList.add('open');
-      } else {
+      if (ativo) expand.classList.add('open');
+      else {
         expand.classList.remove('open');
         const input = expand.querySelector('input');
         if (input) input.value = '';
       }
-    }
+    };
 
-    function setRenda(val) {
+    window.setRenda = function(val) {
       document.getElementById('ob-renda').value = val;
       document.querySelectorAll('#renda-rapida .ob-opt').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       perfil.renda = val;
-    }
+    };
 
-    function validarRenda() {
+    window.validarRenda = function() {
       perfil.renda = parseFloat(document.getElementById('ob-renda').value) || null;
-    }
+    };
 
     function atualizarIndicador() {
       for (let i = 0; i < totalSteps; i++) {
@@ -540,48 +548,60 @@
       document.getElementById('ob-next').textContent = stepAtual === totalSteps - 1 ? 'Concluir e entrar →' : 'Continuar →';
     }
 
-    function avancarStep() {
-      if (stepAtual === totalSteps - 1) {
-        salvarESair();
-        return;
-      }
+    window.avancarStep = function() {
+      if (stepAtual === totalSteps - 1) { salvarESair(); return; }
       document.getElementById('step-' + stepAtual).classList.remove('active');
       stepAtual++;
       document.getElementById('step-' + stepAtual).classList.add('active');
       atualizarIndicador();
-    }
+    };
 
-    function voltarStep() {
+    window.voltarStep = function() {
       document.getElementById('step-' + stepAtual).classList.remove('active');
       stepAtual--;
       document.getElementById('step-' + stepAtual).classList.add('active');
       atualizarIndicador();
-    }
+    };
 
     function coletarDividas() {
-      const tipos = ['cartao','emprestimo','terceiros','financiamento'];
-      tipos.forEach(t => {
+      ['cartao','emprestimo','terceiros','financiamento'].forEach(t => {
         const btn = document.getElementById('btn-' + t);
         if (btn && btn.classList.contains('ativo')) {
           const input = document.getElementById('div-' + t + '-val');
-          const val = parseFloat(input ? input.value : 0) || 0;
+          const val   = parseFloat(input ? input.value : 0) || 0;
           if (val > 0) perfil.dividas[t] = val;
         }
       });
     }
 
-    function salvarESair() {
+    async function salvarESair() {
       coletarDividas();
       perfil.renda = parseFloat(document.getElementById('ob-renda').value) || perfil.renda;
-      localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
-      localStorage.setItem('monvy_onboarding_done', '1');
+
+      // Salvar no Firestore se logado, senão localStorage como fallback
+      if (currentUser) {
+        try {
+          await salvarPerfilVida(currentUser.uid, perfil);
+          await marcarOnboardingFeito(currentUser.uid);
+        } catch(e) {
+          console.warn('Firestore indisponível, salvando localmente', e);
+          localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
+          localStorage.setItem('monvy_onboarding_done', '1');
+        }
+      } else {
+        localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
+        localStorage.setItem('monvy_onboarding_done', '1');
+      }
       window.location.href = 'index.html';
     }
 
-    function pularOnboarding() {
+    window.pularOnboarding = async function() {
+      if (currentUser) {
+        try { await marcarOnboardingFeito(currentUser.uid); } catch(e) {}
+      }
       localStorage.setItem('monvy_onboarding_done', '1');
       window.location.href = 'index.html';
-    }
+    };
   </script>
 </body>
 </html>

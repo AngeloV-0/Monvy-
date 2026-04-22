@@ -1,6 +1,16 @@
 // ==============================
 // MONVY — LÓGICA COMPLETA
 // ==============================
+import {
+  onAuth, fazerLogout as fbLogout, getPerfil,
+  ouvirMovimentacoes, adicionarMovimentacao, deletarMovimentacao,
+  getMetas, adicionarMeta, atualizarMeta, deletarMeta,
+  getDividas, adicionarDivida, atualizarDivida, deletarDivida,
+  salvarPerfilVida
+} from './firebase.js';
+
+let currentUser = null;
+let unsubMovimentacoes = null;
 
 let saldo = 0, totalEntradas = 0, totalSaidas = 0;
 let movimentacoes = [], metas = [];
@@ -190,7 +200,7 @@ function abrirModal(tipo) {
 
 function fecharModal() { document.getElementById('modal').classList.add('hidden'); }
 
-function confirmarModal() {
+async function confirmarModal() {
   const valor = parseFloat(document.getElementById('modal-valor').value);
   if (!valor||valor<=0) { alert('Digite um valor válido!'); return; }
   if (tipoAtual==='gasto'&&respostaPergunta==='') { document.getElementById('modal-pergunta').classList.remove('hidden'); document.getElementById('btn-confirmar').classList.add('hidden'); return; }
@@ -198,19 +208,31 @@ function confirmarModal() {
   fecharModal();
 }
 
-function responderPergunta(resposta) {
+async function responderPergunta(resposta) {
   respostaPergunta = resposta;
   const valor = parseFloat(document.getElementById('modal-valor').value);
   if (resposta==='desejo') { if (!confirm('Isso é um desejo!\n\nVocê tem certeza que quer gastar?\n\nPense bem antes de confirmar')) { fecharModal(); return; } }
-  registrar(valor, document.getElementById('modal-descricao').value||'Saída', document.getElementById('modal-categoria').value, document.getElementById('modal-data').value||hojeISO(), document.getElementById('modal-recorrente').checked);
+  await registrar(valor, document.getElementById('modal-descricao').value||'Saída', document.getElementById('modal-categoria').value, document.getElementById('modal-data').value||hojeISO(), document.getElementById('modal-recorrente').checked);
   fecharModal();
 }
 
-function registrar(valor, descricao, categoria, data, recorrente) {
-  movimentacoes.push({ tipo:tipoAtual, valor, descricao, categoria, data:data||hojeISO(), recorrente:!!recorrente, resposta:respostaPergunta });
-  recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart();
+async function registrar(valor, descricao, categoria, data, recorrente) {
+  if (!currentUser) return;
+  const mov = { tipo:tipoAtual, valor, descricao, categoria, data:data||hojeISO(), recorrente:!!recorrente, resposta:respostaPergunta };
+  try {
+    await adicionarMovimentacao(currentUser.uid, mov);
+    // onSnapshot atualiza automaticamente
+  } catch(e) {
+    console.error('Erro ao salvar movimentação:', e);
+    alert('Erro ao salvar. Verifique sua conexão.');
+  }
 }
 
+function recalcular() { recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); }
+
+// Aliases para compatibilidade Firebase
+function atualizarListaMetas() { renderizarMetas(); }
+function renderizarMovimentacoes() { atualizarListaInicio(); }
 function recalcularTotais() {
   saldo=0; totalEntradas=0; totalSaidas=0;
   movimentacoes.forEach(m=>{ if(m.tipo==='ganho'){saldo+=m.valor;totalEntradas+=m.valor;}else{saldo-=m.valor;totalSaidas+=m.valor;} });
@@ -230,20 +252,39 @@ function abrirModalEditar(index) {
 
 function fecharModalEditar() { document.getElementById('modal-editar').classList.add('hidden'); editandoIndex=-1; }
 
-function salvarEdicao() {
+async function salvarEdicao() {
   const valor = parseFloat(document.getElementById('edit-valor').value);
   if (!valor||valor<=0) { alert('Digite um valor válido!'); return; }
+  if (!currentUser) return;
   const m = movimentacoes[editandoIndex];
-  m.valor=valor; m.descricao=document.getElementById('edit-descricao').value||(m.tipo==='ganho'?'Entrada':'Saída');
-  m.data=document.getElementById('edit-data').value||hojeISO();
-  if (m.tipo==='gasto') m.categoria=document.getElementById('edit-categoria').value;
-  recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); atualizarTelaCategorias(); fecharModalEditar();
+  if (!m || !m.id) return;
+  const dados = {
+    valor,
+    descricao: document.getElementById('edit-descricao').value||(m.tipo==='ganho'?'Entrada':'Saída'),
+    data: document.getElementById('edit-data').value||hojeISO(),
+    categoria: m.tipo==='gasto' ? document.getElementById('edit-categoria').value : m.categoria
+  };
+  try {
+    // Deletar e recriar para simplificar (mantém compatibilidade com onSnapshot)
+    await deletarMovimentacao(currentUser.uid, m.id);
+    const tipo = m.tipo;
+    tipoAtual = tipo;
+    await adicionarMovimentacao(currentUser.uid, { ...m, ...dados, tipo });
+  } catch(e) { console.error('Erro ao editar:', e); }
+  fecharModalEditar();
 }
 
-function excluirMovimentacao() {
+async function excluirMovimentacao() {
   if (!confirm('Excluir esta movimentação?')) return;
-  movimentacoes.splice(editandoIndex,1);
-  recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); atualizarTelaCategorias(); fecharModalEditar();
+  if (!currentUser) return;
+  const mov = movimentacoes[editandoIndex];
+  if (mov && mov.id) {
+    try {
+      await deletarMovimentacao(currentUser.uid, mov.id);
+      // onSnapshot atualiza automaticamente
+    } catch(e) { console.error('Erro ao excluir:', e); }
+  }
+  fecharModalEditar();
 }
 
 // GASTOS
@@ -252,12 +293,16 @@ function atualizarTelaCategorias_v16_legado() {
 }
 
 // METAS
-function criarMeta() {
+async function criarMeta() {
   const nome=document.getElementById('meta-nome').value.trim(), valor=parseFloat(document.getElementById('meta-valor').value);
   if (!nome||!valor||valor<=0) { alert('Preencha nome e valor!'); return; }
-  metas.push({nome,objetivo:valor,atual:0});
-  document.getElementById('meta-nome').value=''; document.getElementById('meta-valor').value='';
-  renderizarMetas();
+  if (!currentUser) return;
+  try {
+    const id = await adicionarMeta(currentUser.uid, {nome, objetivo:valor, atual:0});
+    metas.push({id, nome, objetivo:valor, atual:0});
+    document.getElementById('meta-nome').value=''; document.getElementById('meta-valor').value='';
+    renderizarMetas();
+  } catch(e) { console.error('Erro ao criar meta:', e); }
 }
 
 function renderizarMetas() {
@@ -278,10 +323,17 @@ function abrirModalMeta(index) {
 
 function fecharModalMeta() { document.getElementById('modal-meta').classList.add('hidden'); }
 
-function adicionarMeta() {
+async function adicionarValorMeta() {
   const valor=parseFloat(document.getElementById('modal-meta-valor').value);
   if (!valor||valor<=0) { alert('Digite um valor válido!'); return; }
-  metas[metaAtualIndex].atual+=valor; fecharModalMeta(); renderizarMetas();
+  if (!currentUser) return;
+  const meta = metas[metaAtualIndex];
+  if (!meta) return;
+  meta.atual += valor;
+  try {
+    if (meta.id) await atualizarMeta(currentUser.uid, meta.id, {atual: meta.atual});
+  } catch(e) { console.error('Erro ao atualizar meta:', e); }
+  fecharModalMeta(); renderizarMetas();
 }
 
 // DÍVIDAS
@@ -474,7 +526,14 @@ function fecharArtigo() { document.getElementById('modal-artigo').classList.add(
 ['modal','modal-artigo','modal-meta','modal-editar'].forEach(id=>{ const el=document.getElementById(id); if(el)el.addEventListener('click',function(e){if(e.target===this)this.classList.add('hidden');}); });
 
 // AUTH & TEMA
-function logout() { if(confirm('Deseja sair da sua conta?')){localStorage.removeItem('monvy_logado');localStorage.removeItem('monvy_logged');window.location.href='auth.html';} }
+async function logout() {
+  if(confirm('Deseja sair da sua conta?')) {
+    if (unsubMovimentacoes) unsubMovimentacoes();
+    await fbLogout();
+    localStorage.removeItem('monvy_theme');
+    window.location.href = 'auth.html';
+  }
+}
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme',theme);
@@ -591,50 +650,73 @@ document.addEventListener('click', function(e) {
 });
 
 // INIT
-(function init(){
-  applyTheme(localStorage.getItem('monvy_theme')||'dark');
-  const raw=localStorage.getItem('monvy_logado')||localStorage.getItem('monvy_logged');
-  if(!raw){window.location.href='auth.html';return;}
-  let user; try{user=JSON.parse(raw);}catch(e){window.location.href='auth.html';return;}
-  const nome=user.nome||user.name||'';
-  const avatarEl=document.getElementById('user-avatar');
-  const fotoSalva=localStorage.getItem('monvy_avatar_foto');
-  if(avatarEl){
-    if(fotoSalva)avatarEl.innerHTML='<img src="'+fotoSalva+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-    else if(nome)avatarEl.textContent=nome.charAt(0).toUpperCase();
-    avatarEl.title=nome;
-  }
-  const greetEl=document.getElementById('topbar-greeting');
-  if(greetEl&&nome)greetEl.textContent='Olá, '+nome.split(' ')[0];
-  const dataInput=document.getElementById('modal-data');
-  if(dataInput)dataInput.value=hojeISO();
-})();
+// ===== INIT FIREBASE =====
+applyTheme(localStorage.getItem('monvy_theme')||'dark');
 
+// Carregar Chart.js
 const script=document.createElement('script');
 script.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
 script.onload=()=>atualizarChart();
 document.head.appendChild(script);
 
+onAuth(async (user) => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+
+  // Preencher avatar e nome
+  const nome = user.displayName || '';
+  const avatarEl = document.getElementById('user-avatar');
+  if (avatarEl) {
+    if (user.photoURL) {
+      avatarEl.innerHTML = '<img src="'+user.photoURL+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    } else if (nome) {
+      avatarEl.textContent = nome.charAt(0).toUpperCase();
+    }
+    avatarEl.title = nome;
+  }
+  const greetEl = document.getElementById('topbar-greeting');
+  if (greetEl && nome) greetEl.textContent = 'Olá, ' + nome.split(' ')[0];
+  const dataInput = document.getElementById('modal-data');
+  if (dataInput) dataInput.value = hojeISO();
+
+  // Verificar onboarding
+  try {
+    const perfil = await getPerfil(user.uid);
+    if (!perfil.onboardingDone) { window.location.href = 'onboarding.html'; return; }
+
+    // Carregar perfil de vida para categorias
+    if (perfil.perfilVida) {
+      localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil.perfilVida));
+    }
+
+    // Carregar metas
+    metas = await getMetas(user.uid);
+    atualizarListaMetas();
+
+    // Carregar dívidas
+    dividasCadastradas = await getDividas(user.uid);
+    if (typeof renderizarDividas === 'function') renderizarDividas();
+
+    // Ouvir movimentações em tempo real
+    if (unsubMovimentacoes) unsubMovimentacoes();
+    unsubMovimentacoes = ouvirMovimentacoes(user.uid, (movs) => {
+      movimentacoes = movs;
+      recalcular();
+      renderizarMovimentacoes();
+      atualizarChart();
+      atualizarTelaCategorias();
+    });
+  } catch(e) {
+    console.error('Erro ao carregar dados:', e);
+  }
+});
+
 // ==============================
 // NOVOS MÓDULOS v17
 // ==============================
 
-// ===== ONBOARDING CHECK =====
-(function verificarOnboarding() {
-  const done = localStorage.getItem('monvy_onboarding_done');
-  const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
-  if (!done && raw) {
-    // Atrasar para não conflitar com o redirect de auth
-    setTimeout(() => {
-      if (!localStorage.getItem('monvy_onboarding_done')) {
-        window.location.href = 'onboarding.html';
-      }
-    }, 100);
-  }
-})();
-
 // ===== DÍVIDAS CADASTRADAS =====
-let dividasCadastradas = JSON.parse(localStorage.getItem('monvy_dividas') || '[]');
+let dividasCadastradas = [];
 
 const DIVIDA_ICONS = {
   cartao: '💳', emprestimo: '💸', financiamento: '🏦', terceiros: '🤝', outros: '📋'
@@ -651,7 +733,7 @@ function atualizarFormDivida() {
   if (jurosArea) jurosArea.style.display = tipo === 'terceiros' ? 'none' : 'block';
 }
 
-function cadastrarDivida() {
+async function cadastrarDivida() {
   const tipo = document.getElementById('div-tipo').value;
   const descricao = document.getElementById('div-descricao').value.trim();
   const valor = parseFloat(document.getElementById('div-valor').value);
@@ -675,8 +757,13 @@ function cadastrarDivida() {
     dataCriacao: new Date().toISOString().slice(0,10)
   };
 
+  if (currentUser) {
+    try {
+      const fbId = await adicionarDivida(currentUser.uid, divida);
+      divida.id = fbId;
+    } catch(e) { console.error('Erro ao salvar dívida:', e); }
+  }
   dividasCadastradas.push(divida);
-  salvarDividas();
   renderizarDividas();
   atualizarKPIsDividas();
 
@@ -691,16 +778,18 @@ function cadastrarDivida() {
   if (sucesso) { sucesso.style.display = 'block'; setTimeout(() => sucesso.style.display = 'none', 2000); }
 }
 
-function excluirDivida(id) {
+async function excluirDivida(id) {
   if (!confirm('Remover esta dívida?')) return;
+  if (currentUser) {
+    try { await deletarDivida(currentUser.uid, id); } catch(e) { console.error(e); }
+  }
   dividasCadastradas = dividasCadastradas.filter(d => d.id !== id);
-  salvarDividas();
   renderizarDividas();
   atualizarKPIsDividas();
 }
 
-function salvarDividas() {
-  localStorage.setItem('monvy_dividas', JSON.stringify(dividasCadastradas));
+async function salvarDividas() {
+  // Dados já salvos individualmente no Firestore — sem ação necessária
 }
 
 function renderizarDividas() {
