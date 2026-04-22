@@ -185,7 +185,7 @@
         <!-- Banner perfil adaptativo -->
         <div id="gastos-perfil-banner" style="display:none;background:linear-gradient(135deg,rgba(0,200,83,0.08),rgba(0,200,83,0.03));border:1px solid rgba(0,200,83,0.18);border-radius:14px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:10px">
-            <img src="icone-meta-novo.png" alt="" style="width:28px;height:28px;object-fit:contain;">
+            <img src="icone-usuario.png" alt="" style="width:28px;height:28px;object-fit:contain;">
             <div>
               <div style="font-size:.82rem;font-weight:600;color:var(--white)">Categorias adaptadas ao seu perfil</div>
               <div id="gastos-perfil-desc" style="font-size:.74rem;color:var(--gray);margin-top:1px"></div>
@@ -288,9 +288,9 @@
 
         <!-- KPIs de Dívidas -->
         <div class="kpi-row" id="dividas-kpis">
-          <div class="kpi-card primary-card" style="border-color:rgba(239,68,68,0.3)">
+          <div class="kpi-card primary-card">
             <div class="kpi-label">Total em Dívidas</div>
-            <div class="kpi-value" id="div-kpi-total" style="color:#ef4444">R$ 0,00</div>
+            <div class="kpi-value" id="div-kpi-total">R$ 0,00</div>
             <div class="kpi-sub" id="div-kpi-qtd">Nenhuma dívida cadastrada</div>
           </div>
           <div class="kpi-card">
@@ -321,16 +321,59 @@
               <img src="icone-cadeado-novo.png" alt="Dívida" style="width:36px;height:36px;object-fit:contain;">
               <span id="div-form-titulo">Cadastrar Dívida</span>
             </div>
-            <div style="margin-bottom:12px">
+            <div style="margin-bottom:12px;position:relative">
               <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Tipo de dívida</label>
-              <select id="div-tipo" onchange="atualizarFormDivida()" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;font-family:inherit">
-                <option value="cartao">💳 Cartão de crédito</option>
-                <option value="emprestimo">💸 Empréstimo pessoal</option>
-                <option value="financiamento">🏦 Financiamento (carro/casa)</option>
-                <option value="terceiros">🤝 Dívida com terceiros</option>
-                <option value="outros">📋 Outros</option>
-              </select>
+              <input type="hidden" id="div-tipo" value="cartao">
+              <div id="div-tipo-selected" onclick="toggleDivTipoDropdown()" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;box-sizing:border-box;user-select:none">
+                <img src="icone-cartao-novo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0">
+                <span>Cartão de crédito</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-left:auto;opacity:.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div id="div-tipo-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface,#1a2236);border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                <div class="div-tipo-opt" data-value="cartao" data-label="Cartão de crédito" data-icon="icone-cartao-novo.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-cartao-novo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Cartão de crédito</span>
+                </div>
+                <div class="div-tipo-opt" data-value="emprestimo" data-label="Empréstimo pessoal" data-icon="icone-emprestimo.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-emprestimo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Empréstimo pessoal</span>
+                </div>
+                <div class="div-tipo-opt" data-value="financiamento" data-label="Financiamento (carro/casa)" data-icon="icone-financiamento.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-financiamento.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Financiamento (carro/casa)</span>
+                </div>
+                <div class="div-tipo-opt" data-value="terceiros" data-label="Dívida com terceiros" data-icon="icone-terceiros.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-terceiros.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Dívida com terceiros</span>
+                </div>
+                <div class="div-tipo-opt" data-value="outros" data-label="Outros" data-icon="icone-outros.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-outros.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Outros</span>
+                </div>
+              </div>
             </div>
+            <script>
+            function toggleDivTipoDropdown() {
+              const dd = document.getElementById('div-tipo-dropdown');
+              dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+            }
+            function selecionarDivTipo(el) {
+              const value = el.dataset.value;
+              const label = el.dataset.label;
+              const icon = el.dataset.icon;
+              document.getElementById('div-tipo').value = value;
+              const sel = document.getElementById('div-tipo-selected');
+              sel.querySelector('img').src = icon;
+              sel.querySelector('span').textContent = label;
+              document.getElementById('div-tipo-dropdown').style.display = 'none';
+              atualizarFormDivida();
+            }
+            document.addEventListener('click', function(e) {
+              if (!e.target.closest('#div-tipo-selected') && !e.target.closest('#div-tipo-dropdown')) {
+                const dd = document.getElementById('div-tipo-dropdown');
+                if (dd) dd.style.display = 'none';
+              }
+            });
+            document.querySelectorAll('.div-tipo-opt').forEach(opt => {
+              opt.addEventListener('mouseover', () => opt.style.background = 'rgba(255,255,255,0.06)');
+              opt.addEventListener('mouseout', () => opt.style.background = '');
+            });
+            </script>
             <input type="text" id="div-descricao" placeholder="Descrição (ex: Cartão Nubank)">
             <input type="number" id="div-valor" placeholder="Valor total da dívida (R$)" min="0">
             <div id="div-juros-area">

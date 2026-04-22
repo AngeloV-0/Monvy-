@@ -1305,7 +1305,7 @@ function renderizarSugestaoOrcamento() {
   el.style.display = 'block';
   el.innerHTML = `<div class="orcamento-sugestao">
     <div class="orcamento-sugestao-titulo">
-      <span>📊</span>
+      <span><img src="icone-grafico-novo.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle"></span>
       Sugestão 50·30·20 — baseada na sua renda de ${fmt(renda)}/mês
       <div style="margin-left:auto;font-size:.72rem;color:var(--gray);font-weight:400">Gastos este mês: <strong style="color:${pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'var(--primary)'}">${fmt(gastosMes)}</strong></div>
     </div>

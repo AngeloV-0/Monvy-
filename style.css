@@ -2261,17 +2261,4 @@ html, body {
 .cat-card.cat-novo {
   border-color: rgba(0,200,83,0.25);
 }
-.cat-card.cat-novo::after {
-  content: 'novo';
-  position: absolute;
-  top: 8px; right: 8px;
-  font-size: .55rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--primary);
-  background: rgba(0,200,83,0.12);
-  padding: 2px 5px;
-  border-radius: 4px;
-}
 
