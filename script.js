@@ -6,8 +6,13 @@ import {
   ouvirMovimentacoes, adicionarMovimentacao, deletarMovimentacao,
   getMetas, adicionarMeta, atualizarMeta, deletarMeta,
   getDividas, adicionarDivida, atualizarDivida, deletarDivida,
-  salvarPerfilVida
+  salvarPerfilVida as fbSalvarPerfilVida,
+  salvarPerfil as fbSalvarPerfil,
+  auth, db
 } from './firebase.js';
+
+// Expor auth e db para scripts inline do index.html
+window._firebaseExports = { auth, db };
 
 let currentUser = null;
 let unsubMovimentacoes = null;
@@ -689,6 +694,25 @@ onAuth(async (user) => {
       localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil.perfilVida));
     }
 
+    // Sincronizar nome e foto do Firebase com localStorage e UI
+    const nomeFirebase = perfil.nome || user.displayName || '';
+    const fotoFirebase = perfil.foto || user.photoURL || null;
+    if (nomeFirebase) {
+      let userData = {};
+      const raw = localStorage.getItem('monvy_logado') || localStorage.getItem('monvy_logged');
+      if (raw) { try { userData = JSON.parse(raw); } catch(e){} }
+      userData.nome = nomeFirebase; userData.name = nomeFirebase;
+      const key = localStorage.getItem('monvy_logado') ? 'monvy_logado' : 'monvy_logged';
+      localStorage.setItem(key, JSON.stringify(userData));
+    }
+    if (fotoFirebase && fotoFirebase.startsWith('data:')) {
+      localStorage.setItem('monvy_avatar_foto', fotoFirebase);
+    }
+    if (typeof aplicarPerfilUI === 'function') {
+      const fotoLocal = localStorage.getItem('monvy_avatar_foto');
+      aplicarPerfilUI(nomeFirebase, fotoLocal || fotoFirebase || null);
+    }
+
     // Carregar metas
     metas = await getMetas(user.uid);
     atualizarListaMetas();
@@ -719,7 +743,11 @@ onAuth(async (user) => {
 let dividasCadastradas = [];
 
 const DIVIDA_ICONS = {
-  cartao: '💳', emprestimo: '💸', financiamento: '🏦', terceiros: '🤝', outros: '📋'
+  cartao: '<img src="icone-cartao-novo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
+  emprestimo: '<img src="icone-emprestimo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
+  financiamento: '<img src="icone-banco.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
+  terceiros: '<img src="icone-terceiros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
+  outros: '<img src="icone-outros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">'
 };
 const DIVIDA_LABELS = {
   cartao: 'Cartão de crédito', emprestimo: 'Empréstimo', financiamento: 'Financiamento', terceiros: 'Terceiros', outros: 'Outros'
@@ -954,6 +982,10 @@ function salvarPerfilVida() {
   const perfil = window._perfilVidaTemp || JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
   localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
   window._perfilVidaTemp = null;
+  // Sincronizar com Firebase
+  if (currentUser) {
+    fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar perfil de vida no Firebase:', e));
+  }
   const suc = document.getElementById('vida-sucesso');
   if (suc) { suc.style.display = 'block'; setTimeout(() => suc.style.display = 'none', 2000); }
 }
@@ -964,6 +996,10 @@ function salvarPerfilFinancas() {
   if (window._perfilVidaTemp?.metaEconomia !== undefined) perfil.metaEconomia = window._perfilVidaTemp.metaEconomia;
   perfil.renda = renda;
   localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
+  // Sincronizar com Firebase
+  if (currentUser) {
+    fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar finanças no Firebase:', e));
+  }
   const suc = document.getElementById('financas-sucesso');
   if (suc) { suc.style.display = 'block'; setTimeout(() => suc.style.display = 'none', 2000); }
 }
@@ -995,7 +1031,8 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-moradia',
     label: 'Moradia',         // aluguel
     labelAlt: 'Financiamento',// financiada
-    icon: 'icone-casa.png',
+    icon: 'icone-aluguel.png',
+    iconFn: (p) => p.moradia === 'financiada' ? 'icone-financiamento.png' : 'icone-aluguel.png',
     ativo: (p) => ['aluguel','financiada'].includes(p.moradia),
     labelFn: (p) => p.moradia === 'financiada' ? 'Financiamento' : 'Aluguel',
     cat: (p) => p.moradia === 'financiada' ? 'Financiamento' : 'Aluguel',
@@ -1005,7 +1042,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-alimentacao',
     label: 'Alimentação',
-    icon: 'icone-alimentacao.png',
+    icon: 'icone-alimentacao-novo.png',
     ativo: () => true,       // sempre ativo
     cat: () => 'Alimentação',
     metaPct: 0.15,
@@ -1014,7 +1051,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-carro',
     label: 'Carro',
-    icon: 'icone-carro.png',
+    icon: 'icone-carro-novo.png',
     ativo: (p) => (p.transporte || []).includes('carro'),
     cat: () => 'Carro',
     metaPct: 0.10,
@@ -1023,7 +1060,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-moto',
     label: 'Moto',
-    icon: 'icone-moto.png',
+    icon: 'icone-moto-novo.png',
     ativo: (p) => (p.transporte || []).includes('moto'),
     cat: () => 'Moto',
     metaPct: 0.07,
@@ -1032,11 +1069,12 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-transporte',
     label: 'Transporte',
-    icon: 'icone-carro.png',
+    icon: 'icone-onibus.png',
     iconFn: (p) => {
       const t = p.transporte || [];
-      if (t.includes('app') && !t.includes('publico')) return 'icone-carro.png';
-      return 'icone-carro.png';
+      if (t.includes('app') && !t.includes('publico') && !t.includes('bike')) return 'icone-app.png';
+      if (t.includes('bike')) return 'icone-bike.png';
+      return 'icone-onibus.png';
     },
     ativo: (p) => {
       const t = p.transporte || [];
@@ -1049,7 +1087,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-educacao',
     label: 'Educação',
-    icon: 'icone-cadeado.png',
+    icon: 'icone-bebe.png',
     ativo: (p) => p.filhos === 'sim',
     cat: () => 'Educação',
     metaPct: 0.08,
@@ -1058,7 +1096,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-saude',
     label: 'Saúde',
-    icon: 'icone-saude.png',
+    icon: 'icone-saude-novo.png',
     ativo: () => true,
     cat: () => 'Saúde',
     metaPct: 0.08,
@@ -1067,7 +1105,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-pets',
     label: 'Pets',
-    icon: 'icone-caixa.png',
+    icon: 'icone-pets.png',
     ativo: (p) => (p.familia || []).includes('pets'),
     cat: () => 'Pets',
     metaPct: 0.05,
@@ -1076,7 +1114,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-lazer',
     label: 'Lazer',
-    icon: 'icone-cartao02.png',
+    icon: 'icone-lazer.png',
     ativo: () => true,
     cat: () => 'Lazer',
     metaPct: 0.10,
@@ -1085,7 +1123,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-outros',
     label: 'Outros',
-    icon: 'icone-caixa.png',
+    icon: 'icone-outros.png',
     ativo: () => true,
     cat: () => 'Outros',
     metaPct: 0.05,
