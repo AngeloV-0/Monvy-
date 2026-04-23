@@ -150,7 +150,7 @@
             <div class="kpi-value yellow" id="kpi-movs">0</div>
             <div class="kpi-sub">registradas</div>
           </div>
-          <div class="kpi-card score-mini-card" onclick="irPara('score')" style="cursor:pointer;position:relative;overflow:hidden">
+          <div class="kpi-card score-mini-card" onclick="(window.irPara||irPara)('score')" style="cursor:pointer;position:relative;overflow:hidden">
             <div class="kpi-icon" style="color:#A3E635"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
             <div class="kpi-label">Score Financeiro</div>
             <div class="kpi-value" id="kpi-score-mini" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">–</div>
@@ -194,7 +194,7 @@
           <div class="recent-card">
             <div class="card-header">
               <div class="card-title">Últimas Movimentações</div>
-              <span class="see-all" onclick="irPara('gastos')">Ver todas →</span>
+              <span class="see-all" onclick="(window.irPara||irPara)('gastos')">Ver todas →</span>
             </div>
             <div id="lista-inicio" class="lista-movs">
               <div class="vazio">Nenhuma movimentação ainda.</div>
@@ -1050,7 +1050,7 @@
       <h2>Adicionar à meta</h2>
       <p id="modal-meta-nome-display" style="color:var(--gray);margin-bottom:16px;font-size:.9rem"></p>
       <input type="number" id="modal-meta-valor" placeholder="Valor a adicionar (R$)">
-      <button class="btn-primary" onclick="adicionarMeta()">Adicionar</button>
+      <button class="btn-primary" onclick="criarMeta()">Adicionar</button>
     </div>
   </div>
 
@@ -1245,8 +1245,8 @@
       const tela = el.getAttribute('data-tela');
       document.querySelectorAll('.drawer-item[data-tela]').forEach(i => i.classList.remove('active'));
       el.classList.add('active');
-      if (typeof irPara === 'function') {
-        irPara(tela);
+      if (typeof window.irPara === "function" || typeof irPara === "function") {
+        (window.irPara || irPara)(tela);
       } else {
         document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
         const telaEl = document.getElementById('tela-' + tela);

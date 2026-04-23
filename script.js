@@ -2756,7 +2756,7 @@ function renderizarInsights(insights) {
     const c = cores[ins.tipo] || cores.educativo;
     return `
       <div class="insight-card" style="background:${c.bg};border:1px solid ${c.border}"
-           onclick="irPara('${ins.rota}')">
+           onclick="(window.irPara||irPara)('${ins.rota}')">
         <img src="${ins.icone}" alt="" class="insight-icon" onerror="this.style.display='none'">
         <div class="insight-body">
           <div class="insight-tag" style="color:${c.label}">${c.tag}</div>
@@ -2764,7 +2764,7 @@ function renderizarInsights(insights) {
           <div class="insight-desc">${ins.descricao}</div>
         </div>
         <button class="insight-acao" style="border-color:${c.border};color:${c.label}"
-                onclick="event.stopPropagation();irPara('${ins.rota}')">
+                onclick="event.stopPropagation();(window.irPara||irPara)('${ins.rota}')">
           ${ins.acao} →
         </button>
       </div>
