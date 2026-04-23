@@ -190,9 +190,57 @@ nav {
   pointer-events: none;
   transition: opacity 0.15s;
   border: 1px solid var(--border);
+  z-index: 200;
 }
 
 .nav-item:hover::after { opacity: 1; }
+
+/* Dica do Dia — card no dashboard */
+.dica-dia-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(34,197,94,0.07);
+  border: 1px solid rgba(34,197,94,0.22);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 20px;
+  position: relative;
+}
+.dica-dia-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(34,197,94,0.12);
+  border-radius: 10px;
+}
+.dica-dia-body { flex: 1; min-width: 0; }
+.dica-dia-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.dica-dia-texto {
+  font-size: 0.875rem;
+  color: var(--gray-3);
+  line-height: 1.5;
+}
+.dica-dia-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none; border: none;
+  color: var(--gray); font-size: 1.1rem;
+  cursor: pointer; line-height: 1;
+  padding: 2px 6px;
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.dica-dia-close:hover { opacity: 1; }
 
 .sidebar-bottom {
   margin-top: auto;

@@ -29,7 +29,7 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 
 // NAVEGAÇÃO
 document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function(e) { e.preventDefault(); irPara(this.dataset.tela); });
+  item.addEventListener('click', function(e) { e.preventDefault(); (window.irPara || irPara)(this.dataset.tela); });
 });
 
 function irPara(tela) {
@@ -1781,6 +1781,23 @@ window.addEventListener('load', () => {
   sincronizarSelects();
   renderizarGridCategorias();
   atualizarBannerPerfil();
+
+  // Dica do dia — rotação aleatória
+  const dicasDoDia = [
+    { icon: '💡', texto: 'Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.' },
+    { icon: '🛡️', texto: 'Reserva de emergência ideal: 3 a 6 meses de despesas guardadas em investimentos com liquidez diária, como Tesouro Selic ou CDB.' },
+    { icon: '📊', texto: 'Regra 50-30-20: destine 50% da renda para necessidades, 30% para desejos e 20% para poupança e investimentos.' },
+    { icon: '🏦', texto: 'Dívidas com juros altos (cartão, cheque especial) devem ser quitadas antes de começar a investir. Os juros corroem seu patrimônio.' },
+    { icon: '🎯', texto: 'Defina metas financeiras específicas com prazo e valor. Isso aumenta muito as chances de você alcançá-las.' },
+    { icon: '📈', texto: 'O poder dos juros compostos: investindo R$200/mês por 20 anos a 10% a.a., você acumula mais de R$150 mil.' },
+    { icon: '💳', texto: 'Cartão de crédito não é extensão de renda. Use-o apenas para o que você já tem dinheiro guardado para pagar.' },
+    { icon: '🚀', texto: 'Diversifique seus investimentos entre renda fixa e variável de acordo com seu perfil de risco e objetivos.' },
+  ];
+  const d = dicasDoDia[new Date().getDate() % dicasDoDia.length];
+  const iconEl = document.getElementById('dica-dia-icon');
+  const textoEl = document.getElementById('dica-dia-texto');
+  if (iconEl) iconEl.textContent = d.icon;
+  if (textoEl) textoEl.textContent = d.texto;
 });
 
 // ==============================
