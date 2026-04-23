@@ -1,13 +1,15 @@
 // ==============================
-// MONVY — LÓGICA COMPLETA
+// MONVAY — LÓGICA COMPLETA
 // ==============================
 import {
   onAuth, fazerLogout as fbLogout, getPerfil,
   ouvirMovimentacoes, adicionarMovimentacao, deletarMovimentacao,
   getMetas, adicionarMeta, atualizarMeta, deletarMeta,
   getDividas, adicionarDivida, atualizarDivida, deletarDivida,
+  getContas, adicionarConta, atualizarConta, deletarConta,
   salvarPerfilVida as fbSalvarPerfilVida,
   salvarPerfil as fbSalvarPerfil,
+  verificarEResetarMes, getHistorico,
   auth, db
 } from './firebase.js';
 
@@ -22,7 +24,7 @@ let movimentacoes = [], metas = [];
 let tipoAtual = '', metaAtualIndex = -1, respostaPergunta = '';
 let editandoIndex = -1, filtroAtual = 'mes', relatorioMesOffset = 0;
 
-const pageTitles = { inicio:'Dashboard', gastos:'Gastos', metas:'Metas', dividas:'Dívidas', investimentos:'Investimentos', aprender:'Aprender', relatorio:'Relatório Mensal' };
+const pageTitles = { inicio:'Dashboard', gastos:'Gastos', metas:'Metas', dividas:'Dívidas', investimentos:'Investimentos', aprender:'Aprender', relatorio:'Relatório Mensal', contas:'Contas a Pagar', score:'Score Financeiro' };
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // NAVEGAÇÃO
@@ -36,12 +38,13 @@ function irPara(tela) {
   document.querySelectorAll('[data-tela="'+tela+'"]').forEach(el => el.classList.add('active'));
   const telaEl = document.getElementById('tela-'+tela);
   if (telaEl) telaEl.classList.add('active');
-  const titulo = pageTitles[tela] || 'Monvy';
+  const titulo = pageTitles[tela] || 'Monvay';
   document.getElementById('page-title').textContent = titulo;
   const mobileTelaEl = document.getElementById('topbar-mobile-tela');
   if (mobileTelaEl) mobileTelaEl.textContent = titulo;
   if (tela === 'gastos') atualizarTelaCategorias();
-  if (tela === 'relatorio') atualizarRelatorio();
+  if (tela === 'relatorio') { atualizarRelatorio(); carregarHistorico(); }
+  if (tela === 'contas') renderizarContas();
 }
 
 // FORMATO
@@ -339,23 +342,57 @@ function atualizarTelaCategorias_v16_legado() {
 
 // METAS
 async function criarMeta() {
-  const nome=document.getElementById('meta-nome').value.trim(), valor=parseFloat(document.getElementById('meta-valor').value);
-  if (!nome||!valor||valor<=0) { alert('Preencha nome e valor!'); return; }
+  const nome = document.getElementById('meta-nome').value.trim();
+  const valor = parseFloat(document.getElementById('meta-valor').value);
+  const atual = parseFloat(document.getElementById('meta-atual').value) || 0;
+  const dataAlvo = document.getElementById('meta-data-alvo').value || null;
+  if (!nome || !valor || valor <= 0) { alert('Preencha nome e valor!'); return; }
   if (!currentUser) return;
   try {
-    const id = await adicionarMeta(currentUser.uid, {nome, objetivo:valor, atual:0});
-    metas.push({id, nome, objetivo:valor, atual:0});
-    document.getElementById('meta-nome').value=''; document.getElementById('meta-valor').value='';
+    const metaObj = { nome, objetivo: valor, atual, dataAlvo };
+    const id = await adicionarMeta(currentUser.uid, metaObj);
+    metas.push({ id, ...metaObj });
+    document.getElementById('meta-nome').value = '';
+    document.getElementById('meta-valor').value = '';
+    document.getElementById('meta-atual').value = '';
+    document.getElementById('meta-data-alvo').value = '';
     renderizarMetas();
+    executarManualEngine();
   } catch(e) { console.error('Erro ao criar meta:', e); }
 }
 
+function calcularMensalMeta(m) {
+  if (!m.dataAlvo) return null;
+  const agora = new Date();
+  const alvo = new Date(m.dataAlvo + '-01');
+  const mesesRestantes = (alvo.getFullYear() - agora.getFullYear()) * 12 + (alvo.getMonth() - agora.getMonth());
+  if (mesesRestantes <= 0) return null;
+  const faltando = Math.max(0, m.objetivo - (m.atual || 0));
+  return faltando / mesesRestantes;
+}
+
 function renderizarMetas() {
-  const lista=document.getElementById('lista-metas');
-  if (metas.length===0) { lista.innerHTML='<div class="vazio">Nenhuma meta ainda.</div>'; return; }
-  lista.innerHTML=metas.map((m,i)=>{
-    const pct=Math.min(100,Math.round((m.atual/m.objetivo)*100));
-    return `<div class="meta-card"><div class="meta-topo"><span class="meta-nome">${m.nome}</span><span class="meta-valores">${fmt(m.atual)} / ${fmt(m.objetivo)}</span></div><div class="meta-barra-bg"><div class="meta-barra-fill" style="width:${pct}%"></div></div><div class="meta-rodape"><span class="meta-pct">${pct}% concluído</span><button class="btn-meta" onclick="abrirModalMeta(${i})">+ Adicionar</button></div></div>`;
+  const lista = document.getElementById('lista-metas');
+  if (metas.length === 0) { lista.innerHTML = '<div class="vazio">Nenhuma meta ainda.</div>'; return; }
+  lista.innerHTML = metas.map((m, i) => {
+    const pct = Math.min(100, Math.round(((m.atual||0) / m.objetivo) * 100));
+    const mensal = calcularMensalMeta(m);
+    const dataStr = m.dataAlvo ? `<span style="color:var(--gray);font-size:.72rem">📅 ${m.dataAlvo.replace('-', '/')}</span>` : '';
+    const mensalStr = mensal !== null ? `<div style="margin-top:6px;padding:7px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:.8rem;color:var(--primary)">💡 Guardar <strong>${fmt(mensal)}/mês</strong> para atingir no prazo</div>` : '';
+    const concluida = pct >= 100;
+    return `<div class="meta-card${concluida ? ' concluida' : ''}">
+      <div class="meta-topo">
+        <span class="meta-nome">${concluida ? '✅ ' : ''}${m.nome}</span>
+        <span class="meta-valores">${fmt(m.atual||0)} / ${fmt(m.objetivo)}</span>
+      </div>
+      ${dataStr}
+      <div class="meta-barra-bg"><div class="meta-barra-fill" style="width:${pct}%"></div></div>
+      <div class="meta-rodape">
+        <span class="meta-pct">${pct}% concluído</span>
+        ${!concluida ? `<button class="btn-meta" onclick="abrirModalMeta(${i})">+ Adicionar</button>` : '<span style="color:var(--primary);font-size:.78rem;font-weight:600">🎉 Concluída!</span>'}
+      </div>
+      ${mensalStr}
+    </div>`;
   }).join('');
 }
 
@@ -393,14 +430,348 @@ function calcularDivida() {
 }
 
 // INVESTIMENTOS
+// ===== MÓDULO 4: SIMULADOR DE INVESTIMENTOS =====
+
+let simChartInstance = null;
+let simResultados = [];
+let simParams = {};
+let bcbTaxasCarregadas = false;
+
+// Taxas de fallback (mercado atual 2025-2026, Selic ~14.75% a.a.)
+const TAXAS_FALLBACK = {
+  selicAa: 14.75,   // % a.a.
+  cdiMes:  0.01195, // % ao mês
+  ipcaMes: 0.00407, // % ao mês
+  poupMes: 0.005,   // % ao mês
+};
+
+// INV_TIPOS começa com fallback; buscarTaxasBCB() atualiza taxaMes dinamicamente
+const INV_TIPOS = [
+  { id:'lci',   nome:'LCI e LCA',          taxaMes: 0.01195, custoAa: 0,     isentoIR: true,  cor:'#3B82F6', fatorCdi: 1.00,  ehLci: true  },
+  { id:'cdb',   nome:'CDB 110% CDI',       taxaMes: 0.01315, custoAa: 0,     isentoIR: false, cor:'#6366F1', fatorCdi: 1.10,  ehCdi: true  },
+  { id:'selic', nome:'Tesouro Selic',       taxaMes: 0.01195, custoAa: 0.002, isentoIR: false, cor:'#8B5CF6', ehSelic: true              },
+  { id:'fundo', nome:'Fundo DI',            taxaMes: 0.01135, custoAa: 0.005, isentoIR: false, cor:'#EC4899', fatorCdi: 0.95,  ehCdi: true  },
+  { id:'prfix', nome:'Tesouro Prefixado',   taxaMes: 0.01065, custoAa: 0.002, isentoIR: false, cor:'#F97316', fatorSelic:0.92              },
+  { id:'poup',  nome:'Poupança',            taxaMes: 0.005,   custoAa: 0,     isentoIR: true,  cor:'#14B8A6', ehPoup: true               },
+  { id:'ipca',  nome:'Tesouro IPCA+',       taxaMes: 0.00975, custoAa: 0.002, isentoIR: false, cor:'#22C55E', premioAa: 7.0,  ehIpca: true },
+  { id:'corr',  nome:'Correção pelo IPCA',  taxaMes: 0.00407, custoAa: 0,     isentoIR: true,  cor:'#A3E635', ehIpcaPuro: true            },
+];
+
+// ---- Busca taxas do Banco Central (API SGS) ----
+async function buscarTaxasBCB() {
+  const statusBar  = document.getElementById('bcb-status-bar');
+  const statusDot  = document.getElementById('bcb-dot');
+  const statusTxt  = document.getElementById('bcb-status-text');
+  const updateTime = document.getElementById('bcb-update-time');
+  const ratesRow   = document.getElementById('bcb-rates-row');
+
+  // Cache por 4 horas para não sobrecarregar a API do Bacen
+  const CACHE_KEY = 'monvy_bcb_taxas';
+  const CACHE_TTL = 4 * 60 * 60 * 1000; // 4h em ms
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
+      aplicarTaxasBCB(cached.dados);
+      if (statusDot) statusDot.className = 'bcb-status-dot online';
+      if (statusTxt) statusTxt.textContent = '🟢 Taxas em tempo real — Banco Central do Brasil';
+      if (updateTime) updateTime.textContent = 'Cache de ' + new Date(cached.ts).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+      return;
+    }
+  } catch(e) {}
+
+  const BASE = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.';
+  const SUFIXO = '/dados/ultimos/1?formato=json';
+
+  try {
+    // Busca paralela: Selic meta (432), IPCA mensal (433), Poupança (195), CDI diário (12)
+    const [rSelic, rIpca, rPoup, rCdi] = await Promise.all([
+      fetch(BASE + '432' + SUFIXO).then(r => r.json()),
+      fetch(BASE + '433' + SUFIXO).then(r => r.json()),
+      fetch(BASE + '195' + SUFIXO).then(r => r.json()),
+      fetch(BASE + '12'  + SUFIXO).then(r => r.json()),
+    ]);
+
+    const selicAa  = parseFloat(rSelic[0].valor);  // % a.a.
+    const ipcaMes  = parseFloat(rIpca[0].valor) / 100; // % ao mês → decimal
+    const poupMes  = parseFloat(rPoup[0].valor) / 100;
+    // CDI diário → mensal: (1 + diario/100)^22 - 1 (aprox. 22 dias úteis)
+    const cdiDiario = parseFloat(rCdi[0].valor);
+    const cdiMes   = Math.pow(1 + cdiDiario / 100, 22) - 1;
+    const selicMes = Math.pow(1 + selicAa / 100, 1 / 12) - 1;
+    // IPCA+ prêmio ~7% a.a.
+    const premioIpcaMes = Math.pow(1 + 0.07, 1 / 12) - 1;
+
+    const dados = { selicAa, ipcaMes, poupMes, cdiMes, selicMes, premioIpcaMes };
+
+    // Salvar cache
+    localStorage.setItem('monvy_bcb_taxas', JSON.stringify({ ts: Date.now(), dados }));
+
+    aplicarTaxasBCB(dados);
+
+    // Atualizar UI
+    if (statusDot) statusDot.className = 'bcb-status-dot online';
+    if (statusTxt) statusTxt.textContent = '🟢 Taxas em tempo real — Banco Central do Brasil';
+    if (updateTime) {
+      const agora = new Date();
+      updateTime.textContent = `Atualizado às ${agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+    }
+
+    // Mostrar chips de taxas
+    if (ratesRow) ratesRow.style.display = 'flex';
+    const fmtPct = v => (v * 100).toFixed(3).replace('.', ',') + '% a.m.';
+    const fmtAa  = v => v.toFixed(2).replace('.', ',') + '% a.a.';
+    const el = id => document.getElementById(id);
+    if (el('bcb-selic')) el('bcb-selic').textContent = fmtAa(dados.selicAa);
+    if (el('bcb-cdi'))   el('bcb-cdi').textContent   = fmtPct(dados.cdiMes);
+    if (el('bcb-ipca'))  el('bcb-ipca').textContent  = fmtPct(dados.ipcaMes);
+    if (el('bcb-poup'))  el('bcb-poup').textContent  = fmtPct(dados.poupMes);
+    if (el('bcb-lci'))   el('bcb-lci').textContent   = fmtPct(dados.cdiMes);
+
+  } catch (err) {
+    console.warn('BCB API indisponível — usando taxas estimadas:', err);
+    if (statusDot) statusDot.className = 'bcb-status-dot offline';
+    if (statusTxt) statusTxt.textContent = '⚠️ Usando taxas estimadas (BCB temporariamente indisponível)';
+    if (ratesRow) ratesRow.style.display = 'none';
+  }
+}
+
+// Aplica taxas reais (ou do cache) nos INV_TIPOS
+function aplicarTaxasBCB(d) {
+  bcbTaxasCarregadas = true;
+  const premioIpcaMes = d.premioIpcaMes || (Math.pow(1.07, 1/12) - 1);
+  INV_TIPOS.forEach(t => {
+    if (t.ehLci)           t.taxaMes = d.cdiMes;
+    else if (t.ehCdi)      t.taxaMes = d.cdiMes * (t.fatorCdi || 1);
+    else if (t.ehSelic)    t.taxaMes = d.selicMes;
+    else if (t.fatorSelic) t.taxaMes = d.selicMes * t.fatorSelic;
+    else if (t.ehPoup)     t.taxaMes = d.poupMes;
+    else if (t.ehIpca)     t.taxaMes = (1 + d.ipcaMes) * (1 + premioIpcaMes) - 1;
+    else if (t.ehIpcaPuro) t.taxaMes = d.ipcaMes;
+  });
+  // Mostrar chips de taxas se já estiver na tela
+  const ratesRow = document.getElementById('bcb-rates-row');
+  if (ratesRow) {
+    ratesRow.style.display = 'flex';
+    const fmtPct = v => (v * 100).toFixed(3).replace('.', ',') + '% a.m.';
+    const fmtAa  = v => v.toFixed(2).replace('.', ',') + '% a.a.';
+    const el = id => document.getElementById(id);
+    if (el('bcb-selic')) el('bcb-selic').textContent = fmtAa(d.selicAa);
+    if (el('bcb-cdi'))   el('bcb-cdi').textContent   = fmtPct(d.cdiMes);
+    if (el('bcb-ipca'))  el('bcb-ipca').textContent  = fmtPct(d.ipcaMes);
+    if (el('bcb-poup'))  el('bcb-poup').textContent  = fmtPct(d.poupMes);
+    if (el('bcb-lci'))   el('bcb-lci').textContent   = fmtPct(d.cdiMes);
+  }
+}
+
+
+
+function aliquotaIR(meses) {
+  if (meses <= 6)  return 0.225;
+  if (meses <= 12) return 0.20;
+  if (meses <= 24) return 0.175;
+  return 0.15;
+}
+
+function simularInvestimento(inicial, aporte, meses, tipo) {
+  const { taxaMes, custoAa, isentoIR } = tipo;
+  const custoMes = custoAa / 12;
+  let saldo = inicial;
+  let totalInvestido = inicial;
+
+  // Crescimento mês a mês
+  const historico = [inicial];
+  for (let m = 1; m <= meses; m++) {
+    saldo = saldo * (1 + taxaMes - custoMes) + aporte;
+    totalInvestido += aporte;
+    historico.push(saldo);
+  }
+
+  const valorBruto = saldo;
+  const rentBruta = totalInvestido > 0 ? ((valorBruto / totalInvestido) - 1) * 100 : 0;
+  const custos = totalInvestido * (custoAa / 12) * meses; // aproximado
+  const rendimento = valorBruto - totalInvestido;
+  const ir = isentoIR ? 0 : rendimento > 0 ? rendimento * aliquotaIR(meses) : 0;
+  const valorLiquido = valorBruto - ir;
+  const rentLiquida = totalInvestido > 0 ? ((valorLiquido / totalInvestido) - 1) * 100 : 0;
+  const ganhoLiquido = valorLiquido - totalInvestido;
+
+  return { valorBruto, rentBruta, custos, ir, valorLiquido, rentLiquida, ganhoLiquido, totalInvestido, historico };
+}
+
 function calcularInvestimentos() {
-  const valor=parseFloat(document.getElementById('inv-valor').value), meses=parseInt(document.getElementById('inv-meses').value);
-  if (!valor||!meses) { alert('Preencha todos os campos!'); return; }
-  const calc=t=>valor*Math.pow(1+t,meses), tp=calc(0.005), ts=calc(0.009), tc=calc(0.01);
-  document.getElementById('inv-poupanca').textContent=fmt(tp); document.getElementById('inv-poupanca-ganho').textContent='+'+fmt(tp-valor)+' de rendimento';
-  document.getElementById('inv-selic').textContent=fmt(ts); document.getElementById('inv-selic-ganho').textContent='+'+fmt(ts-valor)+' de rendimento';
-  document.getElementById('inv-cdb').textContent=fmt(tc); document.getElementById('inv-cdb-ganho').textContent='+'+fmt(tc-valor)+' de rendimento';
-  document.getElementById('resultado-inv').classList.remove('hidden');
+  const inicial = parseFloat(document.getElementById('inv-inicial').value) || 0;
+  const aporte  = parseFloat(document.getElementById('inv-aporte').value)  || 0;
+  const meses   = parseInt(document.getElementById('inv-meses').value)     || 0;
+
+  if ((!inicial && !aporte) || !meses) {
+    alert('Preencha o valor inicial (ou aporte) e o período!');
+    return;
+  }
+
+  const totalInvestido = inicial + aporte * meses;
+  simParams = { inicial, aporte, meses, totalInvestido };
+
+  // Calcular todos
+  simResultados = INV_TIPOS.map(tipo => ({
+    ...tipo,
+    resultado: simularInvestimento(inicial, aporte, meses, tipo)
+  }));
+
+  // Ordenar por valor líquido desc
+  simResultados.sort((a, b) => b.resultado.valorLiquido - a.resultado.valorLiquido);
+
+  // Melhor
+  const melhor = simResultados[0];
+
+  // Summary
+  document.getElementById('sim-summary').style.display = 'flex';
+  document.getElementById('sim-total-inv').textContent = fmt(totalInvestido);
+  document.getElementById('sim-melhor-nome').textContent = melhor.nome;
+  document.getElementById('sim-melhor-ganho').textContent = '+' + fmt(melhor.resultado.ganhoLiquido);
+
+  // Ranking
+  renderizarRanking();
+  document.getElementById('sim-ranking-wrap').style.display = 'block';
+}
+
+function renderizarRanking() {
+  const list = document.getElementById('sim-ranking-list');
+  if (!list) return;
+  const maxVal = simResultados[0].resultado.valorLiquido;
+  const minVal = simResultados[simResultados.length-1].resultado.valorLiquido;
+  const range  = maxVal - minVal || 1;
+
+  list.innerHTML = simResultados.map((inv, i) => {
+    const r = inv.resultado;
+    const pct = 55 + ((r.valorLiquido - minVal) / range) * 45; // 55% a 100%
+    const isMelhor = i === 0;
+    return `
+      <div class="sim-rank-item ${isMelhor ? 'melhor' : ''}">
+        <div class="sim-rank-nome">
+          ${isMelhor ? '<span class="sim-badge-melhor">⭐ Melhor</span>' : ''}
+          <span>${inv.nome}</span>
+          ${inv.isentoIR ? '<span class="sim-badge-ir">Isento IR</span>' : ''}
+        </div>
+        <div class="sim-rank-bar-wrap">
+          <div class="sim-rank-bar" style="width:${pct}%;background:${isMelhor ? 'var(--grad)' : inv.cor}"></div>
+        </div>
+        <span class="sim-rank-val ${isMelhor ? 'green' : ''}">${fmt(r.valorLiquido)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirModalSimulacao() {
+  document.getElementById('modal-simulacao').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  renderizarModalSubheader();
+  renderizarModalChart();
+  renderizarModalTabela();
+}
+
+function fecharModalSimulacao() {
+  document.getElementById('modal-simulacao').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function renderizarModalSubheader() {
+  const el = document.getElementById('sim-modal-subheader');
+  const { inicial, aporte, meses, totalInvestido } = simParams;
+  el.innerHTML = `
+    <div class="sim-sh-item"><span class="sim-sh-label">Valor inicial investido</span><span class="sim-sh-val">${fmt(inicial)}</span></div>
+    <div class="sim-sh-item"><span class="sim-sh-label">Aportes Mensais</span><span class="sim-sh-val">${fmt(aporte)}</span></div>
+    <div class="sim-sh-item"><span class="sim-sh-label">Período da aplicação</span><span class="sim-sh-val">${meses} ${meses===1?'mês':'meses'}</span></div>
+    <div class="sim-sh-item"><span class="sim-sh-label">Soma dos valores investidos</span><span class="sim-sh-val green">${fmt(totalInvestido)}</span></div>
+  `;
+}
+
+function renderizarModalChart() {
+  const canvas = document.getElementById('sim-chart');
+  if (!canvas) return;
+  if (simChartInstance) simChartInstance.destroy();
+
+  const { meses, totalInvestido, inicial, aporte } = simParams;
+  const labels = Array.from({length: meses+1}, (_, i) => i === 0 ? 'Início' : 'M'+i);
+
+  // Top 4 investimentos + linha de total investido
+  const top4 = simResultados.slice(0, 4);
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
+
+  const datasets = top4.map(inv => ({
+    label: inv.nome,
+    data: inv.resultado.historico,
+    borderColor: inv === simResultados[0] ? '#22C55E' : inv.cor,
+    backgroundColor: 'transparent',
+    tension: 0.4,
+    borderWidth: inv === simResultados[0] ? 2.5 : 1.5,
+    pointRadius: 0,
+    pointHoverRadius: 4,
+  }));
+
+  // Linha tracejada: total investido acumulado
+  const totalLine = Array.from({length: meses+1}, (_, i) => inicial + aporte * i);
+  datasets.push({
+    label: 'Total investido',
+    data: totalLine,
+    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'transparent',
+    borderDash: [6, 4],
+    borderWidth: 1.5,
+    pointRadius: 0,
+    tension: 0,
+  });
+
+  simChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: true, labels: { color: textColor, boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y) } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 8 } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: textColor, callback: v => 'R$'+Math.round(v).toLocaleString('pt-BR') } }
+      }
+    }
+  });
+}
+
+function renderizarModalTabela() {
+  const head = document.getElementById('sim-tabela-head');
+  const body = document.getElementById('sim-tabela-body');
+  if (!head || !body) return;
+
+  // Cabeçalho
+  head.innerHTML = '<th>Critério</th>' + simResultados.map((inv, i) =>
+    `<th style="color:${i===0?'#22C55E':inv.cor}">${inv.nome}${i===0?' ⭐':''}</th>`
+  ).join('');
+
+  // Linhas
+  const linhas = [
+    { label: 'Valor bruto acumulado', key: 'valorBruto', fmt: fmt },
+    { label: 'Rentabilidade bruta',   key: 'rentBruta',  fmt: v => v.toFixed(2).replace('.',',') + '%' },
+    { label: 'Custos',                key: 'custos',     fmt: fmt },
+    { label: 'Valor pago em IR',      key: 'ir',         fmt: fmt },
+    { label: 'Valor líquido acumulado', key: 'valorLiquido', fmt: fmt, destaque: true },
+    { label: 'Rentabilidade líquida', key: 'rentLiquida', fmt: v => v.toFixed(2).replace('.',',') + '%' },
+    { label: 'Ganho líquido',         key: 'ganhoLiquido', fmt: v => '+'+fmt(v), green: true },
+  ];
+
+  body.innerHTML = linhas.map(linha => `
+    <tr${linha.destaque ? ' style="font-weight:700"' : ''}>
+      <td style="color:var(--gray-2);font-size:.82rem">${linha.label}</td>
+      ${simResultados.map((inv, i) => {
+        const val = inv.resultado[linha.key];
+        const isFirst = i === 0;
+        const color = linha.green ? '#22C55E' : linha.destaque && isFirst ? '#22C55E' : '';
+        return `<td style="${color ? 'color:'+color : ''}">${linha.fmt(val)}</td>`;
+      }).join('')}
+    </tr>
+  `).join('');
 }
 
 // RELATÓRIO MENSAL
@@ -769,9 +1140,22 @@ onAuth(async (user) => {
     metas = await getMetas(user.uid);
     atualizarListaMetas();
 
+    // Verificar reset mensal automático
+    try {
+      const houveFechamento = await verificarEResetarMes(user.uid);
+      if (houveFechamento) {
+        mostrarToastResetMes();
+      }
+    } catch(e) { console.warn('Erro no reset mensal:', e); }
+
     // Carregar dívidas
     dividasCadastradas = await getDividas(user.uid);
     if (typeof renderizarDividas === 'function') renderizarDividas();
+
+    // Carregar contas a pagar
+    contasCadastradas = await getContas(user.uid);
+    renderizarContas();
+    verificarAlertasContas();
 
     // Ouvir movimentações em tempo real
     if (unsubMovimentacoes) unsubMovimentacoes();
@@ -1421,6 +1805,8 @@ window.fecharModalMeta  = fecharModalMeta;
 window.adicionarValorMeta = adicionarValorMeta;
 window.calcularDivida   = calcularDivida;
 window.calcularInvestimentos = calcularInvestimentos;
+window.abrirModalSimulacao = abrirModalSimulacao;
+window.fecharModalSimulacao = fecharModalSimulacao;
 window.abrirArtigo      = abrirArtigo;
 window.fecharArtigo     = fecharArtigo;
 window.logout           = logout;
@@ -1446,3 +1832,945 @@ window.selecionarVidaMulti  = selecionarVidaMulti;
 window.setMetaEco           = setMetaEco;
 window.salvarPerfilVida     = window.salvarPerfilVida || salvarPerfilVida;
 window.salvarPerfilFinancas = salvarPerfilFinancas;
+
+// ==============================
+// RESET MENSAL + HISTÓRICO
+// ==============================
+
+function mostrarToastResetMes() {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+    background:#1a2236;border:1px solid rgba(0,200,83,0.3);border-radius:14px;
+    padding:16px 24px;color:#fff;font-size:.88rem;font-weight:500;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:9999;
+    display:flex;align-items:center;gap:12px;max-width:340px;text-align:center;
+    animation:slideUp .3s ease;
+  `;
+  toast.innerHTML = `
+    <img src="icone-grafico-novo.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">
+    <div>
+      <div style="font-weight:700;color:var(--primary);margin-bottom:2px">Novo mês, novo começo! 🎯</div>
+      <div style="color:#94a3b8;font-size:.8rem">O mês anterior foi arquivado no Relatório.</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+
+async function carregarHistorico() {
+  if (!currentUser) return;
+  const el = document.getElementById('historico-lista');
+  if (!el) return;
+  el.innerHTML = '<div class="vazio">Carregando...</div>';
+  try {
+    const historico = await getHistorico(currentUser.uid);
+    if (historico.length === 0) {
+      el.innerHTML = '<div class="vazio">Nenhum histórico ainda.<br><span style="font-size:.8rem;opacity:.6">O primeiro fechamento acontece automaticamente no início do próximo mês.</span></div>';
+      return;
+    }
+    const MESES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    el.innerHTML = historico.map(h => {
+      const [ano, mes] = h.mes.split('-');
+      const nomeMes = MESES_NOMES[parseInt(mes) - 1] + ' ' + ano;
+      const saldoPos = (h.saldo || 0) >= 0;
+      return `
+        <div class="historico-card" onclick="toggleHistoricoDetalhes('${h.mes}')" style="cursor:pointer">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-weight:700;font-size:.95rem;color:var(--white)">${nomeMes}</div>
+            <div style="font-size:.82rem;font-weight:700;color:${saldoPos?'#22c55e':'#ef4444'}">${saldoPos?'+':''}${fmt(h.saldo||0)}</div>
+          </div>
+          <div style="display:flex;gap:20px;font-size:.8rem;color:var(--gray)">
+            <span>↑ <strong style="color:#22c55e">${fmt(h.entradas||0)}</strong></span>
+            <span>↓ <strong style="color:#ef4444">${fmt(h.saidas||0)}</strong></span>
+            <span>${h.totalMovimentacoes||0} movimentações</span>
+          </div>
+          <div id="hist-det-${h.mes}" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+            ${(h.movimentacoes||[]).map(m => `
+              <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,0.04)">
+                <span style="color:var(--white)">${m.descricao}</span>
+                <span style="color:${m.tipo==='entrada'?'#22c55e':'#ef4444'}">${m.tipo==='entrada'?'+':'-'}${fmt(m.valor)}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="text-align:right;font-size:.72rem;color:var(--primary);margin-top:6px">Ver movimentações ▾</div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="vazio">Erro ao carregar histórico.</div>';
+    console.error(e);
+  }
+}
+
+window.toggleHistoricoDetalhes = function(mes) {
+  const el = document.getElementById('hist-det-' + mes);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+window.carregarHistorico = carregarHistorico;
+window.mostrarToastResetMes = mostrarToastResetMes;
+
+// ==============================
+// MÓDULO: CONTAS A PAGAR
+// ==============================
+
+let contasCadastradas = [];
+let contasFiltro = 'todas';
+let contasMesOffset = 0;
+// Expose para o manual_engine
+Object.defineProperty(window, '_contasCadastradas', { get: () => contasCadastradas });
+let editandoContaId = null;
+
+const CONTA_CAT_ICONS = {
+  'Moradia':     '🏠', 'Assinatura': '📱', 'Educação': '📚',
+  'Saúde':       '❤️', 'Transporte': '🚌', 'Alimentação': '🍽️', 'Outros': '📋'
+};
+
+function diasParaVencimento(dataStr) {
+  if (!dataStr) return null;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const venc = new Date(dataStr + 'T00:00:00');
+  return Math.round((venc - hoje) / (1000 * 60 * 60 * 24));
+}
+
+function statusConta(conta) {
+  if (conta.paga) return 'paga';
+  const dias = diasParaVencimento(conta.vencimento);
+  if (dias === null) return 'pendente';
+  if (dias < 0) return 'vencida';
+  if (dias <= 3) return 'proxima';
+  return 'pendente';
+}
+
+function renderizarContas() {
+  // KPIs
+  const total = contasCadastradas.filter(c => !c.paga).reduce((s,c) => s + (c.valor||0), 0);
+  const vencidas = contasCadastradas.filter(c => statusConta(c) === 'vencida').length;
+  const proximas = contasCadastradas.filter(c => statusConta(c) === 'proxima').length;
+  const pagas = contasCadastradas.filter(c => c.paga).length;
+
+  const el = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  el('contas-kpi-total', fmt(total));
+  el('contas-kpi-qtd', contasCadastradas.filter(c=>!c.paga).length + ' pendente(s)');
+  el('contas-kpi-vencidas', vencidas);
+  el('contas-kpi-proximas', proximas);
+  el('contas-kpi-pagas', pagas);
+  el('contas-lista-count', contasCadastradas.length + ' conta(s)');
+
+  // Calendário
+  renderizarCalendarioContas();
+
+  // Lista filtrada
+  let lista = [...contasCadastradas];
+  if (contasFiltro === 'pendentes') lista = lista.filter(c => !c.paga && statusConta(c) !== 'vencida');
+  if (contasFiltro === 'vencidas')  lista = lista.filter(c => statusConta(c) === 'vencida');
+  if (contasFiltro === 'pagas')     lista = lista.filter(c => c.paga);
+
+  // Ordenar: vencidas primeiro, depois por data
+  lista.sort((a,b) => {
+    if (a.paga && !b.paga) return 1;
+    if (!a.paga && b.paga) return -1;
+    return (a.vencimento||'').localeCompare(b.vencimento||'');
+  });
+
+  const listaEl = document.getElementById('lista-contas');
+  if (!listaEl) return;
+  if (lista.length === 0) {
+    listaEl.innerHTML = '<div class="vazio">Nenhuma conta nessa categoria.</div>';
+    return;
+  }
+
+  listaEl.innerHTML = lista.map(c => {
+    const st = statusConta(c);
+    const dias = diasParaVencimento(c.vencimento);
+    const diasLabel = c.paga ? 'Paga' :
+      dias === null ? '' :
+      dias < 0 ? `Venceu há ${Math.abs(dias)} dia(s)` :
+      dias === 0 ? 'Vence hoje!' :
+      dias <= 3 ? `Vence em ${dias} dia(s)` :
+      `Vence em ${dias} dias`;
+
+    const statusColor = c.paga ? '#22c55e' : st === 'vencida' ? '#ef4444' : st === 'proxima' ? '#f59e0b' : 'var(--gray)';
+    const bordaColor  = c.paga ? 'rgba(34,197,94,0.2)' : st === 'vencida' ? 'rgba(239,68,68,0.3)' : st === 'proxima' ? 'rgba(245,158,11,0.3)' : 'var(--border)';
+
+    return `
+      <div class="conta-card" style="border-color:${bordaColor}">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="font-size:1.4rem;flex-shrink:0;margin-top:2px">${CONTA_CAT_ICONS[c.categoria]||'📋'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+              <span style="font-weight:600;color:var(--white);font-size:.92rem">${c.descricao}</span>
+              <span style="font-weight:700;font-size:.95rem;color:${c.paga?'#22c55e':'var(--white)'}">${fmt(c.valor||0)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap">
+              <span style="font-size:.75rem;color:var(--gray)">${c.categoria}${c.recorrente?' · recorrente':''}</span>
+              <span style="font-size:.75rem;font-weight:600;color:${statusColor}">${diasLabel}</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              ${!c.paga ? `<button onclick="pagarConta('${c.id}')" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:5px 12px;font-size:.75rem;color:#22c55e;cursor:pointer;font-family:inherit">✓ Marcar como paga</button>` : `<span style="font-size:.75rem;color:#22c55e;font-weight:600">✓ Paga</span>`}
+              <button onclick="editarConta('${c.id}')" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:.75rem;color:var(--gray);cursor:pointer;font-family:inherit">Editar</button>
+              <button onclick="excluirConta('${c.id}')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:5px 12px;font-size:.75rem;color:#ef4444;cursor:pointer;font-family:inherit">Excluir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderizarCalendarioContas() {
+  const agora = new Date();
+  const alvo = new Date(agora.getFullYear(), agora.getMonth() + contasMesOffset, 1);
+  const label = document.getElementById('contas-mes-label');
+  if (label) label.textContent = MESES[alvo.getMonth()] + ' ' + alvo.getFullYear();
+
+  const grid = document.getElementById('contas-grid-dias');
+  if (!grid) return;
+
+  // Remover dias antigos, manter cabeçalho (7 primeiros)
+  while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  const primeiroDia = new Date(alvo.getFullYear(), alvo.getMonth(), 1).getDay();
+  const totalDias = new Date(alvo.getFullYear(), alvo.getMonth() + 1, 0).getDate();
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  // Contas do mês visualizado
+  const anoMes = `${alvo.getFullYear()}-${String(alvo.getMonth()+1).padStart(2,'0')}`;
+  const contasMes = contasCadastradas.filter(c => c.vencimento && c.vencimento.startsWith(anoMes));
+
+  // Células vazias antes do 1º dia
+  for (let i = 0; i < primeiroDia; i++) {
+    const vazio = document.createElement('div');
+    grid.appendChild(vazio);
+  }
+
+  for (let d = 1; d <= totalDias; d++) {
+    const cell = document.createElement('div');
+    const dataStr = `${alvo.getFullYear()}-${String(alvo.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const contasDia = contasMes.filter(c => c.vencimento === dataStr);
+    const diaDate = new Date(dataStr + 'T00:00:00');
+    const isHoje = diaDate.getTime() === hoje.getTime();
+
+    let bg = 'transparent', color = 'var(--gray)', border = 'none';
+    if (contasDia.length > 0) {
+      const temVencida = contasDia.some(c => !c.paga && diaDate < hoje);
+      const temPaga = contasDia.every(c => c.paga);
+      bg = temPaga ? 'rgba(34,197,94,0.2)' : temVencida ? 'rgba(239,68,68,0.25)' : 'rgba(245,158,11,0.25)';
+      color = temPaga ? '#22c55e' : temVencida ? '#ef4444' : '#f59e0b';
+    }
+    if (isHoje) border = '1px solid var(--primary)';
+
+    cell.style.cssText = `font-size:.7rem;padding:4px 2px;border-radius:6px;background:${bg};color:${color};border:${border};font-weight:${contasDia.length>0?'700':'400'};cursor:${contasDia.length>0?'pointer':'default'};`;
+    cell.textContent = d;
+    if (contasDia.length > 0) {
+      cell.title = contasDia.map(c => c.descricao).join(', ');
+    }
+    grid.appendChild(cell);
+  }
+}
+
+async function salvarConta() {
+  if (!currentUser) return;
+  const descricao  = document.getElementById('conta-descricao').value.trim();
+  const valor      = parseFloat(document.getElementById('conta-valor').value);
+  const vencimento = document.getElementById('conta-vencimento').value;
+  const categoria  = document.getElementById('conta-categoria').value;
+  const recorrente = document.getElementById('conta-recorrente').checked;
+
+  if (!descricao || isNaN(valor) || !vencimento) {
+    alert('Preencha descrição, valor e vencimento.'); return;
+  }
+
+  const dados = { descricao, valor, vencimento, categoria, recorrente, paga: false };
+
+  try {
+    if (editandoContaId) {
+      await atualizarConta(currentUser.uid, editandoContaId, dados);
+      const idx = contasCadastradas.findIndex(c => c.id === editandoContaId);
+      if (idx >= 0) contasCadastradas[idx] = { ...contasCadastradas[idx], ...dados };
+      cancelarEdicaoConta();
+    } else {
+      const id = await adicionarConta(currentUser.uid, dados);
+      contasCadastradas.push({ id, ...dados });
+    }
+    limparFormConta();
+    renderizarContas();
+    verificarAlertasContas();
+    const suc = document.getElementById('conta-sucesso');
+    if (suc) { suc.style.display='block'; setTimeout(()=>suc.style.display='none', 2000); }
+  } catch(e) { console.error(e); alert('Erro ao salvar conta.'); }
+}
+
+function limparFormConta() {
+  ['conta-descricao','conta-valor','conta-vencimento'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('conta-recorrente').checked = false;
+  document.getElementById('conta-categoria').value = 'Moradia';
+}
+
+function editarConta(id) {
+  const c = contasCadastradas.find(c => c.id === id);
+  if (!c) return;
+  editandoContaId = id;
+  document.getElementById('conta-descricao').value  = c.descricao || '';
+  document.getElementById('conta-valor').value      = c.valor || '';
+  document.getElementById('conta-vencimento').value = c.vencimento || '';
+  document.getElementById('conta-categoria').value  = c.categoria || 'Outros';
+  document.getElementById('conta-recorrente').checked = c.recorrente || false;
+  document.getElementById('contas-form-titulo').textContent = 'Editar Conta';
+  document.getElementById('btn-salvar-conta').textContent = 'Salvar alterações';
+  document.getElementById('btn-cancelar-conta').style.display = 'block';
+  irPara('contas');
+  document.getElementById('conta-descricao').focus();
+}
+
+function cancelarEdicaoConta() {
+  editandoContaId = null;
+  limparFormConta();
+  document.getElementById('contas-form-titulo').textContent = 'Nova Conta';
+  document.getElementById('btn-salvar-conta').textContent = 'Cadastrar conta';
+  document.getElementById('btn-cancelar-conta').style.display = 'none';
+}
+
+async function pagarConta(id) {
+  if (!currentUser) return;
+  const c = contasCadastradas.find(c => c.id === id);
+  if (!c) return;
+
+  try {
+    // Marcar como paga no Firestore
+    await atualizarConta(currentUser.uid, id, { paga: true });
+    const idx = contasCadastradas.findIndex(c => c.id === id);
+    if (idx >= 0) contasCadastradas[idx].paga = true;
+
+    // Lançar automaticamente como saída nas movimentações
+    await adicionarMovimentacao(currentUser.uid, {
+      descricao: c.descricao,
+      valor: c.valor,
+      tipo: 'gasto',
+      categoria: c.categoria || 'Outros',
+      data: hojeISO(),
+      recorrente: false,
+      origem: 'conta_paga'
+    });
+
+    renderizarContas();
+    verificarAlertasContas();
+    // Atualizar insights após pagamento
+    setTimeout(() => { if (typeof executarManualEngine === 'function') executarManualEngine(); }, 300);
+
+    // Toast confirmação
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1a2236;border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:12px 20px;color:#22c55e;font-size:.85rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:9999;white-space:nowrap';
+    t.textContent = `✓ "${c.descricao}" paga e lançada como saída`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  } catch(e) { console.error(e); alert('Erro ao marcar como paga.'); }
+}
+
+async function excluirConta(id) {
+  if (!currentUser) return;
+  if (!confirm('Excluir esta conta?')) return;
+  try {
+    await deletarConta(currentUser.uid, id);
+    contasCadastradas = contasCadastradas.filter(c => c.id !== id);
+    renderizarContas();
+  } catch(e) { console.error(e); }
+}
+
+function filtrarContas(filtro, btn) {
+  contasFiltro = filtro;
+  document.querySelectorAll('.contas-filtro-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderizarContas();
+}
+
+function mudarMesContas(delta) {
+  contasMesOffset += delta;
+  renderizarCalendarioContas();
+}
+
+function verificarAlertasContas() {
+  const vencidas = contasCadastradas.filter(c => statusConta(c) === 'vencida');
+  const proximas = contasCadastradas.filter(c => statusConta(c) === 'proxima');
+  const total = vencidas.length + proximas.length;
+  if (total === 0) return;
+
+  // Badge no ícone da sidebar
+  const navContas = document.querySelector('[data-tela="contas"]');
+  if (navContas && !navContas.querySelector('.conta-badge')) {
+    const badge = document.createElement('span');
+    badge.className = 'conta-badge';
+    badge.textContent = total;
+    badge.style.cssText = 'position:absolute;top:4px;right:4px;background:#ef4444;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1';
+    navContas.style.position = 'relative';
+    navContas.appendChild(badge);
+  }
+}
+
+window.salvarConta        = salvarConta;
+window.editarConta        = editarConta;
+window.cancelarEdicaoConta= cancelarEdicaoConta;
+window.pagarConta         = pagarConta;
+window.excluirConta       = excluirConta;
+window.filtrarContas      = filtrarContas;
+window.mudarMesContas     = mudarMesContas;
+window.renderizarContas   = renderizarContas;
+
+// ===== MÓDULO 3: SCORE FINANCEIRO =====
+
+let scoreHistoricoChart = null;
+
+function calcularScore() {
+  // Pontua cada critério
+  const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+  const labels = { gastos: '', dividas: '', metas: '', reserva: '' };
+  const pcts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+
+  // 1. CONTROLE DE GASTOS (0–300 pts)
+  // Baseado em % da renda gasta
+  if (totalEntradas > 0) {
+    const pctGasto = (totalSaidas / totalEntradas) * 100;
+    if (pctGasto <= 50)       { pts.gastos = 300; labels.gastos = `${pctGasto.toFixed(0)}% da renda — Excelente!`; pcts.gastos = 100; }
+    else if (pctGasto <= 70)  { pts.gastos = 230; labels.gastos = `${pctGasto.toFixed(0)}% da renda — Bom controle`; pcts.gastos = Math.round(pctGasto); }
+    else if (pctGasto <= 90)  { pts.gastos = 130; labels.gastos = `${pctGasto.toFixed(0)}% da renda — Atenção!`; pcts.gastos = Math.round(pctGasto); }
+    else if (pctGasto <= 100) { pts.gastos = 50;  labels.gastos = `${pctGasto.toFixed(0)}% da renda — Limite!`; pcts.gastos = 95; }
+    else                      { pts.gastos = 0;   labels.gastos = `${pctGasto.toFixed(0)}% da renda — Gasto além da renda!`; pcts.gastos = 100; }
+  } else {
+    pts.gastos = 150; pcts.gastos = 50; labels.gastos = 'Sem entradas registradas';
+  }
+
+  // 2. DÍVIDAS ATIVAS (0–250 pts)
+  const totalDividas = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+  if (totalDividas === 0) {
+    pts.dividas = 250; pcts.dividas = 100; labels.dividas = 'Sem dívidas — Parabéns! 🎉';
+  } else if (totalEntradas > 0) {
+    const mesesDivida = totalDividas / totalEntradas;
+    if (mesesDivida <= 1)      { pts.dividas = 180; pcts.dividas = 80; labels.dividas = fmt(totalDividas) + ' em dívidas (até 1 mês de renda)'; }
+    else if (mesesDivida <= 3) { pts.dividas = 120; pcts.dividas = 55; labels.dividas = fmt(totalDividas) + ' em dívidas (até 3 meses de renda)'; }
+    else if (mesesDivida <= 6) { pts.dividas = 60;  pcts.dividas = 30; labels.dividas = fmt(totalDividas) + ' em dívidas (pesado!)'; }
+    else                       { pts.dividas = 0;   pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas (crítico!)'; }
+  } else {
+    pts.dividas = 0; pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas';
+  }
+
+  // 3. METAS CUMPRIDAS (0–250 pts)
+  if (typeof metas !== 'undefined' && metas.length > 0) {
+    const totalMeta = metas.reduce((s, m) => s + m.objetivo, 0);
+    const totalAtual = metas.reduce((s, m) => s + (m.atual || 0), 0);
+    const pctMeta = totalMeta > 0 ? Math.min((totalAtual / totalMeta) * 100, 100) : 0;
+    pts.metas = Math.round(pctMeta / 100 * 250);
+    pcts.metas = Math.round(pctMeta);
+    labels.metas = `${pctMeta.toFixed(0)}% das metas concluídas`;
+  } else {
+    pts.metas = 0; pcts.metas = 0; labels.metas = 'Nenhuma meta cadastrada';
+  }
+
+  // 4. RESERVA FINANCEIRA (0–200 pts)
+  if (saldo <= 0) {
+    pts.reserva = 0; pcts.reserva = 0; labels.reserva = 'Saldo negativo — emergência!';
+  } else if (totalEntradas > 0) {
+    const mesesReserva = saldo / totalEntradas;
+    if (mesesReserva >= 6)     { pts.reserva = 200; pcts.reserva = 100; labels.reserva = `${mesesReserva.toFixed(1)} meses de reserva — Ótimo!`; }
+    else if (mesesReserva >= 3){ pts.reserva = 150; pcts.reserva = 75;  labels.reserva = `${mesesReserva.toFixed(1)} meses de reserva — Bom!`; }
+    else if (mesesReserva >= 1){ pts.reserva = 90;  pcts.reserva = 45;  labels.reserva = `${mesesReserva.toFixed(1)} mes(es) de reserva — Construindo`; }
+    else                       { pts.reserva = 40;  pcts.reserva = 20;  labels.reserva = `Menos de 1 mês de reserva`; }
+  } else {
+    pts.reserva = saldo > 0 ? 80 : 0; pcts.reserva = 20; labels.reserva = fmt(saldo) + ' em caixa';
+  }
+
+  // Penalidade por contas vencidas
+  const contasV = typeof window._contasCadastradas !== 'undefined'
+    ? window._contasCadastradas.filter(c => {
+        if (c.paga) return false;
+        const v = new Date(c.vencimento + 'T12:00:00');
+        return v < new Date();
+      })
+    : [];
+  const penalidade = Math.min(contasV.length * 30, 150); // até -150 pts
+
+  const total = Math.max(0, pts.gastos + pts.dividas + pts.metas + pts.reserva - penalidade);
+
+  // Classificação
+  let badge, cor, dica;
+  if (total >= 800)      { badge = '⭐ Excelente'; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
+  else if (total >= 600) { badge = '🟢 Bom'; cor = '#22C55E'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
+  else if (total >= 400) { badge = '🟡 Estável'; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
+  else if (total >= 200) { badge = '🟠 Atenção'; cor = '#F97316'; dica = 'Há espaço para melhorar. Reduza dívidas e controle os gastos no próximo mês.'; }
+  else                   { badge = '🔴 Crítico'; cor = '#EF4444'; dica = 'Situação crítica. Priorize quitar dívidas, corte gastos e busque aumentar a renda.'; }
+  if (penalidade > 0) dica = `⚠️ ${contasV.length} conta(s) vencida(s) reduziram seu score em ${penalidade} pontos. ` + dica;
+
+  // Animação do número
+  animarScore(total);
+
+  // Atualizar gauge
+  atualizarGauge(total, cor);
+
+  // Badge e dica principal
+  document.getElementById('score-badge').textContent = badge;
+  document.getElementById('score-tip').textContent = dica;
+
+  // Critérios
+  atualizarCriterio('gastos', pts.gastos, 300, pcts.gastos, labels.gastos);
+  atualizarCriterio('dividas', pts.dividas, 250, pcts.dividas, labels.dividas);
+  atualizarCriterio('metas', pts.metas, 250, pcts.metas, labels.metas);
+  atualizarCriterio('reserva', pts.reserva, 200, pcts.reserva, labels.reserva);
+
+  // Dicas personalizadas
+  renderizarDicas(pts, total);
+
+  // Mini card no dashboard
+  const miniEl = document.getElementById('kpi-score-mini');
+  const miniLabel = document.getElementById('kpi-score-mini-label');
+  if (miniEl) miniEl.textContent = total;
+  if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+
+  // Salvar histórico
+  salvarHistoricoScore(total);
+  renderizarHistoricoScore();
+}
+
+function atualizarCriterio(id, pts, max, pct, label) {
+  const ptsEl = document.getElementById('sc-' + id + '-pts');
+  const barEl = document.getElementById('sc-' + id + '-bar');
+  const labelEl = document.getElementById('sc-' + id + '-label');
+  if (ptsEl) ptsEl.textContent = pts + ' / ' + max + ' pts';
+  if (barEl) {
+    setTimeout(() => { barEl.style.width = Math.min(pct, 100) + '%'; }, 200);
+  }
+  if (labelEl) labelEl.textContent = label;
+}
+
+function animarScore(target) {
+  const el = document.getElementById('score-numero');
+  if (!el) return;
+  const duration = 1200;
+  const start = parseInt(el.textContent) || 0;
+  const startTime = performance.now();
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function atualizarGauge(score, cor) {
+  const arc = document.getElementById('score-gauge-arc');
+  if (!arc) return;
+  const totalLength = 251.3; // semicircle at radius 80
+  const pct = Math.min(score / 1000, 1);
+  const offset = totalLength - (pct * totalLength);
+  arc.style.stroke = cor;
+  arc.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.5s';
+  setTimeout(() => { arc.style.strokeDashoffset = offset; }, 100);
+}
+
+function renderizarDicas(pts, total) {
+  const el = document.getElementById('score-dicas-lista');
+  if (!el) return;
+  const dicas = [];
+
+  if (pts.gastos < 200) dicas.push({ icon: '💸', titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
+  if (pts.gastos >= 230) dicas.push({ icon: '🎯', titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
+
+  if (pts.dividas < 120) dicas.push({ icon: '🏦', titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
+  if (pts.dividas === 250) dicas.push({ icon: '🏆', titulo: 'Zero dívidas!', texto: 'Incrível! Agora redirecione o que pagava em dívidas para construir sua reserva ou investir.' });
+
+  if (pts.metas === 0) dicas.push({ icon: '🎯', titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
+  else if (pts.metas < 150) dicas.push({ icon: '📈', titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
+
+  if (pts.reserva < 90) dicas.push({ icon: '🛡️', titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
+  if (pts.reserva >= 200) dicas.push({ icon: '💎', titulo: 'Reserva sólida!', texto: 'Parabéns! Com 6+ meses de reserva, explore investimentos de médio prazo para fazer o dinheiro crescer.' });
+
+  if (total >= 800) dicas.push({ icon: '🚀', titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
+
+  if (dicas.length === 0) {
+    el.innerHTML = '<div class="vazio">Continue assim! Seu score está sendo monitorado.</div>';
+    return;
+  }
+
+  el.innerHTML = dicas.map(d => `
+    <div class="score-dica-item">
+      <span class="score-dica-icon">${d.icon}</span>
+      <div>
+        <div class="score-dica-titulo">${d.titulo}</div>
+        <div class="score-dica-texto">${d.texto}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function salvarHistoricoScore(score) {
+  const key = 'monvy_score_historico';
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const mesAtual = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const idx = hist.findIndex(h => h.mes === mesAtual);
+  if (idx >= 0) hist[idx].score = score;
+  else hist.push({ mes: mesAtual, score });
+  // Manter apenas os últimos 12 meses
+  if (hist.length > 12) hist.splice(0, hist.length - 12);
+  localStorage.setItem(key, JSON.stringify(hist));
+}
+
+function renderizarHistoricoScore() {
+  const key = 'monvy_score_historico';
+  const hist = JSON.parse(localStorage.getItem(key) || '[]');
+  const canvas = document.getElementById('score-history-chart');
+  const empty = document.getElementById('score-history-empty');
+  if (!canvas) return;
+
+  if (hist.length <= 1) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+
+  const labels = hist.map(h => {
+    const [y, m] = h.mes.split('-');
+    return new Date(y, m - 1).toLocaleDateString('pt-BR', { month: 'short' });
+  });
+  const scores = hist.map(h => h.score);
+
+  if (scoreHistoricoChart) scoreHistoricoChart.destroy();
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)';
+
+  scoreHistoricoChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: scores,
+        borderColor: '#22C55E',
+        backgroundColor: 'rgba(34,197,94,0.12)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#22C55E',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => 'Score: ' + ctx.parsed.y }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor } },
+        y: { min: 0, max: 1000, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: textColor, stepSize: 200 } }
+      }
+    }
+  });
+}
+
+// Hook no irPara para calcular score ao entrar na tela
+const _irParaScore = window.irPara || irPara;
+window.irPara = function(tela) {
+  _irParaScore(tela);
+  if (tela === 'score') {
+    setTimeout(calcularScore, 100);
+  }
+  if (tela === 'investimentos') {
+    buscarTaxasBCB();
+  }
+};
+
+// Atualiza mini-card sempre que KPIs mudam
+const _atualizarKPIsOrig = window.atualizarKPIs || atualizarKPIs;
+function atualizarKPIs() {
+  _atualizarKPIsOrig();
+  // Calcula score silenciosamente para atualizar mini card
+  setTimeout(() => {
+    const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+    if (totalEntradas > 0) {
+      const p = (totalSaidas / totalEntradas) * 100;
+      pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
+    } else { pts.gastos = 150; }
+    const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+    pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
+    pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
+    pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
+    const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
+    const miniEl = document.getElementById('kpi-score-mini');
+    const miniLabel = document.getElementById('kpi-score-mini-label');
+    let badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
+    if (miniEl) miniEl.textContent = total;
+    if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+  }, 300);
+}
+window.atualizarKPIs = atualizarKPIs;
+
+// ===================================================================
+// MANUAL_ENGINE — Motor de Decisão Monvay
+// ===================================================================
+
+function executarManualEngine() {
+  // ---- Coletar dados ----
+  const hoje = new Date();
+  const contasCadastradas = typeof window._contasCadastradas !== 'undefined' ? window._contasCadastradas : (window.contasCadastradas || []);
+
+  // Contas vencidas e próximas
+  const vencidas = contasCadastradas.filter(c => {
+    if (c.paga) return false;
+    const venc = new Date(c.vencimento + 'T12:00:00');
+    return venc < hoje;
+  });
+  const proximas = contasCadastradas.filter(c => {
+    if (c.paga) return false;
+    const venc = new Date(c.vencimento + 'T12:00:00');
+    const diff = (venc - hoje) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff <= 3;
+  });
+
+  // Score atual e anterior
+  const histScore = JSON.parse(localStorage.getItem('monvy_score_historico') || '[]');
+  const scoreAtual = histScore.length > 0 ? histScore[histScore.length - 1].score : 0;
+  const scoreAnterior = histScore.length > 1 ? histScore[histScore.length - 2].score : scoreAtual;
+
+  // Gastos por categoria vs média (últimos 2 meses)
+  const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  const mesAnterior = (() => { const d = new Date(hoje); d.setMonth(d.getMonth() - 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; })();
+
+  function gastosMes(mes) {
+    const movs = typeof movimentacoes !== 'undefined' ? movimentacoes : [];
+    return movs.filter(m => m.tipo === 'gasto' && m.data && m.data.startsWith(mes));
+  }
+
+  const gastosPorCat = {};
+  gastosMes(mesAtual).forEach(m => {
+    const cat = m.categoria || 'Outros';
+    gastosPorCat[cat] = (gastosPorCat[cat] || 0) + m.valor;
+  });
+  const gastosPorCatAnt = {};
+  gastosMes(mesAnterior).forEach(m => {
+    const cat = m.categoria || 'Outros';
+    gastosPorCatAnt[cat] = (gastosPorCatAnt[cat] || 0) + m.valor;
+  });
+
+  // Metas com progresso >= 80%
+  const metasQuaseConcluidas = (typeof metas !== 'undefined' ? metas : []).filter(m => {
+    const pct = m.objetivo > 0 ? ((m.atual || 0) / m.objetivo) * 100 : 0;
+    return pct >= 80 && pct < 100;
+  });
+
+  // Reserva = saldo atual
+  const saldoAtual = typeof saldo !== 'undefined' ? saldo : 0;
+  const entradasMes = typeof totalEntradas !== 'undefined' ? totalEntradas : 0;
+  const reservaMeses = entradasMes > 0 ? saldoAtual / entradasMes : 0;
+
+  // Dívidas total
+  const totalDividas = typeof dividasCadastradas !== 'undefined'
+    ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+
+  // ---- Gerar insights ----
+  const insights = [];
+
+  // REGRA 1: Contas vencidas — URGENTE prio 1
+  if (vencidas.length > 0) {
+    const totalV = vencidas.reduce((s, c) => s + c.valor, 0);
+    insights.push({
+      id: 'contas_vencidas',
+      tipo: 'urgente',
+      prioridade: 1,
+      icone: 'icone-urgente.png',
+      titulo: `${vencidas.length} conta${vencidas.length > 1 ? 's' : ''} vencida${vencidas.length > 1 ? 's' : ''}!`,
+      descricao: `Total em atraso: ${fmt(totalV)}. Juros e multas aumentam a cada dia.`,
+      acao: 'Resolver agora',
+      rota: 'contas',
+    });
+  }
+
+  // REGRA 2: Contas próximas do vencimento — ALERTA prio 2
+  if (proximas.length > 0) {
+    const totalP = proximas.reduce((s, c) => s + c.valor, 0);
+    insights.push({
+      id: 'contas_proximas',
+      tipo: 'alerta',
+      prioridade: 2,
+      icone: 'icone-relatorio-novo.png',
+      titulo: `${proximas.length} conta${proximas.length > 1 ? 's' : ''} vence${proximas.length === 1 ? '' : 'm'} em 3 dias`,
+      descricao: `${fmt(totalP)} com vencimento próximo. Pague antes para evitar juros.`,
+      acao: 'Ver contas',
+      rota: 'contas',
+    });
+  }
+
+  // REGRA 3: Score caiu — ALERTA prio 3
+  if (scoreAtual < scoreAnterior && scoreAnterior > 0) {
+    const queda = scoreAnterior - scoreAtual;
+    insights.push({
+      id: 'score_caiu',
+      tipo: 'alerta',
+      prioridade: 3,
+      icone: 'icone-score-novo.png',
+      titulo: 'Seu score financeiro caiu',
+      descricao: `De ${scoreAnterior} para ${scoreAtual} pontos (-${queda}). Veja o que impactou.`,
+      acao: 'Analisar score',
+      rota: 'score',
+    });
+  }
+
+  // REGRA 4: Gastos acima da média em alguma categoria
+  Object.entries(gastosPorCat).forEach(([cat, valor]) => {
+    const media = gastosPorCatAnt[cat] || 0;
+    if (media > 0 && valor > media * 1.3) {
+      const pctAcima = Math.round(((valor - media) / media) * 100);
+      insights.push({
+        id: `gasto_alto_${cat}`,
+        tipo: 'alerta',
+        prioridade: 4,
+        icone: 'icone-grafico-novo.png',
+        titulo: `${cat} ${pctAcima}% acima do mês passado`,
+        descricao: `Você gastou ${fmt(valor)} em ${cat} vs ${fmt(media)} no mês anterior.`,
+        acao: 'Ver gastos',
+        rota: 'gastos',
+      });
+    }
+  });
+
+  // REGRA 5: Meta quase concluída — OPORTUNIDADE
+  metasQuaseConcluidas.forEach(m => {
+    const pct = Math.round(((m.atual || 0) / m.objetivo) * 100);
+    const falta = m.objetivo - (m.atual || 0);
+    insights.push({
+      id: `meta_quase_${m.id}`,
+      tipo: 'oportunidade',
+      prioridade: 5,
+      icone: 'icone-trofeu.png',
+      titulo: `Falta pouco para "${m.nome}"!`,
+      descricao: `${pct}% concluída. Apenas ${fmt(falta)} para atingir sua meta.`,
+      acao: 'Adicionar valor',
+      rota: 'metas',
+    });
+  });
+
+  // REGRA 6: Saldo positivo — OPORTUNIDADE
+  if (saldoAtual > 0 && totalDividas === 0) {
+    insights.push({
+      id: 'saldo_disponivel',
+      tipo: 'oportunidade',
+      prioridade: 6,
+      icone: 'icone-investimento-novo.png',
+      titulo: `${fmt(saldoAtual)} disponível para investir`,
+      descricao: `Você tem saldo livre. Compare as melhores opções de investimento.`,
+      acao: 'Simular investimento',
+      rota: 'investimentos',
+    });
+  }
+
+  // REGRA 7: Sem reserva ou reserva baixa — EDUCATIVO
+  if (reservaMeses < 1 && entradasMes > 0) {
+    insights.push({
+      id: 'sem_reserva',
+      tipo: 'educativo',
+      prioridade: 7,
+      icone: 'icone-dinheiro-novo.png',
+      titulo: 'Construa sua reserva de emergência',
+      descricao: `O ideal é ter 3–6 meses de despesas guardados. Sua reserva atual é ${reservaMeses < 0.1 ? 'inexistente' : 'muito baixa'}.`,
+      acao: 'Criar meta de reserva',
+      rota: 'metas',
+    });
+  }
+
+  // REGRA 8: Tem dívidas — ALERTA
+  if (totalDividas > 0 && !insights.find(i => i.id === 'contas_vencidas')) {
+    insights.push({
+      id: 'tem_dividas',
+      tipo: 'alerta',
+      prioridade: 3,
+      icone: 'icone-cadeado-novo.png',
+      titulo: `${fmt(totalDividas)} em dívidas ativas`,
+      descricao: 'Priorize quitar as dívidas com maiores juros primeiro.',
+      acao: 'Ver dívidas',
+      rota: 'dividas',
+    });
+  }
+
+  // Sem insights mínimo 1
+  if (insights.length === 0 && entradasMes === 0) {
+    insights.push({
+      id: 'comece_registrando',
+      tipo: 'educativo',
+      prioridade: 10,
+      icone: 'icone-grafico-novo.png',
+      titulo: 'Comece registrando suas entradas',
+      descricao: 'Adicione sua renda e gastos para receber insights personalizados.',
+      acao: 'Adicionar entrada',
+      rota: 'gastos',
+    });
+  }
+
+  // ---- Ordenar e limitar ----
+  const prioTipo = { urgente: 0, alerta: 1, oportunidade: 2, educativo: 3 };
+  insights.sort((a, b) => a.prioridade - b.prioridade || prioTipo[a.tipo] - prioTipo[b.tipo]);
+  const top5 = insights.slice(0, 5);
+
+  // ---- Renderizar no Dashboard ----
+  renderizarInsights(top5);
+  return top5;
+}
+
+function renderizarInsights(insights) {
+  const panel = document.getElementById('insights-panel');
+  const list = document.getElementById('insights-list');
+  const count = document.getElementById('insights-count');
+  if (!panel || !list) return;
+
+  if (insights.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  if (count) count.textContent = `${insights.length} insight${insights.length > 1 ? 's' : ''}`;
+
+  const cores = {
+    urgente:     { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   label: '#EF4444', tag: '🚨 Urgente' },
+    alerta:      { bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.3)',  label: '#F59E0B', tag: '⚠️ Atenção' },
+    oportunidade:{ bg: 'rgba(34,197,94,0.08)',   border: 'rgba(34,197,94,0.25)',  label: '#22C55E', tag: '💡 Oportunidade' },
+    educativo:   { bg: 'rgba(139,92,246,0.08)',  border: 'rgba(139,92,246,0.25)', label: '#8B5CF6', tag: '📚 Saiba mais' },
+  };
+
+  list.innerHTML = insights.map(ins => {
+    const c = cores[ins.tipo] || cores.educativo;
+    return `
+      <div class="insight-card" style="background:${c.bg};border:1px solid ${c.border}"
+           onclick="irPara('${ins.rota}')">
+        <img src="${ins.icone}" alt="" class="insight-icon" onerror="this.style.display='none'">
+        <div class="insight-body">
+          <div class="insight-tag" style="color:${c.label}">${c.tag}</div>
+          <div class="insight-titulo">${ins.titulo}</div>
+          <div class="insight-desc">${ins.descricao}</div>
+        </div>
+        <button class="insight-acao" style="border-color:${c.border};color:${c.label}"
+                onclick="event.stopPropagation();irPara('${ins.rota}')">
+          ${ins.acao} →
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+// Hook: rodar manual_engine sempre que dados mudarem
+const _origAtualizarKPIs2 = window.atualizarKPIs;
+window.atualizarKPIs = function() {
+  if (_origAtualizarKPIs2) _origAtualizarKPIs2();
+  setTimeout(executarManualEngine, 400);
+};
+
+// Rodar ao abrir o dashboard
+const _irParaFinal = window.irPara;
+window.irPara = function(tela) {
+  if (_irParaFinal) _irParaFinal(tela);
+  if (tela === 'inicio') setTimeout(executarManualEngine, 200);
+  if (tela === 'score') setTimeout(calcularScore, 100);
+  if (tela === 'investimentos') buscarTaxasBCB();
+};
+
+// Expor funções globais
+window.executarManualEngine = executarManualEngine;
+window.renderizarInsights = renderizarInsights;

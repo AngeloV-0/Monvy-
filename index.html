@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monvy</title>
+  <title>Monvay — Seu Ecossistema Financeiro</title>
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <img src="logo.png" alt="Monvy" style="height:36px;width:auto;display:block;">
+      <img src="logo.png" alt="Monvay" style="height:36px;width:auto;display:block;">
     </div>
     <nav>
       <a href="#" class="nav-item active" data-tela="inicio" title="Início">
@@ -39,6 +39,12 @@
       </a>
       <a href="#" class="nav-item" data-tela="relatorio" title="Relatório">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </a>
+      <a href="#" class="nav-item" data-tela="contas" title="Contas a Pagar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+      </a>
+      <a href="#" class="nav-item" data-tela="score" title="Score Financeiro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       </a>
     </nav>
     <div class="sidebar-bottom">
@@ -144,9 +150,28 @@
             <div class="kpi-value yellow" id="kpi-movs">0</div>
             <div class="kpi-sub">registradas</div>
           </div>
+          <div class="kpi-card score-mini-card" onclick="irPara('score')" style="cursor:pointer;position:relative;overflow:hidden">
+            <div class="kpi-icon" style="color:#A3E635"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+            <div class="kpi-label">Score Financeiro</div>
+            <div class="kpi-value" id="kpi-score-mini" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">–</div>
+            <div class="kpi-sub" id="kpi-score-mini-label">Ver detalhes →</div>
+          </div>
         </div>
 
-        <!-- Chart + Recent -->
+
+        <!-- MANUAL ENGINE — INSIGHTS PANEL -->
+        <div id="insights-panel" style="margin-bottom:20px;display:none">
+          <div class="card-header" style="margin-bottom:12px">
+            <div>
+              <div class="card-title">⚡ O que fazer agora</div>
+              <div class="card-sub">Insights personalizados para você</div>
+            </div>
+            <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
+          </div>
+          <div id="insights-list" class="insights-list"></div>
+        </div>
+
+                <!-- Chart + Recent -->
         <div class="content-grid">
           <div class="chart-card">
             <div class="card-header">
@@ -269,9 +294,14 @@
       <section id="tela-metas" class="tela">
         <div class="two-col">
           <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-meta-novo.png" alt="Meta" style="width:36px;height:36px;object-fit:contain;"> Nova Meta</div>
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-trofeu.png" alt="Meta" style="width:36px;height:36px;object-fit:contain;"> Nova Meta</div>
             <input type="text" id="meta-nome" placeholder="Nome da meta">
             <input type="number" id="meta-valor" placeholder="Valor objetivo (R$)">
+            <input type="number" id="meta-atual" placeholder="Quanto já tem guardado (R$)" min="0" style="margin-top:0">
+            <div style="margin-bottom:12px">
+              <label style="font-size:.82rem;color:var(--gray);margin-bottom:6px;display:block">Data alvo (opcional)</label>
+              <input type="month" id="meta-data-alvo" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none">
+            </div>
             <button class="btn-primary" onclick="criarMeta()">Criar meta</button>
           </div>
           <div>
@@ -336,8 +366,8 @@
                 <div class="div-tipo-opt" data-value="emprestimo" data-label="Empréstimo pessoal" data-icon="icone-emprestimo.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
                   <img src="icone-emprestimo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Empréstimo pessoal</span>
                 </div>
-                <div class="div-tipo-opt" data-value="financiamento" data-label="Financiamento (carro/casa)" data-icon="icone-financiamento.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
-                  <img src="icone-financiamento.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Financiamento (carro/casa)</span>
+                <div class="div-tipo-opt" data-value="financiamento" data-label="Financiamento (carro/casa)" data-icon="icone-banco.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-banco.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Financiamento (carro/casa)</span>
                 </div>
                 <div class="div-tipo-opt" data-value="terceiros" data-label="Dívida com terceiros" data-icon="icone-terceiros.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
                   <img src="icone-terceiros.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Dívida com terceiros</span>
@@ -426,37 +456,126 @@
 
       <!-- ===== TELA: INVESTIMENTOS ===== -->
       <section id="tela-investimentos" class="tela">
-        <div class="two-col">
-          <div class="form-card">
-            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px"><img src="icone-investimento-novo.png" alt="Investimento" style="width:36px;height:36px;object-fit:contain;"> Simular Investimento</div>
-            <input type="number" id="inv-valor" placeholder="Valor a investir (R$)">
-            <input type="number" id="inv-meses" placeholder="Prazo (meses)">
-            <button class="btn-primary" onclick="calcularInvestimentos()">Comparar</button>
+
+        <!-- Header inteligente -->
+        <!-- BCB Status Bar -->
+        <div class="bcb-status-bar" id="bcb-status-bar">
+          <div class="bcb-status-dot" id="bcb-dot"></div>
+          <span id="bcb-status-text">Buscando taxas do Banco Central...</span>
+          <span class="bcb-update-time" id="bcb-update-time"></span>
+        </div>
+
+        <!-- Taxas ao vivo -->
+        <div class="bcb-rates-row" id="bcb-rates-row" style="display:none">
+          <div class="bcb-rate-chip">
+            <span class="bcb-rate-label">Selic</span>
+            <span class="bcb-rate-val" id="bcb-selic">–</span>
           </div>
-          <div id="resultado-inv" class="inv-cards hidden">
-            <div class="inv-card poupanca">
-              <div class="inv-nome"><img src="icone-cofre.png" alt="Poupança" style="width:32px;height:32px;object-fit:contain;"> Poupança</div>
-              <div class="inv-taxa">~0,5% ao mês</div>
-              <div class="inv-total" id="inv-poupanca">—</div>
-              <div class="inv-ganho" id="inv-poupanca-ganho">—</div>
+          <div class="bcb-rate-chip">
+            <span class="bcb-rate-label">CDI (mês)</span>
+            <span class="bcb-rate-val" id="bcb-cdi">–</span>
+          </div>
+          <div class="bcb-rate-chip">
+            <span class="bcb-rate-label">IPCA (mês)</span>
+            <span class="bcb-rate-val" id="bcb-ipca">–</span>
+          </div>
+          <div class="bcb-rate-chip">
+            <span class="bcb-rate-label">Poupança (mês)</span>
+            <span class="bcb-rate-val" id="bcb-poup">–</span>
+          </div>
+          <div class="bcb-rate-chip">
+            <span class="bcb-rate-label">LCI / LCA</span>
+            <span class="bcb-rate-val" id="bcb-lci">–</span>
+          </div>
+        </div>
+
+        <div class="sim-header-card">
+          <div class="sim-inputs-row">
+            <div class="sim-input-group">
+              <label>Valor inicial (R$)</label>
+              <input type="number" id="inv-inicial" placeholder="Ex: 1000" min="0">
             </div>
-            <div class="inv-card selic">
-              <div class="inv-badge">Recomendado</div>
-              <div class="inv-nome"><img src="icone-banco.png" alt="Selic" style="width:32px;height:32px;object-fit:contain;"> Tesouro Selic</div>
-              <div class="inv-taxa">~0,9% ao mês</div>
-              <div class="inv-total" id="inv-selic">—</div>
-              <div class="inv-ganho" id="inv-selic-ganho">—</div>
+            <div class="sim-input-group">
+              <label>Aporte mensal (R$)</label>
+              <input type="number" id="inv-aporte" placeholder="Ex: 200 (opcional)" min="0">
             </div>
-            <div class="inv-card cdb">
-              <div class="inv-nome"><img src="icone-grafico-novo.png" alt="CDB" style="width:32px;height:32px;object-fit:contain;"> CDB 110%</div>
-              <div class="inv-taxa">~1,0% ao mês</div>
-              <div class="inv-total" id="inv-cdb">—</div>
-              <div class="inv-ganho" id="inv-cdb-ganho">—</div>
+            <div class="sim-input-group">
+              <label>Período (meses)</label>
+              <input type="number" id="inv-meses" placeholder="Ex: 12" min="1">
+            </div>
+            <button class="btn-primary sim-btn" onclick="calcularInvestimentos()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              Simular
+            </button>
+          </div>
+          <div class="sim-summary" id="sim-summary" style="display:none">
+            <div class="sim-summary-item">
+              <span class="sim-summary-label">Total investido</span>
+              <span class="sim-summary-val" id="sim-total-inv">—</span>
+            </div>
+            <div class="sim-summary-sep"></div>
+            <div class="sim-summary-item">
+              <span class="sim-summary-label">Melhor opção</span>
+              <span class="sim-summary-val highlight" id="sim-melhor-nome">—</span>
+            </div>
+            <div class="sim-summary-sep"></div>
+            <div class="sim-summary-item">
+              <span class="sim-summary-label">Ganho líquido</span>
+              <span class="sim-summary-val green" id="sim-melhor-ganho">—</span>
             </div>
           </div>
         </div>
-        <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos.</div>
+
+        </div><!-- end sim-header-card -->
+
+        <!-- Ranking -->
+        <div id="sim-ranking-wrap" style="display:none">
+          <div class="sim-ranking-header">
+            <div>
+              <div class="card-title">🏆 Melhores opções de investimento</div>
+              <div class="card-sub">Valor líquido de resgate — ordenado do maior para o menor</div>
+            </div>
+            <button class="btn-outline-green" onclick="abrirModalSimulacao()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              Ver simulação completa
+            </button>
+          </div>
+
+          <div class="sim-ranking-list" id="sim-ranking-list"></div>
+        </div>
+
+        <!-- Dica -->
+        <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.</div>
+
       </section>
+
+      <!-- MODAL: SIMULAÇÃO COMPLETA -->
+      <div id="modal-simulacao" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalSimulacao()">
+        <div class="modal-box" style="max-width:920px;width:95vw;max-height:90vh;overflow-y:auto">
+          <button class="modal-fechar" onclick="fecharModalSimulacao()">×</button>
+          <h2 style="margin-bottom:4px">📊 Simulação do Investimento</h2>
+
+          <!-- Sub-header -->
+          <div class="sim-modal-subheader" id="sim-modal-subheader"></div>
+
+          <!-- Gráfico de crescimento -->
+          <div style="margin:20px 0 8px">
+            <div class="card-title" style="font-size:.9rem;margin-bottom:12px">📈 Crescimento mês a mês</div>
+            <canvas id="sim-chart" height="200" style="width:100%;max-width:100%"></canvas>
+          </div>
+
+          <!-- Tabela detalhada -->
+          <div class="card-title" style="font-size:.9rem;margin:20px 0 12px">📋 Comparativo detalhado</div>
+          <div class="table-wrap">
+            <table class="mov-table sim-table" id="sim-tabela">
+              <thead><tr id="sim-tabela-head"></tr></thead>
+              <tbody id="sim-tabela-body"></tbody>
+            </table>
+          </div>
+
+          <p style="font-size:0.71rem;color:var(--gray);margin-top:16px;line-height:1.5">Os cálculos consideram taxas de juros e inflação constantes ao longo do período e são baseados nas taxas atuais. É considerado o custo de 0,2% ao ano de custódia para aplicações no Tesouro Direto. O cálculo do IR segue a tabela regressiva: 22,5% em até 6 meses, 20% de 6 a 12 meses, 17,5% de 12 a 24 meses e 15% acima de 24 meses.</p>
+        </div>
+      </div>
 
       <!-- ===== TELA: APRENDER ===== -->
       <section id="tela-aprender" class="tela">
@@ -559,6 +678,280 @@
             <div class="vazio">Nenhum lançamento recorrente cadastrado.</div>
           </div>
         </div>
+
+        <!-- HISTÓRICO MENSAL -->
+        <div class="chart-card" style="margin-top:24px">
+          <div class="card-header" style="margin-bottom:16px">
+            <div>
+              <div class="card-title">Histórico de meses anteriores</div>
+              <div class="card-sub" style="font-size:.78rem;color:var(--gray);margin-top:2px">Fechamentos automáticos mensais</div>
+            </div>
+            <button onclick="carregarHistorico()" style="background:rgba(0,200,83,0.1);border:1px solid rgba(0,200,83,0.2);border-radius:8px;padding:6px 12px;font-size:.75rem;color:var(--primary);cursor:pointer;font-family:inherit">↻ Atualizar</button>
+          </div>
+          <div id="historico-lista">
+            <div class="vazio">Clique em "Atualizar" para carregar o histórico.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== TELA: CONTAS A PAGAR ===== -->
+      <section id="tela-contas" class="tela">
+
+        <!-- KPIs -->
+        <div class="kpi-row" id="contas-kpis">
+          <div class="kpi-card primary-card">
+            <div class="kpi-label">Total a Pagar</div>
+            <div class="kpi-value" id="contas-kpi-total">R$ 0,00</div>
+            <div class="kpi-sub" id="contas-kpi-qtd">Nenhuma conta</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#ef4444">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="kpi-label">Vencidas</div>
+            <div class="kpi-value red" id="contas-kpi-vencidas">0</div>
+            <div class="kpi-sub">em atraso</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#f59e0b">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="kpi-label">Vencem em 3 dias</div>
+            <div class="kpi-value yellow" id="contas-kpi-proximas">0</div>
+            <div class="kpi-sub">atenção</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="color:#22c55e">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="kpi-label">Pagas este mês</div>
+            <div class="kpi-value green" id="contas-kpi-pagas">0</div>
+            <div class="kpi-sub">concluídas</div>
+          </div>
+        </div>
+
+        <div class="two-col" style="align-items:flex-start">
+
+          <!-- Formulário cadastro -->
+          <div class="form-card">
+            <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:28px;height:28px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span id="contas-form-titulo">Nova Conta</span>
+            </div>
+
+            <input type="text" id="conta-descricao" placeholder="Ex: Aluguel, Netflix, Conta de luz...">
+
+            <input type="number" id="conta-valor" placeholder="Valor (R$)" min="0" step="0.01">
+
+            <div style="margin-bottom:12px">
+              <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Vencimento</label>
+              <input type="date" id="conta-vencimento" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+            </div>
+
+            <div style="margin-bottom:12px">
+              <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Categoria</label>
+              <select id="conta-categoria" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;font-family:inherit">
+                <option value="Moradia">Moradia</option>
+                <option value="Assinatura">Assinatura</option>
+                <option value="Educação">Educação</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Alimentação">Alimentação</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">
+              <input type="checkbox" id="conta-recorrente" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;flex-shrink:0">
+              <label for="conta-recorrente" style="font-size:.85rem;color:var(--gray);cursor:pointer">Conta recorrente (repete todo mês)</label>
+            </div>
+
+            <button class="btn-primary" onclick="salvarConta()" id="btn-salvar-conta">Cadastrar conta</button>
+            <button id="btn-cancelar-conta" onclick="cancelarEdicaoConta()" style="display:none;width:100%;margin-top:8px;padding:10px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--gray);cursor:pointer;font-family:inherit;font-size:.9rem">Cancelar edição</button>
+            <div id="conta-sucesso" style="display:none;text-align:center;margin-top:10px;font-size:.82rem;color:var(--primary)">✓ Conta salva!</div>
+          </div>
+
+          <!-- Lista de contas -->
+          <div>
+            <!-- Filtros -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+              <button class="contas-filtro-btn active" onclick="filtrarContas('todas',this)">Todas</button>
+              <button class="contas-filtro-btn" onclick="filtrarContas('pendentes',this)">Pendentes</button>
+              <button class="contas-filtro-btn" onclick="filtrarContas('vencidas',this)">Vencidas</button>
+              <button class="contas-filtro-btn" onclick="filtrarContas('pagas',this)">Pagas</button>
+            </div>
+
+            <!-- Calendário visual -->
+            <div id="contas-calendario" style="background:var(--card-bg,#161b27);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <button onclick="mudarMesContas(-1)" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1.2rem;padding:4px 8px">‹</button>
+                <span id="contas-mes-label" style="font-weight:700;color:var(--white);font-size:.9rem"></span>
+                <button onclick="mudarMesContas(1)" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1.2rem;padding:4px 8px">›</button>
+              </div>
+              <div id="contas-grid-dias" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Dom</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Seg</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Ter</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Qua</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Qui</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Sex</div>
+                <div style="font-size:.65rem;color:var(--gray);padding:2px">Sáb</div>
+              </div>
+            </div>
+
+            <!-- Lista -->
+            <div class="card-title" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+              <span>Contas</span>
+              <span id="contas-lista-count" style="font-size:.78rem;color:var(--gray);font-weight:400">0 contas</span>
+            </div>
+            <div id="lista-contas">
+              <div class="vazio">Nenhuma conta cadastrada.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== TELA: SCORE FINANCEIRO ===== -->
+      <section id="tela-score" class="tela">
+
+        <!-- Score Hero -->
+        <div class="score-hero">
+          <div class="score-gauge-wrap">
+            <svg class="score-gauge-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
+              <path id="score-gauge-arc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#22C55E" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="251.3"/>
+            </svg>
+            <div class="score-number-wrap">
+              <span class="score-number" id="score-numero">0</span>
+              <span class="score-label">de 1000</span>
+            </div>
+          </div>
+          <div class="score-classification">
+            <span class="score-badge" id="score-badge">⬛ Calculando...</span>
+            <p class="score-tip" id="score-tip">Registre movimentações para calcular seu score.</p>
+          </div>
+        </div>
+
+        <!-- Critérios -->
+        <div class="score-criteria-grid">
+
+          <div class="score-criteria-card">
+            <div class="score-criteria-header">
+              <div class="score-criteria-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+              <div>
+                <div class="score-criteria-title">Controle de Gastos</div>
+                <div class="score-criteria-sub">% da renda comprometida</div>
+              </div>
+              <span class="score-pts" id="sc-gastos-pts">0 pts</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track"><div class="score-bar-fill" id="sc-gastos-bar" style="width:0%;background:#F59E0B"></div></div>
+              <span class="score-bar-label" id="sc-gastos-label">–</span>
+            </div>
+          </div>
+
+          <div class="score-criteria-card">
+            <div class="score-criteria-header">
+              <div class="score-criteria-icon" style="background:rgba(239,68,68,0.15);color:#EF4444">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <div>
+                <div class="score-criteria-title">Dívidas Ativas</div>
+                <div class="score-criteria-sub">impacto das dívidas na saúde financeira</div>
+              </div>
+              <span class="score-pts" id="sc-dividas-pts">0 pts</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track"><div class="score-bar-fill" id="sc-dividas-bar" style="width:0%;background:#EF4444"></div></div>
+              <span class="score-bar-label" id="sc-dividas-label">–</span>
+            </div>
+          </div>
+
+          <div class="score-criteria-card">
+            <div class="score-criteria-header">
+              <div class="score-criteria-icon" style="background:rgba(34,197,94,0.15);color:#22C55E">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <div>
+                <div class="score-criteria-title">Metas Cumpridas</div>
+                <div class="score-criteria-sub">progresso nas suas metas</div>
+              </div>
+              <span class="score-pts" id="sc-metas-pts">0 pts</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track"><div class="score-bar-fill" id="sc-metas-bar" style="width:0%;background:#22C55E"></div></div>
+              <span class="score-bar-label" id="sc-metas-label">–</span>
+            </div>
+          </div>
+
+          <div class="score-criteria-card">
+            <div class="score-criteria-header">
+              <div class="score-criteria-icon" style="background:rgba(139,92,246,0.15);color:#8B5CF6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <div class="score-criteria-title">Reserva Financeira</div>
+                <div class="score-criteria-sub">saldo positivo e poupança</div>
+              </div>
+              <span class="score-pts" id="sc-reserva-pts">0 pts</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track"><div class="score-bar-fill" id="sc-reserva-bar" style="width:0%;background:#8B5CF6"></div></div>
+              <span class="score-bar-label" id="sc-reserva-label">–</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dicas + Histórico -->
+        <div class="score-bottom-grid">
+
+          <div class="score-tips-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">💡 Dicas Personalizadas</div>
+                <div class="card-sub">Com base no seu score atual</div>
+              </div>
+            </div>
+            <div id="score-dicas-lista" class="score-dicas-lista">
+              <div class="vazio">Calcule seu score para ver dicas.</div>
+            </div>
+          </div>
+
+          <div class="score-history-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📈 Evolução Mensal</div>
+                <div class="card-sub">Seu score ao longo do tempo</div>
+              </div>
+            </div>
+            <div id="score-history-wrap">
+              <canvas id="score-history-chart" height="160" style="max-width:100%;width:100%"></canvas>
+              <div id="score-history-empty" class="chart-empty" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;opacity:.3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span>Histórico aparecerá conforme os meses passarem</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Escala de classificação -->
+        <div class="score-scale-card">
+          <div class="card-title" style="margin-bottom:16px">📊 Escala de Classificação</div>
+          <div class="score-scale-row">
+            <div class="score-scale-item critico"><span class="scale-emoji">🔴</span><span class="scale-range">0–199</span><span class="scale-name">Crítico</span></div>
+            <div class="score-scale-item atencao"><span class="scale-emoji">🟠</span><span class="scale-range">200–399</span><span class="scale-name">Atenção</span></div>
+            <div class="score-scale-item estavel"><span class="scale-emoji">🟡</span><span class="scale-range">400–599</span><span class="scale-name">Estável</span></div>
+            <div class="score-scale-item bom"><span class="scale-emoji">🟢</span><span class="scale-range">600–799</span><span class="scale-name">Bom</span></div>
+            <div class="score-scale-item excelente"><span class="scale-emoji">⭐</span><span class="scale-range">800–1000</span><span class="scale-name">Excelente</span></div>
+          </div>
+        </div>
+
       </section>
 
     </main>
@@ -666,32 +1059,40 @@
     </div>
     <nav class="drawer-nav">
       <a href="#" class="drawer-item active" data-tela="inicio" onclick="navegarDrawer(this)">
-        <img src="icone-casa-propria.png" alt="Início" style="width:22px;height:22px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
         <span>Início</span>
       </a>
       <a href="#" class="drawer-item" data-tela="gastos" onclick="navegarDrawer(this)">
-        <img src="icone-dinheiro.png" alt="Gastos" style="width:22px;height:22px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         <span>Gastos</span>
       </a>
       <a href="#" class="drawer-item" data-tela="metas" onclick="navegarDrawer(this)">
-        <img src="icone-meta-novo.png" alt="Metas" style="width:22px;height:22px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         <span>Metas</span>
       </a>
       <a href="#" class="drawer-item" data-tela="dividas" onclick="navegarDrawer(this)">
-        <img src="icone-cartao-novo.png" alt="Dívidas" style="width:24px;height:24px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         <span>Dívidas</span>
       </a>
       <a href="#" class="drawer-item" data-tela="investimentos" onclick="navegarDrawer(this)">
-        <img src="icone-investimento-novo.png" alt="Investimentos" style="width:24px;height:24px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         <span>Investimentos</span>
       </a>
       <a href="#" class="drawer-item" data-tela="aprender" onclick="navegarDrawer(this)">
-        <img src="icone-cerebro-novo.png" alt="Aprender" style="width:22px;height:22px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
         <span>Aprender</span>
       </a>
       <a href="#" class="drawer-item" data-tela="relatorio" onclick="navegarDrawer(this)">
-        <img src="icone-relatorio.png" alt="Relatório" style="width:22px;height:22px;object-fit:contain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Relatório</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="contas" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+        <span>Contas a Pagar</span>
+      </a>
+      <a href="#" class="drawer-item" data-tela="score" onclick="navegarDrawer(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <span>Score Financeiro</span>
       </a>
     </nav>
     <div class="drawer-footer">
@@ -752,7 +1153,7 @@
 
       <!-- Tab: Minha vida -->
       <div id="perfil-tab-vida" style="display:none">
-        <div style="font-size:.8rem;color:var(--gray);margin-bottom:16px;line-height:1.5">Atualize sua situação de vida. O Monvy ajusta as categorias e sugestões automaticamente.</div>
+        <div style="font-size:.8rem;color:var(--gray);margin-bottom:16px;line-height:1.5">Atualize sua situação de vida. O Monvay ajusta as categorias e sugestões automaticamente.</div>
 
         <div style="margin-bottom:14px">
           <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">MORADIA</div>

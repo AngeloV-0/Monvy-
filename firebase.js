@@ -163,3 +163,87 @@ export async function deletarDivida(uid, id) {
 }
 
 export { auth, db };
+
+// ── Contas a Pagar ────────────────────────────────────────────
+
+export async function getContas(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'contas'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function adicionarConta(uid, conta) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'contas'), {
+    ...conta, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarConta(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'contas', id), dados);
+}
+
+export async function deletarConta(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'contas', id));
+}
+
+// ── Reset Mensal ──────────────────────────────────────────────
+
+export async function verificarEResetarMes(uid) {
+  const agora = new Date();
+  const mesAtual = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+
+  const perfilRef = doc(db, 'usuarios', uid);
+  const perfilSnap = await getDoc(perfilRef);
+  const perfil = perfilSnap.data() || {};
+  const ultimoMes = perfil.ultimoMesAtivo || null;
+
+  // Se já está no mesmo mês, nada a fazer
+  if (ultimoMes === mesAtual) return false;
+
+  // É um mês novo — arquivar movimentações do mês anterior
+  if (ultimoMes) {
+    const movsSnap = await getDocs(
+      query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('criadoEm', 'desc'))
+    );
+    const movs = movsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (movs.length > 0) {
+      // Calcular totais do mês encerrado
+      const entradas = movs.filter(m => m.tipo === 'entrada').reduce((s, m) => s + (m.valor || 0), 0);
+      const saidas = movs.filter(m => m.tipo === 'saida').reduce((s, m) => s + (m.valor || 0), 0);
+
+      // Salvar resumo no histórico
+      await setDoc(doc(db, 'usuarios', uid, 'historico', ultimoMes), {
+        mes: ultimoMes,
+        entradas,
+        saidas,
+        saldo: entradas - saidas,
+        totalMovimentacoes: movs.length,
+        movimentacoes: movs.map(m => ({
+          descricao: m.descricao || '',
+          valor: m.valor || 0,
+          tipo: m.tipo || '',
+          categoria: m.categoria || '',
+          data: m.data || '',
+        })),
+        arquivadoEm: serverTimestamp()
+      });
+
+      // Deletar todas as movimentações atuais
+      for (const d of movsSnap.docs) {
+        await deleteDoc(doc(db, 'usuarios', uid, 'movimentacoes', d.id));
+      }
+    }
+  }
+
+  // Atualizar o mês ativo no perfil
+  await updateDoc(perfilRef, { ultimoMesAtivo: mesAtual });
+  return true; // indica que houve reset
+}
+
+export async function getHistorico(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'historico'));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => b.mes.localeCompare(a.mes));
+}
