@@ -1183,7 +1183,7 @@ const DIVIDA_ICONS = {
   emprestimo: '<img src="icone-emprestimo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
   financiamento: '<img src="icone-banco.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
   terceiros: '<img src="icone-terceiros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
-  outros: '<img src="icone-outros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">'
+  outros: '<img src="icone-outros-novo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">'
 };
 const DIVIDA_LABELS = {
   cartao: 'Cartão de crédito', emprestimo: 'Empréstimo', financiamento: 'Financiamento', terceiros: 'Terceiros', outros: 'Outros'
@@ -1541,7 +1541,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-pets',
     label: 'Pets',
-    icon: 'icone-pets.png',
+    icon: 'icone-pets-novo.png',
     ativo: (p) => (p.familia || []).includes('pets'),
     cat: () => 'Pets',
     metaPct: 0.05,
@@ -1550,7 +1550,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-lazer',
     label: 'Lazer',
-    icon: 'icone-lazer.png',
+    icon: 'icone-lazer-novo.png',
     ativo: () => true,
     cat: () => 'Lazer',
     metaPct: 0.10,
@@ -1559,7 +1559,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-outros',
     label: 'Outros',
-    icon: 'icone-outros.png',
+    icon: 'icone-outros-novo.png',
     ativo: () => true,
     cat: () => 'Outros',
     metaPct: 0.05,
