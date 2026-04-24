@@ -1782,22 +1782,19 @@ window.addEventListener('load', () => {
   renderizarGridCategorias();
   atualizarBannerPerfil();
 
-  // Dica do dia — rotação aleatória
+  // Dica do dia — rotação aleatória (apenas texto, ícone é sempre a lâmpada PNG)
   const dicasDoDia = [
-    { icon: '💡', texto: 'Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.' },
-    { icon: '🛡️', texto: 'Reserva de emergência ideal: 3 a 6 meses de despesas guardadas em investimentos com liquidez diária, como Tesouro Selic ou CDB.' },
-    { icon: '📊', texto: 'Regra 50-30-20: destine 50% da renda para necessidades, 30% para desejos e 20% para poupança e investimentos.' },
-    { icon: '🏦', texto: 'Dívidas com juros altos (cartão, cheque especial) devem ser quitadas antes de começar a investir. Os juros corroem seu patrimônio.' },
-    { icon: '🎯', texto: 'Defina metas financeiras específicas com prazo e valor. Isso aumenta muito as chances de você alcançá-las.' },
-    { icon: '📈', texto: 'O poder dos juros compostos: investindo R$200/mês por 20 anos a 10% a.a., você acumula mais de R$150 mil.' },
-    { icon: '💳', texto: 'Cartão de crédito não é extensão de renda. Use-o apenas para o que você já tem dinheiro guardado para pagar.' },
-    { icon: '🚀', texto: 'Diversifique seus investimentos entre renda fixa e variável de acordo com seu perfil de risco e objetivos.' },
+    'Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.',
+    'Reserva de emergência ideal: 3 a 6 meses de despesas guardadas em investimentos com liquidez diária, como Tesouro Selic ou CDB.',
+    'Regra 50-30-20: destine 50% da renda para necessidades, 30% para desejos e 20% para poupança e investimentos.',
+    'Dívidas com juros altos (cartão, cheque especial) devem ser quitadas antes de começar a investir. Os juros corroem seu patrimônio.',
+    'Defina metas financeiras específicas com prazo e valor. Isso aumenta muito as chances de você alcançá-las.',
+    'O poder dos juros compostos: investindo R$200/mês por 20 anos a 10% a.a., você acumula mais de R$150 mil.',
+    'Cartão de crédito não é extensão de renda. Use-o apenas para o que você já tem dinheiro guardado para pagar.',
+    'Diversifique seus investimentos entre renda fixa e variável de acordo com seu perfil de risco e objetivos.',
   ];
-  const d = dicasDoDia[new Date().getDate() % dicasDoDia.length];
-  const iconEl = document.getElementById('dica-dia-icon');
   const textoEl = document.getElementById('dica-dia-texto');
-  if (iconEl) iconEl.textContent = d.icon;
-  if (textoEl) textoEl.textContent = d.texto;
+  if (textoEl) textoEl.textContent = dicasDoDia[new Date().getDate() % dicasDoDia.length];
 });
 
 // ==============================
@@ -2392,19 +2389,21 @@ function renderizarDicas(pts, total) {
   if (!el) return;
   const dicas = [];
 
-  if (pts.gastos < 200) dicas.push({ icon: '💸', titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
-  if (pts.gastos >= 230) dicas.push({ icon: '🎯', titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
+  const img = (src) => `<img src="${src}" style="width:32px;height:32px;object-fit:contain;">`;
 
-  if (pts.dividas < 120) dicas.push({ icon: '🏦', titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
-  if (pts.dividas === 250) dicas.push({ icon: '🏆', titulo: 'Zero dívidas!', texto: 'Incrível! Agora redirecione o que pagava em dívidas para construir sua reserva ou investir.' });
+  if (pts.gastos < 200) dicas.push({ icon: img('icone-dinheiro-novo.png'), titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
+  if (pts.gastos >= 230) dicas.push({ icon: img('icone-grafico-novo.png'), titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
 
-  if (pts.metas === 0) dicas.push({ icon: '🎯', titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
-  else if (pts.metas < 150) dicas.push({ icon: '📈', titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
+  if (pts.dividas < 120) dicas.push({ icon: img('icone-banco-novo.png'), titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
+  if (pts.dividas === 250) dicas.push({ icon: img('icone-trofeu.png'), titulo: 'Zero dívidas!', texto: 'Incrível! Agora redirecione o que pagava em dívidas para construir sua reserva ou investir.' });
 
-  if (pts.reserva < 90) dicas.push({ icon: '🛡️', titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
-  if (pts.reserva >= 200) dicas.push({ icon: '💎', titulo: 'Reserva sólida!', texto: 'Parabéns! Com 6+ meses de reserva, explore investimentos de médio prazo para fazer o dinheiro crescer.' });
+  if (pts.metas === 0) dicas.push({ icon: img('icone-meta-novo.png'), titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
+  else if (pts.metas < 150) dicas.push({ icon: img('icone-investimento-novo.png'), titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
 
-  if (total >= 800) dicas.push({ icon: '🚀', titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
+  if (pts.reserva < 90) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
+  if (pts.reserva >= 200) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Reserva sólida!', texto: 'Parabéns! Com 6+ meses de reserva, explore investimentos de médio prazo para fazer o dinheiro crescer.' });
+
+  if (total >= 800) dicas.push({ icon: img('icone-investimento-novo.png'), titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
 
   if (dicas.length === 0) {
     el.innerHTML = '<div class="vazio">Continue assim! Seu score está sendo monitorado.</div>';

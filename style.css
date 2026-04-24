@@ -2581,6 +2581,11 @@ html, body {
   font-size: 1.3rem;
   flex-shrink: 0;
   line-height: 1.2;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .score-dica-titulo {
