@@ -5,7 +5,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup,
+  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
@@ -32,9 +32,28 @@ const googleProvider = new GoogleAuthProvider();
 // ── Auth ──────────────────────────────────────────────────────
 
 export async function loginComGoogle() {
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    await signInWithRedirect(auth, googleProvider);
+    return; // página vai recarregar, onAuth vai capturar o resultado
+  }
   const result = await signInWithPopup(auth, googleProvider);
   await _garantirPerfil(result.user);
   return result.user;
+}
+
+// Captura o resultado do redirect (chamado no carregamento da página)
+export async function verificarRedirectGoogle() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      await _garantirPerfil(result.user);
+      return result.user;
+    }
+  } catch (e) {
+    console.error('Erro no redirect Google:', e);
+  }
+  return null;
 }
 
 export async function loginComEmail(email, senha) {

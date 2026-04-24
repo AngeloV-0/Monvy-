@@ -659,10 +659,15 @@
   </div>
 
   <script type="module">
-    import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth } from './firebase.js';
+    import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle } from './firebase.js';
 
     // Redirecionar se já logado
     onAuth(user => {
+      if (user) window.location.href = 'index.html';
+    });
+
+    // Captura resultado do redirect Google no mobile
+    verificarRedirectGoogle().then(user => {
       if (user) window.location.href = 'index.html';
     });
 
