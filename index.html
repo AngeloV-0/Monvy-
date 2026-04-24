@@ -126,7 +126,7 @@
 
         <!-- Dica do Dia -->
         <div class="dica-dia-card" id="dica-dia-card">
-          <div class="dica-dia-icon" id="dica-dia-icon"><img src="icone-cerebro-novo.png" style="width:28px;height:28px;object-fit:contain;"></div>
+          <div class="dica-dia-icon" id="dica-dia-icon"><img src="icone-lampada.png" style="width:28px;height:28px;object-fit:contain;"></div>
           <div class="dica-dia-body">
             <div class="dica-dia-label">Dica do dia</div>
             <div class="dica-dia-texto" id="dica-dia-texto">Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.</div>
@@ -359,20 +359,20 @@
           <!-- Formulário de nova dívida -->
           <div class="form-card">
             <div class="card-title" style="margin-bottom:20px;display:flex;align-items:center;gap:12px">
-              <img src="icone-cadeado-novo.png" alt="Dívida" style="width:36px;height:36px;object-fit:contain;">
+              <img src="icone-cadeado.png" alt="Dívida" style="width:36px;height:36px;object-fit:contain;">
               <span id="div-form-titulo">Cadastrar Dívida</span>
             </div>
             <div style="margin-bottom:12px;position:relative">
               <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Tipo de dívida</label>
               <input type="hidden" id="div-tipo" value="cartao">
               <div id="div-tipo-selected" onclick="toggleDivTipoDropdown()" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;box-sizing:border-box;user-select:none">
-                <img src="icone-cartao-novo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0">
+                <img src="icone-cartao-02.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0">
                 <span>Cartão de crédito</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-left:auto;opacity:.5"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
               <div id="div-tipo-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface,#1a2236);border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
-                <div class="div-tipo-opt" data-value="cartao" data-label="Cartão de crédito" data-icon="icone-cartao-novo.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
-                  <img src="icone-cartao-novo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Cartão de crédito</span>
+                <div class="div-tipo-opt" data-value="cartao" data-label="Cartão de crédito" data-icon="icone-cartao-02.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
+                  <img src="icone-cartao-02.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Cartão de crédito</span>
                 </div>
                 <div class="div-tipo-opt" data-value="emprestimo" data-label="Empréstimo pessoal" data-icon="icone-emprestimo.png" onclick="selecionarDivTipo(this)" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;color:var(--white);font-size:.9rem;transition:background .15s">
                   <img src="icone-emprestimo.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0"><span>Empréstimo pessoal</span>
@@ -457,7 +457,7 @@
 
             <!-- Estratégia de quitação -->
             <div id="estrategia-card" style="display:none;margin-top:20px;background:var(--card-bg,#161b27);border:1px solid var(--border);border-radius:16px;padding:20px">
-              <div class="card-title" style="margin-bottom:10px;font-size:.95rem"><img src="icone-meta-novo.png" alt="" style="width:22px;height:22px;object-fit:contain;"> Estratégia sugerida</div>
+              <div class="card-title" style="margin-bottom:10px;font-size:.95rem"><img src="icone-meta.png" alt="" style="width:22px;height:22px;object-fit:contain;"> Estratégia sugerida</div>
               <div id="estrategia-texto" style="font-size:.85rem;color:var(--gray);line-height:1.6"></div>
             </div>
           </div>
@@ -590,11 +590,11 @@
       <section id="tela-aprender" class="tela">
         <div class="artigos-grid">
           <div class="artigo-card" onclick="abrirArtigo(0)"><div class="artigo-emoji"><img src="icone-cofre.png" alt="Reserva" style="width:64px;height:64px;object-fit:contain;"></div><h3>Reserva de emergência</h3><p>Por que esse é o primeiro passo para sua saúde financeira.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji"><img src="icone-cartao-novo.png" alt="Cartão" style="width:64px;height:64px;object-fit:contain;"></div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji"><img src="icone-cadeado-novo.png" alt="Dívidas" style="width:64px;height:64px;object-fit:contain;"></div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji"><img src="icone-cerebro-novo.png" alt="Mente" style="width:64px;height:64px;object-fit:contain;"></div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji"><img src="icone-grafico-novo.png" alt="Gráfico" style="width:64px;height:64px;object-fit:contain;"></div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
-          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji"><img src="icone-investimento-novo.png" alt="Investir" style="width:64px;height:64px;object-fit:contain;"></div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(1)"><div class="artigo-emoji"><img src="icone-cartao-02.png" alt="Cartão" style="width:64px;height:64px;object-fit:contain;"></div><h3>Cartão de crédito</h3><p>Os perigos do rotativo e como usar sem se prejudicar.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(2)"><div class="artigo-emoji"><img src="icone-cadeado.png" alt="Dívidas" style="width:64px;height:64px;object-fit:contain;"></div><h3>Sair das dívidas</h3><p>Um plano simples e direto para quitar suas dívidas.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(3)"><div class="artigo-emoji"><img src="icone-cerebro.png" alt="Mente" style="width:64px;height:64px;object-fit:contain;"></div><h3>Necessidade vs Desejo</h3><p>Aprenda a diferença e tome decisões melhores.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(4)"><div class="artigo-emoji"><img src="icone-grafico-02.png" alt="Gráfico" style="width:64px;height:64px;object-fit:contain;"></div><h3>Regra dos 50-30-20</h3><p>O jeito mais simples de organizar seu salário.</p><span class="artigo-link">Ler artigo →</span></div>
+          <div class="artigo-card" onclick="abrirArtigo(5)"><div class="artigo-emoji"><img src="icone-investimento.png" alt="Investir" style="width:64px;height:64px;object-fit:contain;"></div><h3>Como começar a investir</h3><p>Invista mesmo com pouco dinheiro. Comece agora.</p><span class="artigo-link">Ler artigo →</span></div>
         </div>
       </section>
 
@@ -1131,7 +1131,7 @@
       <div style="display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px">
         <button class="perfil-tab active" id="tab-conta" onclick="abrirTabPerfil('conta')"><img src="icone-usuario.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Conta</button>
         <button class="perfil-tab" id="tab-vida" onclick="abrirTabPerfil('vida')"><img src="icone-casa-propria.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Minha vida</button>
-        <button class="perfil-tab" id="tab-financas" onclick="abrirTabPerfil('financas')"><img src="icone-bolsa-novo.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Finanças</button>
+        <button class="perfil-tab" id="tab-financas" onclick="abrirTabPerfil('financas')"><img src="icone-bolsa-de-dinheiro.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Finanças</button>
       </div>
 
       <!-- Tab: Conta -->
@@ -1177,8 +1177,8 @@
         <div style="margin-bottom:14px">
           <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">TRANSPORTE <span style="font-weight:400;font-size:.7rem">(múltiplos)</span></div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="vida-transporte-opts">
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','carro')"><span><img src="icone-carro-novo.png" style="width:28px;height:28px;object-fit:contain"></span>Carro</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','moto')"><span><img src="icone-moto-novo.png" style="width:28px;height:28px;object-fit:contain"></span>Moto</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','carro')"><span><img src="icone-carro.png" style="width:28px;height:28px;object-fit:contain"></span>Carro</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','moto')"><span><img src="icone-moto.png" style="width:28px;height:28px;object-fit:contain"></span>Moto</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','publico')"><span><img src="icone-onibus.png" style="width:28px;height:28px;object-fit:contain"></span>Público</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','app')"><span><img src="icone-app.png" style="width:28px;height:28px;object-fit:contain"></span>App</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'transporte','bike')"><span><img src="icone-bike.png" style="width:28px;height:28px;object-fit:contain"></span>Bike</div>
@@ -1216,7 +1216,7 @@
             <div class="vida-opt" onclick="setMetaEco(this,10)"><span><img src="icone-meta-10.png" style="width:36px;height:36px;object-fit:contain"></span>10% da renda</div>
             <div class="vida-opt" onclick="setMetaEco(this,20)"><span><img src="icone-meta-20.png" style="width:36px;height:36px;object-fit:contain"></span>20% da renda</div>
             <div class="vida-opt" onclick="setMetaEco(this,30)"><span><img src="icone-meta-30.png" style="width:36px;height:36px;object-fit:contain"></span>30% da renda</div>
-            <div class="vida-opt" onclick="setMetaEco(this,0)"><span><img src="icone-meta-novo.png" style="width:36px;height:36px;object-fit:contain"></span>Definir depois</div>
+            <div class="vida-opt" onclick="setMetaEco(this,0)"><span><img src="icone-meta.png" style="width:36px;height:36px;object-fit:contain"></span>Definir depois</div>
           </div>
         </div>
         <button class="btn-primary" style="width:100%;margin-top:4px" onclick="salvarPerfilFinancas()">Salvar</button>
