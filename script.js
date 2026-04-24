@@ -2391,19 +2391,19 @@ function renderizarDicas(pts, total) {
 
   const img = (src) => `<img src="${src}" style="width:32px;height:32px;object-fit:contain;">`;
 
-  if (pts.gastos < 200) dicas.push({ icon: img('icone-dinheiro-novo.png'), titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
-  if (pts.gastos >= 230) dicas.push({ icon: img('icone-lupa-novo.png'), titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
+  if (pts.gastos < 200) dicas.push({ icon: img('icone-dinheiro-01.png'), titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
+  if (pts.gastos >= 230) dicas.push({ icon: img('icone-grafico-01.png'), titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
 
-  if (pts.dividas < 120) dicas.push({ icon: img('icone-banco-novo.png'), titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
+  if (pts.dividas < 120) dicas.push({ icon: img('icone-banco.png'), titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
   if (pts.dividas === 250) dicas.push({ icon: img('icone-trofeu.png'), titulo: 'Zero dívidas!', texto: 'Incrível! Agora redirecione o que pagava em dívidas para construir sua reserva ou investir.' });
 
-  if (pts.metas === 0) dicas.push({ icon: img('icone-meta-novo.png'), titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
-  else if (pts.metas < 150) dicas.push({ icon: img('icone-foguete-novo.png'), titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
+  if (pts.metas === 0) dicas.push({ icon: img('icone-meta.png'), titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
+  else if (pts.metas < 150) dicas.push({ icon: img('icone-foguete.png'), titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
 
   if (pts.reserva < 90) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
   if (pts.reserva >= 200) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Reserva sólida!', texto: 'Parabéns! Com 6+ meses de reserva, explore investimentos de médio prazo para fazer o dinheiro crescer.' });
 
-  if (total >= 800) dicas.push({ icon: img('icone-foguete-novo.png'), titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
+  if (total >= 800) dicas.push({ icon: img('icone-foguete.png'), titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
 
   if (dicas.length === 0) {
     el.innerHTML = '<div class="vazio">Continue assim! Seu score está sendo monitorado.</div>';
