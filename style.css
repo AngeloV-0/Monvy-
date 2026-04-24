@@ -484,7 +484,7 @@ nav {
 
 .kpi-row {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
   gap: 16px;
   margin-bottom: 24px;
 }
