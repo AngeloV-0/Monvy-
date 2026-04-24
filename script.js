@@ -2500,30 +2500,32 @@ window.irPara = function(tela) {
   }
 };
 
-// Atualiza mini-card sempre que KPIs mudam
-const _atualizarKPIsOrig = window.atualizarKPIs || atualizarKPIs;
-function atualizarKPIs() {
-  _atualizarKPIsOrig();
-  // Calcula score silenciosamente para atualizar mini card
-  setTimeout(() => {
-    const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
-    if (totalEntradas > 0) {
-      const p = (totalSaidas / totalEntradas) * 100;
-      pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
-    } else { pts.gastos = 150; }
-    const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
-    pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
-    pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
-    pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
-    const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const miniEl = document.getElementById('kpi-score-mini');
-    const miniLabel = document.getElementById('kpi-score-mini-label');
-    let badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
-    if (miniEl) miniEl.textContent = total;
-    if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
-  }, 300);
-}
-window.atualizarKPIs = atualizarKPIs;
+// Atualiza mini-card sempre que KPIs mudam — patch sobre a função original
+(function() {
+  const _orig = atualizarKPIs;
+  atualizarKPIs = function() {
+    _orig();
+    // Calcula score silenciosamente para atualizar mini card
+    setTimeout(() => {
+      const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+      if (totalEntradas > 0) {
+        const p = (totalSaidas / totalEntradas) * 100;
+        pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
+      } else { pts.gastos = 150; }
+      const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+      pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
+      pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
+      pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
+      const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
+      const miniEl = document.getElementById('kpi-score-mini');
+      const miniLabel = document.getElementById('kpi-score-mini-label');
+      let badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
+      if (miniEl) miniEl.textContent = total;
+      if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+    }, 300);
+  };
+  window.atualizarKPIs = atualizarKPIs;
+})();
 
 // ===================================================================
 // MANUAL_ENGINE — Motor de Decisão Monvay
