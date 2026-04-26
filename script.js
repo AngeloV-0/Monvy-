@@ -69,8 +69,8 @@ function atualizarChart() {
   if (!canvas) return;
   if (movimentacoes.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
   canvas.style.display='block'; emptyEl.style.display='none';
-  const ultimas = movimentacoes.slice(-8);
-  const labels = ultimas.map((m,i) => '#'+(movimentacoes.indexOf(m)+1));
+  const ultimas = [...movimentacoes].slice(0, 8).reverse();
+  const labels = ultimas.map((m,i) => '#'+(i+1));
   if (chartInstance) chartInstance.destroy();
   const ctx = canvas.getContext('2d');
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
@@ -274,7 +274,7 @@ async function registrar(valor, descricao, categoria, data, recorrente) {
   }
 }
 
-function recalcular() { recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); }
+function recalcular() { recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); }
 
 // Aliases para compatibilidade Firebase
 function atualizarListaMetas() { renderizarMetas(); }
@@ -392,13 +392,24 @@ function renderizarMetas() {
       <div class="meta-barra-bg"><div class="meta-barra-fill" style="width:${pct}%"></div></div>
       <div class="meta-rodape">
         <span class="meta-pct">${pct}% concluído</span>
-        ${!concluida ? `<button class="btn-meta" onclick="abrirModalMeta(${i})">+ Adicionar</button>` : '<span style="color:var(--primary);font-size:.78rem;font-weight:600">🎉 Concluída!</span>'}
+        ${!concluida ? `<button class="btn-meta" onclick="abrirModalMetaPorId('${m.id}')">+ Adicionar</button>` : '<span style="color:var(--primary);font-size:.78rem;font-weight:600">🎉 Concluída!</span>'}
+        <button onclick="excluirMeta('${m.id}')" style="background:none;border:none;cursor:pointer;color:var(--gray);font-size:.75rem;padding:2px 6px;border-radius:4px;margin-left:4px" title="Excluir meta">🗑️</button>
       </div>
       ${mensalStr}
     </div>`;
   }).join('');
 }
 
+async function excluirMeta(id) {
+  if (!confirm('Excluir esta meta?')) return;
+  if (!currentUser) return;
+  try {
+    await deletarMeta(currentUser.uid, id);
+    metas = metas.filter(m => m.id !== id);
+    renderizarMetas();
+    if (typeof executarManualEngine === 'function') executarManualEngine();
+  } catch(e) { console.error('Erro ao excluir meta:', e); alert('Erro ao excluir meta.'); }
+}
 function abrirModalMeta(index) {
   metaAtualIndex=index;
   document.getElementById('modal-meta-nome-display').textContent=metas[index].nome;
@@ -414,7 +425,7 @@ async function adicionarValorMeta() {
   if (!currentUser) return;
   const meta = metas[metaAtualIndex];
   if (!meta) return;
-  meta.atual += valor;
+  meta.atual = (meta.atual || 0) + valor;
   try {
     if (meta.id) await atualizarMeta(currentUser.uid, meta.id, {atual: meta.atual});
   } catch(e) { console.error('Erro ao atualizar meta:', e); }
@@ -849,10 +860,10 @@ function getMovimentacoesPeriodo() {
 }
 
 function atualizarRelatorio() {
-  const agora = new Date(), alvo = new Date(agora.getFullYear(), agora.getMonth() + relatorioMesOffset, 1);
-  document.getElementById('relatorio-mes-label').textContent = MESES[alvo.getMonth()] + ' ' + alvo.getFullYear();
-
   const { movs: doMes, alvo: alvoReal } = getMovimentacoesPeriodo();
+  document.getElementById('relatorio-mes-label').textContent = periodoModo === 'mes'
+    ? MESES[alvoReal.getMonth()] + ' ' + alvoReal.getFullYear()
+    : (periodoCustomInicio || '') + ' — ' + (periodoCustomFim || '');
 
   // Label período custom
   const labelEl = document.getElementById('periodo-custom-label');
@@ -923,9 +934,18 @@ function processarRecorrentes() {
   const pendentes=unicos.filter(m=>!jaSet.has(m.descricao+'|'+m.categoria+'|'+m.tipo));
   if (pendentes.length===0) { alert('Todos os recorrentes já foram lançados neste mês!'); return; }
   if (!confirm('Lançar '+pendentes.length+' recorrente(s) para '+MESES[agora.getMonth()]+'?')) return;
-  pendentes.forEach(m=>{ tipoAtual=m.tipo; movimentacoes.push({...m,data:hojeISO(),resposta:''}); });
-  recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); atualizarRelatorio();
-  alert(pendentes.length+' lançamento(s) adicionado(s)!');
+  if (currentUser) {
+    Promise.all(pendentes.map(m => {
+      const novaM = { tipo: m.tipo, valor: m.valor, descricao: m.descricao, categoria: m.categoria||'', data: hojeISO(), recorrente: true, resposta: '' };
+      return adicionarMovimentacao(currentUser.uid, novaM);
+    })).then(() => {
+      alert(pendentes.length+' lançamento(s) adicionado(s)!');
+    }).catch(e => { console.error('Erro ao lançar recorrentes:', e); alert('Erro ao salvar alguns lançamentos.'); });
+  } else {
+    pendentes.forEach(m=>{ tipoAtual=m.tipo; movimentacoes.push({...m,data:hojeISO(),resposta:''}); });
+    recalcularTotais(); atualizarKPIs(); atualizarListaInicio(); atualizarChart(); atualizarRelatorio();
+    alert(pendentes.length+' lançamento(s) adicionado(s)!');
+  }
 }
 
 // ARTIGOS
@@ -1160,6 +1180,7 @@ onAuth(async (user) => {
     // Carregar dívidas
     dividasCadastradas = await getDividas(user.uid);
     if (typeof renderizarDividas === 'function') renderizarDividas();
+    await carregarDividasOnboarding(); // Importar do onboarding se Firebase vazio
 
     // Carregar contas a pagar
     contasCadastradas = await getContas(user.uid);
@@ -1172,7 +1193,6 @@ onAuth(async (user) => {
       movimentacoes = movs;
       recalcular();
       renderizarMovimentacoes();
-      atualizarChart();
       atualizarTelaCategorias();
     });
   } catch(e) {
@@ -1293,7 +1313,7 @@ function renderizarDividas() {
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
         <div class="divida-item-valor">${fmt(d.valor)}</div>
-        <button class="divida-btn-del" onclick="excluirDivida(${d.id})">✕</button>
+        <button class="divida-btn-del" onclick="excluirDivida('${d.id}')">✕</button>
       </div>
     </div>`;
   }).join('');
@@ -1344,19 +1364,27 @@ function gerarEstrategia() {
   textoEl.innerHTML = texto;
 }
 
-// Carregar dívidas do onboarding inicial
-(function carregarDividasOnboarding() {
+// Carregar dívidas do onboarding inicial — só executa se Firebase não retornou nada
+async function carregarDividasOnboarding() {
   const perfil = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
-  if (perfil.dividas && dividasCadastradas.length === 0) {
-    const tipos = { cartao: 'Cartão de crédito (onboarding)', emprestimo: 'Empréstimo (onboarding)', terceiros: 'Dívida com terceiros (onboarding)', financiamento: 'Financiamento (onboarding)' };
-    Object.entries(perfil.dividas).forEach(([tipo, valor]) => {
-      if (valor > 0) {
-        dividasCadastradas.push({ id: Date.now() + Math.random(), tipo, descricao: tipos[tipo] || tipo, valor, juros: 0, parcelas: 0, dataCriacao: new Date().toISOString().slice(0,10) });
-      }
-    });
-    if (dividasCadastradas.length > 0) salvarDividas();
+  if (!perfil.dividas) return;
+  if (dividasCadastradas.length > 0) return; // Firebase já tem dívidas
+  const tipos = { cartao: 'Cartão de crédito (onboarding)', emprestimo: 'Empréstimo (onboarding)', terceiros: 'Dívida com terceiros (onboarding)', financiamento: 'Financiamento (onboarding)' };
+  const novas = [];
+  for (const [tipo, valor] of Object.entries(perfil.dividas)) {
+    if (valor > 0) novas.push({ tipo, descricao: tipos[tipo] || tipo, valor, juros: 0, parcelas: 0, dataCriacao: new Date().toISOString().slice(0,10) });
   }
-})();
+  if (novas.length > 0 && currentUser) {
+    for (const d of novas) {
+      try {
+        const fbId = await adicionarDivida(currentUser.uid, d);
+        dividasCadastradas.push({ id: fbId, ...d });
+      } catch(e) { console.error('Erro ao salvar dívida do onboarding:', e); }
+    }
+    renderizarDividas();
+    atualizarKPIsDividas();
+  }
+}
 
 // ===== PERFIL DE VIDA (modal) =====
 function abrirTabPerfil(tab) {
@@ -1824,6 +1852,8 @@ window.setFiltro        = setFiltro;
 window.setTipoGrafico   = setTipoGrafico;
 window.criarMeta        = criarMeta;
 window.abrirModalMeta   = abrirModalMeta;
+window.excluirMeta      = excluirMeta;
+window.abrirModalMetaPorId = abrirModalMetaPorId;
 window.fecharModalMeta  = fecharModalMeta;
 window.adicionarValorMeta = adicionarValorMeta;
 window.calcularDivida   = calcularDivida;

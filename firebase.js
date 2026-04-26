@@ -243,8 +243,8 @@ export async function verificarEResetarMes(uid) {
 
     if (movs.length > 0) {
       // Calcular totais do mês encerrado
-      const entradas = movs.filter(m => m.tipo === 'entrada').reduce((s, m) => s + (m.valor || 0), 0);
-      const saidas = movs.filter(m => m.tipo === 'saida').reduce((s, m) => s + (m.valor || 0), 0);
+      const entradas = movs.filter(m => m.tipo === 'ganho').reduce((s, m) => s + (m.valor || 0), 0);
+      const saidas = movs.filter(m => m.tipo === 'gasto').reduce((s, m) => s + (m.valor || 0), 0);
 
       // Salvar resumo no histórico
       await setDoc(doc(db, 'usuarios', uid, 'historico', ultimoMes), {
