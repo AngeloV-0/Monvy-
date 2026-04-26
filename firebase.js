@@ -18,7 +18,7 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_xar1S5zCb5WEg814btkj4vwwcGGmQt4",
-  authDomain: "monvay.com.br",
+  authDomain: "monvy-5969f.firebaseapp.com",
   projectId: "monvy-5969f",
   storageBucket: "monvy-5969f.firebasestorage.app",
   messagingSenderId: "373157570069",

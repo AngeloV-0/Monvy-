@@ -250,7 +250,6 @@ async function responderPergunta(resposta) {
 
 async function registrar(valor, descricao, categoria, data, recorrente) {
   if (!currentUser) { alert('Você precisa estar logado.'); return; }
-  // Garantir que nenhum campo seja undefined (Firestore rejeita undefined)
   const mov = {
     tipo: tipoAtual,
     valor: Number(valor),
@@ -261,12 +260,16 @@ async function registrar(valor, descricao, categoria, data, recorrente) {
     resposta: respostaPergunta || ''
   };
   try {
+    console.log('[Monvay] Salvando movimentação:', mov, 'uid:', currentUser.uid);
     await adicionarMovimentacao(currentUser.uid, mov);
+    console.log('[Monvay] Movimentação salva com sucesso!');
   } catch(e) {
-    console.error('Erro ao salvar movimentação:', e);
+    console.error('[Monvay] ERRO ao salvar movimentação:', e.code, e.message);
     const msg = e && e.code === 'permission-denied'
-      ? 'Sem permissão para salvar. Verifique as regras do Firestore.'
-      : 'Erro ao salvar. Tente novamente.';
+      ? '❌ Sem permissão no Firestore!\n\nVerifique as regras no Firebase Console.'
+      : e && e.code === 'unauthenticated'
+      ? '❌ Usuário não autenticado!\n\nFaça login novamente.'
+      : `❌ Erro ao salvar: ${e.message || e.code || 'Erro desconhecido'}`;
     alert(msg);
   }
 }
