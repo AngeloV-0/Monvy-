@@ -69,7 +69,11 @@ export async function cadastrarComEmail(nome, email, senha) {
 }
 
 export async function enviarResetSenha(email) {
-  await sendPasswordResetEmail(auth, email);
+  const actionCodeSettings = {
+    url: 'https://monvay.com.br/auth.html',
+    handleCodeInApp: false
+  };
+  await sendPasswordResetEmail(auth, email, actionCodeSettings);
 }
 
 export async function fazerLogout() {

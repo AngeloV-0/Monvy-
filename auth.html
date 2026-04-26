@@ -661,9 +661,14 @@
   <script type="module">
     import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle } from './firebase.js';
 
-    // Redirecionar se já logado
+    // Redirecionar se já logado — aguarda estabilização do estado
+    let authResolved = false;
     onAuth(user => {
-      if (user) window.location.href = 'index.html';
+      if (authResolved) return; // evita múltiplos redirects
+      authResolved = true;
+      if (user) {
+        setTimeout(() => { window.location.href = 'index.html'; }, 300);
+      }
     });
 
     // Captura resultado do redirect Google no mobile
@@ -766,15 +771,26 @@
         return;
       }
       erro('err-esqueci-email', false);
+      const btn = document.querySelector('#form-esqueci .btn-submit');
+      if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
       try {
         await enviarResetSenha(email);
         const res = document.getElementById('esqueci-resultado');
-        document.getElementById('esqueci-senha-reveal').textContent = 'E-mail de recuperação enviado! Verifique sua caixa de entrada.';
+        document.getElementById('esqueci-senha-reveal').innerHTML =
+          `<strong>E-mail enviado para ${email}!</strong><br><br>` +
+          `📬 Verifique sua caixa de entrada (e o spam).<br>` +
+          `Clique no link do e-mail para criar uma nova senha.<br><br>` +
+          `<span style="font-size:0.8rem;opacity:0.6">Não recebeu? Aguarde 1 minuto e tente novamente.</span>`;
         if (res) res.style.display = 'block';
         showToast('E-mail de recuperação enviado ✓');
       } catch(e) {
         erro('err-esqueci-email', true);
-        document.getElementById('err-esqueci-email').textContent = traduzirErro(e.code);
+        const msg = e.code === 'auth/user-not-found'
+          ? 'Nenhuma conta encontrada com este e-mail'
+          : traduzirErro(e.code);
+        document.getElementById('err-esqueci-email').textContent = msg;
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Enviar link de recuperação'; }
       }
     };
 
