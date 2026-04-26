@@ -7,7 +7,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile
+  sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile,
+  setPersistence, browserLocalStoragePersistence
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc,
@@ -17,7 +18,7 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_xar1S5zCb5WEg814btkj4vwwcGGmQt4",
-  authDomain: "monvy-5969f.firebaseapp.com",
+  authDomain: "monvay.com.br",
   projectId: "monvy-5969f",
   storageBucket: "monvy-5969f.firebasestorage.app",
   messagingSenderId: "373157570069",
@@ -28,6 +29,9 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
+
+// Garante que a sessão persiste mesmo fechando o navegador
+setPersistence(auth, browserLocalStoragePersistence).catch(e => console.warn('Persistence error:', e));
 
 // ── Auth ──────────────────────────────────────────────────────
 

@@ -1076,7 +1076,13 @@ script.onload=()=>atualizarChart();
 document.head.appendChild(script);
 
 onAuth(async (user) => {
-  if (!user) { window.location.href = 'auth.html'; return; }
+  if (!user) {
+    // Aguarda um tick para garantir que a persistência foi verificada
+    setTimeout(() => {
+      if (!currentUser) window.location.href = 'auth.html';
+    }, 1500);
+    return;
+  }
   currentUser = user;
 
   // Preencher avatar e nome
