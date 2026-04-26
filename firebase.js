@@ -31,15 +31,19 @@ const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Garante que a sessão persiste mesmo fechando o navegador
-setPersistence(auth, browserLocalStoragePersistence).catch(e => console.warn('Persistence error:', e));
+const authReady = setPersistence(auth, browserLocalStoragePersistence)
+  .catch(e => console.warn('Persistence error:', e));
+
+export async function waitAuthReady() { return authReady; }
 
 // ── Auth ──────────────────────────────────────────────────────
 
 export async function loginComGoogle() {
+  await authReady;
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if (isMobile) {
     await signInWithRedirect(auth, googleProvider);
-    return; // página vai recarregar, onAuth vai capturar o resultado
+    return;
   }
   const result = await signInWithPopup(auth, googleProvider);
   await _garantirPerfil(result.user);
@@ -48,6 +52,7 @@ export async function loginComGoogle() {
 
 // Captura o resultado do redirect (chamado no carregamento da página)
 export async function verificarRedirectGoogle() {
+  await authReady;
   try {
     const result = await getRedirectResult(auth);
     if (result && result.user) {
@@ -61,11 +66,13 @@ export async function verificarRedirectGoogle() {
 }
 
 export async function loginComEmail(email, senha) {
+  await authReady;
   const result = await signInWithEmailAndPassword(auth, email, senha);
   return result.user;
 }
 
 export async function cadastrarComEmail(nome, email, senha) {
+  await authReady;
   const result = await createUserWithEmailAndPassword(auth, email, senha);
   await updateProfile(result.user, { displayName: nome });
   await _garantirPerfil(result.user, nome);
