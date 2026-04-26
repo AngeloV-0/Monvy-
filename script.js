@@ -28,9 +28,15 @@ const pageTitles = { inicio:'Dashboard', gastos:'Gastos', metas:'Metas', dividas
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // NAVEGAÇÃO
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function(e) { e.preventDefault(); (window.irPara || irPara)(this.dataset.tela); });
-});
+try {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const tela = this.dataset.tela;
+      if (tela) (window.irPara || irPara)(tela);
+    });
+  });
+} catch(e) { console.error('[Monvay] Erro ao registrar nav:', e); }
 
 function irPara(tela) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1478,11 +1484,13 @@ function salvarPerfilFinancas() {
 }
 
 // Inicializar dívidas ao carregar
-(function initDividas() {
-  renderizarDividas();
-  atualizarKPIsDividas();
-  atualizarFormDivida();
-})();
+try {
+  (function initDividas() {
+    renderizarDividas();
+    atualizarKPIsDividas();
+    atualizarFormDivida();
+  })();
+} catch(e) { console.error('[Monvay] Erro no initDividas:', e); }
 
 // Atualizar ao navegar para tela de dívidas
 const _irParaOrig = irPara;
@@ -2539,7 +2547,7 @@ window.irPara = function(tela) {
 };
 
 // Atualiza mini-card sempre que KPIs mudam — patch sobre a função original
-(function() {
+try { (function() {
   const _orig = atualizarKPIs;
   atualizarKPIs = function() {
     _orig();
@@ -2563,7 +2571,7 @@ window.irPara = function(tela) {
     }, 300);
   };
   window.atualizarKPIs = atualizarKPIs;
-})();
+})(); } catch(e) { console.error('[Monvay] Erro no patch KPIs:', e); }
 
 // ===================================================================
 // MANUAL_ENGINE — Motor de Decisão Monvay
