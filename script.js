@@ -2764,9 +2764,10 @@ function renderizarInsights(insights) {
 // FUNÇÃO irPara CONSOLIDADA FINAL
 // Centraliza todos os hooks de navegação numa única função robusta
 // ==============================
+const _irParaBase = irPara;
 window.irPara = function(tela) {
   // Navegação base
-  irPara(tela);
+  _irParaBase(tela);
   // Hooks por tela com pequeno delay para garantir DOM visível
   if (tela === 'dividas')      { setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e){} }, 50); }
   if (tela === 'gastos')       { setTimeout(() => { try { atualizarTelaCategorias(); } catch(e){ console.error('[Monvay] gastos erro:', e); } }, 50); }
@@ -2776,13 +2777,16 @@ window.irPara = function(tela) {
   if (tela === 'relatorio')    { setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e){} }, 50); }
   if (tela === 'contas')       { setTimeout(() => { try { renderizarContas(); } catch(e){} }, 50); }
 };
+// Ensure module-internal calls also use the hooked version
+// (functions called from within module that call irPara() directly will use this)
+try { irPara = window.irPara; } catch(e) { /* strict mode may block - use window.irPara */ }
 
 // ==============================
 // atualizarKPIs CONSOLIDADO FINAL
 // Atualiza KPIs + mini card score + insights
 // ==============================
 const _kpisBase = atualizarKPIs;
-atualizarKPIs = function() {
+const _atualizarKPIsWrap = function() {
   try { _kpisBase(); } catch(e){}
   // Mini card score
   setTimeout(() => {
@@ -2807,13 +2811,13 @@ atualizarKPIs = function() {
   // Insights
   setTimeout(() => { try { executarManualEngine(); } catch(e){} }, 400);
 };
-window.atualizarKPIs = atualizarKPIs;
+window.atualizarKPIs = _atualizarKPIsWrap;
 
 // ==============================
 // EXPOR TODAS AS FUNÇÕES GLOBALMENTE
 // (necessário porque script.js usa type="module")
 // ==============================
-window.irPara                   = window.irPara; // já definido acima
+// window.irPara already set above — no reassignment needed
 window.abrirModal               = abrirModal;
 window.fecharModal              = fecharModal;
 window.confirmarModal           = confirmarModal;
@@ -2857,7 +2861,8 @@ window.abrirTabPerfil           = abrirTabPerfil;
 window.selecionarVida           = selecionarVida;
 window.selecionarVidaMulti      = selecionarVidaMulti;
 window.setMetaEco               = setMetaEco;
-window.salvarPerfilVida         = salvarPerfilVida;
+// window.salvarPerfilVida already set to wrapped version above (line 1853) — keep it
+// window.salvarPerfilVida = salvarPerfilVida; // REMOVED: would overwrite the wrapper
 window.salvarPerfilFinancas     = salvarPerfilFinancas;
 window.salvarConta              = salvarConta;
 window.editarConta              = editarConta;
