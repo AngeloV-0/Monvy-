@@ -1729,6 +1729,7 @@ function atualizarBannerPerfil() {
   }
 
   banner.style.display = 'flex';
+  const partes = [];
   if (p.moradia === 'aluguel') partes.push('aluguel');
   else if (p.moradia === 'financiada') partes.push('financiamento');
   else if (p.moradia === 'propria') partes.push('casa própria');
