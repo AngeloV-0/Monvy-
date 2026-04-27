@@ -355,10 +355,10 @@
       .hero-sub { font-size: 0.92rem; margin-bottom: 32px; }
       .hero-form { flex-direction: column; gap: 10px; }
       .hero-form input, .hero-form .btn-solid { width: 100%; padding: 14px 18px; border-radius: 12px; }
-      .hero-cards { display: flex; justify-content: center; margin-top: 48px; height: 180px; } /* Mostra os cards no mobile */
-      .fc1 { width: 160px; margin-left: -80px; }
-      .fc2 { width: 160px; margin-left: -210px; }
-      .fc3 { width: 160px; margin-left: 55px; }
+      .hero-cards { display: flex; justify-content: center; margin-top: 32px; height: 200px; overflow: hidden; }
+      .fc1 { width: 150px; margin-left: -75px; top: 0; }
+      .fc2 { width: 150px; margin-left: -195px; top: 20px; }
+      .fc3 { width: 150px; margin-left: 48px; top: 36px; }
       .card-num { font-size: 0.68rem; }
       .card-name { font-size: 0.72rem; }
 
@@ -369,6 +369,7 @@
       /* Features */
       .features-grid { grid-template-columns: 1fr; gap: 12px; }
       .why-section { padding: 60px 16px; }
+      .why-section::before { display: none; }
 
       /* How */
       .how-section { padding: 60px 16px; }
