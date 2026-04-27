@@ -48,7 +48,7 @@ function irPara(tela) {
   document.getElementById('page-title').textContent = titulo;
   const mobileTelaEl = document.getElementById('topbar-mobile-tela');
   if (mobileTelaEl) mobileTelaEl.textContent = titulo;
-  if (tela === 'gastos') atualizarTelaCategorias();
+  if (tela === 'gastos') { try { atualizarTelaCategorias(); } catch(e) { console.error('[Monvay] Erro ao atualizar tela categorias:', e); } }
   if (tela === 'relatorio') { atualizarRelatorio(); carregarHistorico(); }
   if (tela === 'contas') renderizarContas();
 }
@@ -1678,7 +1678,13 @@ function renderizarGridCategorias() {
   if (!grid) return;
 
   const p = obterPerfilVida();
-  const lista = obterCategoriasAtivas();
+  // Se não há perfil configurado, mostra todas as categorias padrão
+  let lista = obterCategoriasAtivas();
+  if (!lista || lista.length === 0) {
+    lista = CATEGORIAS_CONFIG.filter(c => {
+      try { return c.ativo({}); } catch(e) { return false; }
+    });
+  }
   const movs = movsFiltradas();
 
   // Calcular totais por categoria
@@ -1723,12 +1729,12 @@ function atualizarBannerPerfil() {
   if (!banner || !desc) return;
 
   const p = obterPerfilVida();
+  // Banner sempre visível; sem perfil mostra texto genérico
+  banner.style.display = 'flex';
   if (!p || Object.keys(p).length === 0) {
-    banner.style.display = 'none';
+    if (desc) desc.textContent = 'Configure seu perfil para categorias personalizadas';
     return;
   }
-
-  banner.style.display = 'flex';
   const partes = [];
   if (p.moradia === 'aluguel') partes.push('aluguel');
   else if (p.moradia === 'financiada') partes.push('financiamento');
@@ -1854,9 +1860,9 @@ window.salvarPerfilVida = function() {
 
 // Inicializar selects ao carregar (garante sincronia mesmo sem entrar na tela)
 window.addEventListener('load', () => {
-  sincronizarSelects();
-  renderizarGridCategorias();
-  atualizarBannerPerfil();
+  try { sincronizarSelects(); } catch(e) { console.error('[Monvay] sincronizarSelects:', e); }
+  try { renderizarGridCategorias(); } catch(e) { console.error('[Monvay] renderizarGridCategorias:', e); }
+  try { atualizarBannerPerfil(); } catch(e) { console.error('[Monvay] atualizarBannerPerfil:', e); }
 
   // Dica do dia — rotação aleatória (apenas texto, ícone é sempre a lâmpada PNG)
   const dicasDoDia = [
