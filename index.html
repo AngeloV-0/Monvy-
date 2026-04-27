@@ -1227,6 +1227,59 @@
   </div>
 
   <script type="module" src="script.js"></script>
+
+  <!-- Script de compatibilidade: garante que funções onclick funcionam mesmo antes do módulo ES6 terminar -->
+  <script>
+    // Proxy seguro para todas as funções chamadas por onclick no HTML
+    // Se o módulo ainda não carregou, faz fila e executa quando disponível
+    (function() {
+      var _pendentes = [];
+      var _pronto = false;
+      function _proxy(nome) {
+        return function() {
+          var args = arguments;
+          if (typeof window[nome] === 'function') {
+            return window[nome].apply(window, args);
+          } else {
+            _pendentes.push({ nome: nome, args: args });
+          }
+        };
+      }
+      // Lista de todas as funções usadas em onclick que precisam de proxy
+      var funcoesOnclick = [
+        'abrirModal','fecharModal','confirmarModal','responderPergunta',
+        'abrirModalEditar','fecharModalEditar','salvarEdicao','excluirMovimentacao',
+        'setFiltro','setTipoGrafico','criarMeta','abrirModalMeta','excluirMeta',
+        'abrirModalMetaPorId','fecharModalMeta','adicionarValorMeta',
+        'calcularDivida','calcularInvestimentos','abrirModalSimulacao','fecharModalSimulacao',
+        'abrirArtigo','fecharArtigo','logout','toggleTheme',
+        'mudarMesRelatorio','setPeriodoModo','aplicarPeriodoCustom','atalhoUltimos',
+        'buscarMovimentacoes','limparBusca','abrirBuscaMobile','fecharBuscaMobile',
+        'fecharDropdownBusca','mostrarDropdownBusca','atualizarFormDivida',
+        'cadastrarDivida','excluirDivida','abrirTabPerfil','selecionarVida',
+        'selecionarVidaMulti','setMetaEco','salvarPerfilVida','salvarPerfilFinancas',
+        'salvarConta','editarConta','cancelarEdicaoConta','pagarConta','excluirConta',
+        'filtrarContas','mudarMesContas','renderizarContas','carregarHistorico',
+        'processarRecorrentes','irPara'
+      ];
+      funcoesOnclick.forEach(function(nome) {
+        if (typeof window[nome] === 'undefined') {
+          window[nome] = _proxy(nome);
+        }
+      });
+      // Quando o módulo terminar de expor as funções, executar pendentes
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          _pendentes.forEach(function(p) {
+            if (typeof window[p.nome] === 'function') {
+              try { window[p.nome].apply(window, p.args); } catch(e) {}
+            }
+          });
+          _pendentes = [];
+        }, 500);
+      });
+    })();
+  </script>
   <script>
     // Drawer mobile
     function abrirDrawer() {

@@ -45,12 +45,10 @@ function irPara(tela) {
   const telaEl = document.getElementById('tela-'+tela);
   if (telaEl) telaEl.classList.add('active');
   const titulo = pageTitles[tela] || 'Monvay';
-  document.getElementById('page-title').textContent = titulo;
+  const ptEl = document.getElementById('page-title');
+  if (ptEl) ptEl.textContent = titulo;
   const mobileTelaEl = document.getElementById('topbar-mobile-tela');
   if (mobileTelaEl) mobileTelaEl.textContent = titulo;
-  if (tela === 'gastos') { try { atualizarTelaCategorias(); } catch(e) { console.error('[Monvay] Erro ao atualizar tela categorias:', e); } }
-  if (tela === 'relatorio') { atualizarRelatorio(); carregarHistorico(); }
-  if (tela === 'contas') renderizarContas();
 }
 
 // FORMATO
@@ -1232,6 +1230,13 @@ onAuth(async (user) => {
       renderizarMovimentacoes();
       atualizarTelaCategorias();
     });
+
+    // Inicializar a tela de categorias imediatamente após carregar o perfil
+    // (garante que os ícones aparecem mesmo sem movimentações)
+    try { sincronizarSelects(); } catch(e) {}
+    try { renderizarGridCategorias(); } catch(e) {}
+    try { atualizarBannerPerfil(); } catch(e) {}
+    try { renderizarSugestaoOrcamento(); } catch(e) {}
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
   }
@@ -1523,15 +1528,7 @@ try {
   })();
 } catch(e) { console.error('[Monvay] Erro no initDividas:', e); }
 
-// Atualizar ao navegar para tela de dívidas
-const _irParaOrig = irPara;
-window.irPara = function(tela) {
-  _irParaOrig(tela);
-  if (tela === 'dividas') {
-    renderizarDividas();
-    atualizarKPIsDividas();
-  }
-};
+// Módulo de dívidas: hooks integrados ao irPara consolidado no final do arquivo
 
 // ==============================
 // MÓDULO 2 — GASTOS ADAPTATIVOS
@@ -1678,12 +1675,17 @@ function renderizarGridCategorias() {
   if (!grid) return;
 
   const p = obterPerfilVida();
-  // Se não há perfil configurado, mostra todas as categorias padrão
+  // Se não há perfil configurado, mostra TODAS as categorias (ativo sem filtro)
   let lista = obterCategoriasAtivas();
   if (!lista || lista.length === 0) {
+    // Fallback: mostrar categorias com ativo=true (padrão universal)
     lista = CATEGORIAS_CONFIG.filter(c => {
       try { return c.ativo({}); } catch(e) { return false; }
     });
+  }
+  // Garantia mínima: se ainda vazio, mostra todas sem filtro
+  if (!lista || lista.length === 0) {
+    lista = [...CATEGORIAS_CONFIG];
   }
   const movs = movsFiltradas();
 
@@ -1879,57 +1881,7 @@ window.addEventListener('load', () => {
   if (textoEl) textoEl.textContent = dicasDoDia[new Date().getDate() % dicasDoDia.length];
 });
 
-// ==============================
-// EXPOR FUNÇÕES GLOBALMENTE
-// Necessário porque script.js usa type="module"
-// e funções de módulo não ficam no escopo window
-// ==============================
-window.irPara           = window.irPara || irPara;
-window.abrirModal       = abrirModal;
-window.fecharModal      = fecharModal;
-window.confirmarModal   = confirmarModal;
-window.responderPergunta = responderPergunta;
-window.abrirModalEditar = abrirModalEditar;
-window.fecharModalEditar = fecharModalEditar;
-window.salvarEdicao     = salvarEdicao;
-window.excluirMovimentacao = excluirMovimentacao;
-window.setFiltro        = setFiltro;
-window.setTipoGrafico   = setTipoGrafico;
-window.criarMeta        = criarMeta;
-window.abrirModalMeta   = abrirModalMeta;
-window.excluirMeta      = excluirMeta;
-window.abrirModalMetaPorId = abrirModalMetaPorId;
-window.fecharModalMeta  = fecharModalMeta;
-window.adicionarValorMeta = adicionarValorMeta;
-window.calcularDivida   = calcularDivida;
-window.calcularInvestimentos = calcularInvestimentos;
-window.abrirModalSimulacao = abrirModalSimulacao;
-window.fecharModalSimulacao = fecharModalSimulacao;
-window.abrirArtigo      = abrirArtigo;
-window.fecharArtigo     = fecharArtigo;
-window.logout           = logout;
-window.toggleTheme      = toggleTheme;
-window.applyTheme       = applyTheme;
-window.mudarMesRelatorio = mudarMesRelatorio;
-window.setPeriodoModo   = setPeriodoModo;
-window.aplicarPeriodoCustom = aplicarPeriodoCustom;
-window.atalhoUltimos    = atalhoUltimos;
-window.processarRecorrentes = processarRecorrentes;
-window.buscarMovimentacoes = buscarMovimentacoes;
-window.limparBusca      = limparBusca;
-window.abrirBuscaMobile = abrirBuscaMobile;
-window.fecharBuscaMobile = fecharBuscaMobile;
-window.fecharDropdownBusca = fecharDropdownBusca;
-window.mostrarDropdownBusca = mostrarDropdownBusca;
-window.atualizarFormDivida  = atualizarFormDivida;
-window.cadastrarDivida      = cadastrarDivida;
-window.excluirDivida        = excluirDivida;
-window.abrirTabPerfil       = abrirTabPerfil;
-window.selecionarVida       = selecionarVida;
-window.selecionarVidaMulti  = selecionarVidaMulti;
-window.setMetaEco           = setMetaEco;
-window.salvarPerfilVida     = window.salvarPerfilVida || salvarPerfilVida;
-window.salvarPerfilFinancas = salvarPerfilFinancas;
+// (Exposição global de funções consolidada ao final do arquivo)
 
 // ==============================
 // RESET MENSAL + HISTÓRICO
@@ -2005,9 +1957,6 @@ window.toggleHistoricoDetalhes = function(mes) {
   const el = document.getElementById('hist-det-' + mes);
   if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 };
-
-window.carregarHistorico = carregarHistorico;
-window.mostrarToastResetMes = mostrarToastResetMes;
 
 // ==============================
 // MÓDULO: CONTAS A PAGAR
@@ -2308,15 +2257,6 @@ function verificarAlertasContas() {
   }
 }
 
-window.salvarConta        = salvarConta;
-window.editarConta        = editarConta;
-window.cancelarEdicaoConta= cancelarEdicaoConta;
-window.pagarConta         = pagarConta;
-window.excluirConta       = excluirConta;
-window.filtrarContas      = filtrarContas;
-window.mudarMesContas     = mudarMesContas;
-window.renderizarContas   = renderizarContas;
-
 // ===== MÓDULO 3: SCORE FINANCEIRO =====
 
 let scoreHistoricoChart = null;
@@ -2571,44 +2511,7 @@ function renderizarHistoricoScore() {
   });
 }
 
-// Hook no irPara para calcular score ao entrar na tela
-const _irParaScore = window.irPara || irPara;
-window.irPara = function(tela) {
-  _irParaScore(tela);
-  if (tela === 'score') {
-    setTimeout(calcularScore, 100);
-  }
-  if (tela === 'investimentos') {
-    buscarTaxasBCB();
-  }
-};
-
-// Atualiza mini-card sempre que KPIs mudam — patch sobre a função original
-try { (function() {
-  const _orig = atualizarKPIs;
-  atualizarKPIs = function() {
-    _orig();
-    // Calcula score silenciosamente para atualizar mini card
-    setTimeout(() => {
-      const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
-      if (totalEntradas > 0) {
-        const p = (totalSaidas / totalEntradas) * 100;
-        pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
-      } else { pts.gastos = 150; }
-      const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
-      pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
-      pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
-      pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
-      const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-      const miniEl = document.getElementById('kpi-score-mini');
-      const miniLabel = document.getElementById('kpi-score-mini-label');
-      let badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
-      if (miniEl) miniEl.textContent = total;
-      if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
-    }, 300);
-  };
-  window.atualizarKPIs = atualizarKPIs;
-})(); } catch(e) { console.error('[Monvay] Erro no patch KPIs:', e); }
+// Hook de score e investimentos integrado ao irPara central (ver final do arquivo)
 
 // ===================================================================
 // MANUAL_ENGINE — Motor de Decisão Monvay
@@ -2617,15 +2520,15 @@ try { (function() {
 function executarManualEngine() {
   // ---- Coletar dados ----
   const hoje = new Date();
-  const contasCadastradas = typeof window._contasCadastradas !== 'undefined' ? window._contasCadastradas : (window.contasCadastradas || []);
+  const _contasEngine = (typeof contasCadastradas !== 'undefined' && Array.isArray(contasCadastradas)) ? contasCadastradas : [];
 
   // Contas vencidas e próximas
-  const vencidas = contasCadastradas.filter(c => {
+  const vencidas = _contasEngine.filter(c => {
     if (c.paga) return false;
     const venc = new Date(c.vencimento + 'T12:00:00');
     return venc < hoje;
   });
-  const proximas = contasCadastradas.filter(c => {
+  const proximas = _contasEngine.filter(c => {
     if (c.paga) return false;
     const venc = new Date(c.vencimento + 'T12:00:00');
     const diff = (venc - hoje) / (1000 * 60 * 60 * 24);
@@ -2857,30 +2760,120 @@ function renderizarInsights(insights) {
   }).join('');
 }
 
-// Hook: rodar manual_engine sempre que dados mudarem
-const _origAtualizarKPIs2 = window.atualizarKPIs;
-window.atualizarKPIs = function() {
-  if (_origAtualizarKPIs2) _origAtualizarKPIs2();
-  setTimeout(executarManualEngine, 400);
-};
-
-// Rodar ao abrir o dashboard
-const _irParaFinal = window.irPara;
+// ==============================
+// FUNÇÃO irPara CONSOLIDADA FINAL
+// Centraliza todos os hooks de navegação numa única função robusta
+// ==============================
 window.irPara = function(tela) {
-  if (_irParaFinal) _irParaFinal(tela);
-  if (tela === 'inicio') setTimeout(executarManualEngine, 200);
-  if (tela === 'score') setTimeout(calcularScore, 100);
-  if (tela === 'investimentos') buscarTaxasBCB();
+  // Navegação base
+  irPara(tela);
+  // Hooks por tela com pequeno delay para garantir DOM visível
+  if (tela === 'dividas')      { setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e){} }, 50); }
+  if (tela === 'gastos')       { setTimeout(() => { try { atualizarTelaCategorias(); } catch(e){ console.error('[Monvay] gastos erro:', e); } }, 50); }
+  if (tela === 'score')        { setTimeout(() => { try { calcularScore(); } catch(e){} }, 100); }
+  if (tela === 'investimentos'){ setTimeout(() => { try { buscarTaxasBCB(); } catch(e){} }, 50); }
+  if (tela === 'inicio')       { setTimeout(() => { try { executarManualEngine(); } catch(e){} }, 200); }
+  if (tela === 'relatorio')    { setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e){} }, 50); }
+  if (tela === 'contas')       { setTimeout(() => { try { renderizarContas(); } catch(e){} }, 50); }
 };
 
-// Expor funções globais
-window.executarManualEngine = executarManualEngine;
-window.renderizarInsights = renderizarInsights;
+// ==============================
+// atualizarKPIs CONSOLIDADO FINAL
+// Atualiza KPIs + mini card score + insights
+// ==============================
+const _kpisBase = atualizarKPIs;
+atualizarKPIs = function() {
+  try { _kpisBase(); } catch(e){}
+  // Mini card score
+  setTimeout(() => {
+    try {
+      const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+      if (totalEntradas > 0) {
+        const p = (totalSaidas / totalEntradas) * 100;
+        pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
+      } else { pts.gastos = 150; }
+      const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+      pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
+      pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
+      pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
+      const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
+      const badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
+      const miniEl = document.getElementById('kpi-score-mini');
+      const miniLabel = document.getElementById('kpi-score-mini-label');
+      if (miniEl) miniEl.textContent = total;
+      if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+    } catch(e) {}
+  }, 300);
+  // Insights
+  setTimeout(() => { try { executarManualEngine(); } catch(e){} }, 400);
+};
+window.atualizarKPIs = atualizarKPIs;
 
-// Funções adicionais necessárias para o HTML
-window.atualizarTelaCategorias  = atualizarTelaCategorias;
+// ==============================
+// EXPOR TODAS AS FUNÇÕES GLOBALMENTE
+// (necessário porque script.js usa type="module")
+// ==============================
+window.irPara                   = window.irPara; // já definido acima
+window.abrirModal               = abrirModal;
+window.fecharModal              = fecharModal;
+window.confirmarModal           = confirmarModal;
+window.responderPergunta        = responderPergunta;
+window.abrirModalEditar         = abrirModalEditar;
+window.fecharModalEditar        = fecharModalEditar;
+window.salvarEdicao             = salvarEdicao;
+window.excluirMovimentacao      = excluirMovimentacao;
+window.setFiltro                = setFiltro;
+window.setTipoGrafico           = setTipoGrafico;
+window.criarMeta                = criarMeta;
+window.abrirModalMeta           = abrirModalMeta;
+window.excluirMeta              = excluirMeta;
+window.abrirModalMetaPorId      = abrirModalMetaPorId;
+window.fecharModalMeta          = fecharModalMeta;
+window.adicionarValorMeta       = adicionarValorMeta;
+window.calcularDivida           = calcularDivida;
+window.calcularInvestimentos    = calcularInvestimentos;
+window.abrirModalSimulacao      = abrirModalSimulacao;
+window.fecharModalSimulacao     = fecharModalSimulacao;
+window.abrirArtigo              = abrirArtigo;
+window.fecharArtigo             = fecharArtigo;
+window.logout                   = logout;
+window.toggleTheme              = toggleTheme;
+window.applyTheme               = applyTheme;
+window.mudarMesRelatorio        = mudarMesRelatorio;
+window.setPeriodoModo           = setPeriodoModo;
+window.aplicarPeriodoCustom     = aplicarPeriodoCustom;
+window.atalhoUltimos            = atalhoUltimos;
+window.processarRecorrentes     = processarRecorrentes;
+window.buscarMovimentacoes      = buscarMovimentacoes;
+window.limparBusca              = limparBusca;
+window.abrirBuscaMobile         = abrirBuscaMobile;
+window.fecharBuscaMobile        = fecharBuscaMobile;
+window.fecharDropdownBusca      = fecharDropdownBusca;
+window.mostrarDropdownBusca     = mostrarDropdownBusca;
+window.atualizarFormDivida      = atualizarFormDivida;
+window.cadastrarDivida          = cadastrarDivida;
+window.excluirDivida            = excluirDivida;
+window.abrirTabPerfil           = abrirTabPerfil;
+window.selecionarVida           = selecionarVida;
+window.selecionarVidaMulti      = selecionarVidaMulti;
+window.setMetaEco               = setMetaEco;
+window.salvarPerfilVida         = salvarPerfilVida;
+window.salvarPerfilFinancas     = salvarPerfilFinancas;
+window.salvarConta              = salvarConta;
+window.editarConta              = editarConta;
+window.cancelarEdicaoConta      = cancelarEdicaoConta;
+window.pagarConta               = pagarConta;
+window.excluirConta             = excluirConta;
+window.filtrarContas            = filtrarContas;
+window.mudarMesContas           = mudarMesContas;
+window.renderizarContas         = renderizarContas;
+window.carregarHistorico        = carregarHistorico;
+// Módulos internos úteis
+window.executarManualEngine     = executarManualEngine;
+window.renderizarInsights       = renderizarInsights;
 window.calcularScore            = calcularScore;
 window.buscarTaxasBCB           = buscarTaxasBCB;
+window.atualizarTelaCategorias  = atualizarTelaCategorias;
 window.renderizarGridCategorias = renderizarGridCategorias;
 window.sincronizarSelects       = sincronizarSelects;
 window.atualizarBannerPerfil    = atualizarBannerPerfil;
@@ -2896,7 +2889,7 @@ window.recalcularTotais         = recalcularTotais;
 window.atualizarListaInicio     = atualizarListaInicio;
 window.atualizarChart           = atualizarChart;
 window.atualizarChartPizza      = atualizarChartPizza;
-window.atualizarKPIs            = atualizarKPIs;
+window.atualizarRelatorio       = atualizarRelatorio;
 window.fmt                      = fmt;
 window.fmtData                  = fmtData;
 window.hojeISO                  = hojeISO;
