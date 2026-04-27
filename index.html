@@ -1562,10 +1562,12 @@
   </script>
 
   <script>
-    // Fallback de navegação — garante que as abas funcionem mesmo se o módulo ES falhar
+    // Fallback de navegação — só age se o módulo ES não carregou (sem listener duplo)
     document.addEventListener('DOMContentLoaded', function() {
       function _irParaFallback(tela) {
+        // Se o módulo já carregou e registrou window.irPara, delega pra ele
         if (typeof window.irPara === 'function') { window.irPara(tela); return; }
+        // Fallback puro só se o módulo falhou
         document.querySelectorAll('.tela').forEach(function(s) { s.classList.remove('active'); });
         var el = document.getElementById('tela-' + tela);
         if (el) el.classList.add('active');
@@ -1575,12 +1577,17 @@
         var pt = document.getElementById('page-title'); if(pt) pt.textContent = titulo;
         var mt = document.getElementById('topbar-mobile-tela'); if(mt) mt.textContent = titulo;
       }
-      document.querySelectorAll('.nav-item[data-tela]').forEach(function(item) {
-        item.addEventListener('click', function(e) {
-          e.preventDefault();
-          _irParaFallback(this.getAttribute('data-tela'));
+      // FIX listener duplo: só adiciona se nav-item ainda não tem listener do módulo
+      // O módulo adiciona _monvayNavBound=true no primeiro item registrado
+      var firstNav = document.querySelector('.nav-item[data-tela]');
+      if (!firstNav || !firstNav._monvayNavBound) {
+        document.querySelectorAll('.nav-item[data-tela]').forEach(function(item) {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
+            _irParaFallback(this.getAttribute('data-tela'));
+          });
         });
-      });
+      }
       window._irParaFallback = _irParaFallback;
     });
   </script>

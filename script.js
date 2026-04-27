@@ -35,6 +35,7 @@ try {
       const tela = this.dataset.tela;
       if (tela) (window.irPara || irPara)(tela);
     });
+    item._monvayNavBound = true; // FIX: marca como registrado para evitar listener duplo
   });
 } catch(e) { console.error('[Monvay] Erro ao registrar nav:', e); }
 
@@ -1848,16 +1849,18 @@ function atualizarTelaCategorias() {
   }).join('');
 }
 
-// Módulo 4: quando salvarPerfilVida() é chamado, recalibrar gastos automaticamente
-const _salvarPerfilVidaOrig = salvarPerfilVida;
-window.salvarPerfilVida = function() {
-  _salvarPerfilVidaOrig();
-  // Recalibrar tudo
+// FIX: salvarPerfilVida wrapper — recalibra categorias após salvar perfil de vida
+const _salvarPerfilVidaBase = salvarPerfilVida;
+window.salvarPerfilVida = function(...args) {
+  const result = _salvarPerfilVidaBase(...args);
+  // Recalibrar categorias, banner e selects com pequeno delay para DOM atualizar
   setTimeout(() => {
-    atualizarTelaCategorias();
-    atualizarBannerPerfil();
-    sincronizarSelects();
-  }, 100);
+    try { atualizarTelaCategorias(); } catch(e) {}
+    try { atualizarBannerPerfil(); }    catch(e) {}
+    try { sincronizarSelects(); }       catch(e) {}
+    try { atualizarKPIs(); }            catch(e) {}
+  }, 120);
+  return result;
 };
 
 // Inicializar selects ao carregar (garante sincronia mesmo sem entrar na tela)
@@ -2764,52 +2767,88 @@ function renderizarInsights(insights) {
 // FUNÇÃO irPara CONSOLIDADA FINAL
 // Centraliza todos os hooks de navegação numa única função robusta
 // ==============================
+// FIX: irPara consolidado — um único wrapper, sem proxy, sem recursão
+// Base salva ANTES do override para evitar recursão infinita
 const _irParaBase = irPara;
 window.irPara = function(tela) {
-  // Navegação base
+  // 1. Navegação base (atualiza DOM: telas + nav-items + título)
   _irParaBase(tela);
-  // Hooks por tela com pequeno delay para garantir DOM visível
-  if (tela === 'dividas')      { setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e){} }, 50); }
-  if (tela === 'gastos')       { setTimeout(() => { try { atualizarTelaCategorias(); } catch(e){ console.error('[Monvay] gastos erro:', e); } }, 50); }
-  if (tela === 'score')        { setTimeout(() => { try { calcularScore(); } catch(e){} }, 100); }
-  if (tela === 'investimentos'){ setTimeout(() => { try { buscarTaxasBCB(); } catch(e){} }, 50); }
-  if (tela === 'inicio')       { setTimeout(() => { try { executarManualEngine(); } catch(e){} }, 200); }
-  if (tela === 'relatorio')    { setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e){} }, 50); }
-  if (tela === 'contas')       { setTimeout(() => { try { renderizarContas(); } catch(e){} }, 50); }
+
+  // 2. Hooks por tela — delayed para garantir DOM visível
+  const D = 60; // delay padrão
+  switch (tela) {
+    case 'inicio':
+      setTimeout(() => { try { executarManualEngine(); } catch(e) {} }, 200);
+      break;
+    case 'gastos':
+      setTimeout(() => { try { atualizarTelaCategorias(); } catch(e) { console.error('[Monvay] gastos:', e); } }, D);
+      break;
+    case 'dividas':
+      setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e) {} }, D);
+      break;
+    case 'score':
+      setTimeout(() => { try { calcularScore(); } catch(e) {} }, 100);
+      break;
+    case 'investimentos':
+      setTimeout(() => { try { buscarTaxasBCB(); } catch(e) {} }, D);
+      break;
+    case 'relatorio':
+      setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e) {} }, D);
+      break;
+    case 'contas':
+      setTimeout(() => { try { renderizarContas(); } catch(e) {} }, D);
+      break;
+  }
 };
-// Ensure module-internal calls also use the hooked version
-// (functions called from within module that call irPara() directly will use this)
-try { irPara = window.irPara; } catch(e) { /* strict mode may block - use window.irPara */ }
+// NÃO reatribuir irPara do módulo — módulo usa _irParaBase internamente
+// Chamadas externas (onclick, drawer) usam window.irPara automaticamente
 
 // ==============================
 // atualizarKPIs CONSOLIDADO FINAL
 // Atualiza KPIs + mini card score + insights
 // ==============================
+// FIX: atualizarKPIs wrapper limpo — sem reatribuição direta
+function _atualizarMiniCardScore() {
+  try {
+    const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
+    if (totalEntradas > 0) {
+      const p = (totalSaidas / totalEntradas) * 100;
+      pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
+    } else { pts.gastos = 150; }
+    const totalDiv = (typeof dividasCadastradas !== 'undefined')
+      ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
+    pts.dividas = totalDiv === 0 ? 250
+      : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180
+        : totalDiv / totalEntradas <= 3 ? 120
+        : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
+    pts.metas = (typeof metas !== 'undefined' && metas.length > 0)
+      ? Math.round(Math.min(
+          metas.reduce((s, m) => s + (m.atual || 0), 0) /
+          Math.max(metas.reduce((s, m) => s + m.objetivo, 0), 1), 1) * 250)
+      : 0;
+    pts.reserva = saldo <= 0 ? 0
+      : totalEntradas > 0
+        ? (saldo / totalEntradas >= 6 ? 200
+          : saldo / totalEntradas >= 3 ? 150
+          : saldo / totalEntradas >= 1 ? 90 : 40)
+        : 40;
+    const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
+    const badge = total >= 800 ? '⭐ Excelente'
+      : total >= 600 ? '🟢 Bom'
+      : total >= 400 ? '🟡 Estável'
+      : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
+    const miniEl    = document.getElementById('kpi-score-mini');
+    const miniLabel = document.getElementById('kpi-score-mini-label');
+    if (miniEl)    miniEl.textContent    = total;
+    if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+  } catch(e) {}
+}
+
 const _kpisBase = atualizarKPIs;
-const _atualizarKPIsWrap = function() {
-  try { _kpisBase(); } catch(e){}
-  // Mini card score
-  setTimeout(() => {
-    try {
-      const pts = { gastos: 0, dividas: 0, metas: 0, reserva: 0 };
-      if (totalEntradas > 0) {
-        const p = (totalSaidas / totalEntradas) * 100;
-        pts.gastos = p <= 50 ? 300 : p <= 70 ? 230 : p <= 90 ? 130 : p <= 100 ? 50 : 0;
-      } else { pts.gastos = 150; }
-      const totalDiv = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
-      pts.dividas = totalDiv === 0 ? 250 : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180 : totalDiv / totalEntradas <= 3 ? 120 : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
-      pts.metas = (typeof metas !== 'undefined' && metas.length > 0) ? Math.round(Math.min(metas.reduce((s,m) => s + (m.atual||0), 0) / Math.max(metas.reduce((s,m) => s + m.objetivo, 0), 1), 1) * 250) : 0;
-      pts.reserva = saldo <= 0 ? 0 : totalEntradas > 0 ? (saldo/totalEntradas >= 6 ? 200 : saldo/totalEntradas >= 3 ? 150 : saldo/totalEntradas >= 1 ? 90 : 40) : 40;
-      const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-      const badge = total >= 800 ? '⭐ Excelente' : total >= 600 ? '🟢 Bom' : total >= 400 ? '🟡 Estável' : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
-      const miniEl = document.getElementById('kpi-score-mini');
-      const miniLabel = document.getElementById('kpi-score-mini-label');
-      if (miniEl) miniEl.textContent = total;
-      if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
-    } catch(e) {}
-  }, 300);
-  // Insights
-  setTimeout(() => { try { executarManualEngine(); } catch(e){} }, 400);
+const _atualizarKPIsWrap = function(...args) {
+  try { _kpisBase(...args); } catch(e) { console.error('[Monvay] atualizarKPIs base:', e); }
+  setTimeout(_atualizarMiniCardScore, 300);
+  setTimeout(() => { try { executarManualEngine(); } catch(e) {} }, 400);
 };
 window.atualizarKPIs = _atualizarKPIsWrap;
 
