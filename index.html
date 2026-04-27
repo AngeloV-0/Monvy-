@@ -1234,18 +1234,23 @@
     // Se o módulo ainda não carregou, faz fila e executa quando disponível
     (function() {
       var _pendentes = [];
-      var _pronto = false;
+      var _proxies = {}; // rastreia quais funções são proxies para evitar recursão
       function _proxy(nome) {
-        return function() {
+        var p = function() {
           var args = arguments;
-          if (typeof window[nome] === 'function') {
-            return window[nome].apply(window, args);
+          var atual = window[nome];
+          // Evitar recursão: se window[nome] ainda é o proxy, enfileirar
+          if (typeof atual === 'function' && atual !== _proxies[nome]) {
+            return atual.apply(window, args);
           } else {
             _pendentes.push({ nome: nome, args: args });
           }
         };
+        _proxies[nome] = p;
+        return p;
       }
       // Lista de todas as funções usadas em onclick que precisam de proxy
+      // irPara removido da lista pois window.irPara é definido no módulo imediatamente
       var funcoesOnclick = [
         'abrirModal','fecharModal','confirmarModal','responderPergunta',
         'abrirModalEditar','fecharModalEditar','salvarEdicao','excluirMovimentacao',
@@ -1260,7 +1265,7 @@
         'selecionarVidaMulti','setMetaEco','salvarPerfilVida','salvarPerfilFinancas',
         'salvarConta','editarConta','cancelarEdicaoConta','pagarConta','excluirConta',
         'filtrarContas','mudarMesContas','renderizarContas','carregarHistorico',
-        'processarRecorrentes','irPara'
+        'processarRecorrentes'
       ];
       funcoesOnclick.forEach(function(nome) {
         if (typeof window[nome] === 'undefined') {
@@ -1271,8 +1276,9 @@
       window.addEventListener('load', function() {
         setTimeout(function() {
           _pendentes.forEach(function(p) {
-            if (typeof window[p.nome] === 'function') {
-              try { window[p.nome].apply(window, p.args); } catch(e) {}
+            var atual = window[p.nome];
+            if (typeof atual === 'function' && atual !== _proxies[p.nome]) {
+              try { atual.apply(window, p.args); } catch(e) {}
             }
           });
           _pendentes = [];
@@ -1565,9 +1571,9 @@
     // Fallback de navegação — só age se o módulo ES não carregou (sem listener duplo)
     document.addEventListener('DOMContentLoaded', function() {
       function _irParaFallback(tela) {
-        // Se o módulo já carregou e registrou window.irPara, delega pra ele
+        // Se window.irPara está definido pelo módulo, usa ele
         if (typeof window.irPara === 'function') { window.irPara(tela); return; }
-        // Fallback puro só se o módulo falhou
+        // Fallback puro só se o módulo falhou completamente
         document.querySelectorAll('.tela').forEach(function(s) { s.classList.remove('active'); });
         var el = document.getElementById('tela-' + tela);
         if (el) el.classList.add('active');
@@ -1577,13 +1583,13 @@
         var pt = document.getElementById('page-title'); if(pt) pt.textContent = titulo;
         var mt = document.getElementById('topbar-mobile-tela'); if(mt) mt.textContent = titulo;
       }
-      // FIX listener duplo: só adiciona se nav-item ainda não tem listener do módulo
-      // O módulo adiciona _monvayNavBound=true no primeiro item registrado
+      // Só adiciona listeners se o módulo NÃO os registrou (_monvayNavBound)
       var firstNav = document.querySelector('.nav-item[data-tela]');
       if (!firstNav || !firstNav._monvayNavBound) {
         document.querySelectorAll('.nav-item[data-tela]').forEach(function(item) {
           item.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             _irParaFallback(this.getAttribute('data-tela'));
           });
         });

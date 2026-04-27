@@ -8,7 +8,7 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, signOut, onAuthStateChanged, updateProfile,
-  setPersistence, browserLocalStoragePersistence
+  setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc,
@@ -31,7 +31,7 @@ const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Garante que a sessão persiste mesmo fechando o navegador
-const authReady = setPersistence(auth, browserLocalStoragePersistence)
+const authReady = setPersistence(auth, browserLocalPersistence)
   .catch(e => console.warn('Persistence error:', e));
 
 export async function waitAuthReady() { return authReady; }

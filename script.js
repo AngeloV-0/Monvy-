@@ -28,16 +28,16 @@ const pageTitles = { inicio:'Dashboard', gastos:'Gastos', metas:'Metas', dividas
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // NAVEGAÇÃO
-try {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.onclick = function(e) {
-      e.preventDefault();
-      const tela = this.dataset.tela;
-      if (tela) (window.irPara || irPara)(tela);
-    });
-    item._monvayNavBound = true; // FIX: marca como registrado para evitar listener duplo
+// Listeners registrados aqui no escopo do módulo (após DOM parseado, pois módulos são defer)
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const tela = this.dataset.tela;
+    if (tela) irParaComHooks(tela);
   });
-} catch(e) { console.error('[Monvay] Erro ao registrar nav:', e); }
+  item._monvayNavBound = true;
+});
 
 function irPara(tela) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -51,6 +51,41 @@ function irPara(tela) {
   const mobileTelaEl = document.getElementById('topbar-mobile-tela');
   if (mobileTelaEl) mobileTelaEl.textContent = titulo;
 }
+
+// Função principal de navegação com hooks por tela
+// Definida logo após irPara para estar disponível para os listeners acima
+function irParaComHooks(tela) {
+  // 1. Navegação base (atualiza DOM)
+  irPara(tela);
+  // 2. Hooks por tela com delay para garantir DOM visível
+  const D = 60;
+  switch (tela) {
+    case 'inicio':
+      setTimeout(() => { try { executarManualEngine(); } catch(e) {} }, 200);
+      break;
+    case 'gastos':
+      setTimeout(() => { try { atualizarTelaCategorias(); } catch(e) {} }, D);
+      break;
+    case 'dividas':
+      setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e) {} }, D);
+      break;
+    case 'score':
+      setTimeout(() => { try { calcularScore(); } catch(e) {} }, 100);
+      break;
+    case 'investimentos':
+      setTimeout(() => { try { buscarTaxasBCB(); } catch(e) {} }, D);
+      break;
+    case 'relatorio':
+      setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e) {} }, D);
+      break;
+    case 'contas':
+      setTimeout(() => { try { renderizarContas(); } catch(e) {} }, D);
+      break;
+  }
+}
+
+// Expor globalmente IMEDIATAMENTE para que onclicks e drawer funcionem
+window.irPara = irParaComHooks;
 
 // FORMATO
 function fmt(v) { return 'R$ '+Math.abs(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
@@ -2172,7 +2207,7 @@ function editarConta(id) {
   document.getElementById('contas-form-titulo').textContent = 'Editar Conta';
   document.getElementById('btn-salvar-conta').textContent = 'Salvar alterações';
   document.getElementById('btn-cancelar-conta').style.display = 'block';
-  irPara('contas');
+  irParaComHooks('contas');
   document.getElementById('conta-descricao').focus();
 }
 
@@ -2763,24 +2798,8 @@ function renderizarInsights(insights) {
   }).join('');
 }
 
-// ==============================
-// FUNÇÃO irPara CONSOLIDADA FINAL
-// Centraliza todos os hooks de navegação numa única função robusta
-// ==============================
-// FIX: irPara consolidado — um único wrapper, sem proxy, sem recursão
-// Base salva ANTES do override para evitar recursão infinita
-const _irParaBase = irPara;
-// PATCH ChatGPT: simplifica navegação para remover regressões dos wrappers
-window.irPara = function(tela){
-  try{
-    _irParaBase(tela);
-    if (window.lucide && window.lucide.createIcons) { try{window.lucide.createIcons();}catch(e){} }
-  }catch(e){
-    console.error('[Monvay] falha em irPara',e);
-  }
-};
-// NÃO reatribuir irPara do módulo — módulo usa _irParaBase internamente
-// Chamadas externas (onclick, drawer) usam window.irPara automaticamente
+// window.irPara já está definido logo após a função irPara (início do arquivo)
+// com todos os hooks de navegação por tela. Não é necessário redefinir aqui.
 
 // ==============================
 // atualizarKPIs CONSOLIDADO FINAL
