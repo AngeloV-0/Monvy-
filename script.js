@@ -30,7 +30,7 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 // NAVEGAÇÃO
 try {
   document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function(e) {
+    item.onclick = function(e) {
       e.preventDefault();
       const tela = this.dataset.tela;
       if (tela) (window.irPara || irPara)(tela);
@@ -2770,34 +2770,13 @@ function renderizarInsights(insights) {
 // FIX: irPara consolidado — um único wrapper, sem proxy, sem recursão
 // Base salva ANTES do override para evitar recursão infinita
 const _irParaBase = irPara;
-window.irPara = function(tela) {
-  // 1. Navegação base (atualiza DOM: telas + nav-items + título)
-  _irParaBase(tela);
-
-  // 2. Hooks por tela — delayed para garantir DOM visível
-  const D = 60; // delay padrão
-  switch (tela) {
-    case 'inicio':
-      setTimeout(() => { try { executarManualEngine(); } catch(e) {} }, 200);
-      break;
-    case 'gastos':
-      setTimeout(() => { try { atualizarTelaCategorias(); } catch(e) { console.error('[Monvay] gastos:', e); } }, D);
-      break;
-    case 'dividas':
-      setTimeout(() => { try { renderizarDividas(); atualizarKPIsDividas(); } catch(e) {} }, D);
-      break;
-    case 'score':
-      setTimeout(() => { try { calcularScore(); } catch(e) {} }, 100);
-      break;
-    case 'investimentos':
-      setTimeout(() => { try { buscarTaxasBCB(); } catch(e) {} }, D);
-      break;
-    case 'relatorio':
-      setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e) {} }, D);
-      break;
-    case 'contas':
-      setTimeout(() => { try { renderizarContas(); } catch(e) {} }, D);
-      break;
+// PATCH ChatGPT: simplifica navegação para remover regressões dos wrappers
+window.irPara = function(tela){
+  try{
+    _irParaBase(tela);
+    if (window.lucide && window.lucide.createIcons) { try{window.lucide.createIcons();}catch(e){} }
+  }catch(e){
+    console.error('[Monvay] falha em irPara',e);
   }
 };
 // NÃO reatribuir irPara do módulo — módulo usa _irParaBase internamente
