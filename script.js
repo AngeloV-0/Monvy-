@@ -2876,3 +2876,27 @@ window.irPara = function(tela) {
 // Expor funções globais
 window.executarManualEngine = executarManualEngine;
 window.renderizarInsights = renderizarInsights;
+
+// Funções adicionais necessárias para o HTML
+window.atualizarTelaCategorias  = atualizarTelaCategorias;
+window.calcularScore            = calcularScore;
+window.buscarTaxasBCB           = buscarTaxasBCB;
+window.renderizarGridCategorias = renderizarGridCategorias;
+window.sincronizarSelects       = sincronizarSelects;
+window.atualizarBannerPerfil    = atualizarBannerPerfil;
+window.renderizarSugestaoOrcamento = renderizarSugestaoOrcamento;
+window.obterCategoriasAtivas    = obterCategoriasAtivas;
+window.obterPerfilVida          = obterPerfilVida;
+window.renderizarDividas        = renderizarDividas;
+window.atualizarKPIsDividas     = atualizarKPIsDividas;
+window.carregarDividasOnboarding = carregarDividasOnboarding;
+window.mostrarToastResetMes     = mostrarToastResetMes;
+window.recalcular               = recalcular;
+window.recalcularTotais         = recalcularTotais;
+window.atualizarListaInicio     = atualizarListaInicio;
+window.atualizarChart           = atualizarChart;
+window.atualizarChartPizza      = atualizarChartPizza;
+window.atualizarKPIs            = atualizarKPIs;
+window.fmt                      = fmt;
+window.fmtData                  = fmtData;
+window.hojeISO                  = hojeISO;
