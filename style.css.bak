@@ -1201,7 +1201,7 @@ select option { background: var(--surface-2); }
   .topbar-desktop-title { display: none !important; }
 
   /* Barra de busca: esconde no mobile — usa overlay com ícone de lupa */
-  /* (min-width rule moved outside — nested @media not valid here) */
+  @media (min-width: 769px) { .topbar-left { min-width: 160px; } }
 
 .topbar-center {
     display: none !important;
@@ -3107,115 +3107,4 @@ html, body {
   .insight-card { padding: 12px 14px; gap: 10px; }
   .insight-icon { width: 36px; height: 36px; }
   .insight-acao { width: 100%; text-align: center; }
-}
-
-/* ============================================================
-   FIX MOBILE — TELA DÍVIDAS
-   Garante layout de coluna única em dispositivos ≤ 768px
-   ============================================================ */
-
-@media (max-width: 768px) {
-
-  /* ---- Two-col stacking: forma correta sem depender do bloco anterior ---- */
-  .two-col {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* ---- Form card: largura total, sem overflow ---- */
-  #tela-dividas .form-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 18px 16px !important;
-  }
-
-  /* ---- Lista de dívidas: largura total ---- */
-  #tela-dividas .two-col > div:last-child {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* ---- Inputs da tela de dívidas: nunca excedem o container ---- */
-  #tela-dividas input[type="text"],
-  #tela-dividas input[type="number"],
-  #tela-dividas select {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    font-size: 16px !important; /* evita zoom automático no iOS */
-  }
-
-  /* ---- Dropdown do tipo de dívida ---- */
-  #div-tipo-selected {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  #div-tipo-dropdown {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    left: 0 !important;
-    right: 0 !important;
-  }
-
-  /* ---- Botão cadastrar: largura total ---- */
-  #tela-dividas .btn-primary {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* ---- Resultado do simulador: sem overflow ---- */
-  #resultado-divida {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-  }
-
-  /* ---- KPIs da tela dívidas: 2x2 no mobile ---- */
-  #dividas-kpis {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* ---- Card de dívida cadastrada ---- */
-  .divida-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-  }
-
-  .divida-card .divida-valor {
-    font-size: 0.95rem !important;
-    white-space: nowrap !important;
-  }
-
-  /* ---- Estratégia sugerida ---- */
-  #estrategia-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 16px !important;
-  }
-
-  /* ---- Seção principal sem overflow lateral ---- */
-  #tela-dividas {
-    overflow-x: hidden !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-}
-
-/* Mobile pequeno: KPIs em coluna única */
-@media (max-width: 400px) {
-  #dividas-kpis {
-    grid-template-columns: 1fr !important;
-  }
 }
