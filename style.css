@@ -2630,7 +2630,7 @@ html, body {
 }
 
 .scale-emoji { font-size: 1.4rem; }
-.scale-range { font-size: 0.72rem; color: var(--gray); font-weight: 600; }
+.scale-range { font-size: 0.72rem; color: var(--gray) !important; font-weight: 600; -webkit-text-fill-color: var(--gray) !important; }
 .scale-name { font-size: 0.82rem; font-weight: 700; color: var(--white); }
 
 .score-scale-item.critico   { border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.06); }

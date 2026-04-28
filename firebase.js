@@ -18,7 +18,7 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_xar1S5zCb5WEg814btkj4vwwcGGmQt4",
-  authDomain: "monvy-5969f.firebaseapp.com",
+  authDomain: "monvay.com.br",           // ← domínio real (resolve redirect_uri_mismatch)
   projectId: "monvy-5969f",
   storageBucket: "monvy-5969f.firebasestorage.app",
   messagingSenderId: "373157570069",
@@ -31,8 +31,12 @@ const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Garante que a sessão persiste mesmo fechando o navegador
-const authReady = setPersistence(auth, browserLocalPersistence)
-  .catch(e => console.warn('Persistence error:', e));
+// authReady resolve ANTES de qualquer operação de auth para evitar race conditions
+let _authReadyResolve;
+const authReady = new Promise(resolve => { _authReadyResolve = resolve; });
+setPersistence(auth, browserLocalPersistence)
+  .catch(e => console.warn('Persistence error:', e))
+  .finally(() => _authReadyResolve());
 
 export async function waitAuthReady() { return authReady; }
 
@@ -42,12 +46,24 @@ export async function loginComGoogle() {
   await authReady;
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if (isMobile) {
+    // Salva flag para o redirect não confundir com novo usuário
+    try { sessionStorage.setItem('monvy_google_redirect', '1'); } catch(_) {}
     await signInWithRedirect(auth, googleProvider);
     return;
   }
-  const result = await signInWithPopup(auth, googleProvider);
-  await _garantirPerfil(result.user);
-  return result.user;
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    await _garantirPerfil(result.user);
+    return result.user;
+  } catch (e) {
+    // Popup bloqueado: cai para redirect
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      try { sessionStorage.setItem('monvy_google_redirect', '1'); } catch(_) {}
+      await signInWithRedirect(auth, googleProvider);
+      return;
+    }
+    throw e;
+  }
 }
 
 // Captura o resultado do redirect (chamado no carregamento da página)

@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monvay — Entrar</title>
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060D0A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Monvay">
   <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -659,21 +664,61 @@
   </div>
 
   <script type="module">
-    import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle } from './firebase.js';
+  import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle, waitAuthReady, getPerfil } from './firebase.js';
 
-    // Redirecionar se já logado — aguarda estabilização do estado
+    // Aguarda persistence estar pronta ANTES de ouvir mudanças de auth
+    // Isso evita race condition em novos dispositivos onde localStorage ainda não carregou
     let authResolved = false;
-    onAuth(user => {
-      if (authResolved) return; // evita múltiplos redirects
+
+    async function rotearUsuario(user) {
+      if (authResolved) return;
       authResolved = true;
-      if (user) {
-        setTimeout(() => { window.location.href = 'index.html'; }, 300);
+
+      // Verifica localStorage como cache rápido
+      const onboardingLocal = localStorage.getItem('monvy_onboarding_done') === '1';
+      if (onboardingLocal) {
+        window.location.href = 'index.html';
+        return;
       }
+
+      // Em novo dispositivo ou sem cache: SEMPRE verifica Firestore
+      // Isso resolve o bug de "conta não encontrada" em dispositivo novo
+      try {
+        const perfil = await getPerfil(user.uid);
+        if (perfil && perfil.onboardingDone) {
+          // Usuário existente em novo dispositivo — atualiza cache local e vai ao painel
+          localStorage.setItem('monvy_onboarding_done', '1');
+          window.location.href = 'index.html';
+        } else if (perfil && perfil.email) {
+          // Perfil existe mas onboarding não feito
+          window.location.href = 'onboarding.html';
+        } else {
+          // Perfil ainda não criado (cadastro novo muito recente)
+          window.location.href = 'onboarding.html';
+        }
+      } catch(e) {
+        console.warn('Erro ao verificar perfil:', e);
+        // Em caso de erro de rede, tenta ir para o painel (melhor UX)
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Só começa a ouvir onAuth DEPOIS que a persistência está configurada
+    waitAuthReady().then(() => {
+      onAuth(async user => {
+        if (user) {
+          await rotearUsuario(user);
+        }
+      });
     });
 
-    // Captura resultado do redirect Google no mobile
-    verificarRedirectGoogle().then(user => {
-      if (user) window.location.href = 'index.html';
+    // Captura resultado do redirect Google (mobile) — também verifica onboarding
+    verificarRedirectGoogle().then(async user => {
+      if (user) {
+        // Limpa flag de redirect
+        try { sessionStorage.removeItem('monvy_google_redirect'); } catch(_) {}
+        await rotearUsuario(user);
+      }
     });
 
     // ── Params da URL ──
@@ -722,7 +767,7 @@
       const senha = document.getElementById('login-senha').value;
       let ok = true;
       if (!email || !email.includes('@')) { erro('err-login-email', true); ok = false; } else erro('err-login-email', false);
-      if (!senha) { erro('err-login-senha', true); ok = false; } else erro('err-login-senha', false);
+      if (!senha) { erro('err-login-senha', true); document.getElementById('err-login-senha').textContent = 'Digite sua senha'; ok = false; } else erro('err-login-senha', false);
       if (!ok) return;
       try {
         setBusy(true);
@@ -730,9 +775,12 @@
         showToast('Bem-vindo de volta! ✓');
       } catch(e) {
         setBusy(false);
+        const msg = traduzirErro(e.code);
+        // Mostra erro no campo de senha (não revela se e-mail existe ou não)
         erro('err-login-senha', true);
-        document.getElementById('err-login-senha').textContent = traduzirErro(e.code);
-        showToast(traduzirErro(e.code));
+        document.getElementById('err-login-senha').innerHTML =
+          msg + ' &nbsp;·&nbsp; <a href="#" onclick="mudarAba(\'esqueci\')" style="color:var(--primary)">Esqueci a senha</a>';
+        showToast(msg);
       }
     };
 
@@ -752,6 +800,9 @@
         setBusy(true);
         await cadastrarComEmail(nome, email, senha);
         showToast(`Conta criada! Bem-vindo, ${nome}! ✓`);
+        // Marca que precisa de onboarding e redireciona imediatamente
+        localStorage.removeItem('monvy_onboarding_done');
+        setTimeout(() => { window.location.href = 'onboarding.html'; }, 600);
       } catch(e) {
         setBusy(false);
         if (e.code === 'auth/email-already-in-use') {
@@ -823,17 +874,23 @@
 
     function traduzirErro(code) {
       const map = {
-        'auth/invalid-credential':      'E-mail ou senha incorretos',
-        'auth/user-not-found':          'Usuário não encontrado',
-        'auth/wrong-password':          'Senha incorreta',
+        // Firebase v9+: auth/user-not-found + auth/wrong-password → auth/invalid-credential
+        'auth/invalid-credential':      'E-mail ou senha incorretos. Verifique e tente novamente',
+        'auth/user-not-found':          'E-mail ou senha incorretos. Verifique e tente novamente',
+        'auth/wrong-password':          'E-mail ou senha incorretos. Verifique e tente novamente',
         'auth/email-already-in-use':    'E-mail já cadastrado',
-        'auth/weak-password':           'Senha muito fraca (mín. 6 caracteres)',
-        'auth/invalid-email':           'E-mail inválido',
+        'auth/weak-password':           'Senha muito fraca (mínimo 6 caracteres)',
+        'auth/invalid-email':           'Formato de e-mail inválido',
         'auth/popup-closed-by-user':    'Login cancelado',
+        'auth/popup-blocked':           'Popup bloqueado pelo navegador. Tentando redirect...',
         'auth/network-request-failed':  'Sem conexão. Verifique a internet',
-        'auth/too-many-requests':       'Muitas tentativas. Tente mais tarde',
+        'auth/too-many-requests':       'Conta temporariamente bloqueada por muitas tentativas. Tente mais tarde ou redefina sua senha',
+        'auth/user-disabled':           'Esta conta foi desativada. Entre em contato com o suporte',
+        'auth/operation-not-allowed':   'Método de login não permitido',
+        'auth/requires-recent-login':   'Por segurança, faça login novamente para continuar',
       };
       return map[code] || 'Algo deu errado. Tente novamente';
+    }
     }
   </script>
 <script>

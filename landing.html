@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monvay — Finanças que fazem sentido</title>
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060D0A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Monvay">
   <link rel="apple-touch-icon" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -723,6 +728,22 @@
   }
 
   function goToDashboard() { window.location.href = 'index.html'; }
+
+  // Se usuário já está logado, vai direto para o painel
+  (async () => {
+    try {
+      const { onAuth } = await import('./firebase.js');
+      let resolved = false;
+      onAuth(user => {
+        if (resolved) return;
+        resolved = true;
+        if (user) {
+          const onboardingDone = localStorage.getItem('monvy_onboarding_done') === '1';
+          window.location.href = onboardingDone ? 'index.html' : 'onboarding.html';
+        }
+      });
+    } catch(e) { /* firebase não disponível na landing, ignora */ }
+  })();
 
   function setStep(el) {
     document.querySelectorAll('.how-step').forEach(s => s.classList.remove('active'));

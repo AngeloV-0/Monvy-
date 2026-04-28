@@ -3,9 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
   <title>Monvay — Seu Ecossistema Financeiro</title>
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="logo.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060D0A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Monvay">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -934,7 +943,7 @@
           <div class="score-history-card">
             <div class="card-header">
               <div>
-                <div class="card-title"><img src="icone-grafico-02.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;margin-top:-2px"> Evolução Mensal</div>
+                <div class="card-title"><img src="icone-grafico-01.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;margin-top:-2px"> Evolução Mensal</div>
                 <div class="card-sub">Seu score ao longo do tempo</div>
               </div>
             </div>
@@ -1570,7 +1579,20 @@
   <script>
     // Fallback de navegação — só age se o módulo ES não carregou (sem listener duplo)
     document.addEventListener('DOMContentLoaded', function() {
-      function _irParaFallback(tela) {
+      // Redirect rápido: se não tem sessão no localStorage, vai para auth imediatamente
+  // (Firebase demora para confirmar, isso acelera a percepção)
+  (function() {
+    const hasSession = localStorage.getItem('monvy_onboarding_done') ||
+                       localStorage.getItem('monvy_logado') ||
+                       localStorage.getItem('monvy_logged');
+    if (!hasSession) {
+      // Mostra loading enquanto Firebase confirma autenticação
+      document.documentElement.style.opacity = '0';
+      setTimeout(() => { document.documentElement.style.opacity = '1'; }, 50);
+    }
+  })();
+
+  function _irParaFallback(tela) {
         // Se window.irPara está definido pelo módulo, usa ele
         if (typeof window.irPara === 'function') { window.irPara(tela); return; }
         // Fallback puro só se o módulo falhou completamente

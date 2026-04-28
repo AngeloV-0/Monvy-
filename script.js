@@ -1182,7 +1182,7 @@ onAuth(async (user) => {
     // Aguarda um tick para garantir que a persistência foi verificada
     setTimeout(() => {
       if (!currentUser) window.location.href = 'auth.html';
-    }, 1500);
+    }, 800); // Reduzido de 1500ms → 800ms para resposta mais rápida
     return;
   }
   currentUser = user;
@@ -1244,27 +1244,28 @@ onAuth(async (user) => {
       aplicarPerfilUI(nomeFirebase, fotoLocal || fotoFirebase || null);
     }
 
-    // Carregar metas
-    metas = await getMetas(user.uid);
+    // Carregar dados em paralelo para reduzir tempo de espera
+    const [metasData, dividasData, contasData] = await Promise.all([
+      getMetas(user.uid).catch(e => { console.warn('metas:', e); return []; }),
+      getDividas(user.uid).catch(e => { console.warn('dividas:', e); return []; }),
+      getContas(user.uid).catch(e => { console.warn('contas:', e); return []; }),
+    ]);
+
+    metas = metasData;
     atualizarListaMetas();
 
-    // Verificar reset mensal automático
-    try {
-      const houveFechamento = await verificarEResetarMes(user.uid);
-      if (houveFechamento) {
-        mostrarToastResetMes();
-      }
-    } catch(e) { console.warn('Erro no reset mensal:', e); }
-
-    // Carregar dívidas
-    dividasCadastradas = await getDividas(user.uid);
+    dividasCadastradas = dividasData;
     if (typeof renderizarDividas === 'function') renderizarDividas();
-    await carregarDividasOnboarding(); // Importar do onboarding se Firebase vazio
+    try { await carregarDividasOnboarding(); } catch(e) {}
 
-    // Carregar contas a pagar
-    contasCadastradas = await getContas(user.uid);
+    contasCadastradas = contasData;
     renderizarContas();
     verificarAlertasContas();
+
+    // Verificar reset mensal automático (não bloqueia o carregamento inicial)
+    verificarEResetarMes(user.uid).then(houveFechamento => {
+      if (houveFechamento) mostrarToastResetMes();
+    }).catch(e => console.warn('Erro no reset mensal:', e));
 
     // Ouvir movimentações em tempo real
     if (unsubMovimentacoes) unsubMovimentacoes();
