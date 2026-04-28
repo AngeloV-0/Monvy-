@@ -2322,7 +2322,7 @@ html, body {
 
 /* Cat novo (categoria adicionada pelo perfil) — brilho sutil */
 .cat-card.cat-novo {
-  border-color: rgba(0,200,83,0.25);
+  border-color: var(--border);
 }
 
 
