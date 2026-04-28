@@ -1163,10 +1163,18 @@ document.addEventListener('click', function(e) {
 // ===== INIT FIREBASE =====
 applyTheme(localStorage.getItem('monvy_theme')||'dark');
 
-// Carregar Chart.js
-const script=document.createElement('script');
-script.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
-script.onload=()=>atualizarChart();
+// Carregar Chart.js — arquivo local (sem dependência de CDN externo)
+// Evita erros de "Tracking Prevention blocked access to storage"
+const script = document.createElement('script');
+script.src = 'chart.min.js';
+script.onload = () => atualizarChart();
+script.onerror = () => {
+  // Fallback: tenta CDN apenas se o arquivo local falhar
+  const fallback = document.createElement('script');
+  fallback.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+  fallback.onload = () => atualizarChart();
+  document.head.appendChild(fallback);
+};
 document.head.appendChild(script);
 
 onAuth(async (user) => {
