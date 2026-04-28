@@ -42,3 +42,27 @@ COMO APLICAR:
 5. Apague o conteúdo atual e cole as regras acima
 6. Clique em "Publicar" (Publish)
 --------------------------------------
+
+==============================
+CORREÇÃO: Google Login (redirect_uri_mismatch)
+==============================
+
+O erro "Erro 400: redirect_uri_mismatch" do Google OAuth
+NÃO é corrigido no código — precisa ser configurado no console:
+
+PASSO 1 — Firebase Console:
+  https://console.firebase.google.com/project/monvy-5969f/authentication/settings
+  → Aba "Domínios autorizados"
+  → Adicionar: monvay.com.br
+
+PASSO 2 — Google Cloud Console:
+  https://console.cloud.google.com/apis/credentials
+  → Selecionar o OAuth 2.0 Client ID do projeto monvy-5969f
+  → Em "URIs de redirecionamento autorizados", adicionar:
+    https://monvy-5969f.firebaseapp.com/__/auth/handler
+  → Em "Origens JavaScript autorizadas", adicionar:
+    https://monvay.com.br
+
+IMPORTANTE: O authDomain deve permanecer como "monvy-5969f.firebaseapp.com"
+no firebase.js. Mudar para "monvay.com.br" causa erro 404 no iframe de auth
+a menos que o Firebase Hosting esteja configurado nesse domínio.

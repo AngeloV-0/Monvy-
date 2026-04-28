@@ -18,7 +18,7 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_xar1S5zCb5WEg814btkj4vwwcGGmQt4",
-  authDomain: "monvay.com.br",           // ← domínio real (resolve redirect_uri_mismatch)
+  authDomain: "monvy-5969f.firebaseapp.com",  // domínio Firebase (evita 404 no iframe de auth)
   projectId: "monvy-5969f",
   storageBucket: "monvy-5969f.firebasestorage.app",
   messagingSenderId: "373157570069",
