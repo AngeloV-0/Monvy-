@@ -1788,10 +1788,25 @@ input[type="date"] {
   font-family: var(--font-body);
   color-scheme: dark;
 }
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(3) hue-rotate(90deg);
+  opacity: 0.7;
+  cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="month"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
 [data-theme="light"] input[type="date"] {
   background: rgba(0,0,0,0.04);
   color: var(--text);
   color-scheme: light;
+}
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: none;
+  opacity: 0.6;
 }
 input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
 
