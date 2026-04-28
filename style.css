@@ -470,7 +470,7 @@ nav {
 }
 
 /* Telas */
-.tela { display: none; animation: fadeUp 0.3s ease; }
+.tela { display: none; animation: fadeUp 0.3s ease; overflow: hidden; }
 .tela.active { display: block; }
 
 @keyframes fadeUp {
@@ -2729,11 +2729,12 @@ html, body {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   padding: 11px 22px;
   font-size: 0.9rem;
-  width: auto !important;
-  margin-top: 0;
+  width: 100% !important;
+  margin-top: 8px;
 }
 
 /* Summary bar */
@@ -3154,6 +3155,35 @@ html, body {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  /* ---- Lista de contas (calendário + lista): largura total ---- */
+  #tela-contas .two-col > div:last-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* ---- Calendário de contas: nunca ultrapassa o container ---- */
+  #contas-calendario {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  #contas-grid-dias {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  /* ---- Form card de contas: largura total ---- */
+  #tela-contas .form-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px 16px !important;
   }
 
   /* ---- Inputs da tela de dívidas: nunca excedem o container ---- */
