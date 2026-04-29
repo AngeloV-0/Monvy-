@@ -2470,7 +2470,7 @@ html, body {
 .score-badge {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   font-family: var(--font-title);
   font-size: 1.5rem;
   font-weight: 700;
