@@ -1178,9 +1178,23 @@
         <!-- Data de nascimento -->
         <div style="margin-bottom:16px">
           <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">Data de nascimento</label>
-          <input type="date" id="perfil-nascimento-input"
-            style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit"
-            oninput="atualizarIdade()">
+          <div style="display:flex;gap:8px">
+            <select id="perfil-nasc-dia" onchange="atualizarIdade()"
+              style="flex:1;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:12px 10px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit;appearance:none;text-align:center">
+              <option value="">Dia</option>
+              ${Array.from({length:31},(_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${String(i+1).padStart(2,'0')}</option>`).join('')}
+            </select>
+            <select id="perfil-nasc-mes" onchange="atualizarIdade()"
+              style="flex:2;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:12px 10px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit;appearance:none;text-align:center">
+              <option value="">Mês</option>
+              ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'].map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')}
+            </select>
+            <select id="perfil-nasc-ano" onchange="atualizarIdade()"
+              style="flex:1;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:12px 10px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit;appearance:none;text-align:center">
+              <option value="">Ano</option>
+              ${Array.from({length:100},(_,i)=>2025-i).map(y=>`<option value="${y}">${y}</option>`).join('')}
+            </select>
+          </div>
         </div>
         <!-- Idade calculada -->
         <div style="margin-bottom:20px" id="perfil-idade-row" style="display:none">
@@ -1376,9 +1390,18 @@
       } catch(e) {}
       // Preencher data de nascimento salva (localStorage primeiro, depois Firestore)
       const nascSalvo = localStorage.getItem('monvy_nascimento');
-      const nascInput = document.getElementById('perfil-nascimento-input');
-      if (nascSalvo) { nascInput.value = nascSalvo; atualizarIdade(); }
-      else { nascInput.value = ''; document.getElementById('perfil-idade-display').textContent = '—'; }
+      if (nascSalvo) {
+        const [ano, mes, dia] = nascSalvo.split('-');
+        document.getElementById('perfil-nasc-dia').value = dia || '';
+        document.getElementById('perfil-nasc-mes').value = mes || '';
+        document.getElementById('perfil-nasc-ano').value = ano || '';
+        atualizarIdade();
+      } else {
+        document.getElementById('perfil-nasc-dia').value = '';
+        document.getElementById('perfil-nasc-mes').value = '';
+        document.getElementById('perfil-nasc-ano').value = '';
+        document.getElementById('perfil-idade-display').textContent = '—';
+      }
       // Tentar carregar do Firestore se não tiver no localStorage
       try {
         const { auth } = window._firebaseExports || {};
@@ -1386,7 +1409,10 @@
           import('./firebase.js').then(({ getPerfil }) => {
             getPerfil(auth.currentUser.uid).then(perfil => {
               if (perfil && perfil.nascimento) {
-                nascInput.value = perfil.nascimento;
+                const [ano, mes, dia] = perfil.nascimento.split('-');
+                document.getElementById('perfil-nasc-dia').value = dia || '';
+                document.getElementById('perfil-nasc-mes').value = mes || '';
+                document.getElementById('perfil-nasc-ano').value = ano || '';
                 localStorage.setItem('monvy_nascimento', perfil.nascimento);
                 atualizarIdade();
               }
@@ -1445,11 +1471,12 @@
       reader.readAsDataURL(input.files[0]);
     }
     function atualizarIdade() {
-      const val = document.getElementById('perfil-nascimento-input').value;
-      const row = document.getElementById('perfil-idade-row');
+      const dia = document.getElementById('perfil-nasc-dia').value;
+      const mes = document.getElementById('perfil-nasc-mes').value;
+      const ano = document.getElementById('perfil-nasc-ano').value;
       const display = document.getElementById('perfil-idade-display');
-      if (!val) { display.textContent = '—'; return; }
-      const nasc = new Date(val + 'T00:00:00');
+      if (!dia || !mes || !ano) { display.textContent = '—'; return; }
+      const nasc = new Date(`${ano}-${mes}-${dia}T00:00:00`);
       const hoje = new Date();
       let idade = hoje.getFullYear() - nasc.getFullYear();
       const m = hoje.getMonth() - nasc.getMonth();
@@ -1466,7 +1493,10 @@
     }
     async function salvarPerfil() {
       const nome = document.getElementById('perfil-nome-input').value.trim() || 'Visitante';
-      const nascimento = document.getElementById('perfil-nascimento-input').value || null;
+      const dia = document.getElementById('perfil-nasc-dia').value;
+      const mes = document.getElementById('perfil-nasc-mes').value;
+      const ano = document.getElementById('perfil-nasc-ano').value;
+      const nascimento = (dia && mes && ano) ? `${ano}-${mes}-${dia}` : null;
       const imgEl = document.getElementById('perfil-avatar-img');
       const temFoto = imgEl.style.display !== 'none' && imgEl.src && imgEl.src !== window.location.href;
       const fotoSrc = temFoto ? imgEl.src : null;
