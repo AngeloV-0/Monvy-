@@ -428,8 +428,8 @@
     <li><a href="#depoimentos">Depoimentos</a></li>
   </ul>
   <div class="nav-cta">
-    <button class="btn-ghost" onclick="openAuth('login')">Entrar</button>
-    <button class="btn-solid" onclick="openAuth('signup')">Criar conta grátis</button>
+    <button class="btn-ghost" onclick="window.location.href='auth.html'">Entrar</button>
+    <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Criar conta grátis</button>
   </div>
 </nav>
 
@@ -452,9 +452,9 @@
     </p>
     <div class="hero-form">
       <input type="email" id="hero-email" placeholder="Seu melhor e-mail">
-      <button class="btn-solid" onclick="openAuthWithEmail()">Começar grátis →</button>
+      <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Começar grátis →</button>
     </div>
-    <p class="hero-note">Gratuito para sempre. Sem cartão de crédito. <a href="#" onclick="openAuth('login');return false;">Já tem conta? Entre aqui</a></p>
+    <p class="hero-note">Gratuito para sempre. Sem cartão de crédito. <a href="#" onclick="window.location.href='auth.html';return false;">Já tem conta? Entre aqui</a></p>
 
     <div class="hero-cards">
       <div class="float-card fc3">
@@ -580,7 +580,7 @@
   <div class="section-eyebrow" style="position:relative;z-index:1">Comece hoje</div>
   <h2 class="section-title" style="position:relative;z-index:1">Seu dinheiro merece<br>atenção real</h2>
   <p class="section-sub" style="position:relative;z-index:1">Crie sua conta gratuita e comece a enxergar suas finanças com clareza.</p>
-  <a href="#" class="cta-btn" onclick="openAuth('signup');return false;">
+  <a href="#" class="cta-btn" onclick="window.location.href='auth.html?modo=cadastro';return false;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Criar conta gratuita
   </a>
@@ -730,21 +730,8 @@
 
   function goToDashboard() { window.location.href = 'index.html'; }
 
-  // Se usuário já está logado, vai direto para o painel
-  (async () => {
-    try {
-      const { onAuth } = await import('./firebase.js');
-      let resolved = false;
-      onAuth(user => {
-        if (resolved) return;
-        resolved = true;
-        if (user) {
-          const onboardingDone = localStorage.getItem('monvy_onboarding_done') === '1';
-          window.location.href = onboardingDone ? 'index.html' : 'onboarding.html';
-        }
-      });
-    } catch(e) { /* firebase não disponível na landing, ignora */ }
-  })();
+  // Usuário logado é redirecionado apenas ao clicar em Entrar/Criar conta
+  // (removido auto-redirect que causava loop)
 
   function setStep(el) {
     document.querySelectorAll('.how-step').forEach(s => s.classList.remove('active'));
