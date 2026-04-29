@@ -2515,13 +2515,13 @@ html, body {
 }
 
 .score-criteria-icon {
-  width: 64px; height: 64px;
+  width: 72px !important; height: 72px !important;
   border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 
-.score-criteria-icon svg { width: 36px; height: 36px; }
+.score-criteria-icon svg { width: 42px !important; height: 42px !important; }
 
 .score-criteria-title {
   font-size: 0.88rem;
