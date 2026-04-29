@@ -2644,7 +2644,7 @@ html, body {
   border: 1px solid var(--border);
 }
 
-.scale-emoji { font-size: 1.4rem; display: flex; align-items: center; justify-content: center; height: 48px; }
+.scale-emoji { display: flex; align-items: center; justify-content: center; height: 48px; }
 .scale-range { font-size: 0.72rem; color: var(--gray) !important; font-weight: 600; -webkit-text-fill-color: var(--gray) !important; }
 .scale-name { font-size: 0.82rem; font-weight: 700; color: var(--white); }
 
