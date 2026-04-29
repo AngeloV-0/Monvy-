@@ -219,7 +219,7 @@ function movsFiltradas() {
 function atualizarListaInicio() {
   const lista = document.getElementById('lista-inicio');
   if (movimentacoes.length===0) { lista.innerHTML='<div class="vazio">Nenhuma movimentação ainda. Comece registrando!</div>'; return; }
-  lista.innerHTML = [...movimentacoes].reverse().slice(0,8).map(m=>`
+  lista.innerHTML = [...movimentacoes].slice(0,8).map(m=>`
     <div class="mov-item">
       <div class="mov-left">
         <div class="mov-dot ${m.tipo==='ganho'?'g':'r'}"></div>
