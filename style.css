@@ -247,7 +247,7 @@ nav {
 }
 
 .avatar-mini {
-  width: 38px; height: 38px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   background: var(--grad);
   display: flex;
@@ -1282,7 +1282,7 @@ select option { background: var(--surface-2); }
     overflow: hidden;
     max-width: calc(100vw - 230px); /* garante espaço para os botões da direita */
   }
-  .topbar-logo-mobile img {
+  .topbar-logo-mobile img:not(#topbar-avatar-mobile) {
     flex-shrink: 0;
     width: 22px;
     height: 22px;
@@ -1428,10 +1428,10 @@ select option { background: var(--surface-2); }
    HAMBURGER BUTTON
    ============================== */
 .topbar-avatar-mobile {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  max-width: 38px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  max-width: 46px;
   border-radius: 50%;
   background: var(--primary);
   background-size: cover !important;
@@ -2018,10 +2018,10 @@ html, body {
 
   /* Avatar mobile - garante dimensões fixas */
   .topbar-avatar-mobile {
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    max-width: 38px !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
     border-radius: 50% !important;
     overflow: hidden !important;
     background-size: cover !important;
@@ -2030,10 +2030,22 @@ html, body {
   }
 
   /* Logo visível */
-  .topbar-logo-mobile img {
+  .topbar-logo-mobile img:not(#topbar-avatar-mobile) {
     display: block !important;
     height: 24px !important;
     width: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Avatar mobile - tamanho fixo igual ao emoji */
+  #topbar-avatar-mobile {
+    display: block !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
     flex-shrink: 0 !important;
   }
 
@@ -2156,7 +2168,8 @@ html, body {
   background: rgba(0,200,83,0.1);
   color: var(--primary, #00c853);
 }
-.vida-opt span { font-size: 1.2rem; }
+.vida-opt span { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 34px; }
+.vida-opt span img { display: block; }
 
 /* KPIs de Dívidas */
 #dividas-kpis .kpi-card { cursor: default; }
