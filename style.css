@@ -2478,6 +2478,13 @@ html, body {
   margin-bottom: 10px;
 }
 
+.score-badge img {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
+}
+
 .score-tip {
   font-size: 0.9rem;
   color: var(--gray-2);
