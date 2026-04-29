@@ -2380,11 +2380,12 @@ function calcularScore() {
 
   // Classificação
   let badge, cor, dica;
-  if (total >= 800)      { badge = '⭐ Excelente'; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
-  else if (total >= 600) { badge = '🟢 Bom'; cor = '#22C55E'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
-  else if (total >= 400) { badge = '🟡 Estável'; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
-  else if (total >= 200) { badge = '🟠 Atenção'; cor = '#F97316'; dica = 'Há espaço para melhorar. Reduza dívidas e controle os gastos no próximo mês.'; }
-  else                   { badge = '🔴 Crítico'; cor = '#EF4444'; dica = 'Situação crítica. Priorize quitar dívidas, corte gastos e busque aumentar a renda.'; }
+  const iconStyle = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;margin-bottom:2px';
+  if (total >= 800)      { badge = `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
+  else if (total >= 600) { badge = `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`; cor = '#84CC16'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
+  else if (total >= 400) { badge = `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
+  else if (total >= 200) { badge = `<img src="icone-score-atencao.png" style="${iconStyle}"> Atenção`; cor = '#F97316'; dica = 'Há espaço para melhorar. Reduza dívidas e controle os gastos no próximo mês.'; }
+  else                   { badge = `<img src="icone-score-critico.png" style="${iconStyle}"> Crítico`; cor = '#EF4444'; dica = 'Situação crítica. Priorize quitar dívidas, corte gastos e busque aumentar a renda.'; }
   if (penalidade > 0) dica = `⚠️ ${contasV.length} conta(s) vencida(s) reduziram seu score em ${penalidade} pontos. ` + dica;
 
   // Animação do número
@@ -2394,7 +2395,7 @@ function calcularScore() {
   atualizarGauge(total, cor);
 
   // Badge e dica principal
-  document.getElementById('score-badge').textContent = badge;
+  document.getElementById('score-badge').innerHTML = badge;
   document.getElementById('score-tip').textContent = dica;
 
   // Critérios
@@ -2410,7 +2411,7 @@ function calcularScore() {
   const miniEl = document.getElementById('kpi-score-mini');
   const miniLabel = document.getElementById('kpi-score-mini-label');
   if (miniEl) miniEl.textContent = total;
-  if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+  if (miniLabel) miniLabel.innerHTML = badge + ' → Ver detalhes';
 
   // Salvar histórico
   salvarHistoricoScore(total);
@@ -2840,14 +2841,16 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const badge = total >= 800 ? '⭐ Excelente'
-      : total >= 600 ? '🟢 Bom'
-      : total >= 400 ? '🟡 Estável'
-      : total >= 200 ? '🟠 Atenção' : '🔴 Crítico';
+    const iconStyle = 'width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:4px;margin-bottom:2px';
+    const badge = total >= 800 ? `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`
+      : total >= 600 ? `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`
+      : total >= 400 ? `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`
+      : total >= 200 ? `<img src="icone-score-atencao.png" style="${iconStyle}"> Atenção`
+      : `<img src="icone-score-critico.png" style="${iconStyle}"> Crítico`;
     const miniEl    = document.getElementById('kpi-score-mini');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent    = total;
-    if (miniLabel) miniLabel.textContent = badge + ' → Ver detalhes';
+    if (miniLabel) miniLabel.innerHTML = badge + ' → Ver detalhes';
   } catch(e) {}
 }
 
