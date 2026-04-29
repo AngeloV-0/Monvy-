@@ -3,7 +3,7 @@
 // ==============================
 import {
   onAuth, fazerLogout as fbLogout, getPerfil,
-  ouvirMovimentacoes, adicionarMovimentacao, deletarMovimentacao,
+  ouvirMovimentacoes, adicionarMovimentacao, atualizarMovimentacao, deletarMovimentacao,
   getMetas, adicionarMeta, atualizarMeta, deletarMeta,
   getDividas, adicionarDivida, atualizarDivida, deletarDivida,
   getContas, adicionarConta, atualizarConta, deletarConta,
@@ -354,10 +354,8 @@ async function salvarEdicao() {
     resposta: m.resposta || ''
   };
   try {
-    await deletarMovimentacao(currentUser.uid, m.id);
-    const tipo = m.tipo;
-    tipoAtual = tipo;
-    await adicionarMovimentacao(currentUser.uid, { tipo, ...dados });
+    // Atualiza direto — preserva criadoEm original para não mudar a ordem de cadastro
+    await atualizarMovimentacao(currentUser.uid, m.id, dados);
   } catch(e) {
     console.error('Erro ao editar:', e);
     alert('Erro ao salvar edição. Tente novamente.');

@@ -675,32 +675,27 @@
       if (authResolved) return;
       authResolved = true;
 
-      // Verifica localStorage como cache rápido
-      const onboardingLocal = localStorage.getItem('monvy_onboarding_done') === '1';
-      if (onboardingLocal) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      // Em novo dispositivo ou sem cache: SEMPRE verifica Firestore
-      // Isso resolve o bug de "conta não encontrada" em dispositivo novo
+      // SEMPRE verifica Firestore para garantir que a sessão é válida.
+      // O cache do localStorage era a causa do bug: ao sair e entrar novamente,
+      // o cache indicava onboarding feito mas a sessão Firebase ainda não havia
+      // sido restaurada, causando loop de redirecionamento.
       try {
         const perfil = await getPerfil(user.uid);
         if (perfil && perfil.onboardingDone) {
-          // Usuário existente em novo dispositivo — atualiza cache local e vai ao painel
           localStorage.setItem('monvy_onboarding_done', '1');
           window.location.href = 'index.html';
         } else if (perfil && perfil.email) {
-          // Perfil existe mas onboarding não feito
           window.location.href = 'onboarding.html';
         } else {
-          // Perfil ainda não criado (cadastro novo muito recente)
           window.location.href = 'onboarding.html';
         }
       } catch(e) {
         console.warn('Erro ao verificar perfil:', e);
-        // Em caso de erro de rede, tenta ir para o painel (melhor UX)
-        window.location.href = 'index.html';
+        // Só vai ao painel se o localStorage confirmar onboarding feito
+        // (evita mandar usuário sem sessão para o painel)
+        if (localStorage.getItem('monvy_onboarding_done') === '1') {
+          window.location.href = 'index.html';
+        }
       }
     }
 

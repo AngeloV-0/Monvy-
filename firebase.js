@@ -147,7 +147,7 @@ export async function marcarOnboardingFeito(uid) {
 // ── Movimentações ─────────────────────────────────────────────
 
 export async function getMovimentacoes(uid) {
-  const q    = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('criadoEm', 'desc'));
+  const q    = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -159,12 +159,16 @@ export async function adicionarMovimentacao(uid, mov) {
   return ref.id;
 }
 
+export async function atualizarMovimentacao(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'movimentacoes', id), dados);
+}
+
 export async function deletarMovimentacao(uid, id) {
   await deleteDoc(doc(db, 'usuarios', uid, 'movimentacoes', id));
 }
 
 export function ouvirMovimentacoes(uid, callback) {
-  const q = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('criadoEm', 'desc'));
+  const q = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'));
   return onSnapshot(q, snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
 }
 
@@ -253,7 +257,7 @@ export async function verificarEResetarMes(uid) {
   // É um mês novo — arquivar movimentações do mês anterior
   if (ultimoMes) {
     const movsSnap = await getDocs(
-      query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('criadoEm', 'desc'))
+      query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'))
     );
     const movs = movsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
