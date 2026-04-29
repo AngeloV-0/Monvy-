@@ -2841,16 +2841,19 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const iconStyle = 'width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:4px;margin-bottom:2px';
-    const badge = total >= 800 ? `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`
-      : total >= 600 ? `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`
-      : total >= 400 ? `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`
-      : total >= 200 ? `<img src="icone-score-atencao.png" style="${iconStyle}"> Atenção`
-      : `<img src="icone-score-critico.png" style="${iconStyle}"> Crítico`;
+    const iconStyle = 'width:36px;height:36px;object-fit:contain;display:block';
+    const iconSrc = total >= 800 ? 'icone-score-excelente.png'
+      : total >= 600 ? 'icone-score-bom.png'
+      : total >= 400 ? 'icone-score-estavel.png'
+      : total >= 200 ? 'icone-score-atencao.png'
+      : 'icone-score-critico.png';
+    const labelText = total >= 800 ? 'Excelente' : total >= 600 ? 'Bom' : total >= 400 ? 'Estável' : total >= 200 ? 'Atenção' : 'Crítico';
     const miniEl    = document.getElementById('kpi-score-mini');
+    const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
-    if (miniEl)    miniEl.textContent    = total;
-    if (miniLabel) miniLabel.innerHTML = badge + ' → Ver detalhes';
+    if (miniEl)    miniEl.textContent = total;
+    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.82rem;font-weight:700;color:var(--white)">${labelText}</span>`;
+    if (miniLabel) miniLabel.innerHTML = 'Ver detalhes →';
   } catch(e) {}
 }
 
