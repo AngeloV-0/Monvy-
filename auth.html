@@ -562,15 +562,15 @@
           <label class="form-label">Senha</label>
           <div style="position:relative">
             <input type="password" class="form-input" id="login-senha" placeholder="••••••••" style="padding-right:44px">
-            <button type="button" onclick="toggleSenhaAuth('login-senha','eye-login-show','eye-login-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted,#64748b);padding:0;display:flex;align-items:center">
+            <button type="button" onclick="toggleSenhaAuth('login-senha','eye-login-show','eye-login-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#1a1a1a;padding:0;display:flex;align-items:center">
               <svg id="eye-login-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <svg id="eye-login-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
           </div>
           <div class="error-msg" id="err-login-senha">Senha incorreta</div>
-          <div style="text-align:right;margin-top:6px">
-            <a href="#" onclick="mudarAba('esqueci')" style="font-size:.78rem;color:var(--primary);text-decoration:none;font-weight:600">Esqueci minha senha</a>
-          </div>
+        </div>
+        <div style="text-align:center;margin:12px 0 4px">
+          <a href="#" onclick="mudarAba('esqueci')" style="font-size:.88rem;color:var(--primary);text-decoration:none;font-weight:700;display:inline-block;padding:9px 24px;border:1.5px solid rgba(0,200,83,0.4);border-radius:22px;background:rgba(0,200,83,0.07)">🔑 Esqueci minha senha</a>
         </div>
 
         <div class="divider">ou</div>
@@ -634,7 +634,7 @@
           <label class="form-label">Senha</label>
           <div style="position:relative">
             <input type="password" class="form-input" id="cad-senha" placeholder="Mínimo 6 caracteres" oninput="verificarSenha(this)" style="padding-right:44px">
-            <button type="button" onclick="toggleSenhaAuth('cad-senha','eye-cad-show','eye-cad-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted,#64748b);padding:0;display:flex;align-items:center">
+            <button type="button" onclick="toggleSenhaAuth('cad-senha','eye-cad-show','eye-cad-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#1a1a1a;padding:0;display:flex;align-items:center">
               <svg id="eye-cad-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               <svg id="eye-cad-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             </button>
