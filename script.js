@@ -2380,7 +2380,7 @@ function calcularScore() {
 
   // Classificação
   let badge, cor, dica;
-  const iconStyle = 'width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;margin-bottom:2px';
+  const iconStyle = 'width:56px;height:56px;object-fit:contain;vertical-align:middle;margin-right:8px;margin-bottom:2px';
   if (total >= 800)      { badge = `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
   else if (total >= 600) { badge = `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`; cor = '#84CC16'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
   else if (total >= 400) { badge = `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
