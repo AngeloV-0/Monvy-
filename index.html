@@ -1167,6 +1167,29 @@
             style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit"
             oninput="atualizarPreviewNome(this.value)">
         </div>
+        <!-- E-mail (somente leitura) -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">E-mail da conta</label>
+          <div id="perfil-email-display"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--gray);font-size:0.92rem;font-family:inherit;opacity:0.7;cursor:default">
+            —
+          </div>
+        </div>
+        <!-- Data de nascimento -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">Data de nascimento</label>
+          <input type="date" id="perfil-nascimento-input"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:0.92rem;outline:none;font-family:inherit;color-scheme:dark"
+            oninput="atualizarIdade()">
+        </div>
+        <!-- Idade calculada -->
+        <div style="margin-bottom:20px" id="perfil-idade-row" style="display:none">
+          <label style="font-size:0.78rem;color:var(--gray);display:block;margin-bottom:6px">Idade</label>
+          <div id="perfil-idade-display"
+            style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--primary);font-size:0.92rem;font-weight:700;font-family:inherit">
+            —
+          </div>
+        </div>
         <button class="btn-primary" style="width:100%" onclick="salvarPerfil()">Salvar alterações</button>
         <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:12px;font-size:0.82rem;color:var(--primary)">✓ Perfil atualizado!</div>
       </div>
@@ -1343,6 +1366,34 @@
       }
       document.getElementById('perfil-nome-input').value = nome;
       atualizarPreviewNome(nome);
+      // Preencher e-mail (somente leitura)
+      try {
+        const { auth } = window._firebaseExports || {};
+        const emailDisplay = document.getElementById('perfil-email-display');
+        if (auth && auth.currentUser && auth.currentUser.email) {
+          emailDisplay.textContent = auth.currentUser.email;
+        }
+      } catch(e) {}
+      // Preencher data de nascimento salva (localStorage primeiro, depois Firestore)
+      const nascSalvo = localStorage.getItem('monvy_nascimento');
+      const nascInput = document.getElementById('perfil-nascimento-input');
+      if (nascSalvo) { nascInput.value = nascSalvo; atualizarIdade(); }
+      else { nascInput.value = ''; document.getElementById('perfil-idade-display').textContent = '—'; }
+      // Tentar carregar do Firestore se não tiver no localStorage
+      try {
+        const { auth } = window._firebaseExports || {};
+        if (auth && auth.currentUser && !nascSalvo) {
+          import('./firebase.js').then(({ getPerfil }) => {
+            getPerfil(auth.currentUser.uid).then(perfil => {
+              if (perfil && perfil.nascimento) {
+                nascInput.value = perfil.nascimento;
+                localStorage.setItem('monvy_nascimento', perfil.nascimento);
+                atualizarIdade();
+              }
+            });
+          });
+        }
+      } catch(e) {}
       // Carregar foto salva se existir
       const fotoSalva = localStorage.getItem('monvy_avatar_foto');
       const imgEl = document.getElementById('perfil-avatar-img');
@@ -1393,6 +1444,18 @@
       };
       reader.readAsDataURL(input.files[0]);
     }
+    function atualizarIdade() {
+      const val = document.getElementById('perfil-nascimento-input').value;
+      const row = document.getElementById('perfil-idade-row');
+      const display = document.getElementById('perfil-idade-display');
+      if (!val) { display.textContent = '—'; return; }
+      const nasc = new Date(val + 'T00:00:00');
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nasc.getFullYear();
+      const m = hoje.getMonth() - nasc.getMonth();
+      if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+      display.textContent = idade >= 0 && idade < 130 ? idade + ' anos' : '—';
+    }
     function removerFoto() {
       const imgEl = document.getElementById('perfil-avatar-img');
       const letraEl = document.getElementById('perfil-avatar-letra');
@@ -1403,9 +1466,14 @@
     }
     async function salvarPerfil() {
       const nome = document.getElementById('perfil-nome-input').value.trim() || 'Visitante';
+      const nascimento = document.getElementById('perfil-nascimento-input').value || null;
       const imgEl = document.getElementById('perfil-avatar-img');
       const temFoto = imgEl.style.display !== 'none' && imgEl.src && imgEl.src !== window.location.href;
       const fotoSrc = temFoto ? imgEl.src : null;
+
+      // Salvar nascimento no localStorage
+      if (nascimento) localStorage.setItem('monvy_nascimento', nascimento);
+      else localStorage.removeItem('monvy_nascimento');
 
       // Salvar nome no localStorage
       let userData = {};
@@ -1434,6 +1502,7 @@
           // Atualizar nome no Firestore
           const dadosAtualizados = { nome };
           if (fotoSrc) dadosAtualizados.foto = fotoSrc;
+          if (nascimento) dadosAtualizados.nascimento = nascimento;
           await updateDoc(doc(db, 'usuarios', user.uid), dadosAtualizados);
         }
       } catch(e) {
