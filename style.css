@@ -2521,13 +2521,13 @@ html, body {
 }
 
 .score-criteria-icon {
-  width: 72px !important; height: 72px !important;
-  border-radius: 16px;
+  width: 48px !important; height: 48px !important;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 
-.score-criteria-icon svg { width: 42px !important; height: 42px !important; }
+.score-criteria-icon svg { width: 28px !important; height: 28px !important; }
 
 .score-criteria-title {
   font-size: 0.88rem;
