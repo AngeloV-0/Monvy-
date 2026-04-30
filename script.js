@@ -137,84 +137,122 @@ function atualizarChart() {
   if (movimentacoes.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
   canvas.style.display='block'; emptyEl.style.display='none';
 
-  // Agrupar movimentações por data
-  const porData = {};
-  [...movimentacoes].forEach(m => {
-    const data = m.data || 'Sem data';
-    if (!porData[data]) porData[data] = { entradas: 0, saidas: 0 };
-    if (m.tipo === 'ganho') porData[data].entradas += m.valor;
-    else porData[data].saidas += m.valor;
-  });
-
-  // Ordenar cronologicamente
-  let datasOrdenadas = Object.keys(porData).sort((a, b) => {
-    if (a === 'Sem data') return 1;
-    if (b === 'Sem data') return -1;
-    return new Date(a) - new Date(b);
-  });
-
-  // Aplicar filtro de acordo com o modo
-  if (fluxoModo === 'recentes') {
-    // Últimas 8 datas com movimentações
-    datasOrdenadas = datasOrdenadas.slice(-8);
-    if (subEl) subEl.textContent = 'Últimas 8 movimentações';
-  } else {
-    // Mês atual
-    const mesAtual = new Date().toISOString().slice(0, 7);
-    const filtradas = datasOrdenadas.filter(d => d !== 'Sem data' && d.startsWith(mesAtual));
-    datasOrdenadas = filtradas.length > 0 ? filtradas : datasOrdenadas;
-    if (subEl) subEl.textContent = 'Este mês (' + datasOrdenadas.length + (datasOrdenadas.length === 1 ? ' dia)' : ' dias)');
-  }
-
-  const labels = datasOrdenadas.map(d => {
-    if (d === 'Sem data') return 'S/D';
-    const [ano, mes, dia] = d.split('-');
-    return `${dia}/${mes}`;
-  });
-
-  const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
-  const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
-
-  // Destruir instância anterior sem substituir o canvas no DOM
-  // (replaceChild causava perda de atributos HTML como height="180")
-  if (chartInstance) {
-    chartInstance.destroy();
-    chartInstance = null;
-  }
-  // Limpar o canvas manualmente para garantir estado limpo
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
-  const pontoRadius = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
+  if (fluxoModo === 'recentes') {
+    // --- MODO RECENTES: cada movimentação individual como um ponto ---
+    const movsOrdenadas = [...movimentacoes]
+      .filter(m => m.data)
+      .sort((a, b) => new Date(a.data) - new Date(b.data));
 
-  chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:pontoRadius },
-    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:pontoRadius }
-  ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false,mode:'index'},
-    plugins:{
-      legend:{display:false},
-      tooltip:{
-        backgroundColor:'#1A2235',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
-        titleColor:'#94A3B8',bodyColor:'#fff',padding:10,
-        callbacks:{
-          title: items => {
-            const d = datasOrdenadas[items[0].dataIndex];
-            if (d === 'Sem data') return 'Sem data';
-            const [ano,mes,dia] = d.split('-');
-            return `${dia}/${mes}/${ano}`;
-          },
-          label: c => ' ' + c.dataset.label + ': R$ ' + c.raw.toFixed(2).replace('.',',')
+    // Montar labels e datasets individuais
+    // Cada ponto no eixo X é uma movimentação; entradas e saídas em datasets separados
+    // Usamos índice global para alinhar os dois datasets no mesmo eixo
+    const labels = movsOrdenadas.map((m, i) => {
+      const [ano, mes, dia] = m.data.split('-');
+      return `${dia}/${mes}`;
+    });
+
+    // Para cada posição do eixo X, entrada ou saída (null se não for do tipo)
+    const dataEntradas = movsOrdenadas.map(m => m.tipo === 'ganho' ? m.valor : null);
+    const dataSaidas   = movsOrdenadas.map(m => m.tipo !== 'ganho' ? m.valor : null);
+
+    if (subEl) subEl.textContent = 'Movimentações individuais (' + movsOrdenadas.length + ')';
+
+    chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:false },
+      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:false }
+    ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
+          titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
+          callbacks:{
+            title: items => {
+              const m = movsOrdenadas[items[0].dataIndex];
+              if (!m) return '';
+              const [ano,mes,dia] = m.data.split('-');
+              return `${dia}/${mes}/${ano}`;
+            },
+            label: c => {
+              if (c.raw === null) return null;
+              const m = movsOrdenadas[c.dataIndex];
+              const sinal = m.tipo === 'ganho' ? '+' : '-';
+              const nome = m.descricao || m.categoria || (m.tipo === 'ganho' ? 'Entrada' : 'Saída');
+              return ` ${nome}: ${sinal}R$ ${Math.abs(c.raw).toFixed(2).replace('.',',')}`;
+            },
+            filter: item => item.raw !== null
+          }
         }
+      },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
       }
-    },
-    scales:{
-      x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:12 } },
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
-    }
-  }});
+    }});
+
+  } else {
+    // --- MODO TODAS: agrupado por dia, mês atual ---
+    const porData = {};
+    [...movimentacoes].forEach(m => {
+      const data = m.data || 'Sem data';
+      if (!porData[data]) porData[data] = { entradas: 0, saidas: 0 };
+      if (m.tipo === 'ganho') porData[data].entradas += m.valor;
+      else porData[data].saidas += m.valor;
+    });
+
+    let datasOrdenadas = Object.keys(porData).sort((a, b) => {
+      if (a === 'Sem data') return 1;
+      if (b === 'Sem data') return -1;
+      return new Date(a) - new Date(b);
+    });
+
+    const mesAtual = new Date().toISOString().slice(0, 7);
+    const filtradas = datasOrdenadas.filter(d => d !== 'Sem data' && d.startsWith(mesAtual));
+    datasOrdenadas = filtradas.length > 0 ? filtradas : datasOrdenadas;
+
+    if (subEl) subEl.textContent = 'Este mês (' + datasOrdenadas.length + (datasOrdenadas.length === 1 ? ' dia)' : ' dias)');
+
+    const labels = datasOrdenadas.map(d => {
+      if (d === 'Sem data') return 'S/D';
+      const [ano, mes, dia] = d.split('-');
+      return `${dia}/${mes}`;
+    });
+    const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
+    const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
+    const pontoRadius  = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
+
+    chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:pontoRadius },
+      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:pontoRadius }
+    ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
+          titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
+          callbacks:{
+            title: items => {
+              const d = datasOrdenadas[items[0].dataIndex];
+              if (d === 'Sem data') return 'Sem data';
+              const [ano,mes,dia] = d.split('-');
+              return `${dia}/${mes}/${ano}`;
+            },
+            label: c => ' ' + c.dataset.label + ': R$ ' + c.raw.toFixed(2).replace('.',',')
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:12 } },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
+      }
+    }});
+  }
 }
 
 // CHART PIZZA
