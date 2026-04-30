@@ -144,9 +144,10 @@ function atualizarChart() {
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
   if (fluxoModo === 'recentes') {
-    // --- MODO RECENTES: cada movimentação individual como um ponto ---
+    // --- MODO RECENTES: movimentações dos últimos 8 dias ---
+    const corte8 = new Date(); corte8.setDate(corte8.getDate() - 7); corte8.setHours(0,0,0,0);
     const movsOrdenadas = [...movimentacoes]
-      .filter(m => m.data)
+      .filter(m => m.data && new Date(m.data) >= corte8)
       .sort((a, b) => new Date(a.data) - new Date(b.data));
 
     // Montar labels e datasets individuais
@@ -161,7 +162,7 @@ function atualizarChart() {
     const dataEntradas = movsOrdenadas.map(m => m.tipo === 'ganho' ? m.valor : null);
     const dataSaidas   = movsOrdenadas.map(m => m.tipo !== 'ganho' ? m.valor : null);
 
-    if (subEl) subEl.textContent = 'Movimentações individuais (' + movsOrdenadas.length + ')';
+    if (subEl) subEl.textContent = 'Últimos 8 dias (' + movsOrdenadas.length + (movsOrdenadas.length === 1 ? ' movimentação)' : ' movimentações)');
 
     chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
       { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
@@ -198,12 +199,12 @@ function atualizarChart() {
 
   } else {
     // --- MODO TODAS: cada movimentação individual do mês atual como um ponto ---
-    const mesAtual = new Date().toISOString().slice(0, 7);
+    const corte30 = new Date(); corte30.setDate(corte30.getDate() - 29); corte30.setHours(0,0,0,0);
     const movsOrdenadas = [...movimentacoes]
-      .filter(m => m.data && m.data.startsWith(mesAtual))
+      .filter(m => m.data && new Date(m.data) >= corte30)
       .sort((a, b) => new Date(a.data) - new Date(b.data));
 
-    // Fallback: se não há dados no mês atual, usar todas
+    // Fallback: se não há dados nos últimos 30 dias, usar todas
     const movsFinal = movsOrdenadas.length > 0
       ? movsOrdenadas
       : [...movimentacoes].filter(m => m.data).sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -216,7 +217,7 @@ function atualizarChart() {
     const dataEntradas = movsFinal.map(m => m.tipo === 'ganho' ? m.valor : null);
     const dataSaidas   = movsFinal.map(m => m.tipo !== 'ganho' ? m.valor : null);
 
-    if (subEl) subEl.textContent = 'Este mês (' + movsFinal.length + (movsFinal.length === 1 ? ' movimentação)' : ' movimentações)');
+    if (subEl) subEl.textContent = 'Últimos 30 dias (' + movsFinal.length + (movsFinal.length === 1 ? ' movimentação)' : ' movimentações)');
 
     chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
       { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
