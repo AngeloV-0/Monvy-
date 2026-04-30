@@ -2839,7 +2839,7 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const iconStyle = 'width:24px;height:24px;object-fit:contain;display:inline-block;vertical-align:middle;flex-shrink:0';
+    const iconStyle = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
     const iconSrc = total >= 800 ? 'icone-score-excelente.png'
       : total >= 600 ? 'icone-score-bom.png'
       : total >= 400 ? 'icone-score-estavel.png'
@@ -2850,7 +2850,7 @@ function _atualizarMiniCardScore() {
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent = total;
-    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.82rem;font-weight:700;color:var(--white)">${labelText}</span>`;
+    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.85rem;font-weight:700;color:var(--white);margin-left:6px">${labelText}</span>`;
     if (miniLabel) miniLabel.innerHTML = 'Ver detalhes →';
   } catch(e) {}
 }
