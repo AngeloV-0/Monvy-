@@ -2850,7 +2850,7 @@ function _atualizarMiniCardScore() {
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent = total;
-    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.85rem;font-weight:700;color:var(--white);margin-left:4px">${labelText}</span>`;
+    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle};margin-left:-6px"><span style="font-size:0.85rem;font-weight:700;color:var(--white);margin-left:2px">${labelText}</span>`;
     if (miniLabel) miniLabel.innerHTML = 'Ver detalhes →';
   } catch(e) {}
 }
