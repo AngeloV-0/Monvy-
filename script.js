@@ -197,39 +197,30 @@ function atualizarChart() {
     }});
 
   } else {
-    // --- MODO TODAS: agrupado por dia, mês atual ---
-    const porData = {};
-    [...movimentacoes].forEach(m => {
-      const data = m.data || 'Sem data';
-      if (!porData[data]) porData[data] = { entradas: 0, saidas: 0 };
-      if (m.tipo === 'ganho') porData[data].entradas += m.valor;
-      else porData[data].saidas += m.valor;
-    });
-
-    let datasOrdenadas = Object.keys(porData).sort((a, b) => {
-      if (a === 'Sem data') return 1;
-      if (b === 'Sem data') return -1;
-      return new Date(a) - new Date(b);
-    });
-
+    // --- MODO TODAS: cada movimentação individual do mês atual como um ponto ---
     const mesAtual = new Date().toISOString().slice(0, 7);
-    const filtradas = datasOrdenadas.filter(d => d !== 'Sem data' && d.startsWith(mesAtual));
-    datasOrdenadas = filtradas.length > 0 ? filtradas : datasOrdenadas;
+    const movsOrdenadas = [...movimentacoes]
+      .filter(m => m.data && m.data.startsWith(mesAtual))
+      .sort((a, b) => new Date(a.data) - new Date(b.data));
 
-    if (subEl) subEl.textContent = 'Este mês (' + datasOrdenadas.length + (datasOrdenadas.length === 1 ? ' dia)' : ' dias)');
+    // Fallback: se não há dados no mês atual, usar todas
+    const movsFinal = movsOrdenadas.length > 0
+      ? movsOrdenadas
+      : [...movimentacoes].filter(m => m.data).sort((a, b) => new Date(a.data) - new Date(b.data));
 
-    const labels = datasOrdenadas.map(d => {
-      if (d === 'Sem data') return 'S/D';
-      const [ano, mes, dia] = d.split('-');
+    const labels = movsFinal.map(m => {
+      const [ano, mes, dia] = m.data.split('-');
       return `${dia}/${mes}`;
     });
-    const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
-    const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
-    const pontoRadius  = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
+
+    const dataEntradas = movsFinal.map(m => m.tipo === 'ganho' ? m.valor : null);
+    const dataSaidas   = movsFinal.map(m => m.tipo !== 'ganho' ? m.valor : null);
+
+    if (subEl) subEl.textContent = 'Este mês (' + movsFinal.length + (movsFinal.length === 1 ? ' movimentação)' : ' movimentações)');
 
     chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:pontoRadius },
-      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:pontoRadius }
+      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
+      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:true }
     ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
       plugins:{
         legend:{display:false},
@@ -238,17 +229,24 @@ function atualizarChart() {
           titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
           callbacks:{
             title: items => {
-              const d = datasOrdenadas[items[0].dataIndex];
-              if (d === 'Sem data') return 'Sem data';
-              const [ano,mes,dia] = d.split('-');
+              const m = movsFinal[items[0].dataIndex];
+              if (!m) return '';
+              const [ano,mes,dia] = m.data.split('-');
               return `${dia}/${mes}/${ano}`;
             },
-            label: c => ' ' + c.dataset.label + ': R$ ' + c.raw.toFixed(2).replace('.',',')
+            label: c => {
+              if (c.raw === null) return null;
+              const m = movsFinal[c.dataIndex];
+              const sinal = m.tipo === 'ganho' ? '+' : '-';
+              const nome = m.descricao || m.categoria || (m.tipo === 'ganho' ? 'Entrada' : 'Saída');
+              return ` ${nome}: ${sinal}R$ ${Math.abs(c.raw).toFixed(2).replace('.',',')}`;
+            },
+            filter: item => item.raw !== null
           }
         }
       },
       scales:{
-        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:12 } },
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
         y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
       }
     }});
