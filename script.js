@@ -2839,7 +2839,7 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const iconStyle = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
+    const iconStyle = 'width:20px;height:20px;object-fit:contain;vertical-align:middle;flex-shrink:0';
     const iconSrc = total >= 800 ? 'icone-score-excelente.png'
       : total >= 600 ? 'icone-score-bom.png'
       : total >= 400 ? 'icone-score-estavel.png'
