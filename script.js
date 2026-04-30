@@ -163,7 +163,12 @@ function atualizarChart() {
   const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
   const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
 
-  if (chartInstance) chartInstance.destroy();
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+    // Reset canvas para evitar bug de chart estático ao trocar modo
+    canvas.width = canvas.width;
+  }
   const ctx = canvas.getContext('2d');
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
