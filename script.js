@@ -166,10 +166,16 @@ function atualizarChart() {
   if (chartInstance) {
     chartInstance.destroy();
     chartInstance = null;
-    // Reset canvas para evitar bug de chart estático ao trocar modo
-    canvas.width = canvas.width;
   }
-  const ctx = canvas.getContext('2d');
+  // Substituir o canvas para garantir estado limpo no Chart.js 4.x
+  // (canvas.width = canvas.width conflita com o ResizeObserver interno e trava o gráfico)
+  const parent = canvas.parentNode;
+  const freshCanvas = document.createElement('canvas');
+  freshCanvas.id = canvas.id;
+  freshCanvas.className = canvas.className;
+  freshCanvas.style.cssText = canvas.style.cssText;
+  parent.replaceChild(freshCanvas, canvas);
+  const ctx = freshCanvas.getContext('2d');
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
