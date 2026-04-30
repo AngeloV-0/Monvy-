@@ -3026,8 +3026,8 @@ function _atualizarMiniCardScore() {
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent = total;
-    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.85rem;font-weight:700;color:var(--white);margin-left:6px">${labelText}</span>`;
-    if (miniLabel) miniLabel.innerHTML = 'Ver detalhes →';
+    if (miniBadge) miniBadge.innerHTML = `<div class="kpi-icon" style="background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrc}" style="${iconStyle}"></div>`;
+    if (miniLabel) miniLabel.innerHTML = `<span style="font-weight:700;color:var(--white)">${labelText}</span> · Ver detalhes →`;
   } catch(e) {}
 }
 
