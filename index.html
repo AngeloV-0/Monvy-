@@ -198,11 +198,23 @@
             <div class="card-header">
               <div>
                 <div class="card-title">Fluxo Financeiro</div>
-                <div class="card-sub">Entradas e saídas</div>
+                <div class="card-sub" id="fluxo-sub">Entradas e saídas</div>
               </div>
-              <div class="chart-legend">
-                <span class="legend-dot green"></span> Entradas
-                <span class="legend-dot red"></span> Saídas
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+                <div class="chart-legend">
+                  <span class="legend-dot green"></span> Entradas
+                  <span class="legend-dot red"></span> Saídas
+                </div>
+                <div style="display:flex;background:rgba(255,255,255,0.05);border-radius:8px;padding:2px;gap:2px">
+                  <button id="btn-fluxo-recentes" onclick="setFluxoModo('recentes')"
+                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:#22c55e;color:#000;transition:all .2s">
+                    Últimas 8
+                  </button>
+                  <button id="btn-fluxo-todas" onclick="setFluxoModo('todas')"
+                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:transparent;color:#64748b;transition:all .2s">
+                    Todas
+                  </button>
+                </div>
               </div>
             </div>
             <canvas id="chart-fluxo" height="180" style="max-width:100%;width:100%"></canvas>

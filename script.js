@@ -103,14 +103,34 @@ function atualizarKPIs() {
 
 // CHART FLUXO
 let chartInstance = null;
+let fluxoModo = 'recentes'; // 'recentes' | 'todas'
+
+function setFluxoModo(modo) {
+  fluxoModo = modo;
+  // Atualizar visual dos botões
+  const btnR = document.getElementById('btn-fluxo-recentes');
+  const btnT = document.getElementById('btn-fluxo-todas');
+  if (btnR && btnT) {
+    if (modo === 'recentes') {
+      btnR.style.background = '#22c55e'; btnR.style.color = '#000';
+      btnT.style.background = 'transparent'; btnT.style.color = '#64748b';
+    } else {
+      btnT.style.background = '#22c55e'; btnT.style.color = '#000';
+      btnR.style.background = 'transparent'; btnR.style.color = '#64748b';
+    }
+  }
+  atualizarChart();
+}
+
 function atualizarChart() {
   const canvas = document.getElementById('chart-fluxo');
   const emptyEl = document.getElementById('chart-empty');
+  const subEl = document.getElementById('fluxo-sub');
   if (!canvas) return;
   if (movimentacoes.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
   canvas.style.display='block'; emptyEl.style.display='none';
 
-  // Agrupar TODAS as movimentações por data (do mais antigo ao mais recente)
+  // Agrupar movimentações por data
   const porData = {};
   [...movimentacoes].forEach(m => {
     const data = m.data || 'Sem data';
@@ -119,14 +139,21 @@ function atualizarChart() {
     else porData[data].saidas += m.valor;
   });
 
-  // Ordenar datas cronologicamente
-  const datasOrdenadas = Object.keys(porData).sort((a, b) => {
+  // Ordenar cronologicamente
+  let datasOrdenadas = Object.keys(porData).sort((a, b) => {
     if (a === 'Sem data') return 1;
     if (b === 'Sem data') return -1;
     return new Date(a) - new Date(b);
   });
 
-  // Formatar labels: "01/04", "02/04" etc
+  // Aplicar filtro de acordo com o modo
+  if (fluxoModo === 'recentes') {
+    datasOrdenadas = datasOrdenadas.slice(-8); // últimas 8 datas
+    if (subEl) subEl.textContent = 'Últimas 8 movimentações';
+  } else {
+    if (subEl) subEl.textContent = `Todo o histórico (${datasOrdenadas.length} dias)`;
+  }
+
   const labels = datasOrdenadas.map(d => {
     if (d === 'Sem data') return 'S/D';
     const [ano, mes, dia] = d.split('-');
@@ -141,7 +168,6 @@ function atualizarChart() {
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
-  // Ajustar tamanho dos pontos: muitos dados = pontos menores
   const pontoRadius = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
 
   chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
