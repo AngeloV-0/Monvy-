@@ -163,19 +163,27 @@ function atualizarChart() {
   const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
   const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
 
+  // Se o gráfico já existe, atualizar os dados diretamente (sem destruir/recriar o canvas)
+  // Isso evita o bug onde o canvas substituto perde atributos e o gráfico fica estático
   if (chartInstance) {
-    chartInstance.destroy();
-    chartInstance = null;
+    // Atualizar tooltip callback com as novas datasOrdenadas via closure
+    chartInstance.options.plugins.tooltip.callbacks.title = items => {
+      const d = datasOrdenadas[items[0].dataIndex];
+      if (d === 'Sem data') return 'Sem data';
+      const [ano,mes,dia] = d.split('-');
+      return `${dia}/${mes}/${ano}`;
+    };
+    const pontoRadius = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
+    chartInstance.data.labels = labels;
+    chartInstance.data.datasets[0].data = dataEntradas;
+    chartInstance.data.datasets[0].pointRadius = pontoRadius;
+    chartInstance.data.datasets[1].data = dataSaidas;
+    chartInstance.data.datasets[1].pointRadius = pontoRadius;
+    chartInstance.update();
+    return;
   }
-  // Substituir o canvas para garantir estado limpo no Chart.js 4.x
-  // (canvas.width = canvas.width conflita com o ResizeObserver interno e trava o gráfico)
-  const parent = canvas.parentNode;
-  const freshCanvas = document.createElement('canvas');
-  freshCanvas.id = canvas.id;
-  freshCanvas.className = canvas.className;
-  freshCanvas.style.cssText = canvas.style.cssText;
-  parent.replaceChild(freshCanvas, canvas);
-  const ctx = freshCanvas.getContext('2d');
+
+  const ctx = canvas.getContext('2d');
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
