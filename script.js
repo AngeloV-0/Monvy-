@@ -3062,6 +3062,7 @@ window.recalcular               = recalcular;
 window.recalcularTotais         = recalcularTotais;
 window.atualizarListaInicio     = atualizarListaInicio;
 window.atualizarChart           = atualizarChart;
+window.setFluxoModo             = setFluxoModo;
 window.atualizarChartPizza      = atualizarChartPizza;
 window.atualizarRelatorio       = atualizarRelatorio;
 window.fmt                      = fmt;
