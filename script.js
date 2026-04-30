@@ -155,10 +155,15 @@ function atualizarChart() {
 
   // Aplicar filtro de acordo com o modo
   if (fluxoModo === 'recentes') {
+    // Últimas 8 datas com movimentações
     datasOrdenadas = datasOrdenadas.slice(-8);
     if (subEl) subEl.textContent = 'Últimas 8 movimentações';
   } else {
-    if (subEl) subEl.textContent = `Todo o histórico (${datasOrdenadas.length} dias)`;
+    // Mês atual
+    const mesAtual = new Date().toISOString().slice(0, 7);
+    const filtradas = datasOrdenadas.filter(d => d !== 'Sem data' && d.startsWith(mesAtual));
+    datasOrdenadas = filtradas.length > 0 ? filtradas : datasOrdenadas;
+    if (subEl) subEl.textContent = 'Este mês (' + datasOrdenadas.length + (datasOrdenadas.length === 1 ? ' dia)' : ' dias)');
   }
 
   const labels = datasOrdenadas.map(d => {
