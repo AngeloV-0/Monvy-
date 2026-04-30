@@ -109,18 +109,65 @@ function atualizarChart() {
   if (!canvas) return;
   if (movimentacoes.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
   canvas.style.display='block'; emptyEl.style.display='none';
-  const ultimas = [...movimentacoes].slice(0, 8).reverse();
-  const labels = ultimas.map((m,i) => '#'+(i+1));
+
+  // Agrupar TODAS as movimentações por data (do mais antigo ao mais recente)
+  const porData = {};
+  [...movimentacoes].forEach(m => {
+    const data = m.data || 'Sem data';
+    if (!porData[data]) porData[data] = { entradas: 0, saidas: 0 };
+    if (m.tipo === 'ganho') porData[data].entradas += m.valor;
+    else porData[data].saidas += m.valor;
+  });
+
+  // Ordenar datas cronologicamente
+  const datasOrdenadas = Object.keys(porData).sort((a, b) => {
+    if (a === 'Sem data') return 1;
+    if (b === 'Sem data') return -1;
+    return new Date(a) - new Date(b);
+  });
+
+  // Formatar labels: "01/04", "02/04" etc
+  const labels = datasOrdenadas.map(d => {
+    if (d === 'Sem data') return 'S/D';
+    const [ano, mes, dia] = d.split('-');
+    return `${dia}/${mes}`;
+  });
+
+  const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
+  const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
+
   if (chartInstance) chartInstance.destroy();
   const ctx = canvas.getContext('2d');
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
+
+  // Ajustar tamanho dos pontos: muitos dados = pontos menores
+  const pontoRadius = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
+
   chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { label:'Entradas', data:ultimas.map(m=>m.tipo==='ganho'?m.valor:0), borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:4 },
-    { label:'Saídas', data:ultimas.map(m=>m.tipo==='gasto'?m.valor:0), borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:4 }
+    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:pontoRadius },
+    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:pontoRadius }
   ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false,mode:'index'},
-    plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#1A2235',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#94A3B8',bodyColor:'#fff',padding:10, callbacks:{label:c=>' '+c.dataset.label+': R$ '+c.raw.toFixed(2).replace('.',',')}}},
-    scales:{ x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748B',font:{size:11}}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748B',font:{size:11},callback:v=>'R$'+v.toFixed(0)}} }
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1A2235',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
+        titleColor:'#94A3B8',bodyColor:'#fff',padding:10,
+        callbacks:{
+          title: items => {
+            const d = datasOrdenadas[items[0].dataIndex];
+            if (d === 'Sem data') return 'Sem data';
+            const [ano,mes,dia] = d.split('-');
+            return `${dia}/${mes}/${ano}`;
+          },
+          label: c => ' ' + c.dataset.label + ': R$ ' + c.raw.toFixed(2).replace('.',',')
+        }
+      }
+    },
+    scales:{
+      x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:12 } },
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
+    }
   }});
 }
 
@@ -1356,6 +1403,28 @@ async function cadastrarDivida() {
   if (sucesso) { sucesso.style.display = 'block'; setTimeout(() => sucesso.style.display = 'none', 2000); }
 }
 
+async function quitarDivida(id) {
+  if (!currentUser) return;
+  const d = dividasCadastradas.find(d => d.id === id);
+  if (!d) return;
+
+  try {
+    await atualizarDivida(currentUser.uid, id, { quitada: true });
+    const idx = dividasCadastradas.findIndex(d => d.id === id);
+    if (idx >= 0) dividasCadastradas[idx].quitada = true;
+
+    renderizarDividas();
+    atualizarKPIsDividas();
+    setTimeout(() => { if (typeof executarManualEngine === 'function') executarManualEngine(); }, 300);
+
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1a2236;border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:12px 20px;color:#22c55e;font-size:.85rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:9999;white-space:nowrap';
+    t.textContent = `✓ "${d.descricao}" marcada como quitada!`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  } catch(e) { console.error(e); alert('Erro ao quitar dívida.'); }
+}
+
 async function excluirDivida(id) {
   if (!confirm('Remover esta dívida?')) return;
   if (currentUser) {
@@ -1387,18 +1456,27 @@ function renderizarDividas() {
   lista.innerHTML = dividasCadastradas.map(d => {
     const badgeClass = 'badge-' + d.tipo;
     const label = DIVIDA_LABELS[d.tipo] || d.tipo;
-    const icon = DIVIDA_ICONS[d.tipo] || '📋';
+    const icon = DIVIDA_ICONS[d.tipo] || '<img src="icone-conta.png" style="width:24px;height:24px;object-fit:contain;">';
     const sub = d.juros > 0 ? `${d.juros}% a.m.` : (d.credor ? `Deve para: ${d.credor}` : label);
     const parcSub = d.parcelas > 0 ? ` · ${d.parcelas} parc. restantes` : '';
-    return `<div class="divida-item">
+    const quitada = d.quitada === true;
+    const bordaColor = quitada ? 'rgba(34,197,94,0.25)' : 'var(--border)';
+    const valorColor = quitada ? '#22c55e' : 'var(--white)';
+    return `<div class="divida-item" style="border:1px solid ${bordaColor};border-radius:12px;padding:12px;margin-bottom:8px;background:var(--card-bg);opacity:${quitada?'0.75':'1'}">
       <div class="divida-item-icon">${icon}</div>
       <div class="divida-item-info">
-        <div class="divida-item-nome">${d.descricao} <span class="divida-badge ${badgeClass}">${label}</span></div>
+        <div class="divida-item-nome">${d.descricao} <span class="divida-badge ${badgeClass}">${label}</span>${quitada ? ' <span style="font-size:.72rem;color:#22c55e;font-weight:600;background:rgba(34,197,94,0.12);padding:2px 7px;border-radius:20px;">✓ Quitada</span>' : ''}</div>
         <div class="divida-item-sub">${sub}${parcSub}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-        <div class="divida-item-valor">${fmt(d.valor)}</div>
-        <button class="divida-btn-del" onclick="excluirDivida('${d.id}')">✕</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="divida-item-valor" style="color:${valorColor}">${fmt(d.valor)}</div>
+          <button class="divida-btn-del" onclick="excluirDivida('${d.id}')">✕</button>
+        </div>
+        ${!quitada
+          ? `<button onclick="quitarDivida('${d.id}')" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:5px 12px;font-size:.75rem;color:#22c55e;cursor:pointer;font-family:inherit;white-space:nowrap">✓ Marcar como quitada</button>`
+          : `<span style="font-size:.75rem;color:#22c55e;font-weight:600">✓ Quitada</span>`
+        }
       </div>
     </div>`;
   }).join('');
@@ -1411,10 +1489,11 @@ function renderizarDividas() {
 }
 
 function atualizarKPIsDividas() {
-  const total = dividasCadastradas.reduce((s, d) => s + d.valor, 0);
-  const cartao = dividasCadastradas.filter(d => d.tipo === 'cartao').reduce((s, d) => s + d.valor, 0);
-  const emprest = dividasCadastradas.filter(d => d.tipo === 'emprestimo' || d.tipo === 'financiamento').reduce((s, d) => s + d.valor, 0);
-  const terceiros = dividasCadastradas.filter(d => d.tipo === 'terceiros').reduce((s, d) => s + d.valor, 0);
+  const ativas = dividasCadastradas.filter(d => !d.quitada);
+  const total = ativas.reduce((s, d) => s + d.valor, 0);
+  const cartao = ativas.filter(d => d.tipo === 'cartao').reduce((s, d) => s + d.valor, 0);
+  const emprest = ativas.filter(d => d.tipo === 'emprestimo' || d.tipo === 'financiamento').reduce((s, d) => s + d.valor, 0);
+  const terceiros = ativas.filter(d => d.tipo === 'terceiros').reduce((s, d) => s + d.valor, 0);
 
   const totalEl = document.getElementById('div-kpi-total');
   const qtdEl = document.getElementById('div-kpi-qtd');
@@ -2089,7 +2168,7 @@ function renderizarContas() {
     return `
       <div class="conta-card" style="border-color:${bordaColor}">
         <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="font-size:1.4rem;flex-shrink:0;margin-top:2px">${CONTA_CAT_ICONS[c.categoria]||'📋'}</div>
+          <div style="font-size:1.4rem;flex-shrink:0;margin-top:2px"><img src="icone-conta.png" style="width:28px;height:28px;object-fit:contain;"></div>
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
               <span style="font-weight:600;color:var(--white);font-size:.92rem">${c.descricao}</span>
@@ -2326,17 +2405,28 @@ function calcularScore() {
   }
 
   // 2. DÍVIDAS ATIVAS (0–250 pts)
-  const totalDividas = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
-  if (totalDividas === 0) {
+  const todasDividas = (typeof dividasCadastradas !== 'undefined') ? dividasCadastradas : [];
+  const dividasAtivas   = todasDividas.filter(d => !d.quitada);
+  const dividasQuitadas = todasDividas.filter(d => d.quitada);
+  const totalDividas = dividasAtivas.reduce((s, d) => s + d.valor, 0);
+  const totalQuitadas = dividasQuitadas.length;
+
+  // Bônus por dívidas quitadas: até +50 pts extras (máx 5 quitadas = +50 pts)
+  const bonusQuitadas = Math.min(totalQuitadas * 10, 50);
+
+  if (totalDividas === 0 && totalQuitadas === 0) {
     pts.dividas = 250; pcts.dividas = 100; labels.dividas = 'Sem dívidas — Parabéns! 🎉';
+  } else if (totalDividas === 0 && totalQuitadas > 0) {
+    pts.dividas = Math.min(250 + bonusQuitadas, 300); pcts.dividas = 100;
+    labels.dividas = `Todas as dívidas quitadas! 🏆 (${totalQuitadas} quitada${totalQuitadas > 1 ? 's' : ''})`;
   } else if (totalEntradas > 0) {
     const mesesDivida = totalDividas / totalEntradas;
-    if (mesesDivida <= 1)      { pts.dividas = 180; pcts.dividas = 80; labels.dividas = fmt(totalDividas) + ' em dívidas (até 1 mês de renda)'; }
-    else if (mesesDivida <= 3) { pts.dividas = 120; pcts.dividas = 55; labels.dividas = fmt(totalDividas) + ' em dívidas (até 3 meses de renda)'; }
-    else if (mesesDivida <= 6) { pts.dividas = 60;  pcts.dividas = 30; labels.dividas = fmt(totalDividas) + ' em dívidas (pesado!)'; }
-    else                       { pts.dividas = 0;   pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas (crítico!)'; }
+    if (mesesDivida <= 1)      { pts.dividas = Math.min(180 + bonusQuitadas, 250); pcts.dividas = 80; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else if (mesesDivida <= 3) { pts.dividas = Math.min(120 + bonusQuitadas, 250); pcts.dividas = 55; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else if (mesesDivida <= 6) { pts.dividas = Math.min(60  + bonusQuitadas, 250); pcts.dividas = 30; labels.dividas = fmt(totalDividas) + ` em dívidas (pesado!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else                       { pts.dividas = Math.min(0   + bonusQuitadas, 250); pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ` em dívidas (crítico!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
   } else {
-    pts.dividas = 0; pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas';
+    pts.dividas = bonusQuitadas; pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas';
   }
 
   // 3. METAS CUMPRIDAS (0–250 pts)
@@ -2464,10 +2554,11 @@ function renderizarDicas(pts, total) {
   if (pts.gastos < 200) dicas.push({ icon: img('icone-dinheiro-01.png'), titulo: 'Reduza os gastos', texto: 'Você está comprometendo mais de 70% da renda. Identifique as categorias que mais pesam e corte o supérfluo.' });
   if (pts.gastos >= 230) dicas.push({ icon: img('icone-grafico-01.png'), titulo: 'Gastos sob controle', texto: 'Excelente controle! Considere direcionar parte do que sobra para investimentos.' });
 
-  if (pts.dividas < 120) dicas.push({ icon: img('icone-banco.png'), titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
-  if (pts.dividas === 250) dicas.push({ icon: img('icone-trofeu.png'), titulo: 'Zero dívidas!', texto: 'Incrível! Agora redirecione o que pagava em dívidas para construir sua reserva ou investir.' });
+  if (dividasAtivas.length > 0 && pts.dividas < 120) dicas.push({ icon: img('icone-banco.png'), titulo: 'Quite dívidas primeiro', texto: 'Dívidas consomem sua renda futura. Use o método Avalanche (maior juros primeiro) para sair mais rápido.' });
+  if (dividasAtivas.length === 0 && dividasQuitadas.length > 0) dicas.push({ icon: img('icone-trofeu.png'), titulo: 'Todas as dívidas quitadas! 🏆', texto: `Incrível! Você quitou ${dividasQuitadas.length} dívida${dividasQuitadas.length>1?'s':''} e ganhou pontos bônus no score. Agora redirecione esse dinheiro para investir!` });
+  if (dividasAtivas.length > 0 && dividasQuitadas.length > 0) dicas.push({ icon: img('icone-trofeu.png'), titulo: `${dividasQuitadas.length} dívida${dividasQuitadas.length>1?'s':''} quitada${dividasQuitadas.length>1?'s':''}! ✓`, texto: 'Continue assim! Cada dívida quitada aumenta seu score. Foque agora nas dívidas restantes.' });
 
-  if (pts.metas === 0) dicas.push({ icon: img('icone-meta.png'), titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
+  if (pts.metas === 0) dicas.push({ icon: `<img src="icone-meta.png" style="width:44px;height:44px;object-fit:contain;">`, titulo: 'Crie suas metas', texto: 'Metas dão direção ao dinheiro. Cadastre pelo menos uma meta — viagem, reserva, ou conquista pessoal.' });
   else if (pts.metas < 150) dicas.push({ icon: img('icone-foguete.png'), titulo: 'Acelere suas metas', texto: 'Você está progredindo! Tente contribuir um valor fixo por mês para cada meta.' });
 
   if (pts.reserva < 90) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
@@ -2823,7 +2914,9 @@ function _atualizarMiniCardScore() {
     } else { pts.gastos = 150; }
     const totalDiv = (typeof dividasCadastradas !== 'undefined')
       ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
-    pts.dividas = totalDiv === 0 ? 250
+    const _divAtivas = (typeof dividasCadastradas!=='undefined') ? dividasCadastradas.filter(d=>!d.quitada) : [];
+    const _bonusQ = Math.min(((typeof dividasCadastradas!=='undefined')?dividasCadastradas.filter(d=>d.quitada).length:0)*10,50);
+    pts.dividas = totalDiv === 0 ? Math.min(250+_bonusQ,300)
       : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180
         : totalDiv / totalEntradas <= 3 ? 120
         : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
@@ -2839,7 +2932,7 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const iconStyle = 'width:24px;height:24px;object-fit:contain;display:inline-block;vertical-align:middle;flex-shrink:0';
+    const iconStyle = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
     const iconSrc = total >= 800 ? 'icone-score-excelente.png'
       : total >= 600 ? 'icone-score-bom.png'
       : total >= 400 ? 'icone-score-estavel.png'
@@ -2850,7 +2943,7 @@ function _atualizarMiniCardScore() {
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent = total;
-    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.82rem;font-weight:700;color:var(--white)">${labelText}</span>`;
+    if (miniBadge) miniBadge.innerHTML = `<img src="${iconSrc}" style="${iconStyle}"><span style="font-size:0.85rem;font-weight:700;color:var(--white);margin-left:6px">${labelText}</span>`;
     if (miniLabel) miniLabel.innerHTML = 'Ver detalhes →';
   } catch(e) {}
 }
