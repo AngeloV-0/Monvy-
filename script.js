@@ -164,8 +164,8 @@ function atualizarChart() {
     if (subEl) subEl.textContent = 'Movimentações individuais (' + movsOrdenadas.length + ')';
 
     chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:false },
-      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:false }
+      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
+      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:true }
     ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
       plugins:{
         legend:{display:false},
