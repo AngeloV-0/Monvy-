@@ -526,6 +526,7 @@ nav {
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
+  background: rgba(255,255,255,0.06);
 }
 
 .kpi-icon svg { width: 26px; height: 26px; }
