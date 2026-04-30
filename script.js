@@ -55,6 +55,12 @@ function irPara(tela) {
 // Função principal de navegação com hooks por tela
 // Definida logo após irPara para estar disponível para os listeners acima
 function irParaComHooks(tela) {
+  // Destruir chartInstance ao sair da tela inicio para evitar estado corrompido
+  // quando o canvas fica display:none e o Chart.js perde o contexto de resize
+  if (tela !== 'inicio' && chartInstance) {
+    try { chartInstance.destroy(); } catch(e) {}
+    chartInstance = null;
+  }
   // 1. Navegação base (atualiza DOM)
   irPara(tela);
   // 2. Hooks por tela com delay para garantir DOM visível
@@ -62,6 +68,7 @@ function irParaComHooks(tela) {
   switch (tela) {
     case 'inicio':
       setTimeout(() => { try { executarManualEngine(); } catch(e) {} }, 200);
+      setTimeout(() => { try { atualizarChart(); } catch(e) {} }, 250);
       break;
     case 'gastos':
       setTimeout(() => { try { atualizarTelaCategorias(); } catch(e) {} }, D);
@@ -148,7 +155,7 @@ function atualizarChart() {
 
   // Aplicar filtro de acordo com o modo
   if (fluxoModo === 'recentes') {
-    datasOrdenadas = datasOrdenadas.slice(-8); // últimas 8 datas
+    datasOrdenadas = datasOrdenadas.slice(-8);
     if (subEl) subEl.textContent = 'Últimas 8 movimentações';
   } else {
     if (subEl) subEl.textContent = `Todo o histórico (${datasOrdenadas.length} dias)`;
@@ -163,27 +170,16 @@ function atualizarChart() {
   const dataEntradas = datasOrdenadas.map(d => porData[d].entradas);
   const dataSaidas   = datasOrdenadas.map(d => porData[d].saidas);
 
-  // Se o gráfico já existe, atualizar os dados diretamente (sem destruir/recriar o canvas)
-  // Isso evita o bug onde o canvas substituto perde atributos e o gráfico fica estático
+  // Destruir instância anterior sem substituir o canvas no DOM
+  // (replaceChild causava perda de atributos HTML como height="180")
   if (chartInstance) {
-    // Atualizar tooltip callback com as novas datasOrdenadas via closure
-    chartInstance.options.plugins.tooltip.callbacks.title = items => {
-      const d = datasOrdenadas[items[0].dataIndex];
-      if (d === 'Sem data') return 'Sem data';
-      const [ano,mes,dia] = d.split('-');
-      return `${dia}/${mes}/${ano}`;
-    };
-    const pontoRadius = datasOrdenadas.length > 20 ? 2 : datasOrdenadas.length > 10 ? 3 : 4;
-    chartInstance.data.labels = labels;
-    chartInstance.data.datasets[0].data = dataEntradas;
-    chartInstance.data.datasets[0].pointRadius = pontoRadius;
-    chartInstance.data.datasets[1].data = dataSaidas;
-    chartInstance.data.datasets[1].pointRadius = pontoRadius;
-    chartInstance.update();
-    return;
+    chartInstance.destroy();
+    chartInstance = null;
   }
-
+  // Limpar o canvas manualmente para garantir estado limpo
   const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
