@@ -99,6 +99,20 @@ function fmt(v) { return 'R$ '+Math.abs(v).toFixed(2).replace('.',',').replace(/
 function fmtData(iso) { if (!iso) return ''; const [y,m,d]=iso.split('-'); return d+'/'+m+'/'+y; }
 function hojeISO() { return new Date().toISOString().slice(0,10); }
 
+// Helper: retorna milliseconds de uma movimentação usando createdAt (Firestore) ou data (string)
+function getTsMs(m) {
+  if (m.createdAt) {
+    if (typeof m.createdAt.toMillis === 'function') return m.createdAt.toMillis();
+    if (typeof m.createdAt.seconds === 'number')    return m.createdAt.seconds * 1000 + (m.createdAt.nanoseconds || 0) / 1e6;
+  }
+  // fallback: data como string 'YYYY-MM-DD' — usa meia-noite UTC
+  return m.data ? new Date(m.data + 'T00:00:00').getTime() : 0;
+}
+// Ordena mais recente primeiro (para listas)
+function sortMaisRecente(arr)  { return [...arr].sort((a, b) => getTsMs(b) - getTsMs(a)); }
+// Ordena mais antigo primeiro (para gráficos)
+function sortMaisAntigo(arr)   { return [...arr].sort((a, b) => getTsMs(a) - getTsMs(b)); }
+
 // KPIs
 function atualizarKPIs() {
   document.getElementById('saldo-display').textContent = fmt(saldo);
@@ -155,12 +169,8 @@ function atualizarChart() {
       movsFiltradas = [...movimentacoes].filter(m => m.data);
   }
 
-  // Ordena por timestamp (createdAt se disponível, senão por data + hora do campo data)
-  const movsOrdenadas = movsFiltradas.sort((a, b) => {
-    const tsA = a.createdAt?.toMillis?.() ?? a.createdAt?.seconds * 1000 ?? new Date(a.data).getTime();
-    const tsB = b.createdAt?.toMillis?.() ?? b.createdAt?.seconds * 1000 ?? new Date(b.data).getTime();
-    return tsA - tsB;
-  });
+  // Ordena do mais antigo para o mais recente (progressão esquerda→direita)
+  const movsOrdenadas = sortMaisAntigo(movsFiltradas);
 
   if (movsOrdenadas.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
@@ -338,7 +348,7 @@ function movsFiltradas() {
 function atualizarListaInicio() {
   const lista = document.getElementById('lista-inicio');
   if (movimentacoes.length===0) { lista.innerHTML='<div class="vazio">Nenhuma movimentação ainda. Comece registrando!</div>'; return; }
-  lista.innerHTML = [...movimentacoes].slice(0,8).map(m=>`
+  lista.innerHTML = sortMaisRecente(movimentacoes).slice(0,8).map(m=>`
     <div class="mov-item">
       <div class="mov-left">
         <div class="mov-dot ${m.tipo==='ganho'?'g':'r'}"></div>
@@ -1206,7 +1216,7 @@ function _renderBuscaResultados(termo, header, lista) {
       (m.tipo === 'gasto' && 'saída'.includes(q)) ||
       (m.data && fmtData(m.data).includes(q))
     );
-  }).sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  }).sort((a, b) => getTsMs(b) - getTsMs(a));
 
   header.textContent = resultados.length === 0
     ? 'Nenhum resultado para "' + termo + '"'
@@ -2057,7 +2067,7 @@ function atualizarTelaCategorias() {
     tbody.innerHTML = '<tr><td colspan="6" class="vazio">Nenhuma movimentação no período.</td></tr>';
     return;
   }
-  tbody.innerHTML = [...lista].sort((a,b) => (b.data||'').localeCompare(a.data||'')).map(m => {
+  tbody.innerHTML = sortMaisRecente(lista).map(m => {
     const idx = movimentacoes.indexOf(m);
     return `<tr>
       <td>${m.descricao}${m.recorrente ? ' <span style="font-size:.7rem;background:rgba(57,255,121,0.15);color:var(--primary);padding:1px 6px;border-radius:4px">recorrente</span>' : ''}</td>
