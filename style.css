@@ -2071,12 +2071,12 @@ html, body {
   /* Avatar mobile - tamanho fixo igual ao emoji */
   #topbar-avatar-mobile {
     display: block !important;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    max-width: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     object-fit: cover !important;
