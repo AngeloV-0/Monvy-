@@ -1058,7 +1058,7 @@ function getMovimentacoesPeriodo() {
   }
 }
 
-function atualizarRelatorio() {
+async function atualizarRelatorio() {
   const { movs: doMes, alvo: alvoReal } = getMovimentacoesPeriodo();
   document.getElementById('relatorio-mes-label').textContent = periodoModo === 'mes'
     ? MESES[alvoReal.getMonth()] + ' ' + alvoReal.getFullYear()
@@ -1074,18 +1074,42 @@ function atualizarRelatorio() {
     labelEl.textContent = '';
   }
 
-  const entradas = doMes.filter(m => m.tipo === 'ganho').reduce((a, m) => a + m.valor, 0);
-  const saidas = doMes.filter(m => m.tipo === 'gasto').reduce((a, m) => a + m.valor, 0);
-  const saldoMes = entradas - saidas;
+  let movsFinal = doMes;
+  let entradas, saidas, saldoMes;
+
+  // Se não tem movimentações ativas e é modo mês, busca do histórico arquivado
+  if (periodoModo === 'mes' && doMes.length === 0 && typeof currentUser !== 'undefined' && currentUser) {
+    try {
+      const mesKey = `${alvoReal.getFullYear()}-${String(alvoReal.getMonth() + 1).padStart(2, '0')}`;
+      const { getHistorico } = await import('./firebase.js');
+      const historico = await getHistorico(currentUser.uid);
+      const hMes = historico.find(h => h.mes === mesKey);
+      if (hMes) {
+        entradas = hMes.entradas || 0;
+        saidas = hMes.saidas || 0;
+        saldoMes = hMes.saldo || 0;
+        movsFinal = (hMes.movimentacoes || []).map(m => ({ ...m, tipo: m.tipo === 'ganho' ? 'ganho' : 'gasto' }));
+        const labelMesEl = document.getElementById('relatorio-mes-label');
+        if (labelMesEl) labelMesEl.innerHTML += ' <span style="font-size:.7rem;color:var(--primary);opacity:.8">(arquivado)</span>';
+      }
+    } catch(e) { console.warn('Erro ao buscar histórico:', e); }
+  }
+
+  if (entradas === undefined) {
+    entradas = movsFinal.filter(m => m.tipo === 'ganho').reduce((a, m) => a + m.valor, 0);
+    saidas = movsFinal.filter(m => m.tipo === 'gasto').reduce((a, m) => a + m.valor, 0);
+    saldoMes = entradas - saidas;
+  }
+
   document.getElementById('rel-entradas').textContent = fmt(entradas);
   document.getElementById('rel-saidas').textContent = fmt(saidas);
   const saldoEl = document.getElementById('rel-saldo');
   saldoEl.textContent = fmt(saldoMes);
   saldoEl.className = 'kpi-value ' + (saldoMes >= 0 ? 'green' : 'red');
-  document.getElementById('rel-total').textContent = doMes.length;
+  document.getElementById('rel-total').textContent = movsFinal.length;
 
   const topEl = document.getElementById('relatorio-top-gastos');
-  const gastosMes = doMes.filter(m => m.tipo === 'gasto').sort((a, b) => b.valor - a.valor).slice(0, 5);
+  const gastosMes = movsFinal.filter(m => m.tipo === 'gasto').sort((a, b) => b.valor - a.valor).slice(0, 5);
   topEl.innerHTML = gastosMes.length === 0
     ? '<div class="vazio">Nenhum gasto no período.</div>'
     : gastosMes.map(m => `<div class="mov-item"><div class="mov-left"><div class="mov-dot r"></div><div class="mov-info"><span class="mov-desc">${m.descricao}</span><span class="mov-cat">${m.categoria} · ${fmtData(m.data)}</span></div></div><span class="mov-valor negativo">-${fmt(m.valor)}</span></div>`).join('');
@@ -2146,7 +2170,7 @@ async function carregarHistorico() {
             ${(h.movimentacoes||[]).map(m => `
               <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,0.04)">
                 <span style="color:var(--white)">${m.descricao}</span>
-                <span style="color:${m.tipo==='entrada'?'#22c55e':'#ef4444'}">${m.tipo==='entrada'?'+':'-'}${fmt(m.valor)}</span>
+                <span style="color:${m.tipo==='ganho'?'#22c55e':'#ef4444'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</span>
               </div>
             `).join('')}
           </div>
