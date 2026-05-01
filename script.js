@@ -1426,6 +1426,8 @@ onAuth(async (user) => {
       recalcular();
       renderizarMovimentacoes();
       atualizarTelaCategorias();
+      // Atualiza o mini card de score automaticamente a cada carregamento
+      setTimeout(() => { try { calcularScore(); } catch(e) {} }, 500);
     });
 
     // Inicializar a tela de categorias imediatamente após carregar o perfil
@@ -1434,6 +1436,8 @@ onAuth(async (user) => {
     try { renderizarGridCategorias(); } catch(e) {}
     try { atualizarBannerPerfil(); } catch(e) {}
     try { renderizarSugestaoOrcamento(); } catch(e) {}
+    // Atualizar mini card de score imediatamente ao carregar (sem esperar movimentações)
+    setTimeout(() => { try { _atualizarMiniCardScore(); } catch(e) {} }, 200);
   } catch(e) {
     console.error('Erro ao carregar dados:', e);
   }
@@ -2583,30 +2587,38 @@ function calcularScore() {
   else                   { badge = `<img src="icone-score-critico.png" style="${iconStyle}"> Crítico`; cor = '#EF4444'; dica = 'Situação crítica. Priorize quitar dívidas, corte gastos e busque aumentar a renda.'; }
   if (penalidade > 0) dica = `⚠️ ${contasV.length} conta(s) vencida(s) reduziram seu score em ${penalidade} pontos. ` + dica;
 
-  // Animação do número
-  animarScore(total);
-
-  // Atualizar gauge
-  atualizarGauge(total, cor);
-
-  // Badge e dica principal
-  document.getElementById('score-badge').innerHTML = badge;
-  document.getElementById('score-tip').textContent = dica;
-
-  // Critérios
-  atualizarCriterio('gastos', pts.gastos, 300, pcts.gastos, labels.gastos);
-  atualizarCriterio('dividas', pts.dividas, 250, pcts.dividas, labels.dividas);
-  atualizarCriterio('metas', pts.metas, 250, pcts.metas, labels.metas);
-  atualizarCriterio('reserva', pts.reserva, 200, pcts.reserva, labels.reserva);
-
-  // Dicas personalizadas
-  renderizarDicas(pts, total);
-
-  // Mini card no dashboard
+  // Mini card no dashboard (sempre atualiza, independente da tela ativa)
   const miniEl = document.getElementById('kpi-score-mini');
   const miniLabel = document.getElementById('kpi-score-mini-label');
+  const miniBadgeEl = document.getElementById('kpi-score-mini-badge');
+  const iconStyleMini = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
+  const iconSrcMini = total >= 800 ? 'icone-score-excelente.png'
+    : total >= 600 ? 'icone-score-bom.png'
+    : total >= 400 ? 'icone-score-estavel.png'
+    : total >= 200 ? 'icone-score-atencao.png'
+    : 'icone-score-critico.png';
+  const labelTextMini = total >= 800 ? 'Excelente' : total >= 600 ? 'Bom' : total >= 400 ? 'Estável' : total >= 200 ? 'Atenção' : 'Crítico';
   if (miniEl) miniEl.textContent = total;
-  if (miniLabel) miniLabel.innerHTML = badge + ' → Ver detalhes';
+  if (miniBadgeEl) miniBadgeEl.innerHTML = `<div class="kpi-icon" style="background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrcMini}" style="${iconStyleMini}"></div>`;
+  if (miniLabel) miniLabel.innerHTML = `<span style="font-weight:700;color:var(--white)">${labelTextMini}</span> · Ver detalhes →`;
+
+  // Elementos específicos da tela de Score (só atualiza se existirem)
+  if (document.getElementById('score-badge')) {
+    // Animação do número
+    animarScore(total);
+    // Atualizar gauge
+    atualizarGauge(total, cor);
+    // Badge e dica principal
+    document.getElementById('score-badge').innerHTML = badge;
+    document.getElementById('score-tip').textContent = dica;
+    // Critérios
+    atualizarCriterio('gastos', pts.gastos, 300, pcts.gastos, labels.gastos);
+    atualizarCriterio('dividas', pts.dividas, 250, pcts.dividas, labels.dividas);
+    atualizarCriterio('metas', pts.metas, 250, pcts.metas, labels.metas);
+    atualizarCriterio('reserva', pts.reserva, 200, pcts.reserva, labels.reserva);
+    // Dicas personalizadas
+    renderizarDicas(pts, total);
+  }
 
   // Salvar histórico
   salvarHistoricoScore(total);
@@ -3127,6 +3139,7 @@ window.carregarHistorico        = carregarHistorico;
 window.executarManualEngine     = executarManualEngine;
 window.renderizarInsights       = renderizarInsights;
 window.calcularScore            = calcularScore;
+window._atualizarMiniCardScore  = _atualizarMiniCardScore;
 window.buscarTaxasBCB           = buscarTaxasBCB;
 window.atualizarTelaCategorias  = atualizarTelaCategorias;
 window.renderizarGridCategorias = renderizarGridCategorias;
