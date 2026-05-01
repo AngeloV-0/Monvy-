@@ -143,7 +143,7 @@ function atualizarChart() {
   const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.25)'); gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.18)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
-  // Determina o conjunto de movimentações conforme o modo
+  // Filtra movimentações conforme o modo
   let movsFiltradas;
   if (fluxoModo === 'recentes') {
     const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
@@ -154,7 +154,13 @@ function atualizarChart() {
     if (movsFiltradas.length === 0)
       movsFiltradas = [...movimentacoes].filter(m => m.data);
   }
-  const movsOrdenadas = movsFiltradas.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+  // Ordena por timestamp (createdAt se disponível, senão por data + hora do campo data)
+  const movsOrdenadas = movsFiltradas.sort((a, b) => {
+    const tsA = a.createdAt?.toMillis?.() ?? a.createdAt?.seconds * 1000 ?? new Date(a.data).getTime();
+    const tsB = b.createdAt?.toMillis?.() ?? b.createdAt?.seconds * 1000 ?? new Date(b.data).getTime();
+    return tsA - tsB;
+  });
 
   if (movsOrdenadas.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
@@ -163,33 +169,28 @@ function atualizarChart() {
     subEl.textContent = diasLabel + ' (' + movsOrdenadas.length + (movsOrdenadas.length === 1 ? ' movimentação)' : ' movimentações)');
   }
 
-  // Agrupa movimentações por data — soma entradas e saídas em cada dia
-  const porData = {};
-  movsOrdenadas.forEach(m => {
-    if (!porData[m.data]) porData[m.data] = { entradas: 0, saidas: 0, movs: [] };
-    if (m.tipo === 'ganho') porData[m.data].entradas += m.valor;
-    else                    porData[m.data].saidas   += m.valor;
-    porData[m.data].movs.push(m);
-  });
-
-  const datas = Object.keys(porData).sort();
-  const labels = datas.map(d => { const [,mes,dia] = d.split('-'); return `${dia}/${mes}`; });
-
-  // Calcula acumulados contínuos
+  // Cada movimentação = 1 ponto individual no gráfico (sem agrupamento)
+  // Ambas as linhas recebem um ponto por movimentação:
+  // — linha de entradas: sobe se for ganho, mantém valor anterior se for gasto
+  // — linha de saídas:   sobe se for gasto, mantém valor anterior se for ganho
   let acumE = 0, acumS = 0;
-  const dataEntradas = [], dataSaidas = [], acumEporData = [], acumSporData = [];
-  datas.forEach(d => {
-    acumE += porData[d].entradas;
-    acumS += porData[d].saidas;
-    dataEntradas.push(parseFloat(acumE.toFixed(2)));
-    dataSaidas.push(parseFloat(acumS.toFixed(2)));
-    acumEporData.push(parseFloat(acumE.toFixed(2)));
-    acumSporData.push(parseFloat(acumS.toFixed(2)));
+  const labels = [], dataEntradas = [], dataSaidas = [];
+
+  movsOrdenadas.forEach((m, i) => {
+    // Label: data formatada (dd/mm) + índice para garantir unicidade no eixo X
+    const [ano, mes, dia] = m.data.split('-');
+    labels.push(`${dia}/${mes}`);
+
+    if (m.tipo === 'ganho') acumE = parseFloat((acumE + m.valor).toFixed(2));
+    else                    acumS = parseFloat((acumS + m.valor).toFixed(2));
+
+    dataEntradas.push(acumE);
+    dataSaidas.push(acumS);
   });
 
   chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2.5, tension:0.35, fill:true, pointBackgroundColor:'#22C55E', pointRadius:4, pointHoverRadius:7 },
-    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2.5, tension:0.35, fill:true, pointBackgroundColor:'#EF4444', pointRadius:4, pointHoverRadius:7 }
+    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2.5, tension:0.2, fill:true, pointBackgroundColor: movsOrdenadas.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'), pointBorderColor: movsOrdenadas.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'), pointRadius: movsOrdenadas.map(m => m.tipo === 'ganho' ? 5 : 0), pointHoverRadius:7 },
+    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2.5, tension:0.2, fill:true, pointBackgroundColor: movsOrdenadas.map(m => m.tipo !== 'ganho' ? '#EF4444' : 'transparent'), pointBorderColor: movsOrdenadas.map(m => m.tipo !== 'ganho' ? '#EF4444' : 'transparent'), pointRadius: movsOrdenadas.map(m => m.tipo !== 'ganho' ? 5 : 0), pointHoverRadius:7 }
   ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
     plugins:{
       legend:{display:false},
@@ -198,27 +199,39 @@ function atualizarChart() {
         titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
         callbacks:{
           title: items => {
-            const d = datas[items[0].dataIndex];
-            if (!d) return '';
-            const [ano,mes,dia] = d.split('-');
+            const m = movsOrdenadas[items[0].dataIndex];
+            if (!m) return '';
+            const [ano,mes,dia] = m.data.split('-');
             return `${dia}/${mes}/${ano}`;
           },
           label: c => {
-            const acum = c.datasetIndex === 0 ? acumEporData[c.dataIndex] : acumSporData[c.dataIndex];
-            const tipo = c.datasetIndex === 0 ? 'Entradas acumuladas' : 'Saídas acumuladas';
-            return ` ${tipo}: R$ ${acum.toFixed(2).replace('.',',')}`;
+            const m = movsOrdenadas[c.dataIndex];
+            if (!m) return null;
+            if (c.datasetIndex === 0) {
+              // linha de entradas
+              if (m.tipo === 'ganho') {
+                const nome = m.descricao || m.categoria || 'Entrada';
+                return ` ↑ +R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`;
+              }
+              return ` Entradas acum.: R$ ${c.raw.toFixed(2).replace('.',',')}`;
+            } else {
+              // linha de saídas
+              if (m.tipo !== 'ganho') {
+                const nome = m.descricao || m.categoria || 'Saída';
+                return ` ↓ -R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`;
+              }
+              return ` Saídas acum.: R$ ${c.raw.toFixed(2).replace('.',',')}`;
+            }
           },
-          afterBody: items => {
-            const d = datas[items[0].dataIndex];
-            const movsDia = porData[d]?.movs || [];
-            if (movsDia.length === 0) return [];
-            const linhas = ['', 'Neste dia:'];
-            movsDia.forEach(m => {
-              const sinal = m.tipo === 'ganho' ? '+' : '-';
-              const nome = m.descricao || m.categoria || (m.tipo === 'ganho' ? 'Entrada' : 'Saída');
-              linhas.push(` ${sinal}R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`);
-            });
-            return linhas;
+          afterLabel: c => {
+            if (c.datasetIndex === 1) {
+              return [
+                ``,
+                ` Total entradas: R$ ${dataEntradas[c.dataIndex].toFixed(2).replace('.',',')}`,
+                ` Total saídas:   R$ ${dataSaidas[c.dataIndex].toFixed(2).replace('.',',')}`,
+              ];
+            }
+            return null;
           }
         }
       }
