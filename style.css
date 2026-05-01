@@ -1387,9 +1387,34 @@ select option { background: var(--surface-2); }
     max-height: 96vh;
     height: auto;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
   .artigo-box { max-height: 88vh; }
+
+  /* Modal de perfil: centralizado (não bottom-sheet), com scroll interno nas tabs */
+  #modal-perfil {
+    align-items: center;
+    padding: 16px;
+  }
+  #modal-perfil .modal-box {
+    border-radius: 20px;
+    max-height: 92vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px 20px;
+  }
+  /* Container interno scrollável do perfil */
+  #modal-perfil .modal-box > *:not(button.modal-fechar):not(h2):not(.perfil-tabs-header) {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Sub-modal de edição de campo fica contido dentro do modal-box */
+  #modal-editar-campo {
+    border-radius: inherit;
+    overflow-y: auto;
+  }
 
   /* Ajustes de cards de meta */
   .meta-topo { flex-wrap: wrap; gap: 6px; }
@@ -3284,5 +3309,46 @@ html, body {
 @media (max-width: 400px) {
   #dividas-kpis {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ==============================
+   FIX: Modal Perfil - Scroll interno das tabs no mobile
+   ============================== */
+
+/* O modal-perfil usa layout flex para fixar header e scrollar só o conteúdo */
+#modal-perfil .modal-box {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden; /* contém o sub-modal absoluto */
+}
+
+/* Título e abas ficam fixos no topo */
+#modal-perfil .modal-box > h2,
+#modal-perfil .modal-box > div:first-of-type {
+  flex-shrink: 0;
+}
+
+/* Conteúdo das tabs ocupa o espaço restante e scrolla */
+#perfil-tab-conta,
+#perfil-tab-vida,
+#perfil-tab-financas {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Sub-modal de edição de campo: fica dentro do modal-box sem vazar */
+#modal-editar-campo {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 20px 20px 0 0; /* herda borda mobile */
+}
+
+@media (min-width: 601px) {
+  #modal-editar-campo {
+    border-radius: inherit;
   }
 }
