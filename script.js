@@ -140,118 +140,94 @@ function atualizarChart() {
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.3)'); gG.addColorStop(1,'rgba(34,197,94,0)');
-  const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.25)'); gR.addColorStop(1,'rgba(239,68,68,0)');
+  const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.25)'); gG.addColorStop(1,'rgba(34,197,94,0)');
+  const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.18)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
+  // Determina o conjunto de movimentações conforme o modo
+  let movsFiltradas;
   if (fluxoModo === 'recentes') {
-    // --- MODO RECENTES: movimentações dos últimos 8 dias ---
-    const corte8 = new Date(); corte8.setDate(corte8.getDate() - 7); corte8.setHours(0,0,0,0);
-    const movsOrdenadas = [...movimentacoes]
-      .filter(m => m.data && new Date(m.data) >= corte8)
-      .sort((a, b) => new Date(a.data) - new Date(b.data));
-
-    // Montar labels e datasets individuais
-    // Cada ponto no eixo X é uma movimentação; entradas e saídas em datasets separados
-    // Usamos índice global para alinhar os dois datasets no mesmo eixo
-    const labels = movsOrdenadas.map((m, i) => {
-      const [ano, mes, dia] = m.data.split('-');
-      return `${dia}/${mes}`;
-    });
-
-    // Para cada posição do eixo X, entrada ou saída (null se não for do tipo)
-    const dataEntradas = movsOrdenadas.map(m => m.tipo === 'ganho' ? m.valor : null);
-    const dataSaidas   = movsOrdenadas.map(m => m.tipo !== 'ganho' ? m.valor : null);
-
-    if (subEl) subEl.textContent = 'Últimos 8 dias (' + movsOrdenadas.length + (movsOrdenadas.length === 1 ? ' movimentação)' : ' movimentações)');
-
-    chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
-      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:true }
-    ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
-          titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
-          callbacks:{
-            title: items => {
-              const m = movsOrdenadas[items[0].dataIndex];
-              if (!m) return '';
-              const [ano,mes,dia] = m.data.split('-');
-              return `${dia}/${mes}/${ano}`;
-            },
-            label: c => {
-              if (c.raw === null) return null;
-              const m = movsOrdenadas[c.dataIndex];
-              const sinal = m.tipo === 'ganho' ? '+' : '-';
-              const nome = m.descricao || m.categoria || (m.tipo === 'ganho' ? 'Entrada' : 'Saída');
-              return ` ${nome}: ${sinal}R$ ${Math.abs(c.raw).toFixed(2).replace('.',',')}`;
-            },
-            filter: item => item.raw !== null
-          }
-        }
-      },
-      scales:{
-        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
-        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
-      }
-    }});
-
+    const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
+    movsFiltradas = [...movimentacoes].filter(m => m.data && new Date(m.data) >= corte);
   } else {
-    // --- MODO TODAS: cada movimentação individual do mês atual como um ponto ---
-    const corte30 = new Date(); corte30.setDate(corte30.getDate() - 29); corte30.setHours(0,0,0,0);
-    const movsOrdenadas = [...movimentacoes]
-      .filter(m => m.data && new Date(m.data) >= corte30)
-      .sort((a, b) => new Date(a.data) - new Date(b.data));
+    const corte = new Date(); corte.setDate(corte.getDate() - 29); corte.setHours(0,0,0,0);
+    movsFiltradas = [...movimentacoes].filter(m => m.data && new Date(m.data) >= corte);
+    if (movsFiltradas.length === 0)
+      movsFiltradas = [...movimentacoes].filter(m => m.data);
+  }
+  const movsOrdenadas = movsFiltradas.sort((a, b) => new Date(a.data) - new Date(b.data));
 
-    // Fallback: se não há dados nos últimos 30 dias, usar todas
-    const movsFinal = movsOrdenadas.length > 0
-      ? movsOrdenadas
-      : [...movimentacoes].filter(m => m.data).sort((a, b) => new Date(a.data) - new Date(b.data));
+  if (movsOrdenadas.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
-    const labels = movsFinal.map(m => {
-      const [ano, mes, dia] = m.data.split('-');
-      return `${dia}/${mes}`;
-    });
+  if (subEl) {
+    const diasLabel = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
+    subEl.textContent = diasLabel + ' (' + movsOrdenadas.length + (movsOrdenadas.length === 1 ? ' movimentação)' : ' movimentações)');
+  }
 
-    const dataEntradas = movsFinal.map(m => m.tipo === 'ganho' ? m.valor : null);
-    const dataSaidas   = movsFinal.map(m => m.tipo !== 'ganho' ? m.valor : null);
+  // Agrupa movimentações por data — soma entradas e saídas em cada dia
+  const porData = {};
+  movsOrdenadas.forEach(m => {
+    if (!porData[m.data]) porData[m.data] = { entradas: 0, saidas: 0, movs: [] };
+    if (m.tipo === 'ganho') porData[m.data].entradas += m.valor;
+    else                    porData[m.data].saidas   += m.valor;
+    porData[m.data].movs.push(m);
+  });
 
-    if (subEl) subEl.textContent = 'Últimos 30 dias (' + movsFinal.length + (movsFinal.length === 1 ? ' movimentação)' : ' movimentações)');
+  const datas = Object.keys(porData).sort();
+  const labels = datas.map(d => { const [,mes,dia] = d.split('-'); return `${dia}/${mes}`; });
 
-    chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-      { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#22C55E', pointRadius:5, pointHoverRadius:7, spanGaps:true },
-      { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:'#EF4444', pointRadius:5, pointHoverRadius:7, spanGaps:true }
-    ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
-          titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
-          callbacks:{
-            title: items => {
-              const m = movsFinal[items[0].dataIndex];
-              if (!m) return '';
-              const [ano,mes,dia] = m.data.split('-');
-              return `${dia}/${mes}/${ano}`;
-            },
-            label: c => {
-              if (c.raw === null) return null;
-              const m = movsFinal[c.dataIndex];
+  // Calcula acumulados contínuos
+  let acumE = 0, acumS = 0;
+  const dataEntradas = [], dataSaidas = [], acumEporData = [], acumSporData = [];
+  datas.forEach(d => {
+    acumE += porData[d].entradas;
+    acumS += porData[d].saidas;
+    dataEntradas.push(parseFloat(acumE.toFixed(2)));
+    dataSaidas.push(parseFloat(acumS.toFixed(2)));
+    acumEporData.push(parseFloat(acumE.toFixed(2)));
+    acumSporData.push(parseFloat(acumS.toFixed(2)));
+  });
+
+  chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
+    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2.5, tension:0.35, fill:true, pointBackgroundColor:'#22C55E', pointRadius:4, pointHoverRadius:7 },
+    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2.5, tension:0.35, fill:true, pointBackgroundColor:'#EF4444', pointRadius:4, pointHoverRadius:7 }
+  ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
+        titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
+        callbacks:{
+          title: items => {
+            const d = datas[items[0].dataIndex];
+            if (!d) return '';
+            const [ano,mes,dia] = d.split('-');
+            return `${dia}/${mes}/${ano}`;
+          },
+          label: c => {
+            const acum = c.datasetIndex === 0 ? acumEporData[c.dataIndex] : acumSporData[c.dataIndex];
+            const tipo = c.datasetIndex === 0 ? 'Entradas acumuladas' : 'Saídas acumuladas';
+            return ` ${tipo}: R$ ${acum.toFixed(2).replace('.',',')}`;
+          },
+          afterBody: items => {
+            const d = datas[items[0].dataIndex];
+            const movsDia = porData[d]?.movs || [];
+            if (movsDia.length === 0) return [];
+            const linhas = ['', 'Neste dia:'];
+            movsDia.forEach(m => {
               const sinal = m.tipo === 'ganho' ? '+' : '-';
               const nome = m.descricao || m.categoria || (m.tipo === 'ganho' ? 'Entrada' : 'Saída');
-              return ` ${nome}: ${sinal}R$ ${Math.abs(c.raw).toFixed(2).replace('.',',')}`;
-            },
-            filter: item => item.raw !== null
+              linhas.push(` ${sinal}R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`);
+            });
+            return linhas;
           }
         }
-      },
-      scales:{
-        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
-        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) } }
       }
-    }});
-  }
+    },
+    scales:{
+      x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) }, beginAtZero:true }
+    }
+  }});
 }
 
 // CHART PIZZA
@@ -2591,7 +2567,7 @@ function calcularScore() {
   const miniEl = document.getElementById('kpi-score-mini');
   const miniLabel = document.getElementById('kpi-score-mini-label');
   const miniBadgeEl = document.getElementById('kpi-score-mini-badge');
-  const iconStyleMini = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
+  const iconStyleMini = 'width:44px;height:44px;object-fit:contain;vertical-align:middle;flex-shrink:0';
   const iconSrcMini = total >= 800 ? 'icone-score-excelente.png'
     : total >= 600 ? 'icone-score-bom.png'
     : total >= 400 ? 'icone-score-estavel.png'
@@ -2599,7 +2575,7 @@ function calcularScore() {
     : 'icone-score-critico.png';
   const labelTextMini = total >= 800 ? 'Excelente' : total >= 600 ? 'Bom' : total >= 400 ? 'Estável' : total >= 200 ? 'Atenção' : 'Crítico';
   if (miniEl) miniEl.textContent = total;
-  if (miniBadgeEl) miniBadgeEl.innerHTML = `<div class="kpi-icon" style="background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrcMini}" style="${iconStyleMini}"></div>`;
+  if (miniBadgeEl) miniBadgeEl.innerHTML = `<div class="kpi-icon" style="width:48px;height:48px;min-width:48px;background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrcMini}" style="${iconStyleMini}"></div>`;
   if (miniLabel) miniLabel.innerHTML = `<span style="font-weight:700;color:var(--white)">${labelTextMini}</span> · Ver detalhes →`;
 
   // Elementos específicos da tela de Score (só atualiza se existirem)
@@ -3051,7 +3027,7 @@ function _atualizarMiniCardScore() {
           : saldo / totalEntradas >= 1 ? 90 : 40)
         : 40;
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva;
-    const iconStyle = 'width:32px;height:32px;object-fit:contain;vertical-align:middle;flex-shrink:0';
+    const iconStyle = 'width:44px;height:44px;object-fit:contain;vertical-align:middle;flex-shrink:0';
     const iconSrc = total >= 800 ? 'icone-score-excelente.png'
       : total >= 600 ? 'icone-score-bom.png'
       : total >= 400 ? 'icone-score-estavel.png'
@@ -3062,7 +3038,7 @@ function _atualizarMiniCardScore() {
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');
     if (miniEl)    miniEl.textContent = total;
-    if (miniBadge) miniBadge.innerHTML = `<div class="kpi-icon" style="background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrc}" style="${iconStyle}"></div>`;
+    if (miniBadge) miniBadge.innerHTML = `<div class="kpi-icon" style="width:48px;height:48px;min-width:48px;background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrc}" style="${iconStyle}"></div>`;
     if (miniLabel) miniLabel.innerHTML = `<span style="font-weight:700;color:var(--white)">${labelText}</span> · Ver detalhes →`;
   } catch(e) {}
 }
