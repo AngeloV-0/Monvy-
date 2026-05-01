@@ -2050,6 +2050,9 @@ html, body {
     height: 46px !important;
     min-width: 46px !important;
     max-width: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     overflow: hidden !important;
     background-size: cover !important;
@@ -2068,13 +2071,17 @@ html, body {
   /* Avatar mobile - tamanho fixo igual ao emoji */
   #topbar-avatar-mobile {
     display: block !important;
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     object-fit: cover !important;
     flex-shrink: 0 !important;
+    align-self: center !important;
   }
 
   /* Direita: botões compactos */
