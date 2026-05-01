@@ -18,7 +18,7 @@
   <meta name="apple-mobile-web-app-title" content="Monvay">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
 
 </head>
 <body>
@@ -1145,7 +1145,7 @@
 
   <!-- MODAL: PERSONALIZAR PERFIL -->
   <div id="modal-perfil" class="modal-overlay hidden">
-    <div class="modal-box" style="max-width:480px;max-height:90vh;overflow-y:auto">
+    <div class="modal-box" style="max-width:480px;max-height:90vh;overflow-y:auto;position:relative">
       <button class="modal-fechar" onclick="fecharModalPerfil()">×</button>
       <h2 style="margin-bottom:16px;font-size:1.1rem">Personalizar perfil</h2>
 
@@ -1255,7 +1255,7 @@
       </div>
 
       <!-- Sub-modal de edição de campo -->
-      <div id="modal-editar-campo" style="display:none;position:absolute;inset:0;background:var(--bg);border-radius:inherit;padding:24px;z-index:10;overflow-y:auto">
+      <div id="modal-editar-campo" style="display:none;position:absolute;inset:0;background:var(--card-bg,#141c2e);border-radius:inherit;padding:24px;z-index:20;overflow-y:auto">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
           <button onclick="fecharEditarCampo()" style="background:none;border:none;color:var(--white);cursor:pointer;padding:4px;display:flex">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:22px;height:22px"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -1333,7 +1333,7 @@
     </div>
   </div>
 
-  <script type="module" src="script.js?v=22"></script>
+  <script type="module" src="script.js?v=23"></script>
 
   <!-- Script de compatibilidade: garante que funções onclick funcionam mesmo antes do módulo ES6 terminar -->
   <script>
