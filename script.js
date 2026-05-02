@@ -590,10 +590,26 @@ async function criarMeta() {
   } catch(e) { console.error('Erro ao criar meta:', e); }
 }
 
+function formatarDataAlvo(dataAlvo) {
+  if (!dataAlvo) return '';
+  // Formato YYYY-MM-DD → DD/MM/AAAA
+  if (dataAlvo.length === 10) {
+    const [y, m, d] = dataAlvo.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  // Formato legado YYYY-MM → MM/AAAA
+  if (dataAlvo.length === 7) {
+    const [y, m] = dataAlvo.split('-');
+    return `${m}/${y}`;
+  }
+  return dataAlvo;
+}
+
 function calcularMensalMeta(m) {
   if (!m.dataAlvo) return null;
   const agora = new Date();
-  const alvo = new Date(m.dataAlvo + '-01');
+  // Suporta tanto YYYY-MM quanto YYYY-MM-DD
+  const alvo = m.dataAlvo.length === 7 ? new Date(m.dataAlvo + '-01') : new Date(m.dataAlvo);
   const mesesRestantes = (alvo.getFullYear() - agora.getFullYear()) * 12 + (alvo.getMonth() - agora.getMonth());
   if (mesesRestantes <= 0) return null;
   const faltando = Math.max(0, m.objetivo - (m.atual || 0));
@@ -606,7 +622,7 @@ function renderizarMetas() {
   lista.innerHTML = metas.map((m, i) => {
     const pct = Math.min(100, Math.round(((m.atual||0) / m.objetivo) * 100));
     const mensal = calcularMensalMeta(m);
-    const dataStr = m.dataAlvo ? `<span style="color:var(--gray);font-size:.72rem">📅 ${m.dataAlvo.replace('-', '/')}</span>` : '';
+    const dataStr = m.dataAlvo ? `<span style="color:var(--gray);font-size:.72rem">📅 ${formatarDataAlvo(m.dataAlvo)}</span>` : '';
     const mensalStr = mensal !== null ? `<div style="margin-top:6px;padding:7px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:.8rem;color:var(--primary)">💡 Guardar <strong>${fmt(mensal)}/mês</strong> para atingir no prazo</div>` : '';
     const concluida = pct >= 100;
     return `<div class="meta-card${concluida ? ' concluida' : ''}">
