@@ -292,8 +292,6 @@ function atualizarChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      parsing: false,     // CRÍTICO: desativa parsing/sorting automático do Chart.js
-      normalized: true,
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
