@@ -285,8 +285,7 @@ function atualizarChart() {
               const isEntrada = mov.tipo === 'ganho';
               const nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saída');
               const sinal = isEntrada ? '+' : '-';
-              const ico   = isEntrada ? '🟢' : '🔴';
-              return ` ${ico} ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
+              return ` ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
             }
           }
         }
