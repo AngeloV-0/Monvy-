@@ -1508,11 +1508,15 @@
         imgEl.style.display = 'none'; letraEl.style.display = 'block'; btnRemover.style.display = 'none';
       }
       document.getElementById('perfil-sucesso').style.display = 'none';
+      // Resetar rascunho para iniciar com os dados atualmente salvos
+      window._perfilVidaTemp = null;
       document.getElementById('modal-perfil').classList.remove('hidden');
     }
     function fecharModalPerfil() {
       document.getElementById('modal-perfil').classList.add('hidden');
       fecharEditarCampo();
+      // Limpar rascunho ao fechar sem salvar
+      window._perfilVidaTemp = null;
     }
 
     let _campoAtual = null;

@@ -1736,7 +1736,24 @@ async function carregarDividasOnboarding() {
 }
 
 // ===== PERFIL DE VIDA (modal) =====
+function _inicializarRascunho() {
+  if (!window._perfilVidaTemp) {
+    window._perfilVidaTemp = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  }
+}
+
+function _capturarRascunhoFinancas() {
+  _inicializarRascunho();
+  const rendaEl = document.getElementById('perfil-renda');
+  if (rendaEl && rendaEl.value !== '') {
+    window._perfilVidaTemp.renda = parseFloat(rendaEl.value) || 0;
+  }
+}
+
 function abrirTabPerfil(tab) {
+  if (document.getElementById('perfil-tab-financas').style.display !== 'none') {
+    _capturarRascunhoFinancas();
+  }
   ['conta','vida','financas'].forEach(t => {
     document.getElementById('perfil-tab-' + t).style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('tab-' + t);
@@ -1747,7 +1764,8 @@ function abrirTabPerfil(tab) {
 }
 
 function carregarEstadoVida() {
-  const perfil = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  _inicializarRascunho();
+  const perfil = window._perfilVidaTemp;
   // Moradia
   document.querySelectorAll('#vida-moradia-opts .vida-opt').forEach(el => {
     const val = el.getAttribute('onclick')?.match(/'([^']+)'\)$/)?.[1];
@@ -1763,12 +1781,28 @@ function carregarEstadoVida() {
   const filhosNao = document.getElementById('vida-filhos-nao');
   if (filhosSim) filhosSim.classList.toggle('selected', perfil.filhos === 'sim');
   if (filhosNao) filhosNao.classList.toggle('selected', perfil.filhos === 'nao');
+  // Família multi (dependentes, pets)
+  document.querySelectorAll('.vida-opt.multi').forEach(el => {
+    const onclk = el.getAttribute('onclick') || '';
+    const match = onclk.match(/'(\w+)','(\w+)'\)/);
+    if (!match) return;
+    const [, campo, valor] = match;
+    el.classList.toggle('selected', (perfil[campo] || []).includes(valor));
+  });
 }
 
 function carregarEstadoFinancas() {
-  const perfil = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  _inicializarRascunho();
+  const perfil = window._perfilVidaTemp;
   const rendaEl = document.getElementById('perfil-renda');
   if (rendaEl && perfil.renda) rendaEl.value = perfil.renda;
+  // Restaura meta de economia selecionada
+  if (perfil.metaEconomia !== undefined) {
+    document.querySelectorAll('#meta-eco-opts .vida-opt').forEach(el => {
+      const match = (el.getAttribute('onclick') || '').match(/,(\d+)\)/);
+      el.classList.toggle('selected', match && parseInt(match[1]) === perfil.metaEconomia);
+    });
+  }
 }
 
 function selecionarVida(el, campo, valor) {
@@ -1777,14 +1811,13 @@ function selecionarVida(el, campo, valor) {
     const v = o.getAttribute('onclick')?.match(/'([^']+)'\)$/)?.[1];
     if (v) o.classList.toggle('selected', v === valor);
   });
-  // Salvar no estado temporário
-  if (!window._perfilVidaTemp) window._perfilVidaTemp = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  _inicializarRascunho();
   window._perfilVidaTemp[campo] = valor;
 }
 
 function selecionarVidaMulti(el, campo, valor) {
   el.classList.toggle('selected');
-  if (!window._perfilVidaTemp) window._perfilVidaTemp = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  _inicializarRascunho();
   if (!window._perfilVidaTemp[campo]) window._perfilVidaTemp[campo] = [];
   if (el.classList.contains('selected')) {
     if (!window._perfilVidaTemp[campo].includes(valor)) window._perfilVidaTemp[campo].push(valor);
@@ -1796,15 +1829,14 @@ function selecionarVidaMulti(el, campo, valor) {
 function setMetaEco(el, pct) {
   document.querySelectorAll('#meta-eco-opts .vida-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  if (!window._perfilVidaTemp) window._perfilVidaTemp = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
+  _inicializarRascunho();
   window._perfilVidaTemp.metaEconomia = pct;
 }
 
 function salvarPerfilVida() {
+  _capturarRascunhoFinancas();
   const perfil = window._perfilVidaTemp || JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
   localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
-  window._perfilVidaTemp = null;
-  // Sincronizar com Firebase
   if (currentUser) {
     fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar perfil de vida no Firebase:', e));
   }
@@ -1813,12 +1845,9 @@ function salvarPerfilVida() {
 }
 
 function salvarPerfilFinancas() {
-  const perfil = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
-  const renda = parseFloat(document.getElementById('perfil-renda')?.value) || perfil.renda || 0;
-  if (window._perfilVidaTemp?.metaEconomia !== undefined) perfil.metaEconomia = window._perfilVidaTemp.metaEconomia;
-  perfil.renda = renda;
+  _capturarRascunhoFinancas();
+  const perfil = window._perfilVidaTemp || JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
   localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
-  // Sincronizar com Firebase
   if (currentUser) {
     fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar finanças no Firebase:', e));
   }
