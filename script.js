@@ -158,113 +158,193 @@ function setFluxoModo(modo) {
 function atualizarChart() {
   const canvas = document.getElementById('chart-fluxo');
   const emptyEl = document.getElementById('chart-empty');
-  const subEl = document.getElementById('fluxo-sub');
+  const subEl   = document.getElementById('fluxo-sub');
   if (!canvas) return;
   if (movimentacoes.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
   canvas.style.display='block'; emptyEl.style.display='none';
-
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const gG = ctx.createLinearGradient(0,0,0,180); gG.addColorStop(0,'rgba(34,197,94,0.25)'); gG.addColorStop(1,'rgba(34,197,94,0)');
-  const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.18)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
-  // Filtra movimentações conforme o modo
-  // movimentacoes já vem do Firestore ordenado por (data desc, criadoEm desc) — mais recente primeiro.
-  // Filtramos mantendo essa ordem, depois invertemos para o gráfico (mais antigo→esquerda).
-  let movsFiltradas;
+  // ─── PASSO 1: extrair timestamp completo de cada movimentação ───
+  // criadoEm = Firestore Timestamp {seconds, nanoseconds} ou null (write pendente)
+  function getMs(m) {
+    const ts = m.criadoEm || m.createdAt || null;
+    if (ts) {
+      if (typeof ts.toMillis === 'function') return ts.toMillis();
+      if (typeof ts.seconds  === 'number')   return ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1e6);
+    }
+    return m.data ? new Date(m.data + 'T00:00:00').getTime() : 0;
+  }
+
+  // ─── PASSO 2: filtrar por modo (recentes / todas) ───
+  let pool;
   if (fluxoModo === 'recentes') {
     const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
-    movsFiltradas = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
+    pool = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
   } else {
     const corte = new Date(); corte.setDate(corte.getDate() - 29); corte.setHours(0,0,0,0);
-    movsFiltradas = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
-    if (movsFiltradas.length === 0)
-      movsFiltradas = [...movimentacoes];
+    pool = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
+    if (pool.length === 0) pool = [...movimentacoes];
   }
+  if (pool.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
-  // Inverte a ordem do Firestore (newest-first → oldest-first) para o gráfico crescer da esquerda
-  const movsOrdenadas = [...movsFiltradas].reverse();
-
-  if (movsOrdenadas.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
-
-  if (subEl) {
-    const diasLabel = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
-    subEl.textContent = diasLabel + ' (' + movsOrdenadas.length + (movsOrdenadas.length === 1 ? ' movimentação)' : ' movimentações)');
-  }
-
-  // Cada movimentação = 1 ponto individual no gráfico (sem agrupamento)
-  // Ambas as linhas recebem um ponto por movimentação:
-  // — linha de entradas: sobe se for ganho, mantém valor anterior se for gasto
-  // — linha de saídas:   sobe se for gasto, mantém valor anterior se for ganho
-  let acumE = 0, acumS = 0;
-  const labels = [], dataEntradas = [], dataSaidas = [];
-
-  movsOrdenadas.forEach((m, i) => {
-    // Label: data formatada (dd/mm) + índice para garantir unicidade no eixo X
-    const [ano, mes, dia] = m.data.split('-');
-    labels.push(`${dia}/${mes}`);
-
-    if (m.tipo === 'ganho') acumE = parseFloat((acumE + m.valor).toFixed(2));
-    else                    acumS = parseFloat((acumS + m.valor).toFixed(2));
-
-    dataEntradas.push(acumE);
-    dataSaidas.push(acumS);
+  // ─── PASSO 3: ordenação única por timestamp completo + id como desempate ───
+  // Mais antigo → mais recente (esquerda → direita no gráfico)
+  const movements = [...pool].sort((a, b) => {
+    const t1 = getMs(a);
+    const t2 = getMs(b);
+    if (t1 !== t2) return t1 - t2;
+    const idA = a.id || '';
+    const idB = b.id || '';
+    return idA < idB ? -1 : idA > idB ? 1 : 0;
   });
 
-  chartInstance = new Chart(ctx, { type:'line', data:{ labels, datasets:[
-    { label:'Entradas', data:dataEntradas, borderColor:'#22C55E', backgroundColor:gG, borderWidth:2.5, tension:0.2, fill:true, pointBackgroundColor: movsOrdenadas.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'), pointBorderColor: movsOrdenadas.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'), pointRadius: movsOrdenadas.map(m => m.tipo === 'ganho' ? 5 : 0), pointHoverRadius:7 },
-    { label:'Saídas',   data:dataSaidas,   borderColor:'#EF4444', backgroundColor:gR, borderWidth:2.5, tension:0.2, fill:true, pointBackgroundColor: movsOrdenadas.map(m => m.tipo !== 'ganho' ? '#EF4444' : 'transparent'), pointBorderColor: movsOrdenadas.map(m => m.tipo !== 'ganho' ? '#EF4444' : 'transparent'), pointRadius: movsOrdenadas.map(m => m.tipo !== 'ganho' ? 5 : 0), pointHoverRadius:7 }
-  ]}, options:{ responsive:true, maintainAspectRatio:true, interaction:{intersect:false, mode:'index'},
-    plugins:{
-      legend:{display:false},
-      tooltip:{
-        backgroundColor:'#1A2235', borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
-        titleColor:'#94A3B8', bodyColor:'#fff', padding:10,
-        callbacks:{
-          title: items => {
-            const m = movsOrdenadas[items[0].dataIndex];
-            if (!m) return '';
-            const [ano,mes,dia] = m.data.split('-');
-            return `${dia}/${mes}/${ano}`;
-          },
-          label: c => {
-            const m = movsOrdenadas[c.dataIndex];
-            if (!m) return null;
-            if (c.datasetIndex === 0) {
-              // linha de entradas
-              if (m.tipo === 'ganho') {
-                const nome = m.descricao || m.categoria || 'Entrada';
-                return ` ↑ +R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`;
+  // ─── PASSO 4: construir DUAS séries sincronizadas na MESMA timeline ───
+  // Uma única iteração, uma única lista ordenada.
+  // Entrada  → linha verde sobe,  vermelha fica igual
+  // Saída    → linha vermelha sobe, verde fica igual
+  let totalEntradas = 0;
+  let totalSaidas   = 0;
+
+  const chartData = movements.map((mov, index) => {
+    if (mov.tipo === 'ganho') totalEntradas = parseFloat((totalEntradas + mov.valor).toFixed(2));
+    else                      totalSaidas   = parseFloat((totalSaidas   + mov.valor).toFixed(2));
+
+    const [, mes, dia] = (mov.data || '2000-01-01').split('-');
+    return {
+      x        : index,           // índice sequencial real — sem agrupamento
+      label    : `${dia}/${mes}`,
+      entradas : totalEntradas,
+      saidas   : totalSaidas,
+      mov
+    };
+  });
+
+  // DEBUG: valida sequência, timestamps e acumuladores
+  console.table(chartData.map(p => ({
+    seq      : p.x,
+    data     : p.mov.data,
+    ts_ms    : getMs(p.mov),
+    id       : p.mov.id,
+    tipo     : p.mov.tipo,
+    valor    : p.mov.valor,
+    entradas : p.entradas,
+    saidas   : p.saidas
+  })));
+
+  if (subEl) {
+    const lbl = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
+    subEl.textContent = `${lbl} (${movements.length} ${movements.length === 1 ? 'movimentação' : 'movimentações'})`;
+  }
+
+  // ─── PASSO 5: renderizar com Chart.js ───
+  // labels = índice sequencial como string para impedir reordenação da lib
+  const labels    = chartData.map(p => p.label);
+  const dataE     = chartData.map(p => p.entradas);
+  const dataS     = chartData.map(p => p.saidas);
+
+  // Cor de cada ponto: verde só quando é entrada, vermelho só quando é saída
+  const ptColorE  = movements.map(m => m.tipo === 'ganho' ? '#22C55E' : 'rgba(34,197,94,0.25)');
+  const ptColorS  = movements.map(m => m.tipo !== 'ganho' ? '#EF4444' : 'rgba(239,68,68,0.25)');
+  const ptRadiusE = movements.map(m => m.tipo === 'ganho' ? 5 : 3);
+  const ptRadiusS = movements.map(m => m.tipo !== 'ganho' ? 5 : 3);
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const gG = ctx.createLinearGradient(0,0,0,200); gG.addColorStop(0,'rgba(34,197,94,0.22)');  gG.addColorStop(1,'rgba(34,197,94,0)');
+  const gR = ctx.createLinearGradient(0,0,0,200); gR.addColorStop(0,'rgba(239,68,68,0.15)'); gR.addColorStop(1,'rgba(239,68,68,0)');
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Entradas',
+          data: dataE,
+          borderColor: '#22C55E',
+          backgroundColor: gG,
+          borderWidth: 2.5,
+          tension: 0,             // sem bezier — cada ponto representa exatamente 1 mov
+          fill: true,
+          pointBackgroundColor: ptColorE,
+          pointBorderColor:     ptColorE,
+          pointRadius:          ptRadiusE,
+          pointHoverRadius:     8,
+          order: 0
+        },
+        {
+          label: 'Saídas',
+          data: dataS,
+          borderColor: '#EF4444',
+          backgroundColor: gR,
+          borderWidth: 2.5,
+          tension: 0,
+          fill: true,
+          pointBackgroundColor: ptColorS,
+          pointBorderColor:     ptColorS,
+          pointRadius:          ptRadiusS,
+          pointHoverRadius:     8,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      parsing: false,     // CRÍTICO: desativa parsing/sorting automático do Chart.js
+      normalized: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1A2235',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          titleColor: '#94A3B8',
+          bodyColor: '#fff',
+          padding: 12,
+          callbacks: {
+            title: items => {
+              const p = chartData[items[0].dataIndex];
+              if (!p) return '';
+              const [ano, mes, dia] = (p.mov.data || '').split('-');
+              return `#${p.x + 1} · ${dia}/${mes}/${ano}`;
+            },
+            label: c => {
+              const p = chartData[c.dataIndex];
+              if (!p) return null;
+              const m = p.mov;
+              if (c.datasetIndex === 0) {
+                if (m.tipo === 'ganho') {
+                  const nome = m.descricao || m.categoria || 'Entrada';
+                  return ` 🟢 +R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}  →  acum. R$ ${p.entradas.toFixed(2).replace('.',',')}`;
+                }
+                return ` Entradas acum.: R$ ${p.entradas.toFixed(2).replace('.',',')}`;
+              } else {
+                if (m.tipo !== 'ganho') {
+                  const nome = m.descricao || m.categoria || 'Saída';
+                  return ` 🔴 -R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}  →  acum. R$ ${p.saidas.toFixed(2).replace('.',',')}`;
+                }
+                return ` Saídas acum.: R$ ${p.saidas.toFixed(2).replace('.',',')}`;
               }
-              return ` Entradas acum.: R$ ${c.raw.toFixed(2).replace('.',',')}`;
-            } else {
-              // linha de saídas
-              if (m.tipo !== 'ganho') {
-                const nome = m.descricao || m.categoria || 'Saída';
-                return ` ↓ -R$ ${m.valor.toFixed(2).replace('.',',')} · ${nome}`;
-              }
-              return ` Saídas acum.: R$ ${c.raw.toFixed(2).replace('.',',')}`;
             }
-          },
-          afterLabel: c => {
-            if (c.datasetIndex === 1) {
-              return [
-                ``,
-                ` Total entradas: R$ ${dataEntradas[c.dataIndex].toFixed(2).replace('.',',')}`,
-                ` Total saídas:   R$ ${dataSaidas[c.dataIndex].toFixed(2).replace('.',',')}`,
-              ];
-            }
-            return null;
           }
         }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 16 }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#64748B', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) },
+          beginAtZero: true
+        }
       }
-    },
-    scales:{
-      x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:10}, maxRotation:45, autoSkip:true, maxTicksLimit:16 } },
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{ color:'#64748B', font:{size:11}, callback:v=>'R$'+v.toFixed(0) }, beginAtZero:true }
     }
-  }});
+  });
 }
 
 // CHART PIZZA
