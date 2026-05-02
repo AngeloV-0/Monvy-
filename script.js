@@ -186,32 +186,20 @@ function atualizarChart() {
     subEl.textContent = `${lbl} (${movements.length} ${movements.length === 1 ? 'movimentação' : 'movimentações'})`;
   }
 
-  // ── 3. Separar entradas e saídas em séries independentes ──
-  // Cada ponto = valor daquela movimentação (estilo bolsa: sobe se o próximo for maior, desce se menor)
-  // As duas séries compartilham o mesmo eixo X (índice da movimentação na ordem cronológica)
-  const entradasPts = []; // { x, y, label, mov }
-  const saidasPts   = []; // { x, y, label, mov }
+  // ── 3. Separar em duas séries INDEPENDENTES com eixo X próprio ──
+  // Cada série só contém suas movimentações, na ordem cronológica.
+  // Isso evita o cruzamento causado por nulls + spanGaps no eixo compartilhado.
+  const entradasData = []; // { x: label, y: valor, mov }
+  const saidasData   = []; // { x: label, y: valor, mov }
 
-  movements.forEach((mov, i) => {
+  movements.forEach((mov) => {
     const [, mes, dia] = (mov.data || '2000-01-01').split('-');
-    const ponto = { x: i, y: mov.valor, label: `${dia}/${mes}`, mov };
-    if (mov.tipo === 'ganho') entradasPts.push(ponto);
-    else                      saidasPts.push(ponto);
+    const label = `${dia}/${mes}`;
+    if (mov.tipo === 'ganho') entradasData.push({ x: label, y: mov.valor, mov });
+    else                      saidasData.push(  { x: label, y: mov.valor, mov });
   });
 
-  // Montar arrays alinhados ao eixo X (todos os índices), preenchendo null onde não há dado
-  const totalPts   = movements.length;
-  const valEntradas = Array(totalPts).fill(null);
-  const valSaidas   = Array(totalPts).fill(null);
-  entradasPts.forEach(p => { valEntradas[p.x] = p.y; });
-  saidasPts.forEach(p   => { valSaidas[p.x]   = p.y; });
-
-  // ── 4. Renderizar duas linhas ──
-  const labels = movements.map((mov, i) => {
-    const [, mes, dia] = (mov.data || '2000-01-01').split('-');
-    return `${dia}/${mes}`;
-  });
-
+  // ── 4. Renderizar duas linhas com eixo X de categoria ──
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -227,42 +215,41 @@ function atualizarChart() {
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels,
       datasets: [
         {
           label: 'Entradas',
-          data: valEntradas,
+          data: entradasData.map(p => ({ x: p.x, y: p.y })),
           borderColor: '#22C55E',
           backgroundColor: gradE,
           borderWidth: 2.5,
           tension: 0,
-          fill: false,
-          spanGaps: true,
-          pointBackgroundColor: movements.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'),
-          pointBorderColor:     movements.map(m => m.tipo === 'ganho' ? '#22C55E' : 'transparent'),
-          pointRadius:          movements.map(m => m.tipo === 'ganho' ? 5 : 0),
-          pointHoverRadius:     movements.map(m => m.tipo === 'ganho' ? 8 : 0)
+          fill: true,
+          pointBackgroundColor: '#22C55E',
+          pointBorderColor:     '#22C55E',
+          pointRadius:          5,
+          pointHoverRadius:     8,
+          xAxisID: 'xE'
         },
         {
           label: 'Saídas',
-          data: valSaidas,
+          data: saidasData.map(p => ({ x: p.x, y: p.y })),
           borderColor: '#EF4444',
           backgroundColor: gradS,
           borderWidth: 2.5,
           tension: 0,
-          fill: false,
-          spanGaps: true,
-          pointBackgroundColor: movements.map(m => m.tipo === 'gasto' ? '#EF4444' : 'transparent'),
-          pointBorderColor:     movements.map(m => m.tipo === 'gasto' ? '#EF4444' : 'transparent'),
-          pointRadius:          movements.map(m => m.tipo === 'gasto' ? 5 : 0),
-          pointHoverRadius:     movements.map(m => m.tipo === 'gasto' ? 8 : 0)
+          fill: true,
+          pointBackgroundColor: '#EF4444',
+          pointBorderColor:     '#EF4444',
+          pointRadius:          5,
+          pointHoverRadius:     8,
+          xAxisID: 'xS'
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      interaction: { intersect: false, mode: 'index' },
+      interaction: { intersect: false, mode: 'nearest' },
       plugins: {
         legend: {
           display: true,
@@ -273,7 +260,6 @@ function atualizarChart() {
             font: { size: 11 },
             boxWidth: 12,
             boxHeight: 12,
-            borderRadius: 3,
             padding: 12,
             usePointStyle: true,
             pointStyle: 'line'
@@ -287,27 +273,32 @@ function atualizarChart() {
           bodyColor: '#fff',
           padding: 12,
           callbacks: {
-            title: items => {
-              const mov = movements[items[0].dataIndex];
-              if (!mov) return '';
-              const [ano, mes, dia] = (mov.data || '').split('-');
-              return `${dia}/${mes}/${ano}`;
-            },
+            title: items => items[0]?.label || '',
             label: c => {
-              const mov = movements[c.dataIndex];
-              if (!mov || c.raw === null) return '';
-              const nome  = mov.descricao || mov.categoria || (mov.tipo === 'ganho' ? 'Entrada' : 'Saída');
-              const sinal = mov.tipo === 'ganho' ? '+' : '-';
-              const ico   = mov.tipo === 'ganho' ? '🟢' : '🔴';
+              const isEntrada = c.datasetIndex === 0;
+              const arr = isEntrada ? entradasData : saidasData;
+              const p   = arr[c.dataIndex];
+              if (!p) return '';
+              const mov   = p.mov;
+              const nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saída');
+              const sinal = isEntrada ? '+' : '-';
+              const ico   = isEntrada ? '🟢' : '🔴';
               return ` ${ico} ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
             }
           }
         }
       },
       scales: {
-        x: {
+        xE: {
+          type: 'category',
+          position: 'bottom',
           grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 16 }
+          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }
+        },
+        xS: {
+          type: 'category',
+          position: 'bottom',
+          display: false   // oculto — mesma posição visual, sem duplicar labels
         },
         y: {
           grid: { color: 'rgba(255,255,255,0.04)' },
