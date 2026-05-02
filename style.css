@@ -1559,24 +1559,31 @@ select option { background: var(--surface-2); }
   z-index: 9999;
   transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  display: block;           /* bloco simples — sem flex */
+  overflow-y: auto;         /* o drawer INTEIRO scrola */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
   box-sizing: border-box;
   will-change: transform;
   isolation: isolate;
-  /* Safe area iOS — garante que o conteúdo não fique sob a notch */
   padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 24px);
 }
+.drawer::-webkit-scrollbar { display: none; }
 .drawer.open { transform: translateX(0); }
 
 .drawer-header {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   gap: 14px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
+  position: sticky;         /* header gruda no topo ao rolar */
+  top: 0;
+  background: var(--sidebar-bg);
+  z-index: 1;
 }
 .drawer-avatar {
   width: 48px; height: 48px;
@@ -1606,14 +1613,8 @@ select option { background: var(--surface-2); }
   cursor: pointer; padding: 6px; line-height: 1;
 }
 .drawer-nav {
-  flex: 1;
-  padding: 4px 0 0 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  min-height: 0;
-  overscroll-behavior: contain;
+  display: block;
+  padding: 6px 0;
 }
 .drawer-nav::-webkit-scrollbar { display: none; }
 .drawer-item {

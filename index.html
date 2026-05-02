@@ -1783,8 +1783,8 @@
       syncDrawerThemeIcon();
       // Reseta scroll ao topo — rAF garante que ocorre após render
       requestAnimationFrame(function() {
-        const nav = document.querySelector('.drawer-nav');
-        if (nav) nav.scrollTop = 0;
+        const drawer = document.getElementById('drawer');
+        if (drawer) drawer.scrollTop = 0;
       });
     };
     // Sincronizar no carregamento
