@@ -777,7 +777,7 @@
 
             <div style="margin-bottom:12px">
               <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Vencimento</label>
-              <input type="date" id="conta-vencimento" data-no-ios-picker style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+              <input type="date" id="conta-vencimento" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
             </div>
 
             <div style="margin-bottom:12px">
@@ -1911,7 +1911,6 @@
     </div>
     <div class="ios-picker-drums" id="ios-picker-drums">
       <div class="ios-picker-highlight"></div>
-      <!-- drums injected by JS -->
     </div>
   </div>
 </div>
@@ -1920,59 +1919,42 @@
 (function(){
   'use strict';
 
-  const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const MONTHS_PT    = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const MONTHS_SHORT = ['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
 
-  let pickerMode   = 'date';  // 'date' or 'month'
-  let pickerTarget = null;    // the hidden <input>
-  let pickerTrigger= null;    // the visible button
-  let onPickerChange = null;
+  const CAL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
 
-  // Drum state
+  let pickerMode    = 'date';
+  let pickerTarget  = null;
+  let pickerTrigger = null;
+  let onPickerChange = null;
   let dayDrum, monthDrum, yearDrum;
   let selDay, selMonth, selYear;
 
-  /* ---- Build drums ---- */
   function buildDrum(items, selectedIndex, flex) {
     const col = document.createElement('div');
     col.className = 'ios-drum';
     col.style.flex = flex || '1';
     const inner = document.createElement('div');
     inner.className = 'ios-drum-inner';
-    // padding items top/bottom (2 blanks each side)
     const pad = 2;
-    for (let i = 0; i < pad; i++) {
-      const blank = document.createElement('div');
-      blank.className = 'ios-drum-item';
-      inner.appendChild(blank);
-    }
+    for (let i = 0; i < pad; i++) { const b = document.createElement('div'); b.className='ios-drum-item'; inner.appendChild(b); }
     items.forEach((label, i) => {
       const item = document.createElement('div');
       item.className = 'ios-drum-item' + (i === selectedIndex ? ' selected' : '');
       item.textContent = label;
       inner.appendChild(item);
     });
-    for (let i = 0; i < pad; i++) {
-      const blank = document.createElement('div');
-      blank.className = 'ios-drum-item';
-      inner.appendChild(blank);
-    }
+    for (let i = 0; i < pad; i++) { const b = document.createElement('div'); b.className='ios-drum-item'; inner.appendChild(b); }
     col.appendChild(inner);
-    // Set initial scroll position
     inner.style.transform = `translateY(${-selectedIndex * 44}px)`;
     attachDrumEvents(col, inner, items.length, selectedIndex);
     return col;
   }
 
   function attachDrumEvents(col, inner, count, initialIndex) {
-    let curIdx = initialIndex;
-    let startY = 0, startTranslate = 0, isDragging = false, velocity = 0, lastY = 0, lastT = 0;
-
-    function getTranslate() {
-      const m = new DOMMatrix(getComputedStyle(inner).transform);
-      return m.m42;
-    }
-
+    let curIdx = initialIndex, startY = 0, startTranslate = 0, isDragging = false, velocity = 0, lastY = 0, lastT = 0;
+    function getTranslate() { return new DOMMatrix(getComputedStyle(inner).transform).m42; }
     function snapTo(idx) {
       idx = Math.max(0, Math.min(count - 1, idx));
       curIdx = idx;
@@ -1981,282 +1963,154 @@
       updateSelected(inner, idx);
       col.dataset.index = idx;
     }
-
-    function onStart(y) {
-      isDragging = true;
-      startY = y;
-      startTranslate = getTranslate();
-      lastY = y; lastT = Date.now();
-      velocity = 0;
-      inner.style.transition = 'none';
-    }
-
+    function onStart(y) { isDragging=true; startY=y; startTranslate=getTranslate(); lastY=y; lastT=Date.now(); velocity=0; inner.style.transition='none'; }
     function onMove(y) {
       if (!isDragging) return;
-      const now = Date.now(); const dt = now - lastT;
-      if (dt > 0) velocity = (y - lastY) / dt;
-      lastY = y; lastT = now;
-      const delta = y - startY;
-      let newT = startTranslate + delta;
-      newT = Math.max(-(count - 1) * 44, Math.min(0, newT));
+      const now=Date.now(), dt=now-lastT;
+      if (dt>0) velocity=(y-lastY)/dt;
+      lastY=y; lastT=now;
+      let newT = Math.max(-(count-1)*44, Math.min(0, startTranslate+(y-startY)));
       inner.style.transform = `translateY(${newT}px)`;
     }
-
-    function onEnd() {
-      if (!isDragging) return;
-      isDragging = false;
-      const currentT = getTranslate();
-      let targetIdx = Math.round(-currentT / 44 - velocity * 80 / 44);
-      snapTo(targetIdx);
-    }
-
-    col.addEventListener('touchstart', e => { e.preventDefault(); onStart(e.touches[0].clientY); }, { passive: false });
-    col.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0].clientY); },  { passive: false });
-    col.addEventListener('touchend',   () => onEnd());
-    col.addEventListener('mousedown',  e => { onStart(e.clientY); });
-    window.addEventListener('mousemove', e => { if(isDragging) onMove(e.clientY); });
-    window.addEventListener('mouseup',   () => { if(isDragging) onEnd(); });
-
-    // Wheel support
-    col.addEventListener('wheel', e => {
-      e.preventDefault();
-      const dir = e.deltaY > 0 ? 1 : -1;
-      snapTo(curIdx + dir);
-    }, { passive: false });
-
+    function onEnd() { if (!isDragging) return; isDragging=false; snapTo(Math.round(-getTranslate()/44 - velocity*80/44)); }
+    col.addEventListener('touchstart', e=>{e.preventDefault();onStart(e.touches[0].clientY);},{passive:false});
+    col.addEventListener('touchmove',  e=>{e.preventDefault();onMove(e.touches[0].clientY);}, {passive:false});
+    col.addEventListener('touchend',   ()=>onEnd());
+    col.addEventListener('mousedown',  e=>onStart(e.clientY));
+    window.addEventListener('mousemove', e=>{if(isDragging)onMove(e.clientY);});
+    window.addEventListener('mouseup',   ()=>{if(isDragging)onEnd();});
+    col.addEventListener('wheel', e=>{e.preventDefault();snapTo(curIdx+(e.deltaY>0?1:-1));},{passive:false});
     col.dataset.index = curIdx;
   }
 
   function updateSelected(inner, idx) {
-    const items = inner.querySelectorAll('.ios-drum-item');
-    items.forEach((item, i) => {
-      item.classList.toggle('selected', i - 2 === idx); // -2 for padding
-    });
+    inner.querySelectorAll('.ios-drum-item').forEach((item,i)=>item.classList.toggle('selected', i-2===idx));
   }
 
-  /* ---- Open picker ---- */
   function openPicker(mode, triggerEl, inputEl, changeCallback) {
-    pickerMode    = mode;
-    pickerTrigger = triggerEl;
-    pickerTarget  = inputEl;
-    onPickerChange= changeCallback;
-
-    const title = document.getElementById('ios-picker-title');
-    title.textContent = mode === 'month' ? 'Selecionar mês' : 'Selecionar data';
-
-    // Parse current value
-    const val = inputEl.value;
-    const now = new Date();
-    if (mode === 'month') {
-      const parts = val ? val.split('-') : null;
-      selYear  = parts ? parseInt(parts[0]) : now.getFullYear();
-      selMonth = parts ? parseInt(parts[1]) - 1 : now.getMonth();
+    pickerMode=mode; pickerTrigger=triggerEl; pickerTarget=inputEl; onPickerChange=changeCallback;
+    document.getElementById('ios-picker-title').textContent = mode==='month' ? 'Selecionar mês' : 'Selecionar data';
+    const val=inputEl.value, now=new Date();
+    if (mode==='month') {
+      const p=val?val.split('-'):null; selYear=p?parseInt(p[0]):now.getFullYear(); selMonth=p?parseInt(p[1])-1:now.getMonth();
     } else {
-      const parts = val ? val.split('-') : null;
-      selYear  = parts ? parseInt(parts[0]) : now.getFullYear();
-      selMonth = parts ? parseInt(parts[1]) - 1 : now.getMonth();
-      selDay   = parts ? parseInt(parts[2]) : now.getDate();
+      const p=val?val.split('-'):null; selYear=p?parseInt(p[0]):now.getFullYear(); selMonth=p?parseInt(p[1])-1:now.getMonth(); selDay=p?parseInt(p[2]):now.getDate();
     }
-
     buildDrums(mode);
-
-    const backdrop = document.getElementById('ios-picker-backdrop');
-    backdrop.classList.add('active');
+    document.getElementById('ios-picker-backdrop').classList.add('active');
   }
 
   function buildDrums(mode) {
     const container = document.getElementById('ios-picker-drums');
-    // Remove old drums (keep highlight)
-    Array.from(container.children).forEach(c => {
-      if (!c.classList.contains('ios-picker-highlight')) c.remove();
-    });
-
-    const yearRange = 20;
-    const baseYear  = new Date().getFullYear();
-    const years     = [];
-    for (let y = baseYear - yearRange; y <= baseYear + yearRange; y++) years.push(String(y));
-
-    if (mode === 'month') {
-      monthDrum = buildDrum(MONTHS_PT, selMonth, '2');
-      yearDrum  = buildDrum(years, years.indexOf(String(selYear)), '1.2');
-      container.appendChild(monthDrum);
-      container.appendChild(yearDrum);
+    Array.from(container.children).forEach(c=>{if(!c.classList.contains('ios-picker-highlight'))c.remove();});
+    const baseYear=new Date().getFullYear(), years=[];
+    for (let y=baseYear-20; y<=baseYear+20; y++) years.push(String(y));
+    if (mode==='month') {
+      monthDrum=buildDrum(MONTHS_PT, selMonth, '2');
+      yearDrum =buildDrum(years, years.indexOf(String(selYear)), '1.2');
+      container.appendChild(monthDrum); container.appendChild(yearDrum);
     } else {
-      const daysInMonth = new Date(selYear, selMonth + 1, 0).getDate();
-      const days = [];
-      for (let d = 1; d <= daysInMonth; d++) days.push(String(d).padStart(2,'0'));
-
-      dayDrum   = buildDrum(days, selDay - 1, '0.8');
-      monthDrum = buildDrum(MONTHS_PT.map((m,i) => m), selMonth, '1.6');
-      yearDrum  = buildDrum(years, years.indexOf(String(selYear)), '1');
-
-      // Separator
-      const sep = document.createElement('div');
-      sep.className = 'ios-drum-sep';
-      sep.textContent = 'de';
-
-      const sep2 = document.createElement('div');
-      sep2.className = 'ios-drum-sep';
-      sep2.textContent = 'de';
-
-      container.appendChild(dayDrum);
-      container.appendChild(sep);
-      container.appendChild(monthDrum);
-      container.appendChild(sep2);
-      container.appendChild(yearDrum);
+      const daysInMonth=new Date(selYear,selMonth+1,0).getDate(), days=[];
+      for (let d=1;d<=daysInMonth;d++) days.push(String(d).padStart(2,'0'));
+      dayDrum  =buildDrum(days, selDay-1, '0.8');
+      monthDrum=buildDrum(MONTHS_PT, selMonth, '1.6');
+      yearDrum =buildDrum(years, years.indexOf(String(selYear)), '1');
+      const sep1=document.createElement('div'); sep1.className='ios-drum-sep'; sep1.textContent='de';
+      const sep2=document.createElement('div'); sep2.className='ios-drum-sep'; sep2.textContent='de';
+      container.appendChild(dayDrum); container.appendChild(sep1); container.appendChild(monthDrum); container.appendChild(sep2); container.appendChild(yearDrum);
     }
   }
 
   function getSelected() {
-    const yearRange = 20;
-    const baseYear  = new Date().getFullYear();
-    const years = [];
-    for (let y = baseYear - yearRange; y <= baseYear + yearRange; y++) years.push(y);
-
-    const yIdx = parseInt(yearDrum.dataset.index || 0);
-    const mIdx = parseInt(monthDrum.dataset.index || 0);
-    const year  = years[yIdx] || new Date().getFullYear();
-    const month = mIdx; // 0-based
-
-    if (pickerMode === 'month') {
-      return { year, month, day: 1 };
-    } else {
-      const dIdx = parseInt(dayDrum.dataset.index || 0);
-      const day  = dIdx + 1;
-      return { year, month, day };
-    }
+    const baseYear=new Date().getFullYear(), years=[];
+    for (let y=baseYear-20; y<=baseYear+20; y++) years.push(y);
+    const year=years[parseInt(yearDrum.dataset.index||0)]||new Date().getFullYear();
+    const month=parseInt(monthDrum.dataset.index||0);
+    const day=pickerMode==='month'?1:parseInt(dayDrum.dataset.index||0)+1;
+    return {year,month,day};
   }
 
-  function formatDisplay(year, month, day, mode) {
-    if (mode === 'month') {
-      return `${MONTHS_PT[month]} de ${year}`;
-    } else {
-      return `${String(day).padStart(2,'0')} de ${MONTHS_SHORT[month]} de ${year}`;
-    }
+  function formatDisplay(year,month,day,mode) {
+    return mode==='month' ? `${MONTHS_PT[month]} de ${year}` : `${String(day).padStart(2,'0')} de ${MONTHS_SHORT[month]} de ${year}`;
+  }
+  function formatValue(year,month,day,mode) {
+    const mm=String(month+1).padStart(2,'0'), dd=String(day).padStart(2,'0');
+    return mode==='month' ? `${year}-${mm}` : `${year}-${mm}-${dd}`;
   }
 
-  function formatValue(year, month, day, mode) {
-    const mm = String(month + 1).padStart(2,'0');
-    const dd = String(day).padStart(2,'0');
-    if (mode === 'month') return `${year}-${mm}`;
-    return `${year}-${mm}-${dd}`;
-  }
-
-  /* ---- Confirm / Cancel ---- */
-  document.getElementById('ios-picker-ok').addEventListener('click', () => {
-    const { year, month, day } = getSelected();
-    const val = formatValue(year, month, day, pickerMode);
-    const display = formatDisplay(year, month, day, pickerMode);
-
-    if (pickerTarget) pickerTarget.value = val;
+  document.getElementById('ios-picker-ok').addEventListener('click', ()=>{
+    const {year,month,day}=getSelected();
+    const val=formatValue(year,month,day,pickerMode);
+    if (pickerTarget) pickerTarget.value=val;
     if (pickerTrigger) {
-      const span = pickerTrigger.querySelector('.ios-dt-text');
-      if (span) span.textContent = display;
-      pickerTrigger.classList.remove('ios-dt-empty');
+      const span=pickerTrigger.querySelector('.ios-dt-text');
+      if (span) { span.textContent=formatDisplay(year,month,day,pickerMode); span.classList.remove('ios-dt-placeholder'); }
     }
     document.getElementById('ios-picker-backdrop').classList.remove('active');
     if (onPickerChange) onPickerChange(val);
+    if (pickerTarget) pickerTarget.dispatchEvent(new Event('change',{bubbles:true}));
   });
-
-  document.getElementById('ios-picker-cancel').addEventListener('click', () => {
+  document.getElementById('ios-picker-cancel').addEventListener('click', ()=>{
     document.getElementById('ios-picker-backdrop').classList.remove('active');
   });
-  document.getElementById('ios-picker-backdrop').addEventListener('click', e => {
-    if (e.target === e.currentTarget)
-      document.getElementById('ios-picker-backdrop').classList.remove('active');
+  document.getElementById('ios-picker-backdrop').addEventListener('click', e=>{
+    if (e.target===e.currentTarget) document.getElementById('ios-picker-backdrop').classList.remove('active');
   });
 
-  /* ---- Replace all date inputs ---- */
   function replaceDateInput(input, mode) {
-    const placeholder = input.placeholder || (mode === 'month' ? 'Selecionar mês' : 'Selecionar data');
-    const currentVal  = input.value;
-
-    // Hide the original input but keep it in DOM for value reading
+    const placeholder = mode==='month' ? 'Selecionar mês' : 'Selecionar data';
     input.style.display = 'none';
-
     const trigger = document.createElement('button');
     trigger.type = 'button';
     trigger.className = 'ios-date-trigger';
-
     const textSpan = document.createElement('span');
     textSpan.className = 'ios-dt-text';
-
-    if (currentVal) {
-      if (mode === 'month') {
-        const [y, m] = currentVal.split('-');
-        textSpan.textContent = formatDisplay(parseInt(y), parseInt(m)-1, 1, 'month');
-      } else {
-        const [y, m, d] = currentVal.split('-');
-        textSpan.textContent = formatDisplay(parseInt(y), parseInt(m)-1, parseInt(d), 'date');
-      }
+    const val = input.value;
+    if (val) {
+      if (mode==='month') { const [y,m]=val.split('-'); textSpan.textContent=formatDisplay(parseInt(y),parseInt(m)-1,1,'month'); }
+      else { const [y,m,d]=val.split('-'); textSpan.textContent=formatDisplay(parseInt(y),parseInt(m)-1,parseInt(d),'date'); }
     } else {
       textSpan.textContent = placeholder;
       textSpan.classList.add('ios-dt-placeholder');
     }
-
     const icon = document.createElement('span');
     icon.className = 'ios-dt-icon';
-    icon.textContent = '📅';
-
+    icon.innerHTML = CAL_SVG;
     trigger.appendChild(textSpan);
     trigger.appendChild(icon);
     input.parentNode.insertBefore(trigger, input.nextSibling);
-
-    // Sync trigger display when input value changes programmatically
-    const origDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-    const observer = new MutationObserver(() => {});
-    // Use a polling approach for programmatic changes
+    // Sync when value changed programmatically
     let lastVal = input.value;
-    setInterval(() => {
-      if (input.value !== lastVal) {
-        lastVal = input.value;
+    setInterval(()=>{
+      if (input.value!==lastVal) {
+        lastVal=input.value;
         if (input.value) {
-          if (mode === 'month') {
-            const [y, m] = input.value.split('-');
-            textSpan.textContent = formatDisplay(parseInt(y), parseInt(m)-1, 1, 'month');
-          } else {
-            const [y, m, d] = input.value.split('-');
-            textSpan.textContent = formatDisplay(parseInt(y), parseInt(m)-1, parseInt(d), 'date');
-          }
+          if (mode==='month') { const [y,m]=input.value.split('-'); textSpan.textContent=formatDisplay(parseInt(y),parseInt(m)-1,1,'month'); }
+          else { const [y,m,d]=input.value.split('-'); textSpan.textContent=formatDisplay(parseInt(y),parseInt(m)-1,parseInt(d),'date'); }
           textSpan.classList.remove('ios-dt-placeholder');
         } else {
-          textSpan.textContent = placeholder;
-          textSpan.classList.add('ios-dt-placeholder');
+          textSpan.textContent=placeholder; textSpan.classList.add('ios-dt-placeholder');
         }
       }
     }, 300);
-
-    trigger.addEventListener('click', () => {
-      openPicker(mode, trigger, input, (val) => {
-        // Dispatch change event so existing handlers fire
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-        textSpan.classList.remove('ios-dt-placeholder');
-      });
+    trigger.addEventListener('click', ()=>{
+      openPicker(mode, trigger, input, ()=>{ textSpan.classList.remove('ios-dt-placeholder'); });
     });
-
     return trigger;
   }
 
-  // Replace all inputs on DOM ready
   function initPickers() {
-    document.querySelectorAll('input[type="date"]:not([data-no-ios-picker])').forEach(input => {
-      replaceDateInput(input, 'date');
-    });
-    document.querySelectorAll('input[type="month"]:not([data-no-ios-picker])').forEach(input => {
-      replaceDateInput(input, 'month');
-    });
+    document.querySelectorAll('input[type="date"]:not([data-no-ios-picker])').forEach(input=>replaceDateInput(input,'date'));
+    document.querySelectorAll('input[type="month"]:not([data-no-ios-picker])').forEach(input=>replaceDateInput(input,'month'));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPickers);
-  } else {
-    initPickers();
-  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', initPickers);
+  else initPickers();
 
-  // Expose for dynamically added inputs
   window.iosDatePicker = { open: openPicker, replace: replaceDateInput };
 })();
 </script>
 
 </body>
 </html>
+

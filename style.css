@@ -3361,6 +3361,7 @@ html, body {
   }
 }
 
+
 /* ==============================
    IOS-STYLE DATE PICKER
    ============================== */
@@ -3369,7 +3370,7 @@ html, body {
   background: var(--input-bg, rgba(255,255,255,0.06));
   border: 1px solid var(--border, rgba(255,255,255,0.08));
   border-radius: 10px;
-  padding: 10px 36px 10px 12px;
+  padding: 10px 12px;
   color: var(--white);
   font-size: .9rem;
   outline: none;
@@ -3377,7 +3378,6 @@ html, body {
   text-align: left;
   font-family: inherit;
   box-sizing: border-box;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3385,39 +3385,33 @@ html, body {
   min-height: 44px;
 }
 .ios-date-trigger:hover { border-color: rgba(34,197,94,0.4); }
-.ios-date-trigger .ios-dt-placeholder { color: var(--gray, #64748b); }
-.ios-date-trigger .ios-dt-icon {
-  color: #22c55e;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
+.ios-dt-placeholder { color: var(--gray, #64748b); }
+.ios-dt-icon { display:flex; align-items:center; flex-shrink:0; }
 
-/* Overlay backdrop */
 .ios-picker-backdrop {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   z-index: 9000;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  padding: 16px;
 }
 .ios-picker-backdrop.active { display: flex; }
 
-/* Bottom sheet */
 .ios-picker-sheet {
   background: #1e2535;
-  border-radius: 20px 20px 0 0;
+  border-radius: 20px;
   width: 100%;
-  max-width: 480px;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
+  max-width: 420px;
+  padding-bottom: 16px;
   animation: iosPickerSlideUp .28s cubic-bezier(.32,1,.45,1);
 }
 @keyframes iosPickerSlideUp {
-  from { transform: translateY(100%); opacity: 0; }
+  from { transform: translateY(40px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
 .ios-picker-header {
   display: flex;
   justify-content: space-between;
@@ -3425,31 +3419,19 @@ html, body {
   padding: 14px 20px 10px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
-.ios-picker-header button {
-  background: none;
-  border: none;
-  font-size: .95rem;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 4px 8px;
-}
+.ios-picker-header button { background:none; border:none; font-size:.95rem; font-family:inherit; font-weight:600; cursor:pointer; padding:4px 8px; }
 .ios-picker-btn-cancel { color: #94a3b8; }
 .ios-picker-btn-ok     { color: #22c55e; }
-.ios-picker-title      { color: var(--white); font-size: .9rem; font-weight: 600; }
+.ios-picker-title      { color: var(--white); font-size:.9rem; font-weight:600; }
 
-/* Drum wrapper */
 .ios-picker-drums {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0;
   padding: 8px 16px 12px;
   position: relative;
   user-select: none;
 }
-
-/* Selection highlight bar */
 .ios-picker-drums::before,
 .ios-picker-drums::after {
   content: '';
@@ -3461,7 +3443,6 @@ html, body {
 }
 .ios-picker-drums::before { top: calc(8px + 44px * 2); }
 .ios-picker-drums::after  { top: calc(8px + 44px * 3); }
-
 .ios-picker-highlight {
   position: absolute;
   left: 16px; right: 16px;
@@ -3471,8 +3452,6 @@ html, body {
   border-radius: 10px;
   pointer-events: none;
 }
-
-/* Each drum column */
 .ios-drum {
   flex: 1;
   height: 220px;
@@ -3481,32 +3460,16 @@ html, body {
   mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
 }
-.ios-drum-inner {
-  display: flex;
-  flex-direction: column;
-  transition: transform .15s cubic-bezier(.25,.46,.45,.94);
-  will-change: transform;
-}
-.ios-drum-item {
-  height: 44px;
+.ios-drum-inner { display:flex; flex-direction:column; will-change:transform; }
+.ios-drum-item { height:44px; display:flex; align-items:center; justify-content:center; font-size:1.05rem; color:var(--white); font-family:inherit; flex-shrink:0; }
+.ios-drum-item.selected { color:#fff; font-weight:700; }
+.ios-drum-sep {
+  width: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.05rem;
-  color: var(--white);
-  font-family: inherit;
-  flex-shrink: 0;
-  transition: color .1s, font-weight .1s;
-}
-.ios-drum-item.selected {
-  color: #fff;
-  font-weight: 700;
-}
-.ios-drum-sep {
-  width: 20px;
-  text-align: center;
+  height: 220px;
   color: #64748b;
-  font-size: 1rem;
-  flex-shrink: 0;
-  padding-top: 88px; /* align to center row */
+  font-size: .85rem;
 }
