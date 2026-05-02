@@ -170,19 +170,21 @@ function atualizarChart() {
   const gR = ctx.createLinearGradient(0,0,0,180); gR.addColorStop(0,'rgba(239,68,68,0.18)'); gR.addColorStop(1,'rgba(239,68,68,0)');
 
   // Filtra movimentações conforme o modo
+  // movimentacoes já vem do Firestore ordenado por (data desc, criadoEm desc) — mais recente primeiro.
+  // Filtramos mantendo essa ordem, depois invertemos para o gráfico (mais antigo→esquerda).
   let movsFiltradas;
   if (fluxoModo === 'recentes') {
     const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
-    movsFiltradas = [...movimentacoes].filter(m => m.data && new Date(m.data) >= corte);
+    movsFiltradas = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
   } else {
     const corte = new Date(); corte.setDate(corte.getDate() - 29); corte.setHours(0,0,0,0);
-    movsFiltradas = [...movimentacoes].filter(m => m.data && new Date(m.data) >= corte);
+    movsFiltradas = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
     if (movsFiltradas.length === 0)
-      movsFiltradas = [...movimentacoes].filter(m => m.data);
+      movsFiltradas = [...movimentacoes];
   }
 
-  // Ordena do mais antigo para o mais recente (progressão esquerda→direita)
-  const movsOrdenadas = sortMaisAntigo(movsFiltradas);
+  // Inverte a ordem do Firestore (newest-first → oldest-first) para o gráfico crescer da esquerda
+  const movsOrdenadas = [...movsFiltradas].reverse();
 
   if (movsOrdenadas.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
@@ -360,7 +362,7 @@ function movsFiltradas() {
 function atualizarListaInicio() {
   const lista = document.getElementById('lista-inicio');
   if (movimentacoes.length===0) { lista.innerHTML='<div class="vazio">Nenhuma movimentação ainda. Comece registrando!</div>'; return; }
-  lista.innerHTML = sortMaisRecente(movimentacoes).slice(0,8).map(m=>`
+  lista.innerHTML = movimentacoes.slice(0,8).map(m=>`
     <div class="mov-item">
       <div class="mov-left">
         <div class="mov-dot ${m.tipo==='ganho'?'g':'r'}"></div>
@@ -1228,7 +1230,7 @@ function _renderBuscaResultados(termo, header, lista) {
       (m.tipo === 'gasto' && 'saída'.includes(q)) ||
       (m.data && fmtData(m.data).includes(q))
     );
-  }).sort((a, b) => getTsMs(b) - getTsMs(a));
+  });
 
   header.textContent = resultados.length === 0
     ? 'Nenhum resultado para "' + termo + '"'
@@ -2079,7 +2081,7 @@ function atualizarTelaCategorias() {
     tbody.innerHTML = '<tr><td colspan="6" class="vazio">Nenhuma movimentação no período.</td></tr>';
     return;
   }
-  tbody.innerHTML = sortMaisRecente(lista).map(m => {
+  tbody.innerHTML = lista.map(m => {
     const idx = movimentacoes.indexOf(m);
     return `<tr>
       <td>${m.descricao}${m.recorrente ? ' <span style="font-size:.7rem;background:rgba(57,255,121,0.15);color:var(--primary);padding:1px 6px;border-radius:4px">recorrente</span>' : ''}</td>
