@@ -1840,8 +1840,9 @@ function salvarPerfilVida() {
   if (currentUser) {
     fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar perfil de vida no Firebase:', e));
   }
+  if (typeof mostrarToastPerfil === 'function') mostrarToastPerfil('Salvo com sucesso!');
   const suc = document.getElementById('vida-sucesso');
-  if (suc) { suc.style.display = 'block'; setTimeout(() => suc.style.display = 'none', 2000); }
+  if (suc) suc.style.display = 'none';
 }
 
 function salvarPerfilFinancas() {
@@ -1851,8 +1852,9 @@ function salvarPerfilFinancas() {
   if (currentUser) {
     fbSalvarPerfilVida(currentUser.uid, perfil).catch(e => console.error('Erro ao salvar finanças no Firebase:', e));
   }
+  if (typeof mostrarToastPerfil === 'function') mostrarToastPerfil('Salvo com sucesso!');
   const suc = document.getElementById('financas-sucesso');
-  if (suc) { suc.style.display = 'block'; setTimeout(() => suc.style.display = 'none', 2000); }
+  if (suc) suc.style.display = 'none';
 }
 
 // Inicializar dívidas ao carregar
