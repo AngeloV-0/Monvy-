@@ -88,7 +88,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body { overflow-x: hidden; }
+html, body { overflow-x: clip; }
 
 body {
   background: var(--bg);
@@ -96,7 +96,8 @@ body {
   font-family: var(--font-body);
   display: flex;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* NÃO usar overflow-x:hidden no body — cria containing block para position:fixed
+     em Chrome/Safari mobile, deslocando o drawer. Usar overflow-x:clip no lugar. */
 }
 
 /* ==============================
@@ -1193,7 +1194,7 @@ select option { background: var(--surface-2); }
   :root { --sidebar-w: 0px; --topbar-h: 60px; }
 
   .sidebar { display: none !important; }
-  .main-wrapper { margin-left: 0 !important; width: 100vw; max-width: 100vw; overflow-x: hidden; }
+  .main-wrapper { margin-left: 0 !important; width: 100vw; max-width: 100vw; overflow-x: clip; }
 
   .topbar {
     padding: 0 12px;
@@ -1530,12 +1531,17 @@ select option { background: var(--surface-2); }
 /* ==============================
    DRAWER (menu lateral mobile)
    ============================== */
+/* ==============================
+   DRAWER (menu lateral mobile)
+   overflow-x:clip no html/body (não hidden) garante que position:fixed
+   seja sempre relativo à viewport, nunca ao body/containing block.
+   ============================== */
 .drawer-overlay {
   display: none;
   position: fixed;
-  inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.55);
-  z-index: 1998;
+  z-index: 9998;
   opacity: 0;
   transition: opacity 0.28s;
 }
@@ -1543,17 +1549,23 @@ select option { background: var(--surface-2); }
 
 .drawer {
   position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: 280px;
-  max-width: 85vw;
+  top: 0;
+  left: 0;
+  width: 300px;
+  max-width: 100vw;
+  height: 100%;
+  height: 100dvh;
   background: var(--sidebar-bg);
-  z-index: 1999;
+  z-index: 9999;
   transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(.4,0,.2,1);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  will-change: transform;
+  isolation: isolate;
 }
 .drawer.open { transform: translateX(0); }
 
@@ -2155,10 +2167,9 @@ html, body {
     width: 100% !important;
   }
 
-  /* Drawer não vaza */
-  .drawer {
-    overflow-x: hidden !important;
-  }
+  /* Drawer: reforço mobile (regras base já cobrem, mas !important garante) */
+  .drawer-overlay { z-index: 9998 !important; }
+  .drawer { z-index: 9999 !important; overflow-x: hidden !important; }
 }
 
 /* ==============================
