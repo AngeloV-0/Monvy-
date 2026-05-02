@@ -313,6 +313,7 @@ function atualizarChart() {
           }
         },
         y: {
+          grace: "15%",
           grid: { color: 'rgba(255,255,255,0.04)' },
           ticks: { color: '#64748B', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) }
         }
