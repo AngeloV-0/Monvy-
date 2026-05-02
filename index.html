@@ -1245,9 +1245,9 @@
 
         <!-- Campos hidden para compatibilidade com o JS existente -->
         <input type="text" id="perfil-nome-input" style="display:none" maxlength="30">
-        <select id="perfil-nasc-dia" style="display:none" onchange="atualizarIdade()"></select>
-        <select id="perfil-nasc-mes" style="display:none" onchange="atualizarIdade()"></select>
-        <select id="perfil-nasc-ano" style="display:none" onchange="atualizarIdade()"></select>
+        <input type="hidden" id="perfil-nasc-dia">
+        <input type="hidden" id="perfil-nasc-mes">
+        <input type="hidden" id="perfil-nasc-ano">
         <div id="perfil-idade-row" style="display:none"><div id="perfil-idade-display"></div></div>
 
         <div id="perfil-sucesso" style="display:none;text-align:center;margin-top:16px;font-size:.82rem;color:var(--primary)">✓ Perfil atualizado!</div>
@@ -1611,7 +1611,10 @@
         const nascDisp = document.getElementById('perfil-nasc-display');
         if (nascDisp && dia && mes && ano) nascDisp.textContent = parseInt(dia) + ' de ' + mesesNome[parseInt(mes)] + ' de ' + ano;
         else if (nascDisp) nascDisp.textContent = 'Adicionar data';
+        fecharEditarCampo();
         salvarPerfil();
+        document.getElementById('perfil-sucesso').style.display = 'block';
+        setTimeout(()=>document.getElementById('perfil-sucesso').style.display='none', 2000);
       } else if (_campoAtual === 'telefone') {
         const val = document.getElementById('edit-tel').value.trim();
         localStorage.setItem('monvy_telefone', val);
