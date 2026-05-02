@@ -260,14 +260,7 @@ function atualizarChart() {
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: {
-          display: true,
-          position: 'top',
-          align: 'end',
-          labels: {
-            color: '#94A3B8',
-            font: { size: 11 },
-            padding: 12,
-          }
+          display: false,
         },
         tooltip: {
           backgroundColor: '#1A2235',
