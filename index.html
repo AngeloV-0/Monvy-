@@ -1821,10 +1821,8 @@
     }, { passive: true });
 
     // Detecta overflow ao carregar
-    if (window.innerWidth <= 768) {
-      document.documentElement.style.overflowX = 'hidden';
-      document.body.style.overflowX = 'hidden';
-    }
+    // REMOVIDO: overflowX:'hidden' no html/body quebra position:fixed no mobile
+    // A contenção horizontal é feita via overflow-x:clip no CSS
   </script>
 
   <script>

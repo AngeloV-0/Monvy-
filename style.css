@@ -2000,12 +2000,10 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
    FIX OVERFLOW HORIZONTAL MOBILE
    ============================== */
 @media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-  }
+  /* NÃO aplicar overflow-x:hidden no html/body — quebra position:fixed no mobile.
+     Usar overflow-x:clip apenas nos containers internos. */
   .main-wrapper {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     max-width: 100vw !important;
     width: 100vw !important;
   }
@@ -2030,11 +2028,8 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
    FIX MOBILE - OVERFLOW + TOPBAR
    ============================== */
 
-/* Bloqueia scroll lateral em toda a página */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100% !important;
-}
+/* NÃO aplicar overflow-x:hidden no html/body — quebra position:fixed (drawer) no mobile.
+   A contenção horizontal é feita via overflow-x:clip no CSS base. */
 
 @media (max-width: 768px) {
 
