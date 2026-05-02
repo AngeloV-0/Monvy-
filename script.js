@@ -166,7 +166,7 @@ function atualizarChart() {
   canvas.style.display = 'block'; emptyEl.style.display = 'none';
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-  // ── 1. Filtrar por período (mantém a ordem do Firestore: mais recente primeiro) ──
+  // 1. Filtrar por periodo
   let pool;
   if (fluxoModo === 'recentes') {
     const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
@@ -178,32 +178,37 @@ function atualizarChart() {
   }
   if (pool.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
-  // ── 2. Inverter → mais antigo primeiro (ordem cronológica real) ──
+  // 2. Mais antigo primeiro (esquerda para direita)
   const movements = [...pool].reverse();
 
   if (subEl) {
-    const lbl = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
-    subEl.textContent = `${lbl} (${movements.length} ${movements.length === 1 ? 'movimentação' : 'movimentações'})`;
+    const lbl = fluxoModo === 'recentes' ? 'Ultimos 8 dias' : 'Ultimos 30 dias';
+    subEl.textContent = lbl + ' (' + movements.length + ' ' + (movements.length === 1 ? 'movimentacao' : 'movimentacoes') + ')';
   }
 
-  // ── 3. Separar em duas séries INDEPENDENTES com eixo X próprio ──
-  // Cada série só contém suas movimentações, na ordem cronológica.
-  // Isso evita o cruzamento causado por nulls + spanGaps no eixo compartilhado.
-  const entradasData = []; // { x: label, y: valor, mov }
-  const saidasData   = []; // { x: label, y: valor, mov }
+  // 3. Um eixo X compartilhado. Cada linha tem o valor no seu indice, null nos outros.
+  //    spanGaps conecta apenas os pontos proprios de cada linha — sem cruzamento.
+  const labels      = [];
+  const valEntradas = [];
+  const valSaidas   = [];
 
   movements.forEach((mov) => {
-    const [, mes, dia] = (mov.data || '2000-01-01').split('-');
-    const label = `${dia}/${mes}`;
-    if (mov.tipo === 'ganho') entradasData.push({ x: label, y: mov.valor, mov });
-    else                      saidasData.push(  { x: label, y: mov.valor, mov });
+    const parts = (mov.data || '2000-01-01').split('-');
+    const dia = parts[2]; const mes = parts[1];
+    labels.push(dia + '/' + mes);
+    if (mov.tipo === 'ganho') {
+      valEntradas.push(mov.valor);
+      valSaidas.push(null);
+    } else {
+      valSaidas.push(mov.valor);
+      valEntradas.push(null);
+    }
   });
 
-  // ── 4. Renderizar duas linhas com eixo X de categoria ──
+  // 4. Renderizar
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Gradientes de área
   const gradE = ctx.createLinearGradient(0, 0, 0, 220);
   gradE.addColorStop(0, 'rgba(34,197,94,0.22)');
   gradE.addColorStop(1, 'rgba(34,197,94,0)');
@@ -215,41 +220,42 @@ function atualizarChart() {
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
+      labels: labels,
       datasets: [
         {
           label: 'Entradas',
-          data: entradasData.map(p => ({ x: p.x, y: p.y })),
+          data: valEntradas,
           borderColor: '#22C55E',
           backgroundColor: gradE,
           borderWidth: 2.5,
           tension: 0,
           fill: true,
-          pointBackgroundColor: '#22C55E',
-          pointBorderColor:     '#22C55E',
-          pointRadius:          5,
-          pointHoverRadius:     8,
-          xAxisID: 'xE'
+          spanGaps: true,
+          pointBackgroundColor: valEntradas.map(function(v){ return v !== null ? '#22C55E' : 'transparent'; }),
+          pointBorderColor:     valEntradas.map(function(v){ return v !== null ? '#22C55E' : 'transparent'; }),
+          pointRadius:          valEntradas.map(function(v){ return v !== null ? 5 : 0; }),
+          pointHoverRadius:     valEntradas.map(function(v){ return v !== null ? 8 : 0; })
         },
         {
-          label: 'Saídas',
-          data: saidasData.map(p => ({ x: p.x, y: p.y })),
+          label: 'Saidas',
+          data: valSaidas,
           borderColor: '#EF4444',
           backgroundColor: gradS,
           borderWidth: 2.5,
           tension: 0,
           fill: true,
-          pointBackgroundColor: '#EF4444',
-          pointBorderColor:     '#EF4444',
-          pointRadius:          5,
-          pointHoverRadius:     8,
-          xAxisID: 'xS'
+          spanGaps: true,
+          pointBackgroundColor: valSaidas.map(function(v){ return v !== null ? '#EF4444' : 'transparent'; }),
+          pointBorderColor:     valSaidas.map(function(v){ return v !== null ? '#EF4444' : 'transparent'; }),
+          pointRadius:          valSaidas.map(function(v){ return v !== null ? 5 : 0; }),
+          pointHoverRadius:     valSaidas.map(function(v){ return v !== null ? 8 : 0; })
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      interaction: { intersect: false, mode: 'nearest' },
+      interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: {
           display: true,
@@ -258,8 +264,6 @@ function atualizarChart() {
           labels: {
             color: '#94A3B8',
             font: { size: 11 },
-            boxWidth: 12,
-            boxHeight: 12,
             padding: 12,
             usePointStyle: true,
             pointStyle: 'line'
@@ -272,37 +276,35 @@ function atualizarChart() {
           titleColor: '#94A3B8',
           bodyColor: '#fff',
           padding: 12,
+          filter: function(item) { return item.raw !== null; },
           callbacks: {
-            title: items => items[0]?.label || '',
-            label: c => {
-              const isEntrada = c.datasetIndex === 0;
-              const arr = isEntrada ? entradasData : saidasData;
-              const p   = arr[c.dataIndex];
-              if (!p) return '';
-              const mov   = p.mov;
-              const nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saída');
-              const sinal = isEntrada ? '+' : '-';
-              const ico   = isEntrada ? '🟢' : '🔴';
-              return ` ${ico} ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
+            title: function(items) {
+              var mov = movements[items[0].dataIndex];
+              if (!mov) return '';
+              var parts = (mov.data || '').split('-');
+              return parts[2] + '/' + parts[1] + '/' + parts[0];
+            },
+            label: function(c) {
+              if (c.raw === null) return '';
+              var mov = movements[c.dataIndex];
+              if (!mov) return '';
+              var isEntrada = mov.tipo === 'ganho';
+              var nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saida');
+              var sinal = isEntrada ? '+' : '-';
+              var ico   = isEntrada ? 'Entrada' : 'Saida';
+              return ' ' + ico + ' ' + nome + ': ' + sinal + 'R$ ' + mov.valor.toFixed(2).replace('.', ',');
             }
           }
         }
       },
       scales: {
-        xE: {
-          type: 'category',
-          position: 'bottom',
+        x: {
           grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }
-        },
-        xS: {
-          type: 'category',
-          position: 'bottom',
-          display: false   // oculto — mesma posição visual, sem duplicar labels
+          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 16 }
         },
         y: {
           grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) }
+          ticks: { color: '#64748B', font: { size: 11 }, callback: function(v) { return 'R$' + v.toFixed(0); } }
         }
       }
     }
