@@ -777,7 +777,7 @@
 
             <div style="margin-bottom:12px">
               <label style="font-size:.8rem;color:var(--gray);display:block;margin-bottom:6px">Vencimento</label>
-              <input type="date" id="conta-vencimento" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+              <input type="date" id="conta-vencimento" data-no-ios-picker style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
             </div>
 
             <div style="margin-bottom:12px">
@@ -2239,10 +2239,10 @@
 
   // Replace all inputs on DOM ready
   function initPickers() {
-    document.querySelectorAll('input[type="date"]').forEach(input => {
+    document.querySelectorAll('input[type="date"]:not([data-no-ios-picker])').forEach(input => {
       replaceDateInput(input, 'date');
     });
-    document.querySelectorAll('input[type="month"]').forEach(input => {
+    document.querySelectorAll('input[type="month"]:not([data-no-ios-picker])').forEach(input => {
       replaceDateInput(input, 'month');
     });
   }
