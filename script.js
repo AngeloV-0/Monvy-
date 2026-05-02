@@ -622,7 +622,7 @@ function renderizarMetas() {
   lista.innerHTML = metas.map((m, i) => {
     const pct = Math.min(100, Math.round(((m.atual||0) / m.objetivo) * 100));
     const mensal = calcularMensalMeta(m);
-    const dataStr = m.dataAlvo ? `<span style="color:var(--gray);font-size:.72rem">📅 ${formatarDataAlvo(m.dataAlvo)}</span>` : '';
+    const dataStr = m.dataAlvo ? `<span style="color:var(--gray);font-size:.72rem">${formatarDataAlvo(m.dataAlvo)}</span>` : '';
     const mensalStr = mensal !== null ? `<div style="margin-top:6px;padding:7px 10px;background:rgba(34,197,94,0.08);border-radius:8px;font-size:.8rem;color:var(--primary)">💡 Guardar <strong>${fmt(mensal)}/mês</strong> para atingir no prazo</div>` : '';
     const concluida = pct >= 100;
     return `<div class="meta-card${concluida ? ' concluida' : ''}">
