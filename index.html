@@ -1538,18 +1538,32 @@
         const diaV = document.getElementById('perfil-nasc-dia').value || '';
         const mesV = document.getElementById('perfil-nasc-mes').value || '';
         const anoV = document.getElementById('perfil-nasc-ano').value || '';
-        let diasOpts = '<option value="">Dia</option>';
-        for(let i=1;i<=31;i++) { const v=String(i).padStart(2,'0'); diasOpts+=`<option value="${v}"${diaV===v?' selected':''}>${i}</option>`; }
-        let mesesOpts = '<option value="">Mês</option>';
-        mesesNome.forEach((m,i)=>{ if(i===0)return; const v=String(i).padStart(2,'0'); mesesOpts+=`<option value="${v}"${mesV===v?' selected':''}>${m}</option>`; });
-        let anosOpts = '<option value="">Ano</option>';
-        for(let y=new Date().getFullYear()-5;y>=1930;y--) { anosOpts+=`<option value="${y}"${anoV==y?' selected':''}>${y}</option>`; }
-        const sel = 'width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:13px 10px;color:var(--white);font-size:.95rem;outline:none;font-family:inherit;appearance:none';
-        body.innerHTML = `<div style="display:flex;gap:8px">
-          <select id="edit-nasc-dia" style="${sel};flex:1">${diasOpts}</select>
-          <select id="edit-nasc-mes" style="${sel};flex:2">${mesesOpts}</select>
-          <select id="edit-nasc-ano" style="${sel};flex:1.2">${anosOpts}</select>
-        </div>`;
+        // Monta valor atual no formato YYYY-MM-DD para o picker
+        const valAtual = (anoV && mesV && diaV) ? `${anoV}-${mesV}-${diaV}` : '';
+        body.innerHTML = `<input type="date" id="edit-nasc-date" value="${valAtual}" data-no-ios-picker style="display:none">
+          <div id="edit-nasc-trigger" style="display:flex;align-items:center;justify-content:space-between;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--white);font-size:.95rem;cursor:pointer;font-family:inherit">
+            <span id="edit-nasc-label" style="${valAtual ? '' : 'color:var(--gray)'}">
+              ${valAtual ? `${parseInt(diaV)} de ${mesesNome[parseInt(mesV)]} de ${anoV}` : 'Selecionar data'}
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gray)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>`;
+        // Abre o picker iOS ao clicar no trigger
+        setTimeout(() => {
+          const input = document.getElementById('edit-nasc-date');
+          const trigger = document.getElementById('edit-nasc-trigger');
+          const label = document.getElementById('edit-nasc-label');
+          if (trigger && input && window.iosDatePicker) {
+            trigger.addEventListener('click', () => {
+              window.iosDatePicker.open('date', trigger, input, (val) => {
+                if (val) {
+                  const [y, m, d] = val.split('-');
+                  label.textContent = `${parseInt(d)} de ${mesesNome[parseInt(m)]} de ${y}`;
+                  label.style.color = '';
+                }
+              });
+            });
+          }
+        }, 50);
 
       } else if (campo === 'telefone') {
         titulo.textContent = 'Telefone';
@@ -1586,9 +1600,10 @@
         document.getElementById('perfil-nome-display').textContent = val;
         salvarPerfil();
       } else if (_campoAtual === 'nascimento') {
-        const dia = document.getElementById('edit-nasc-dia').value;
-        const mes = document.getElementById('edit-nasc-mes').value;
-        const ano = document.getElementById('edit-nasc-ano').value;
+        const dateInput = document.getElementById('edit-nasc-date');
+        const val = dateInput ? dateInput.value : '';
+        let dia = '', mes = '', ano = '';
+        if (val) { const p = val.split('-'); ano = p[0]; mes = p[1]; dia = p[2]; }
         document.getElementById('perfil-nasc-dia').value = dia;
         document.getElementById('perfil-nasc-mes').value = mes;
         document.getElementById('perfil-nasc-ano').value = ano;
