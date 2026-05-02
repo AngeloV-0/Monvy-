@@ -166,7 +166,7 @@ function atualizarChart() {
   canvas.style.display = 'block'; emptyEl.style.display = 'none';
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-  // 1. Filtrar por periodo
+  // 1. Filtrar por período
   let pool;
   if (fluxoModo === 'recentes') {
     const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
@@ -178,24 +178,26 @@ function atualizarChart() {
   }
   if (pool.length === 0) { canvas.style.display='none'; emptyEl.style.display='flex'; return; }
 
-  // 2. Mais antigo primeiro (esquerda para direita)
-  const movements = [...pool].reverse();
+  // 2. Ordenar mais antigo primeiro com sortMaisAntigo (usa criadoEm + id como desempate)
+  const movements = sortMaisAntigo(pool);
 
   if (subEl) {
-    const lbl = fluxoModo === 'recentes' ? 'Ultimos 8 dias' : 'Ultimos 30 dias';
-    subEl.textContent = lbl + ' (' + movements.length + ' ' + (movements.length === 1 ? 'movimentacao' : 'movimentacoes') + ')';
+    const lbl = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
+    subEl.textContent = `${lbl} (${movements.length} ${movements.length === 1 ? 'movimentação' : 'movimentações'})`;
   }
 
-  // 3. Um eixo X compartilhado. Cada linha tem o valor no seu indice, null nos outros.
-  //    spanGaps conecta apenas os pontos proprios de cada linha — sem cruzamento.
-  const labels      = [];
-  const valEntradas = [];
-  const valSaidas   = [];
+  // 3. Montar labels e dados separados por tipo
+  // Para que AMBAS as linhas comecem no primeiro tick, inserimos o ponto inicial
+  // em zero no índice 0 para cada série que não tem dado lá.
+  // Isso ancora as duas linhas à esquerda e evita que uma "flutue" sem origem.
+  const labels      = [''];   // índice 0 = ponto âncora (label vazio)
+  const valEntradas = [0];    // âncora verde em zero
+  const valSaidas   = [0];    // âncora vermelha em zero
 
   movements.forEach((mov) => {
     const parts = (mov.data || '2000-01-01').split('-');
-    const dia = parts[2]; const mes = parts[1];
-    labels.push(dia + '/' + mes);
+    const label = parts[2] + '/' + parts[1];
+    labels.push(label);
     if (mov.tipo === 'ganho') {
       valEntradas.push(mov.valor);
       valSaidas.push(null);
@@ -220,7 +222,7 @@ function atualizarChart() {
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels,
+      labels,
       datasets: [
         {
           label: 'Entradas',
@@ -231,13 +233,13 @@ function atualizarChart() {
           tension: 0,
           fill: true,
           spanGaps: true,
-          pointBackgroundColor: valEntradas.map(function(v){ return v !== null ? '#22C55E' : 'transparent'; }),
-          pointBorderColor:     valEntradas.map(function(v){ return v !== null ? '#22C55E' : 'transparent'; }),
-          pointRadius:          valEntradas.map(function(v){ return v !== null ? 5 : 0; }),
-          pointHoverRadius:     valEntradas.map(function(v){ return v !== null ? 8 : 0; })
+          pointBackgroundColor: valEntradas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#22C55E' : 'transparent'),
+          pointBorderColor:     valEntradas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#22C55E' : 'transparent'),
+          pointRadius:          valEntradas.map((v, i) => i === 0 ? 0 : v !== null ? 5 : 0),
+          pointHoverRadius:     valEntradas.map((v, i) => i === 0 ? 0 : v !== null ? 8 : 0)
         },
         {
-          label: 'Saidas',
+          label: 'Saídas',
           data: valSaidas,
           borderColor: '#EF4444',
           backgroundColor: gradS,
@@ -245,10 +247,10 @@ function atualizarChart() {
           tension: 0,
           fill: true,
           spanGaps: true,
-          pointBackgroundColor: valSaidas.map(function(v){ return v !== null ? '#EF4444' : 'transparent'; }),
-          pointBorderColor:     valSaidas.map(function(v){ return v !== null ? '#EF4444' : 'transparent'; }),
-          pointRadius:          valSaidas.map(function(v){ return v !== null ? 5 : 0; }),
-          pointHoverRadius:     valSaidas.map(function(v){ return v !== null ? 8 : 0; })
+          pointBackgroundColor: valSaidas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#EF4444' : 'transparent'),
+          pointBorderColor:     valSaidas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#EF4444' : 'transparent'),
+          pointRadius:          valSaidas.map((v, i) => i === 0 ? 0 : v !== null ? 5 : 0),
+          pointHoverRadius:     valSaidas.map((v, i) => i === 0 ? 0 : v !== null ? 8 : 0)
         }
       ]
     },
@@ -276,23 +278,24 @@ function atualizarChart() {
           titleColor: '#94A3B8',
           bodyColor: '#fff',
           padding: 12,
-          filter: function(item) { return item.raw !== null; },
+          filter: item => item.dataIndex > 0 && item.raw !== null,
           callbacks: {
-            title: function(items) {
-              var mov = movements[items[0].dataIndex];
+            title: items => {
+              const idx = items[0].dataIndex - 1; // -1 pelo âncora
+              const mov = movements[idx];
               if (!mov) return '';
-              var parts = (mov.data || '').split('-');
-              return parts[2] + '/' + parts[1] + '/' + parts[0];
+              const [ano, mes, dia] = (mov.data || '').split('-');
+              return `${dia}/${mes}/${ano}`;
             },
-            label: function(c) {
-              if (c.raw === null) return '';
-              var mov = movements[c.dataIndex];
+            label: c => {
+              if (c.raw === null || c.dataIndex === 0) return '';
+              const mov = movements[c.dataIndex - 1];
               if (!mov) return '';
-              var isEntrada = mov.tipo === 'ganho';
-              var nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saida');
-              var sinal = isEntrada ? '+' : '-';
-              var ico   = isEntrada ? 'Entrada' : 'Saida';
-              return ' ' + ico + ' ' + nome + ': ' + sinal + 'R$ ' + mov.valor.toFixed(2).replace('.', ',');
+              const isEntrada = mov.tipo === 'ganho';
+              const nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saída');
+              const sinal = isEntrada ? '+' : '-';
+              const ico   = isEntrada ? '🟢' : '🔴';
+              return ` ${ico} ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
             }
           }
         }
@@ -300,11 +303,18 @@ function atualizarChart() {
       scales: {
         x: {
           grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 16 }
+          ticks: {
+            color: '#64748B',
+            font: { size: 10 },
+            maxRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 16,
+            callback: (val, i) => i === 0 ? '' : val  // oculta label do âncora
+          }
         },
         y: {
           grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 11 }, callback: function(v) { return 'R$' + v.toFixed(0); } }
+          ticks: { color: '#64748B', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) }
         }
       }
     }
