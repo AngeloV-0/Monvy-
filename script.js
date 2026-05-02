@@ -99,19 +99,31 @@ function fmt(v) { return 'R$ '+Math.abs(v).toFixed(2).replace('.',',').replace(/
 function fmtData(iso) { if (!iso) return ''; const [y,m,d]=iso.split('-'); return d+'/'+m+'/'+y; }
 function hojeISO() { return new Date().toISOString().slice(0,10); }
 
-// Helper: retorna milliseconds de uma movimentação usando createdAt (Firestore) ou data (string)
+// Helper: retorna milliseconds de uma movimentação usando criadoEm (Firestore) ou data (string)
+// O campo no Firestore é 'criadoEm' (serverTimestamp), que contém data + hora + segundos exatos.
 function getTsMs(m) {
-  if (m.createdAt) {
-    if (typeof m.createdAt.toMillis === 'function') return m.createdAt.toMillis();
-    if (typeof m.createdAt.seconds === 'number')    return m.createdAt.seconds * 1000 + (m.createdAt.nanoseconds || 0) / 1e6;
+  // Tenta criadoEm (campo real no Firestore)
+  const ts = m.criadoEm ?? m.createdAt ?? null;
+  if (ts) {
+    if (typeof ts.toMillis === 'function') return ts.toMillis();
+    if (typeof ts.seconds === 'number')    return ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1e6);
+    if (typeof ts === 'number')            return ts;
   }
-  // fallback: data como string 'YYYY-MM-DD' — usa meia-noite UTC
+  // Fallback: data como string 'YYYY-MM-DD' (sem hora — usa id como desempate secundário)
   return m.data ? new Date(m.data + 'T00:00:00').getTime() : 0;
 }
+// Desempate por ID quando dois timestamps são idênticos (mesma data sem hora)
+function cmpTs(a, b) {
+  const diff = getTsMs(a) - getTsMs(b);
+  if (diff !== 0) return diff;
+  // IDs Firestore são strings alfanuméricas ordenadas cronologicamente
+  if (a.id && b.id) return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  return 0;
+}
 // Ordena mais recente primeiro (para listas)
-function sortMaisRecente(arr)  { return [...arr].sort((a, b) => getTsMs(b) - getTsMs(a)); }
+function sortMaisRecente(arr)  { return [...arr].sort((a, b) => cmpTs(b, a)); }
 // Ordena mais antigo primeiro (para gráficos)
-function sortMaisAntigo(arr)   { return [...arr].sort((a, b) => getTsMs(a) - getTsMs(b)); }
+function sortMaisAntigo(arr)   { return [...arr].sort((a, b) => cmpTs(a, b)); }
 
 // KPIs
 function atualizarKPIs() {
