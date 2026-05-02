@@ -267,8 +267,6 @@ function atualizarChart() {
             color: '#94A3B8',
             font: { size: 11 },
             padding: 12,
-            usePointStyle: true,
-            pointStyle: 'line'
           }
         },
         tooltip: {
@@ -1697,12 +1695,12 @@ function gerarEstrategia() {
   let texto = '';
   if (temAltoJuros) {
     const maiorJuros = [...dividasCadastradas].sort((a,b) => b.juros - a.juros)[0];
-    texto = `<strong>🔥 Método Avalanche recomendado</strong><br>Você tem dívidas com juros altos. Concentre pagamentos extras na <strong>${maiorJuros.descricao}</strong> (${maiorJuros.juros}% a.m.) primeiro — ela cresce mais rápido. Depois pague as demais em ordem de juros.`;
+    texto = `<strong>Método Avalanche recomendado</strong><br>Você tem dívidas com juros altos. Concentre pagamentos extras na <strong>${maiorJuros.descricao}</strong> (${maiorJuros.juros}% a.m.) primeiro — ela cresce mais rápido. Depois pague as demais em ordem de juros.`;
   } else if (dividasCadastradas.length > 2) {
     const menorValor = [...dividasCadastradas].sort((a,b) => a.valor - b.valor)[0];
-    texto = `<strong>⛄ Método Bola de Neve recomendado</strong><br>Você tem várias dívidas de valores similares. Quite a <strong>${menorValor.descricao}</strong> (${fmt(menorValor.valor)}) primeiro para ganhar motivação. A sensação de "dívida zerada" ajuda a manter o foco!`;
+    texto = `<strong>Método Bola de Neve recomendado</strong><br>Você tem várias dívidas de valores similares. Quite a <strong>${menorValor.descricao}</strong> (${fmt(menorValor.valor)}) primeiro para ganhar motivação. A sensação de "dívida zerada" ajuda a manter o foco!`;
   } else {
-    texto = `<strong>📋 Plano de quitação</strong><br>Total de ${fmt(total)} em dívidas. Separe um percentual fixo da renda todo mês para quitação — mesmo que seja R$ 200, a consistência faz diferença. Evite novas dívidas enquanto quita as atuais.`;
+    texto = `<strong>Plano de quitação</strong><br>Total de ${fmt(total)} em dívidas. Separe um percentual fixo da renda todo mês para quitação — mesmo que seja R$ 200, a consistência faz diferença. Evite novas dívidas enquanto quita as atuais.`;
   }
   textoEl.innerHTML = texto;
 }
