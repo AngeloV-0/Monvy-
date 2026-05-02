@@ -1509,11 +1509,11 @@ onAuth(async (user) => {
 let dividasCadastradas = [];
 
 const DIVIDA_ICONS = {
-  cartao: '<img src="icone-cartao-01.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
-  emprestimo: '<img src="icone-emprestimo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
-  financiamento: '<img src="icone-banco.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
-  terceiros: '<img src="icone-terceiros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">',
-  outros: '<img src="icone-outros.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle">'
+  cartao: '<img src="icone-cartao-01.png" style="width:22px;height:22px;object-fit:contain;">',
+  emprestimo: '<img src="icone-emprestimo.png" style="width:22px;height:22px;object-fit:contain;">',
+  financiamento: '<img src="icone-banco.png" style="width:22px;height:22px;object-fit:contain;">',
+  terceiros: '<img src="icone-terceiros.png" style="width:22px;height:22px;object-fit:contain;">',
+  outros: '<img src="icone-outros.png" style="width:22px;height:22px;object-fit:contain;">'
 };
 const DIVIDA_LABELS = {
   cartao: 'Cartão de crédito', emprestimo: 'Empréstimo', financiamento: 'Financiamento', terceiros: 'Terceiros', outros: 'Outros'
