@@ -434,40 +434,40 @@
         text-align: left;
       }
 
-      /* Cards flutuantes — só mostra 1 card centralizado e maior */
+      /* Cards flutuantes — layout limpo no mobile */
       .hero-cards {
-        display: flex;
-        justify-content: flex-start;
-        margin-top: 32px;
-        height: 148px;
-        overflow: visible;
         position: relative;
+        width: 100%;
+        height: 160px;
+        margin-top: 32px;
+        overflow: hidden;
       }
       .float-card {
+        position: absolute;
         padding: 14px 16px;
         border-radius: 16px;
-        /* para animação mais leve no mobile */
         animation-duration: 8s;
       }
-      /* card central — destaque */
+      /* card principal — frente */
       .fc1 {
-        width: 180px;
+        width: 170px;
         top: 0;
         left: 0;
         margin-left: 0;
         z-index: 3;
+        animation: floatA 8s ease-in-out infinite;
       }
-      /* card esquerdo — parcialmente visível atrás */
+      /* card secundário — atrás e à direita */
       .fc2 {
-        width: 160px;
-        top: 20px;
-        left: auto;
-        right: -10px;
+        width: 155px;
+        top: 18px;
+        left: 155px;
         margin-left: 0;
         z-index: 2;
-        opacity: 0.7;
+        opacity: 0.75;
+        animation: floatB 8s ease-in-out infinite;
       }
-      /* card direito — oculto no mobile (muito poluído) */
+      /* terceiro card — oculto no mobile */
       .fc3 { display: none; }
 
       .card-chip { width: 26px; height: 18px; margin-bottom: 12px; }

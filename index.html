@@ -575,6 +575,37 @@
           <div class="sim-ranking-list" id="sim-ranking-list"></div>
         </div>
 
+        <!-- BOLSA DE VALORES -->
+        <div style="margin-bottom:28px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:1rem;font-weight:700">Bolsa de Valores</div>
+            <span style="font-size:.75rem;color:var(--gray)">delay ~15min</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--gray);margin-bottom:14px">Ações e FIIs mais negociados da B3</div>
+
+          <!-- Filtros -->
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+            <button id="bolsa-filtro-todos" onclick="filtrarBolsa('todos')"
+              style="padding:6px 14px;border-radius:20px;border:1px solid var(--primary);background:var(--primary);color:#000;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">Todos</button>
+            <button id="bolsa-filtro-acoes" onclick="filtrarBolsa('acoes')"
+              style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">Ações</button>
+            <button id="bolsa-filtro-fiis" onclick="filtrarBolsa('fiis')"
+              style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">FIIs</button>
+            <button id="bolsa-filtro-bdrs" onclick="filtrarBolsa('bdrs')"
+              style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">BDRs</button>
+          </div>
+
+          <div id="bolsa-loading" style="text-align:center;padding:20px;font-size:.85rem;color:var(--gray)">Carregando ativos...</div>
+          <div id="bolsa-erro" style="display:none;font-size:.85rem;color:#ef4444;padding:10px 14px;background:rgba(239,68,68,.08);border-radius:10px;margin-bottom:10px"></div>
+          <div id="bolsa-lista" style="display:none;border-radius:14px;overflow:hidden;border:1px solid var(--border)"></div>
+          <div id="bolsa-carregar-mais" style="display:none;margin-top:12px">
+            <button onclick="bolsaMostrarMais()"
+              style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--primary);font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit">
+              ⊕ Carregar mais
+            </button>
+          </div>
+        </div>
+
         <!-- Dica -->
         <!-- BUSCA DE ATIVOS B3 -->
         <div style="margin-bottom:24px">
@@ -1106,6 +1137,58 @@
     <div class="modal-box artigo-box">
       <button class="modal-fechar" onclick="fecharArtigo()">×</button>
       <div id="artigo-conteudo"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHE DO ATIVO (GRÁFICO BOLSA) -->
+  <div id="modal-ativo" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalAtivo()">
+    <div class="modal-box" style="max-width:520px;width:96vw;padding:0;overflow:hidden;border-radius:18px;background:var(--card-bg)">
+      <!-- Header -->
+      <div style="padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;color:var(--gray);margin-bottom:2px" id="ma-tipo-badge"></div>
+          <div style="font-size:1.25rem;font-weight:800" id="ma-symbol">—</div>
+          <div style="font-size:.8rem;color:var(--gray);margin-top:2px" id="ma-name">—</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.5rem;font-weight:800" id="ma-preco">—</div>
+          <div style="font-size:.88rem;font-weight:700;margin-top:2px" id="ma-variacao">—</div>
+        </div>
+      </div>
+
+      <!-- Tabs de período -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border)" id="ma-tabs">
+        <button onclick="trocarPeriodoAtivo('1d','1m')"   id="ma-tab-1d"   class="ma-tab ma-tab-ativo"  style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--primary);border-bottom:2px solid var(--primary)">Hoje</button>
+        <button onclick="trocarPeriodoAtivo('5d','5m')"   id="ma-tab-5d"   class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">5 dias</button>
+        <button onclick="trocarPeriodoAtivo('1mo','1d')"  id="ma-tab-1mo"  class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">1 mês</button>
+        <button onclick="trocarPeriodoAtivo('6mo','1wk')" id="ma-tab-6mo"  class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">6 meses</button>
+        <button onclick="trocarPeriodoAtivo('1y','1wk')"  id="ma-tab-1y"   class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">1 ano</button>
+      </div>
+
+      <!-- Área do gráfico -->
+      <div style="position:relative;padding:8px 0 0">
+        <!-- Tooltip flutuante -->
+        <div id="ma-tooltip" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:8px;pointer-events:none;z-index:10;white-space:nowrap"></div>
+        <div id="ma-grafico-loading" style="text-align:center;padding:40px;font-size:.85rem;color:var(--gray)">Carregando gráfico...</div>
+        <div id="ma-grafico-erro"    style="display:none;text-align:center;padding:40px;font-size:.85rem;color:#ef4444">Não foi possível carregar o gráfico.</div>
+        <canvas id="ma-canvas" width="520" height="200" style="display:none;width:100%;height:200px;cursor:crosshair"></canvas>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--border)" id="ma-stats">
+        <div style="padding:12px 14px;border-right:1px solid var(--border)"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Abertura</div><div style="font-size:.88rem;font-weight:700" id="ma-open">—</div></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border)"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Mínimo</div><div style="font-size:.88rem;font-weight:700" id="ma-low">—</div></div>
+        <div style="padding:12px 14px"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Máximo</div><div style="font-size:.88rem;font-weight:700" id="ma-high">—</div></div>
+      </div>
+
+      <!-- Extras (DY, P/VP, MarketCap) -->
+      <div style="display:flex;gap:0;border-top:1px solid var(--border)" id="ma-extras"></div>
+
+      <!-- Rodapé -->
+      <div style="padding:8px 14px;font-size:.68rem;color:var(--gray);text-align:right;border-top:1px solid var(--border)">Dados com delay de ~15min · BRAPI</div>
+
+      <!-- Fechar -->
+      <button onclick="fecharModalAtivo()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:var(--text);font-size:1.25rem;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
     </div>
   </div>
 

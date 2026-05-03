@@ -81,6 +81,7 @@ function irParaComHooks(tela) {
       break;
     case 'investimentos':
       setTimeout(() => { try { buscarTaxasBCB(); } catch(e) {} }, D);
+      setTimeout(() => { try { if (_bolsaDados.length === 0) carregarBolsa(); } catch(e) {} }, D + 100);
       break;
     case 'relatorio':
       setTimeout(() => { try { atualizarRelatorio(); carregarHistorico(); } catch(e) {} }, D);
@@ -3515,6 +3516,10 @@ async function buscarAtivo(ticker) {
     return;
   }
 
+  // Abre modal com gráfico diretamente
+  abrirModalAtivo(t);
+  return;
+
   if (loading)   { loading.style.display = 'block'; }
   if (erroEl)    { erroEl.style.display = 'none'; }
   if (resultado) { resultado.style.display = 'none'; resultado.innerHTML = ''; }
@@ -3570,9 +3575,445 @@ async function buscarAtivo(ticker) {
     if (erroEl)   { erroEl.textContent = 'Erro ao consultar. Tente novamente.'; erroEl.style.display = 'block'; }
   }
 }
+
+// ── MODAL DETALHE DE ATIVO COM GRÁFICO ───────────────────────────────────────
+let _ativoAtual = null;
+let _periodoAtual = { range: '1d', interval: '1m' };
+let _chartRAF = null;
+
+function fecharModalAtivo() {
+  document.getElementById('modal-ativo').classList.add('hidden');
+  _ativoAtual = null;
+}
+window.fecharModalAtivo = fecharModalAtivo;
+
+async function abrirModalAtivo(ticker) {
+  _ativoAtual = ticker;
+  _periodoAtual = { range: '1d', interval: '1m' };
+  const modal = document.getElementById('modal-ativo');
+  modal.classList.remove('hidden');
+
+  // Reset tabs
+  document.querySelectorAll('.ma-tab').forEach(b => {
+    b.style.color = 'var(--gray)';
+    b.style.borderBottomColor = 'transparent';
+    b.style.fontWeight = '600';
+  });
+  const tabHoje = document.getElementById('ma-tab-1d');
+  if (tabHoje) { tabHoje.style.color = 'var(--primary)'; tabHoje.style.borderBottomColor = 'var(--primary)'; tabHoje.style.fontWeight = '700'; }
+
+  // Fetch dados base
+  try {
+    const url = `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}?range=1d&interval=1m&fundamental=true`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (!json.results?.length) return;
+
+    const a = json.results[0];
+    const pos = (a.regularMarketChangePercent || 0) >= 0;
+    const cor = pos ? '#22c55e' : '#ef4444';
+    const sinal = pos ? '+' : '';
+    const fmtR = v => v != null ? 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+    const fmtP = v => v != null ? Number(v).toFixed(2) + '%' : '—';
+
+    document.getElementById('ma-symbol').textContent = a.symbol;
+    document.getElementById('ma-name').textContent = a.longName || a.shortName || ticker;
+    document.getElementById('ma-preco').textContent = fmtR(a.regularMarketPrice);
+    document.getElementById('ma-variacao').innerHTML = `<span style="color:${cor}">${sinal}${fmtP(a.regularMarketChangePercent)} (${sinal}${fmtR(a.regularMarketChange)})</span>`;
+    document.getElementById('ma-open').textContent = fmtR(a.regularMarketOpen);
+    document.getElementById('ma-low').textContent  = fmtR(a.regularMarketDayLow);
+    document.getElementById('ma-high').textContent = fmtR(a.regularMarketDayHigh);
+
+    // Badge de tipo
+    const tipoMap = { acoes:'Ação · B3', fiis:'FII · B3', bdrs:'BDR · B3' };
+    const tipoKey = BOLSA_ATIVOS.fiis.includes(ticker) ? 'fiis' : BOLSA_ATIVOS.bdrs.includes(ticker) ? 'bdrs' : 'acoes';
+    const corBadge = { acoes:'#818cf8', fiis:'var(--primary)', bdrs:'#fb923c' }[tipoKey];
+    document.getElementById('ma-tipo-badge').innerHTML = `<span style="color:${corBadge}">${tipoMap[tipoKey]}</span>`;
+
+    // Extras
+    const extrasEl = document.getElementById('ma-extras');
+    const itens = [];
+    if (a.dividendYield != null) itens.push({ label: 'Dividend Yield', val: Number(a.dividendYield).toFixed(2) + '%' });
+    if (a.priceToBook   != null) itens.push({ label: 'P/VP',           val: Number(a.priceToBook).toFixed(2) });
+    if (a.marketCap     != null) itens.push({ label: 'Mkt Cap',        val: (a.marketCap / 1e9).toFixed(1) + 'B' });
+    extrasEl.innerHTML = itens.length
+      ? itens.map((it, i) => `<div style="flex:1;padding:10px 14px;${i < itens.length-1 ? 'border-right:1px solid var(--border)' : ''}"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">${it.label}</div><div style="font-size:.88rem;font-weight:700">${it.val}</div></div>`).join('')
+      : '';
+
+    // Desenha gráfico com histórico intraday
+    if (a.historicalDataPrice?.length) {
+      _desenharGrafico(a.historicalDataPrice, cor, '1d');
+    } else {
+      await _carregarEDesenharGrafico(ticker, '1d', '1m', cor);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+window.abrirModalAtivo = abrirModalAtivo;
+
+async function trocarPeriodoAtivo(range, interval) {
+  if (!_ativoAtual) return;
+  _periodoAtual = { range, interval };
+
+  // Atualiza tabs
+  const tabIds = { '1d':'ma-tab-1d', '5d':'ma-tab-5d', '1mo':'ma-tab-1mo', '6mo':'ma-tab-6mo', '1y':'ma-tab-1y' };
+  document.querySelectorAll('.ma-tab').forEach(b => {
+    b.style.color = 'var(--gray)';
+    b.style.borderBottomColor = 'transparent';
+    b.style.fontWeight = '600';
+  });
+  const activeTab = document.getElementById(tabIds[range]);
+  if (activeTab) { activeTab.style.color = 'var(--primary)'; activeTab.style.borderBottomColor = 'var(--primary)'; activeTab.style.fontWeight = '700'; }
+
+  const cor = document.getElementById('ma-variacao')?.querySelector('span')?.style.color || '#22c55e';
+  await _carregarEDesenharGrafico(_ativoAtual, range, interval, cor);
+}
+window.trocarPeriodoAtivo = trocarPeriodoAtivo;
+
+async function _carregarEDesenharGrafico(ticker, range, interval, cor) {
+  const loadEl  = document.getElementById('ma-grafico-loading');
+  const erroEl  = document.getElementById('ma-grafico-erro');
+  const canvas  = document.getElementById('ma-canvas');
+  if (loadEl) { loadEl.style.display = 'block'; }
+  if (erroEl) erroEl.style.display = 'none';
+  if (canvas) canvas.style.display = 'none';
+
+  try {
+    const url = `https://brapi.dev/api/quote/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+    if (loadEl) loadEl.style.display = 'none';
+
+    const hist = json.results?.[0]?.historicalDataPrice;
+    if (!hist?.length) { if (erroEl) erroEl.style.display = 'block'; return; }
+    _desenharGrafico(hist, cor, range);
+  } catch(e) {
+    if (loadEl) loadEl.style.display = 'none';
+    if (erroEl) erroEl.style.display = 'block';
+  }
+}
+
+function _desenharGrafico(data, cor, range) {
+  const canvas  = document.getElementById('ma-canvas');
+  const loadEl  = document.getElementById('ma-grafico-loading');
+  const tooltip = document.getElementById('ma-tooltip');
+  if (!canvas) return;
+
+  if (loadEl) loadEl.style.display = 'none';
+  canvas.style.display = 'block';
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.offsetWidth  || 520;
+  const H   = canvas.offsetHeight || 200;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  // Filtra pontos válidos
+  const pts = data.filter(d => d.close != null).map(d => ({ close: d.close, date: d.date }));
+  if (!pts.length) return;
+
+  const values = pts.map(p => p.close);
+  const minV   = Math.min(...values);
+  const maxV   = Math.max(...values);
+  const rangeV = maxV - minV || 1;
+
+  const padL = 8, padR = 8, padT = 16, padB = 28;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  const xOf = (i) => padL + (i / (pts.length - 1)) * chartW;
+  const yOf = (v) => padT + chartH - ((v - minV) / rangeV) * chartH;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Gradiente fill
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+  const isGreen = cor === '#22c55e';
+  const gradColor = isGreen ? '34,197,94' : '239,68,68';
+  grad.addColorStop(0, `rgba(${gradColor},.25)`);
+  grad.addColorStop(1, `rgba(${gradColor},0)`);
+
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(pts[0].close));
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+  ctx.lineTo(xOf(pts.length - 1), padT + chartH);
+  ctx.lineTo(xOf(0), padT + chartH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Linha
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(pts[0].close));
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+  ctx.strokeStyle = cor;
+  ctx.lineWidth   = 2.2;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+  // Eixo X — labels de tempo
+  ctx.fillStyle = 'rgba(150,150,150,.8)';
+  ctx.font      = `${10 * dpr / dpr}px -apple-system, sans-serif`;
+  ctx.textAlign = 'center';
+  const nLabels = Math.min(5, pts.length);
+  for (let i = 0; i < nLabels; i++) {
+    const idx = Math.round(i * (pts.length - 1) / (nLabels - 1));
+    const d   = pts[idx];
+    const dt  = d.date ? new Date(d.date * 1000) : null;
+    let lbl = '';
+    if (dt) {
+      lbl = range === '1d'
+        ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        : dt.toLocaleDateString('pt-BR',  { day: '2-digit', month: '2-digit' });
+    }
+    ctx.fillText(lbl, xOf(idx), H - 6);
+  }
+
+  // Interatividade: linha vertical + tooltip ao mover mouse/touch
+  function onMove(e) {
+    const rect  = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const relX  = clientX - rect.left;
+    const idx   = Math.round(((relX - padL) / chartW) * (pts.length - 1));
+    const cIdx  = Math.max(0, Math.min(pts.length - 1, idx));
+    const p     = pts[cIdx];
+
+    // Redesenha
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(pts[0].close));
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+    ctx.lineTo(xOf(pts.length - 1), padT + chartH);
+    ctx.lineTo(xOf(0), padT + chartH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(pts[0].close));
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+    ctx.strokeStyle = cor;
+    ctx.lineWidth   = 2.2;
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(150,150,150,.8)';
+    ctx.font      = `10px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    for (let i = 0; i < nLabels; i++) {
+      const ii = Math.round(i * (pts.length - 1) / (nLabels - 1));
+      const dd  = pts[ii];
+      const dt  = dd.date ? new Date(dd.date * 1000) : null;
+      let lbl = '';
+      if (dt) lbl = range === '1d' ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : dt.toLocaleDateString('pt-BR',{ day:'2-digit', month:'2-digit' });
+      ctx.fillText(lbl, xOf(ii), H - 6);
+    }
+
+    // Linha vertical
+    ctx.beginPath();
+    ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = 'rgba(255,255,255,.35)';
+    ctx.lineWidth   = 1;
+    ctx.moveTo(xOf(cIdx), padT);
+    ctx.lineTo(xOf(cIdx), padT + chartH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Ponto
+    const px = xOf(cIdx), py = yOf(p.close);
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
+    ctx.fillStyle = cor;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.strokeStyle = cor;
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = .35;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Tooltip
+    if (tooltip) {
+      const dt   = p.date ? new Date(p.date * 1000) : null;
+      const time = dt ? (range === '1d'
+        ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        : dt.toLocaleDateString('pt-BR',  { day: '2-digit', month: '2-digit', year: '2-digit' })) : '';
+      const precoStr = 'R$ ' + Number(p.close).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      tooltip.style.display = 'block';
+      tooltip.textContent   = `${time}  ${precoStr}`;
+      // Posicionar tooltip acima do ponto
+      const ttW = tooltip.offsetWidth || 110;
+      let leftPct = (px / W) * 100;
+      leftPct = Math.min(Math.max(leftPct, (ttW / W / 2) * 100 + 2), 100 - (ttW / W / 2) * 100 - 2);
+      tooltip.style.left = leftPct + '%';
+      tooltip.style.transform = 'translateX(-50%)';
+    }
+  }
+
+  function onLeave() {
+    if (tooltip) tooltip.style.display = 'none';
+    ctx.clearRect(0, 0, W, H);
+    // Redesenha limpo
+    const g2 = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+    g2.addColorStop(0, `rgba(${gradColor},.25)`);
+    g2.addColorStop(1, `rgba(${gradColor},0)`);
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(pts[0].close));
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+    ctx.lineTo(xOf(pts.length - 1), padT + chartH);
+    ctx.lineTo(xOf(0), padT + chartH);
+    ctx.closePath();
+    ctx.fillStyle = g2;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(pts[0].close));
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(xOf(i), yOf(pts[i].close));
+    ctx.strokeStyle = cor;
+    ctx.lineWidth   = 2.2;
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(150,150,150,.8)';
+    ctx.font      = `10px -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    for (let i = 0; i < nLabels; i++) {
+      const idx = Math.round(i * (pts.length - 1) / (nLabels - 1));
+      const d   = pts[idx];
+      const dt  = d.date ? new Date(d.date * 1000) : null;
+      let lbl = '';
+      if (dt) lbl = range === '1d' ? dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : dt.toLocaleDateString('pt-BR',{ day:'2-digit', month:'2-digit' });
+      ctx.fillText(lbl, xOf(idx), H - 6);
+    }
+  }
+
+  canvas.removeEventListener('mousemove',  canvas._onMove);
+  canvas.removeEventListener('mouseleave', canvas._onLeave);
+  canvas.removeEventListener('touchmove',  canvas._onMove);
+  canvas.removeEventListener('touchend',   canvas._onLeave);
+  canvas._onMove  = onMove;
+  canvas._onLeave = onLeave;
+  canvas.addEventListener('mousemove',  onMove);
+  canvas.addEventListener('mouseleave', onLeave);
+  canvas.addEventListener('touchmove',  onMove, { passive: true });
+  canvas.addEventListener('touchend',   onLeave);
+}
+
 window.buscarAtivo = buscarAtivo;
 
-// ── BANNER DE CONTAS AUTOMÁTICAS (Rotina → Contas a Pagar) ──────────────
+
+// ── BOLSA DE VALORES ────────────────────────────────────────────────────────
+
+const BOLSA_ATIVOS = {
+  acoes: ['PETR4','VALE3','ITUB4','BBDC4','BBAS3','WEGE3','RENT3','ABEV3','MGLU3','SUZB3'],
+  fiis:  ['MXRF11','HGLG11','XPML11','KNRI11','VISC11','HGRE11','BCFF11','RBRF11','XPLG11','GGRC11'],
+  bdrs:  ['AAPL34','MSFT34','AMZO34','NVDC34','GOGL34','TSLA34','META34','NFLX34','DISB34','JBSS32'],
+};
+
+let _bolsaDados = [];       // todos os ativos carregados
+let _bolsaFiltro = 'todos'; // filtro ativo
+let _bolsaVisiveis = 6;     // quantos mostrar
+
+async function carregarBolsa() {
+  const loadEl  = document.getElementById('bolsa-loading');
+  const erroEl  = document.getElementById('bolsa-erro');
+  const listaEl = document.getElementById('bolsa-lista');
+  if (!listaEl) return;
+
+  const tickers = [...BOLSA_ATIVOS.acoes, ...BOLSA_ATIVOS.fiis, ...BOLSA_ATIVOS.bdrs];
+  const chunk = tickers.join(',');
+
+  try {
+    const resp = await fetch(`https://brapi.dev/api/quote/${chunk}?range=1d&interval=1d`);
+    const json = await resp.json();
+    if (loadEl) loadEl.style.display = 'none';
+
+    if (!json.results?.length) {
+      if (erroEl) { erroEl.textContent = 'Não foi possível carregar os ativos.'; erroEl.style.display = 'block'; }
+      return;
+    }
+
+    _bolsaDados = json.results.map(a => {
+      let tipo = 'acoes';
+      if (BOLSA_ATIVOS.fiis.includes(a.symbol))  tipo = 'fiis';
+      if (BOLSA_ATIVOS.bdrs.includes(a.symbol))  tipo = 'bdrs';
+      return { ...a, _tipo: tipo };
+    });
+
+    listaEl.style.display = 'block';
+    renderizarBolsa();
+  } catch(e) {
+    if (loadEl) loadEl.style.display = 'none';
+    if (erroEl) { erroEl.textContent = 'Erro ao carregar ativos. Tente recarregar a página.'; erroEl.style.display = 'block'; }
+  }
+}
+
+function renderizarBolsa() {
+  const listaEl  = document.getElementById('bolsa-lista');
+  const maisEl   = document.getElementById('bolsa-carregar-mais');
+  if (!listaEl) return;
+
+  const filtrados = _bolsaFiltro === 'todos'
+    ? _bolsaDados
+    : _bolsaDados.filter(a => a._tipo === _bolsaFiltro);
+
+  const visiveis = filtrados.slice(0, _bolsaVisiveis);
+
+  listaEl.innerHTML = visiveis.map((a, i) => {
+    const positivo = (a.regularMarketChangePercent || 0) >= 0;
+    const cor = positivo ? '#22c55e' : '#ef4444';
+    const sinal = positivo ? '+' : '';
+    const pct = a.regularMarketChangePercent != null
+      ? sinal + Number(a.regularMarketChangePercent).toFixed(2) + '%'
+      : '—';
+    const preco = a.regularMarketPrice != null
+      ? 'R$ ' + Number(a.regularMarketPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '—';
+    const nome = a.longName || a.shortName || a.symbol;
+    const tipoBadge = { acoes: 'Ação', fiis: 'FII', bdrs: 'BDR' }[a._tipo] || '';
+    const bgBadge   = { acoes: 'rgba(99,102,241,.15)', fiis: 'rgba(0,200,83,.12)', bdrs: 'rgba(249,115,22,.12)' }[a._tipo];
+    const corBadge  = { acoes: '#818cf8', fiis: 'var(--primary)', bdrs: '#fb923c' }[a._tipo];
+    const border = i < visiveis.length - 1 ? 'border-bottom:1px solid var(--border)' : '';
+
+    return `<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card-bg);${border};cursor:pointer;transition:background .15s"
+      onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='var(--card-bg)'"
+      onclick="abrirModalAtivo('${a.symbol}')">
+      <div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.07);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--text);flex-shrink:0;letter-spacing:-.5px">${a.symbol.replace(/\d+/g,'').slice(0,4)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+          <span style="font-size:.72rem;font-weight:700;background:${bgBadge};color:${corBadge};padding:1px 7px;border-radius:4px">${tipoBadge} · ${a.symbol}</span>
+        </div>
+        <div style="font-size:.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:.95rem;font-weight:700">${preco}</div>
+        <div style="font-size:.78rem;font-weight:600;color:${cor}">${pct}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (maisEl) maisEl.style.display = filtrados.length > _bolsaVisiveis ? 'block' : 'none';
+}
+
+window.filtrarBolsa = function(filtro) {
+  _bolsaFiltro = filtro;
+  _bolsaVisiveis = 6;
+  ['todos','acoes','fiis','bdrs'].forEach(f => {
+    const btn = document.getElementById('bolsa-filtro-' + f);
+    if (!btn) return;
+    const ativo = f === filtro;
+    btn.style.background = ativo ? 'var(--primary)' : 'transparent';
+    btn.style.color      = ativo ? '#000' : 'var(--gray)';
+    btn.style.borderColor = ativo ? 'var(--primary)' : 'var(--border)';
+    btn.style.fontWeight  = ativo ? '700' : '600';
+  });
+  renderizarBolsa();
+};
+
+window.bolsaMostrarMais = function() {
+  _bolsaVisiveis += 5;
+  renderizarBolsa();
+};
 
 function verificarBannerRotina() {
   const perfil = JSON.parse(localStorage.getItem('monvy_perfil_vida') || '{}');
