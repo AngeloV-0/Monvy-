@@ -1980,7 +1980,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-academia',
     label: 'Academia',
-    icon: 'icone-saude.png',
+    icon: 'icone-academia.png',
     ativo: (p) => (p.rotina || []).includes('academia'),
     cat: () => 'Academia',
     metaPct: 0.05,
@@ -1989,16 +1989,14 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-luta',
     label: 'Aula de Luta',
-    icon: 'icone-saude.png',
+    icon: 'icone-luta.png',
     ativo: (p) => (p.rotina || []).includes('luta'),
     cat: () => 'Aula de Luta',
     metaPct: 0.05,
     novo: true,
   },
   {
-    id: 'cat-streaming',
-    label: 'Streaming',
-    icon: 'icone-lazer.png',
+    icon: 'icone-streaming.png',
     ativo: (p) => {
       const r = p.rotina || [];
       return ['netflix','disney','spotify','youtube','hbo','prime'].some(s => r.includes(s));
@@ -2010,7 +2008,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-assinaturas',
     label: 'Assinaturas',
-    icon: 'icone-cerebro.png',
+    icon: 'icone-ferramenta-cognitiva.png',
     ativo: (p) => {
       const r = p.rotina || [];
       return ['chatgpt','notion','adobe','office'].some(s => r.includes(s));
@@ -2022,7 +2020,7 @@ const CATEGORIAS_CONFIG = [
   {
     id: 'cat-internet',
     label: 'Internet/Celular',
-    icon: 'icone-cerebro.png',
+    icon: 'icone-internet.png',
     ativo: (p) => {
       const r = p.rotina || [];
       return r.includes('internet') || r.includes('celular');
