@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monvay — Finanças que fazem sentido</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060D0A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Monvay">
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --p: #22C55E;
+      --p2: #A3E635;
+      --grad: linear-gradient(135deg, #22C55E 0%, #A3E635 100%);
+      --dark: #061209;
+      --dark2: #0C1F10;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --white: #FFFFFF;
+      --muted: rgba(255,255,255,0.55);
+      --font-h: 'Plus Jakarta Sans', sans-serif;
+      --font-b: 'DM Sans', sans-serif;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--dark); color: var(--white); font-family: var(--font-b); overflow-x: hidden; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03; pointer-events: none; z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 60px; height: 70px;
+      background: rgba(6,18,9,0.75); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-h); font-weight: 800; font-size: 1.2rem;
+      text-decoration: none; color: var(--white);
+    }
+    .nav-logo-icon {
+      height: 28px; width: auto; background: none; border-radius: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta { display: flex; gap: 12px; align-items: center; }
+    .btn-ghost {
+      padding: 9px 20px; border-radius: 10px; border: 1px solid var(--border);
+      background: transparent; color: var(--white); font-family: var(--font-b);
+      font-size: 0.88rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-ghost:hover { border-color: var(--p); color: var(--p); }
+    .btn-solid {
+      padding: 9px 22px; border-radius: 10px; border: none; background: var(--grad);
+      color: #061209; font-family: var(--font-h); font-weight: 700; font-size: 0.88rem;
+      cursor: pointer; transition: opacity 0.2s, transform 0.15s; text-decoration: none;
+    }
+    .btn-solid:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px; overflow: hidden;
+    }
+    .hero-bg { position: absolute; inset: 0; z-index: 0; }
+    .hero-bg-circle { position: absolute; border-radius: 50%; filter: blur(80px); }
+    .hero-bg-circle.c1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(34,197,94,0.22) 0%, transparent 70%);
+      top: -100px; left: 50%; transform: translateX(-50%);
+    }
+    .hero-bg-circle.c2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(163,230,53,0.12) 0%, transparent 70%);
+      bottom: 0; right: -100px;
+    }
+    .hero-bg-circle.c3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%);
+      bottom: 100px; left: -50px;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 780px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 99px;
+      border: 1px solid rgba(34,197,94,0.3); background: rgba(34,197,94,0.08);
+      font-size: 0.78rem; color: var(--p); font-weight: 500; margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--p); box-shadow: 0 0 6px var(--p);
+    }
+    .hero-title {
+      font-family: var(--font-h); font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 800;
+      line-height: 1.1; letter-spacing: -1px; margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero-title .hl { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub {
+      font-size: 1.05rem; color: var(--muted); line-height: 1.65;
+      max-width: 500px; margin: 0 auto 44px; font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .hero-form {
+      display: flex; gap: 10px; max-width: 420px; margin: 0 auto 16px;
+      animation: fadeUp 0.6s 0.3s ease both; width: 100%;
+    }
+    .hero-form input {
+      flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 18px; color: var(--white);
+      font-family: var(--font-b); font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .hero-form input:focus { border-color: rgba(34,197,94,0.5); }
+    .hero-form input::placeholder { color: rgba(255,255,255,0.3); }
+    .hero-form .btn-solid { padding: 14px 24px; font-size: 0.9rem; border-radius: 12px; white-space: nowrap; }
+    .hero-note { font-size: 0.78rem; color: rgba(255,255,255,0.3); animation: fadeUp 0.6s 0.4s ease both; }
+    .hero-note a { color: var(--p); text-decoration: none; }
+
+    /* Floating Cards */
+    .hero-cards {
+      display: flex; justify-content: center; align-items: flex-start;
+      gap: 0; position: relative; margin-top: 64px; height: 220px;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+    .float-card {
+      position: absolute; border-radius: 20px; padding: 20px 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+    }
+    .fc1 { background: rgba(255,255,255,0.05); width: 220px; top: 0; left: 50%; margin-left: -110px; z-index: 3; animation: floatA 6s ease-in-out infinite; }
+    .fc2 { background: linear-gradient(135deg,rgba(34,197,94,0.18),rgba(163,230,53,0.08)); border-color: rgba(34,197,94,0.3); width: 220px; top: 30px; left: 50%; margin-left: -290px; z-index: 2; animation: floatB 6s ease-in-out infinite; }
+    .fc3 { background: rgba(255,255,255,0.04); width: 220px; top: 50px; left: 50%; margin-left: 80px; z-index: 1; animation: floatC 6s ease-in-out infinite; }
+    @keyframes floatA { 0%,100%{transform:rotate(-3deg) translateY(0)} 50%{transform:rotate(-3deg) translateY(-12px)} }
+    @keyframes floatB { 0%,100%{transform:rotate(3deg) translateY(0)} 50%{transform:rotate(3deg) translateY(-14px)} }
+    @keyframes floatC { 0%,100%{transform:rotate(7deg) translateY(0)} 50%{transform:rotate(7deg) translateY(-8px)} }
+    .card-chip { width: 32px; height: 24px; background: var(--grad); border-radius: 5px; margin-bottom: 18px; opacity: 0.9; }
+    .card-chip.dark { background: linear-gradient(135deg,#1e293b,#334155); }
+    .card-num { font-family: var(--font-h); font-size: 0.8rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .card-name { font-family: var(--font-h); font-size: 0.82rem; color: var(--white); }
+    .card-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); }
+    .grad-text { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* STATS */
+    .stats-strip {
+      position: relative; z-index: 2;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      display: flex; justify-content: center; gap: 80px; padding: 40px 24px; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-val { font-family: var(--font-h); font-size: 2rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+    /* SECTIONS */
+    .section-eyebrow { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; color: var(--p); font-weight: 600; margin-bottom: 16px; }
+    .section-title { font-family: var(--font-h); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.5px; }
+    .section-sub { color: var(--muted); font-size: 0.95rem; max-width: 500px; margin: 0 auto 60px; line-height: 1.65; }
+
+    /* FEATURES */
+    .why-section {
+      padding: 100px 24px; text-align: center;
+      background: var(--dark2); position: relative;
+    }
+    .why-section::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 1px; height: 80px; background: linear-gradient(to bottom, transparent, var(--p));
+    }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 960px; margin: 0 auto; }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px;
+      text-align: left; transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden;
+    }
+    .feature-card::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.07), transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(34,197,94,0.3); transform: translateY(-4px); }
+    .feature-card:hover::after { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
+      padding: 10px;
+    }
+    .feature-icon img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+    .feature-title { font-family: var(--font-h); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+
+    /* HOW */
+    .how-section { padding: 100px 24px; display: flex; justify-content: center; }
+    .how-inner { max-width: 960px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .how-steps { display: flex; flex-direction: column; }
+    .how-step { display: flex; gap: 20px; padding: 22px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .how-step:last-child { border-bottom: none; }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-size: 0.82rem; font-weight: 700;
+      color: var(--muted); flex-shrink: 0; transition: all 0.2s;
+    }
+    .how-step.active .step-num { background: var(--grad); color: #061209; border-color: transparent; }
+    .step-text h3 { font-family: var(--font-h); font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--muted); transition: color 0.2s; }
+    .how-step.active .step-text h3 { color: var(--white); }
+    .step-text p { font-size: 0.82rem; color: rgba(255,255,255,0.25); line-height: 1.6; transition: color 0.2s; }
+    .how-step.active .step-text p { color: var(--muted); }
+    .how-preview {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 24px;
+      padding: 26px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
+    }
+    .how-preview::before {
+      content: ''; position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+    }
+    .preview-saldo { background: var(--grad); border-radius: 14px; padding: 18px 20px; color: #061209; }
+    .preview-saldo-label { font-size: 0.7rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .preview-saldo-val { font-family: var(--font-h); font-size: 1.7rem; font-weight: 800; }
+    .preview-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; font-size: 0.83rem;
+    }
+    .preview-item-left { display: flex; align-items: center; gap: 10px; }
+    .preview-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .preview-dot.g { background: var(--p); }
+    .preview-dot.r { background: #EF4444; }
+    .pv-pos { color: var(--p); font-family: var(--font-h); font-weight: 700; }
+    .pv-neg { color: #EF4444; font-family: var(--font-h); font-weight: 700; }
+
+    /* TESTIM */
+    .testim-section { padding: 80px 24px; background: var(--dark2); text-align: center; }
+    .testim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 900px; margin: 48px auto 0; }
+    .testim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-align: left; }
+    .testim-stars { color: var(--p2); font-size: 0.85rem; margin-bottom: 12px; letter-spacing: 2px; }
+    .testim-text { font-size: 0.84rem; color: var(--muted); line-height: 1.65; margin-bottom: 16px; font-style: italic; }
+    .testim-author { display: flex; align-items: center; gap: 10px; }
+    .testim-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-h); font-weight: 700; font-size: 0.82rem; color: #061209; }
+    .testim-name { font-size: 0.82rem; font-weight: 600; }
+    .testim-role { font-size: 0.72rem; color: var(--muted); }
+
+    /* CTA */
+    .cta-section { padding: 100px 24px; text-align: center; position: relative; overflow: hidden; }
+    .cta-glow { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(34,197,94,0.1), transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+    .cta-btn {
+      position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 10px;
+      background: var(--grad); color: #061209; font-family: var(--font-h); font-weight: 700;
+      font-size: 1rem; padding: 16px 36px; border-radius: 14px; border: none; cursor: pointer;
+      transition: all 0.2s; text-decoration: none; box-shadow: 0 12px 40px rgba(34,197,94,0.3);
+    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(34,197,94,0.42); }
+    .cta-btn svg { width: 18px; height: 18px; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 28px 60px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); }
+
+    /* AUTH MODAL */
+    .auth-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(12px); z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .auth-overlay.open { opacity: 1; pointer-events: all; }
+    .auth-box {
+      background: #0d1f11; border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 24px; padding: 44px 40px; width: 100%; max-width: 420px;
+      position: relative; animation: scaleIn 0.3s ease both;
+    }
+    @keyframes scaleIn { from{opacity:0;transform:scale(.93)} to{opacity:1;transform:scale(1)} }
+    .auth-close {
+      position: absolute; top: 16px; right: 16px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--muted); width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
+    }
+    .auth-close:hover { color: var(--white); background: rgba(255,255,255,0.1); }
+    .auth-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-h); font-weight: 800; font-size: 1.1rem; margin-bottom: 20px; }
+    .auth-logo-icon { width: 38px; height: 38px; background: none; border-radius: 0; display: flex; align-items: center; justify-content: center; }
+    .auth-title { font-family: var(--font-h); font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; }
+    .auth-sub { font-size: 0.84rem; color: var(--muted); margin-bottom: 26px; }
+    .auth-tab-row { display: flex; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+    .auth-tab { flex: 1; padding: 9px; border-radius: 8px; border: none; background: transparent; color: var(--muted); font-family: var(--font-b); font-size: 0.88rem; cursor: pointer; transition: all 0.2s; }
+    .auth-tab.active { background: var(--grad); color: #061209; font-weight: 600; }
+    .auth-field { margin-bottom: 12px; }
+    .auth-field label { display: block; font-size: 0.76rem; color: var(--muted); margin-bottom: 5px; }
+    .auth-field input {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px; color: var(--white);
+      font-family: var(--font-b); font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+    }
+    .auth-field input:focus { border-color: rgba(34,197,94,0.5); }
+    .auth-field input::placeholder { color: rgba(255,255,255,0.2); }
+    .auth-submit {
+      width: 100%; padding: 14px; background: var(--grad); color: #061209;
+      border: none; border-radius: 12px; font-family: var(--font-h); font-weight: 700;
+      font-size: 0.95rem; cursor: pointer; margin-top: 8px; transition: opacity 0.2s, transform 0.15s;
+    }
+    .auth-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+    .auth-error { font-size: 0.8rem; color: #EF4444; margin-top: 10px; text-align: center; display: none; }
+    .auth-success-area { text-align: center; padding: 10px 0; }
+    .success-check { width: 60px; height: 60px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px; }
+    .auth-success-area h3 { font-family: var(--font-h); font-size: 1.1rem; margin-bottom: 8px; }
+    .auth-success-area p { font-size: 0.84rem; color: var(--muted); margin-bottom: 20px; }
+
+    /* UTILS */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* RESPONSIVE */
+    /* ─── TABLET (≤900px) ─────────────────────────────── */
+    @media(max-width:900px){
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .how-inner { grid-template-columns: 1fr; }
+      .how-preview { display: none; }
+      .testim-grid { grid-template-columns: 1fr 1fr; }
+      footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
+    }
+
+    /* ─── MOBILE (≤600px) ─────────────────────────────── */
+    @media(max-width:600px){
+      body { overflow-x: hidden; }
+
+      /* ── Nav ── */
+      nav {
+        padding: 0 16px;
+        height: 58px;
+      }
+      .nav-cta { gap: 8px; }
+      .btn-ghost {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+      }
+      .btn-solid {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        padding: 80px 20px 48px;
+        min-height: 100svh;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: left;
+      }
+      .hero-content {
+        width: 100%;
+        max-width: 100%;
+      }
+      .hero-bg-circle.c1 {
+        width: 280px; height: 280px;
+        opacity: 0.6;
+        top: -60px;
+      }
+      .hero-bg-circle.c2,
+      .hero-bg-circle.c3 { display: none; }
+      .hero-grid {
+        background-size: 40px 40px;
+        opacity: 0.5;
+      }
+      .hero-badge {
+        font-size: 0.72rem;
+        padding: 5px 12px;
+        margin-bottom: 18px;
+      }
+      .hero-title {
+        font-size: clamp(1.9rem, 8.5vw, 2.4rem);
+        letter-spacing: -0.5px;
+        margin-bottom: 14px;
+        line-height: 1.12;
+      }
+      .hero-sub {
+        font-size: 0.88rem;
+        margin-bottom: 24px;
+        max-width: 100%;
+        text-align: left;
+      }
+
+      /* Form: input acima, botão abaixo — largura total */
+      .hero-form {
+        flex-direction: column;
+        gap: 10px;
+        max-width: 100%;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        margin-bottom: 12px;
+      }
+      .hero-form input {
+        width: 100%;
+        min-width: 0;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 1rem; /* evita zoom iOS */
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+        box-sizing: border-box;
+      }
+      .hero-form .btn-solid {
+        width: 100%;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-size: 1rem;
+        text-align: center;
+        box-shadow: 0 8px 28px rgba(34,197,94,0.28);
+        box-sizing: border-box;
+      }
+      .hero-note {
+        font-size: 0.75rem;
+        text-align: left;
+      }
+
+      /* Cards flutuantes — mobile: usa o mesmo modelo do landing original */
+      .hero-cards {
+        position: relative;
+        height: 220px;
+        margin-top: 32px;
+        overflow: visible;
+        display: block;
+      }
+      .hero-cards .float-card {
+        position: absolute !important;
+        width: 155px !important;
+        padding: 14px 16px !important;
+        border-radius: 16px !important;
+        top: 0 !important;
+        left: 50% !important;
+        margin-left: 0 !important;
+        box-sizing: border-box;
+      }
+      .hero-cards .fc1 {
+        z-index: 3 !important;
+        animation: floatA-m 6s ease-in-out infinite !important;
+      }
+      .hero-cards .fc2 {
+        z-index: 2 !important;
+        border-color: rgba(34,197,94,0.3) !important;
+        animation: floatB-m 6s ease-in-out infinite !important;
+      }
+      .hero-cards .fc3 {
+        display: block !important;
+        z-index: 1 !important;
+        animation: floatC-m 6s ease-in-out infinite !important;
+      }
+      @keyframes floatA-m { 0%,100%{transform:translateX(-50%) rotate(-6deg) translateY(0)} 50%{transform:translateX(-50%) rotate(-6deg) translateY(-10px)} }
+      @keyframes floatB-m { 0%,100%{transform:translateX(-90px) rotate(2deg) translateY(0)} 50%{transform:translateX(-90px) rotate(2deg) translateY(-14px)} }
+      @keyframes floatC-m { 0%,100%{transform:translateX(20px) rotate(8deg) translateY(0)} 50%{transform:translateX(20px) rotate(8deg) translateY(-8px)} }
+      .hero-cards .card-chip {
+        width: 26px !important; height: 18px !important;
+        margin-bottom: 12px !important; border-radius: 4px !important;
+      }
+      .hero-cards .card-num  { font-size: 0.62rem !important; margin-bottom: 12px !important; }
+      .hero-cards .card-name { font-size: 0.7rem !important; }
+      .hero-cards .card-row  { font-size: 0.65rem !important; }
+
+      /* ── Stats ── */
+      .stats-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        padding: 0;
+      }
+      .stat {
+        padding: 24px 16px;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .stat:nth-child(even) { border-right: none; }
+      .stat:nth-child(3),
+      .stat:nth-child(4) { border-bottom: none; }
+      .stat-val { font-size: 1.7rem; }
+      .stat-label { font-size: 0.75rem; }
+
+      /* ── Features ── */
+      .why-section { padding: 64px 20px; }
+      .why-section::before { display: none; }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .feature-card { padding: 22px 20px; }
+      .feature-icon { width: 44px; height: 44px; margin-bottom: 14px; }
+      .feature-title { font-size: 0.95rem; }
+      .feature-desc { font-size: 0.83rem; }
+
+      /* ── How ── */
+      .how-section { padding: 64px 20px; }
+      .how-step { gap: 16px; padding: 18px 0; }
+      .step-num { width: 32px; height: 32px; font-size: 0.78rem; flex-shrink: 0; }
+      .step-text h3 { font-size: 0.9rem; }
+      .step-text p { font-size: 0.8rem; }
+
+      /* ── Section headers ── */
+      .section-title {
+        font-size: clamp(1.55rem, 6.5vw, 2rem);
+        letter-spacing: -0.3px;
+      }
+      .section-sub {
+        font-size: 0.88rem;
+        max-width: 100%;
+        margin-bottom: 36px;
+      }
+      .section-eyebrow { font-size: 0.72rem; }
+
+      /* ── Testimonials ── */
+      .testim-section { padding: 64px 20px; }
+      .testim-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 36px;
+      }
+      .testim-card { padding: 20px; }
+      .testim-text { font-size: 0.83rem; }
+
+      /* ── CTA section ── */
+      .cta-section { padding: 72px 20px; }
+      .cta-btn {
+        width: 100%;
+        max-width: 340px;
+        justify-content: center;
+        font-size: 1rem;
+        padding: 16px 28px;
+        border-radius: 14px;
+        box-shadow: 0 10px 36px rgba(34,197,94,0.32);
+      }
+      .cta-glow {
+        width: 280px;
+        height: 280px;
+      }
+
+      /* ── Auth modal — bottom sheet ── */
+      .auth-overlay { align-items: flex-end; }
+      .auth-box {
+        margin: 0;
+        padding: 32px 20px calc(32px + env(safe-area-inset-bottom));
+        border-radius: 24px 24px 0 0;
+        max-width: 100%;
+        width: 100%;
+        max-height: 92svh;
+        overflow-y: auto;
+      }
+      .auth-title { font-size: 1.15rem; }
+      .auth-sub { font-size: 0.82rem; }
+      .auth-submit { font-size: 0.95rem; padding: 14px; }
+      /* Evita zoom automático no iOS */
+      .auth-field input,
+      .hero-form input { font-size: 1rem; }
+    }
+
+    /* ─── MOBILE PEQUENO (≤390px) ────────────────────────── */
+    @media(max-width:390px){
+      .hero-title { font-size: 1.85rem; }
+      .hero-sub { font-size: 0.85rem; }
+      /* Esconde "Entrar" no nav — só mostra "Criar conta" */
+      .btn-ghost { display: none; }
+      .btn-solid { padding: 9px 18px; }
+      .stat-val { font-size: 1.45rem; }
+      .cta-btn { font-size: 0.92rem; padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="logo.png" alt="Monvay" style="height:28px;width:auto;display:block;">
+    Monvay
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Funcionalidades</a></li>
+    <li><a href="#how">Como funciona</a></li>
+    <li><a href="#depoimentos">Depoimentos</a></li>
+  </ul>
+  <div class="nav-cta">
+    <button class="btn-ghost" onclick="window.location.href='auth.html'">Entrar</button>
+    <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Criar conta grátis</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-bg-circle c1"></div>
+    <div class="hero-bg-circle c2"></div>
+    <div class="hero-bg-circle c3"></div>
+  </div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">✦ Finanças pessoais, simplificadas</div>
+    <h1 class="hero-title">
+      Controle seu dinheiro<br>com <span class="hl">clareza real</span>
+    </h1>
+    <p class="hero-sub">
+      Monvay é o site de finanças pessoais que te ajuda a entender para onde vai seu dinheiro — e a tomar decisões muito melhores.
+    </p>
+    <div class="hero-form">
+      <input type="email" id="hero-email" placeholder="Seu melhor e-mail">
+      <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Começar grátis →</button>
+    </div>
+    <p class="hero-note">Gratuito para sempre. Sem cartão de crédito. <a href="#" onclick="window.location.href='auth.html';return false;">Já tem conta? Entre aqui</a></p>
+
+    <div class="hero-cards" id="hero-cards-wrap">
+      <div class="float-card fc3">
+        <div class="card-chip dark"></div>
+        <div class="card-num">•••• •••• •••• 4892</div>
+        <div class="card-row">
+          <div><div style="font-size:.63rem;color:rgba(255,255,255,.35);margin-bottom:2px">Titular</div><div class="card-name">Ana Costa</div></div>
+          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvay</div>
+        </div>
+      </div>
+      <div class="float-card fc1">
+        <div class="card-chip dark" style="background:linear-gradient(135deg,#1e293b,#475569)"></div>
+        <div class="card-num">•••• •••• •••• 7741</div>
+        <div class="card-row">
+          <div><div style="font-size:.63rem;color:rgba(255,255,255,.35);margin-bottom:2px">Titular</div><div class="card-name">João Silva</div></div>
+          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvay</div>
+        </div>
+      </div>
+      <div class="float-card fc2">
+        <div class="card-chip"></div>
+        <div class="card-num grad-text">•••• •••• •••• 3310</div>
+        <div class="card-row">
+          <div><div style="font-size:.63rem;color:rgba(255,255,255,.35);margin-bottom:2px">Saldo</div><div class="card-name grad-text">R$ 4.820,00</div></div>
+          <div class="grad-text" style="font-family:var(--font-h);font-size:.78rem">✦ Pro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat"><div class="stat-val">6</div><div class="stat-label">Módulos funcionais</div></div>
+  <div class="stat"><div class="stat-val">100%</div><div class="stat-label">Gratuito</div></div>
+  <div class="stat"><div class="stat-val">6</div><div class="stat-label">Artigos de educação financeira</div></div>
+  <div class="stat"><div class="stat-val">∞</div><div class="stat-label">Metas de economia</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="why-section" id="features">
+  <div class="section-eyebrow">Funcionalidades</div>
+  <h2 class="section-title">Tudo que você precisa,<br>nada que não precisa</h2>
+  <p class="section-sub">Seis módulos pensados para quem quer organizar a vida financeira sem complicação.</p>
+
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon"><img src="icone-casa-propria.png" alt="Dashboard"></div><div class="feature-title">Dashboard completo</div><div class="feature-desc">Saldo em destaque, entradas, saídas e últimas movimentações numa tela só. Visão geral imediata.</div></div>
+    <div class="feature-card"><div class="feature-icon"><img src="icone-grafico-02.png" alt="Gastos"></div><div class="feature-title">Gastos por categoria</div><div class="feature-desc">Organize seus gastos em Casa, Alimentação, Transporte, Lazer, Saúde e Outros. Com gráfico de fluxo.</div></div>
+    <div class="feature-card"><div class="feature-icon"><img src="icone-meta.png" alt="Metas"></div><div class="feature-title">Metas de economia</div><div class="feature-desc">Crie metas com valor-alvo e acompanhe com barra de progresso. Adicione valores quando quiser.</div></div>
+    <div class="feature-card"><div class="feature-icon"><img src="icone-cartao-01.png" alt="Dívidas"></div><div class="feature-title">Simulador de dívidas</div><div class="feature-desc">Descubra o valor real que você vai pagar com juros antes de assumir qualquer dívida.</div></div>
+    <div class="feature-card"><div class="feature-icon"><img src="icone-investimento.png" alt="Investimentos"></div><div class="feature-title">Comparador de investimentos</div><div class="feature-desc">Poupança, Tesouro Selic e CDB 110% lado a lado. Simule com seu valor e prazo.</div></div>
+    <div class="feature-card"><div class="feature-icon"><img src="icone-cerebro.png" alt="Necessidade vs Desejo"></div><div class="feature-title">Necessidade vs Desejo</div><div class="feature-desc">Ao registrar um gasto o Monvay te pergunta: isso é necessidade ou impulso? E pede confirmação se for desejo.</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div>
+      <div class="section-eyebrow" style="text-align:left">Como funciona</div>
+      <h2 class="section-title" style="text-align:left;margin-bottom:12px">Simples assim</h2>
+      <p class="section-sub" style="text-align:left;margin:0 0 36px">Sem curva de aprendizado. Em 3 passos você já está no controle.</p>
+      <div class="how-steps">
+        <div class="how-step active" onclick="setStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-text"><h3>Crie sua conta gratuita</h3><p>Apenas nome e e-mail. Sem burocracia, sem cartão de crédito.</p></div>
+        </div>
+        <div class="how-step" onclick="setStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-text"><h3>Registre suas movimentações</h3><p>Adicione entradas e saídas com um clique. O Monvay categoriza tudo.</p></div>
+        </div>
+        <div class="how-step" onclick="setStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-text"><h3>Visualize e decida melhor</h3><p>Gráficos, metas e simulações para você controlar seu futuro financeiro.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="how-preview">
+      <div class="preview-saldo"><div class="preview-saldo-label">Saldo atual</div><div class="preview-saldo-val">R$ 2.480,00</div></div>
+      <div class="preview-item"><div class="preview-item-left"><div class="preview-dot g"></div><span>Salário</span></div><span class="pv-pos">+R$ 3.000,00</span></div>
+      <div class="preview-item"><div class="preview-item-left"><div class="preview-dot r"></div><span>Supermercado</span></div><span class="pv-neg">-R$ 320,00</span></div>
+      <div class="preview-item"><div class="preview-item-left"><div class="preview-dot r"></div><span>Aluguel</span></div><span class="pv-neg">-R$ 800,00</span></div>
+      <div class="preview-item"><div class="preview-item-left"><div class="preview-dot g"></div><span>Freelance</span></div><span class="pv-pos">+R$ 600,00</span></div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.2);text-align:center;margin-top:auto;padding-top:8px">Dados ilustrativos</div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="testim-section" id="depoimentos">
+  <div class="section-eyebrow">Depoimentos</div>
+  <h2 class="section-title">O que dizem sobre o Monvay</h2>
+  <div class="testim-grid">
+    <div class="testim-card">
+      <div class="testim-stars">★★★★★</div>
+      <p class="testim-text">"Finalmente entendi para onde ia meu dinheiro. O gráfico de categorias me mostrou que eu gastava demais com lazer sem perceber."</p>
+      <div class="testim-author">
+        <div class="testim-avatar" style="background:linear-gradient(135deg,#22C55E,#A3E635)">A</div>
+        <div><div class="testim-name">Ana Beatriz</div><div class="testim-role">Designer, 26 anos</div></div>
+      </div>
+    </div>
+    <div class="testim-card">
+      <div class="testim-stars">★★★★★</div>
+      <p class="testim-text">"A pergunta 'necessidade ou desejo' me fez cancelar várias compras por impulso. Economizei mais de R$ 400 no primeiro mês."</p>
+      <div class="testim-author">
+        <div class="testim-avatar" style="background:linear-gradient(135deg,#3B82F6,#6366F1)">R</div>
+        <div><div class="testim-name">Rafael Mendes</div><div class="testim-role">Estudante, 22 anos</div></div>
+      </div>
+    </div>
+    <div class="testim-card">
+      <div class="testim-stars">★★★★★</div>
+      <p class="testim-text">"O simulador de dívidas foi um choque de realidade. Quase parcelei algo em 12x sem ver que pagaria 60% a mais."</p>
+      <div class="testim-author">
+        <div class="testim-avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">C</div>
+        <div><div class="testim-name">Carla Souza</div><div class="testim-role">Professora, 34 anos</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="section-eyebrow" style="position:relative;z-index:1">Comece hoje</div>
+  <h2 class="section-title" style="position:relative;z-index:1">Seu dinheiro merece<br>atenção real</h2>
+  <p class="section-sub" style="position:relative;z-index:1">Crie sua conta gratuita e comece a enxergar suas finanças com clareza.</p>
+  <a href="#" class="cta-btn" onclick="window.location.href='auth.html?modo=cadastro';return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Criar conta gratuita
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="nav-logo" style="font-size:.95rem">
+    <img src="logo.png" alt="Monvay" style="height:22px;width:auto;display:block;">
+    Monvay
+  </div>
+  <div class="footer-copy">© 2026 Monvay. Feito com 💚 para quem quer crescer.</div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay" onclick="if(event.target===this)closeAuth()">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+
+    <div id="auth-form-area">
+      <div class="auth-logo">
+        <img src="logo.png" alt="Monvay" style="height:26px;width:auto;display:block;">
+        Monvay
+      </div>
+      <h2 class="auth-title" id="auth-title">Criar conta</h2>
+      <p class="auth-sub" id="auth-sub">Grátis para sempre. Sem cartão.</p>
+
+      <div class="auth-tab-row">
+        <button class="auth-tab active" id="tab-signup" onclick="switchTab('signup')">Criar conta</button>
+        <button class="auth-tab" id="tab-login" onclick="switchTab('login')">Entrar</button>
+      </div>
+
+      <div id="signup-fields">
+        <div class="auth-field">
+          <label>Seu nome</label>
+          <input type="text" id="auth-name" placeholder="Como podemos te chamar?">
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="auth-email" placeholder="seu@email.com">
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <div style="position:relative">
+          <input type="password" id="auth-password" placeholder="Mínimo 6 caracteres" style="padding-right:44px;width:100%;box-sizing:border-box">
+          <button type="button" onclick="toggleSenha()" id="btn-toggle-senha" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);padding:0;display:flex;align-items:center" title="Mostrar senha">
+            <svg id="icon-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="icon-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+      <script>
+      function toggleSenha() {
+        const input = document.getElementById('auth-password');
+        const eyeShow = document.getElementById('icon-eye-show');
+        const eyeHide = document.getElementById('icon-eye-hide');
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeShow.style.display = 'none';
+          eyeHide.style.display = 'block';
+        } else {
+          input.type = 'password';
+          eyeShow.style.display = 'block';
+          eyeHide.style.display = 'none';
+        }
+      }
+      </script>
+
+      <div class="auth-error" id="auth-error"></div>
+      <button class="auth-submit" id="auth-submit" onclick="handleAuth()">Criar minha conta →</button>
+    </div>
+
+    <div id="auth-success-area" class="auth-success-area" style="display:none">
+      <div class="success-check">✓</div>
+      <h3 id="success-title">Conta criada!</h3>
+      <p id="success-msg">Bem-vindo ao Monvay.</p>
+      <button class="auth-submit" onclick="goToDashboard()">Entrar no Dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentTab = 'signup';
+
+  function openAuth(tab) {
+    switchTab(tab);
+    document.getElementById('auth-form-area').style.display = 'block';
+    document.getElementById('auth-success-area').style.display = 'none';
+    document.getElementById('auth-error').style.display = 'none';
+    document.getElementById('auth-overlay').classList.add('open');
+  }
+
+  function openAuthWithEmail() {
+    const email = document.getElementById('hero-email').value;
+    openAuth('signup');
+    if (email) document.getElementById('auth-email').value = email;
+  }
+
+  function closeAuth() {
+    document.getElementById('auth-overlay').classList.remove('open');
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('signup-fields').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('auth-title').textContent  = tab === 'signup' ? 'Criar conta' : 'Bem-vindo de volta';
+    document.getElementById('auth-sub').textContent    = tab === 'signup' ? 'Grátis para sempre. Sem cartão.' : 'Entre com seu e-mail e senha.';
+    document.getElementById('auth-submit').textContent = tab === 'signup' ? 'Criar minha conta →' : 'Entrar →';
+    document.getElementById('auth-error').style.display = 'none';
+  }
+
+  function handleAuth() {
+    const email    = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const name     = document.getElementById('auth-name').value.trim();
+    const errEl    = document.getElementById('auth-error');
+
+    const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+    if (!email || !password || (currentTab === 'signup' && !name)) { showErr('Preencha todos os campos.'); return; }
+    if (!email.includes('@')) { showErr('Digite um e-mail válido.'); return; }
+    if (password.length < 6) { showErr('A senha precisa ter pelo menos 6 caracteres.'); return; }
+
+    if (currentTab === 'login') {
+      const stored = JSON.parse(localStorage.getItem('monvy_user') || 'null');
+      if (!stored || stored.email !== email || stored.password !== password) { showErr('E-mail ou senha incorretos.'); return; }
+      localStorage.setItem('monvy_logged', JSON.stringify({ name: stored.name, email }));
+      showSuccess('Bem-vindo de volta! 👋', `Olá, ${stored.name}! Redirecionando...`);
+    } else {
+      localStorage.setItem('monvy_user', JSON.stringify({ name, email, password }));
+      localStorage.setItem('monvy_logged', JSON.stringify({ name, email }));
+      showSuccess('Conta criada com sucesso! 🎉', `Olá, ${name}! Preparando seu dashboard...`);
+    }
+  }
+
+  function showSuccess(title, msg) {
+    document.getElementById('auth-form-area').style.display = 'none';
+    document.getElementById('auth-success-area').style.display = 'block';
+    document.getElementById('success-title').textContent = title;
+    document.getElementById('success-msg').textContent   = msg;
+    setTimeout(goToDashboard, 2200);
+  }
+
+  function goToDashboard() { window.location.href = 'index.html'; }
+
+  // Usuário logado é redirecionado apenas ao clicar em Entrar/Criar conta
+  // (removido auto-redirect que causava loop)
+
+  function setStep(el) {
+    document.querySelectorAll('.how-step').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
