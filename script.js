@@ -2013,7 +2013,7 @@ const CATEGORIAS_CONFIG = [
     icon: 'icone-ferramenta-cognitiva.png',
     ativo: (p) => {
       const r = p.rotina || [];
-      return ['chatgpt','notion','adobe','office'].some(s => r.includes(s));
+      return ['chatgpt','notion','adobe','office','canva','capcut'].some(s => r.includes(s));
     },
     cat: () => 'Assinaturas',
     metaPct: 0.03,
@@ -2291,7 +2291,7 @@ window.addEventListener('load', () => {
   if (_rotinaDica.includes('internet') || _rotinaDica.includes('celular')) {
     _dicasRotina.push('Internet e celular são necessidades fixas. Pesquise planos anualmente — provedores costumam ter promoções para quem negocia.');
   }
-  if (['chatgpt','notion','adobe','office'].some(s => _rotinaDica.includes(s))) {
+  if (['chatgpt','notion','adobe','office','canva','capcut'].some(s => _rotinaDica.includes(s))) {
     _dicasRotina.push('Ferramentas de produtividade são investimento — mas só se você as usar ativamente. Faça um balanço mensal.');
   }
   const _todasDicas = [..._dicasRotina, ..._dicasGerais];
@@ -3354,7 +3354,7 @@ function _atualizarMiniCardScore() {
       if (_rot.length > 0) {
         const _hoje = new Date();
         const _mov30 = (typeof movimentacoes !== 'undefined' ? movimentacoes : []).filter(m => (_hoje - new Date(m.data + 'T00:00:00')) / 86400000 <= 30);
-        const _mapa = { academia:'Academia', luta:'Aula de Luta', internet:'Internet/Celular', celular:'Internet/Celular', netflix:'Streaming', spotify:'Streaming', disney:'Streaming', hbo:'Streaming', prime:'Streaming', youtube:'Streaming', chatgpt:'Assinaturas', notion:'Assinaturas', adobe:'Assinaturas', office:'Assinaturas' };
+        const _mapa = { academia:'Academia', luta:'Aula de Luta', internet:'Internet/Celular', celular:'Internet/Celular', netflix:'Streaming', spotify:'Streaming', disney:'Streaming', hbo:'Streaming', prime:'Streaming', youtube:'Streaming', chatgpt:'Assinaturas', notion:'Assinaturas', adobe:'Assinaturas', office:'Assinaturas', canva:'Assinaturas', capcut:'Assinaturas' };
         const _cats = [...new Set(_rot.map(r => _mapa[r]).filter(Boolean))];
         const _reg = _cats.filter(c => _mov30.some(m => m.categoria === c));
         _ptsConsistMini = _cats.length > 0 ? Math.round(_reg.length / _cats.length * 100) : 0;
@@ -3544,6 +3544,8 @@ function verificarBannerRotina() {
     notion:   { descricao: 'Notion',           categoria: 'Assinaturas',      valor: 0 },
     adobe:    { descricao: 'Adobe CC',         categoria: 'Assinaturas',      valor: 0 },
     office:   { descricao: 'Office 365',       categoria: 'Assinaturas',      valor: 0 },
+    canva:    { descricao: 'Canva',            categoria: 'Assinaturas',      valor: 0 },
+    capcut:   { descricao: 'CapCut',           categoria: 'Assinaturas',      valor: 0 },
   };
 
   const _contas = (typeof contasCadastradas !== 'undefined' && Array.isArray(contasCadastradas)) ? contasCadastradas : [];
