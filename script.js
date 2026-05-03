@@ -2705,30 +2705,30 @@ function calcularScore() {
   const totalDividas = dividasAtivas.reduce((s, d) => s + d.valor, 0);
   const totalQuitadas = dividasQuitadas.length;
 
-  // Bônus por dívidas quitadas: até +50 pts extras (máx 5 quitadas = +50 pts)
-  const bonusQuitadas = Math.min(totalQuitadas * 10, 50);
+  // Bônus por dívidas quitadas: até +30 pts extras (máx 3 quitadas = +30 pts, cap em 200+30=230)
+  const bonusQuitadas = Math.min(totalQuitadas * 10, 30);
 
   if (totalDividas === 0 && totalQuitadas === 0) {
-    pts.dividas = 250; pcts.dividas = 100; labels.dividas = 'Sem dívidas — Parabéns! 🎉';
+    pts.dividas = 200; pcts.dividas = 100; labels.dividas = 'Sem dívidas — Parabéns! 🎉';
   } else if (totalDividas === 0 && totalQuitadas > 0) {
-    pts.dividas = Math.min(250 + bonusQuitadas, 300); pcts.dividas = 100;
+    pts.dividas = Math.min(200 + bonusQuitadas, 230); pcts.dividas = 100;
     labels.dividas = `Todas as dívidas quitadas! 🏆 (${totalQuitadas} quitada${totalQuitadas > 1 ? 's' : ''})`;
   } else if (totalEntradas > 0) {
     const mesesDivida = totalDividas / totalEntradas;
-    if (mesesDivida <= 1)      { pts.dividas = Math.min(180 + bonusQuitadas, 250); pcts.dividas = 80; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
-    else if (mesesDivida <= 3) { pts.dividas = Math.min(120 + bonusQuitadas, 250); pcts.dividas = 55; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
-    else if (mesesDivida <= 6) { pts.dividas = Math.min(60  + bonusQuitadas, 250); pcts.dividas = 30; labels.dividas = fmt(totalDividas) + ` em dívidas (pesado!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
-    else                       { pts.dividas = Math.min(0   + bonusQuitadas, 250); pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ` em dívidas (crítico!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    if (mesesDivida <= 1)      { pts.dividas = Math.min(145 + bonusQuitadas, 200); pcts.dividas = 80; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else if (mesesDivida <= 3) { pts.dividas = Math.min(95  + bonusQuitadas, 200); pcts.dividas = 55; labels.dividas = fmt(totalDividas) + ` em dívidas ativas${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else if (mesesDivida <= 6) { pts.dividas = Math.min(45  + bonusQuitadas, 200); pcts.dividas = 30; labels.dividas = fmt(totalDividas) + ` em dívidas (pesado!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
+    else                       { pts.dividas = Math.min(0   + bonusQuitadas, 200); pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ` em dívidas (crítico!)${totalQuitadas > 0 ? ` · ${totalQuitadas} quitada${totalQuitadas>1?'s':''} ✓` : ''}`; }
   } else {
     pts.dividas = bonusQuitadas; pcts.dividas = 10; labels.dividas = fmt(totalDividas) + ' em dívidas';
   }
 
-  // 3. METAS CUMPRIDAS (0–250 pts)
+  // 3. METAS CUMPRIDAS (0–200 pts)
   if (typeof metas !== 'undefined' && metas.length > 0) {
     const totalMeta = metas.reduce((s, m) => s + m.objetivo, 0);
     const totalAtual = metas.reduce((s, m) => s + (m.atual || 0), 0);
     const pctMeta = totalMeta > 0 ? Math.min((totalAtual / totalMeta) * 100, 100) : 0;
-    pts.metas = Math.round(pctMeta / 100 * 250);
+    pts.metas = Math.round(pctMeta / 100 * 200);
     pcts.metas = Math.round(pctMeta);
     labels.metas = `${pctMeta.toFixed(0)}% das metas concluídas`;
   } else {
@@ -2799,10 +2799,10 @@ function calcularScore() {
   // Classificação
   let badge, cor, dica;
   const iconStyle = 'width:56px;height:56px;object-fit:contain;vertical-align:middle;margin-right:0;margin-bottom:2px';
-  if (total >= 900)      { badge = `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
-  else if (total >= 700) { badge = `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`; cor = '#84CC16'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
-  else if (total >= 450) { badge = `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
-  else if (total >= 220) { badge = `<img src="icone-score-atencao.png" style="${iconStyle}"> Atenção`; cor = '#F97316'; dica = 'Há espaço para melhorar. Reduza dívidas e controle os gastos no próximo mês.'; }
+  if (total >= 800)      { badge = `<img src="icone-score-excelente.png" style="${iconStyle}"> Excelente`; cor = '#22C55E'; dica = 'Você está no topo! Mantenha a consistência e pense em diversificar seus investimentos.'; }
+  else if (total >= 600) { badge = `<img src="icone-score-bom.png" style="${iconStyle}"> Bom`; cor = '#84CC16'; dica = 'Ótima situação! Foque em aumentar sua reserva de emergência para 6 meses de renda.'; }
+  else if (total >= 400) { badge = `<img src="icone-score-estavel.png" style="${iconStyle}"> Estável`; cor = '#F59E0B'; dica = 'Situação controlada. Revise seus gastos e crie ou acelere suas metas financeiras.'; }
+  else if (total >= 200) { badge = `<img src="icone-score-atencao.png" style="${iconStyle}"> Atenção`; cor = '#F97316'; dica = 'Há espaço para melhorar. Reduza dívidas e controle os gastos no próximo mês.'; }
   else                   { badge = `<img src="icone-score-critico.png" style="${iconStyle}"> Crítico`; cor = '#EF4444'; dica = 'Situação crítica. Priorize quitar dívidas, corte gastos e busque aumentar a renda.'; }
   if (penalidade > 0) dica = `⚠️ ${contasV.length} conta(s) vencida(s) reduziram seu score em ${penalidade} pontos. ` + dica;
 
@@ -2811,12 +2811,12 @@ function calcularScore() {
   const miniLabel = document.getElementById('kpi-score-mini-label');
   const miniBadgeEl = document.getElementById('kpi-score-mini-badge');
   const iconStyleMini = 'width:44px;height:44px;object-fit:contain;vertical-align:middle;flex-shrink:0';
-  const iconSrcMini = total >= 900 ? 'icone-score-excelente.png'
-    : total >= 700 ? 'icone-score-bom.png'
-    : total >= 450 ? 'icone-score-estavel.png'
-    : total >= 220 ? 'icone-score-atencao.png'
+  const iconSrcMini = total >= 800 ? 'icone-score-excelente.png'
+    : total >= 600 ? 'icone-score-bom.png'
+    : total >= 400 ? 'icone-score-estavel.png'
+    : total >= 200 ? 'icone-score-atencao.png'
     : 'icone-score-critico.png';
-  const labelTextMini = total >= 900 ? 'Excelente' : total >= 700 ? 'Bom' : total >= 450 ? 'Estável' : total >= 220 ? 'Atenção' : 'Crítico';
+  const labelTextMini = total >= 800 ? 'Excelente' : total >= 600 ? 'Bom' : total >= 400 ? 'Estável' : total >= 200 ? 'Atenção' : 'Crítico';
   if (miniEl) miniEl.textContent = total;
   if (miniBadgeEl) miniBadgeEl.innerHTML = `<div class="kpi-icon" style="width:48px;height:48px;min-width:48px;background:rgba(255,255,255,0.06);margin-bottom:0"><img src="${iconSrcMini}" style="${iconStyleMini}"></div>`;
   if (miniLabel) miniLabel.innerHTML = `<span style="font-weight:700;color:var(--white)">${labelTextMini}</span> · Ver detalhes →`;
@@ -2831,11 +2831,11 @@ function calcularScore() {
     document.getElementById('score-badge').innerHTML = badge;
     document.getElementById('score-tip').textContent = dica;
     // Critérios
-    atualizarCriterio('gastos', pts.gastos, 300, pcts.gastos, labels.gastos);
-    atualizarCriterio('dividas', pts.dividas, 250, pcts.dividas, labels.dividas);
-    atualizarCriterio('metas', pts.metas, 250, pcts.metas, labels.metas);
-    atualizarCriterio('reserva', pts.reserva, 200, pcts.reserva, labels.reserva);
-    atualizarCriterio('consistencia', pts_consistencia, 100, pct_consistencia, label_consistencia);
+    atualizarCriterio('gastos',       pts.gastos,       300, pcts.gastos,       labels.gastos);
+    atualizarCriterio('dividas',      pts.dividas,      200, pcts.dividas,      labels.dividas);
+    atualizarCriterio('metas',        pts.metas,        200, pcts.metas,        labels.metas);
+    atualizarCriterio('reserva',      pts.reserva,      200, pcts.reserva,      labels.reserva);
+    atualizarCriterio('consistencia', pts_consistencia, 100, pct_consistencia,  label_consistencia);
     // Dicas personalizadas
     renderizarDicas(pts, total);
   }
@@ -2876,7 +2876,7 @@ function atualizarGauge(score, cor) {
   const arc = document.getElementById('score-gauge-arc');
   if (!arc) return;
   const totalLength = 251.3; // semicircle at radius 80
-  const pct = Math.min(score / 1100, 1);
+  const pct = Math.min(score / 1000, 1);
   const offset = totalLength - (pct * totalLength);
   arc.style.stroke = cor;
   arc.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.5s';
@@ -2903,7 +2903,7 @@ function renderizarDicas(pts, total) {
   if (pts.reserva < 90) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Construa uma reserva', texto: 'Seu objetivo é ter 6 meses de despesas guardadas. Comece com um valor pequeno — o hábito é o que importa.' });
   if (pts.reserva >= 200) dicas.push({ icon: img('icone-cofre.png'), titulo: 'Reserva sólida!', texto: 'Parabéns! Com 6+ meses de reserva, explore investimentos de médio prazo para fazer o dinheiro crescer.' });
 
-  if (total >= 900) dicas.push({ icon: img('icone-foguete.png'), titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
+  if (total >= 800) dicas.push({ icon: img('icone-foguete.png'), titulo: 'Pense em investir', texto: 'Com score excelente, é hora de pensar em diversificação: renda fixa, ações, fundos imobiliários.' });
 
   if (dicas.length === 0) {
     el.innerHTML = '<div class="vazio">Continue assim! Seu score está sendo monitorado.</div>';
@@ -3331,15 +3331,15 @@ function _atualizarMiniCardScore() {
     const totalDiv = (typeof dividasCadastradas !== 'undefined')
       ? dividasCadastradas.reduce((s, d) => s + d.valor, 0) : 0;
     const _divAtivas = (typeof dividasCadastradas!=='undefined') ? dividasCadastradas.filter(d=>!d.quitada) : [];
-    const _bonusQ = Math.min(((typeof dividasCadastradas!=='undefined')?dividasCadastradas.filter(d=>d.quitada).length:0)*10,50);
-    pts.dividas = totalDiv === 0 ? Math.min(250+_bonusQ,300)
-      : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 180
-        : totalDiv / totalEntradas <= 3 ? 120
-        : totalDiv / totalEntradas <= 6 ? 60 : 0) : 0;
+    const _bonusQ = Math.min(((typeof dividasCadastradas!=='undefined')?dividasCadastradas.filter(d=>d.quitada).length:0)*10,30);
+    pts.dividas = totalDiv === 0 ? Math.min(200+_bonusQ,230)
+      : totalEntradas > 0 ? (totalDiv / totalEntradas <= 1 ? 145
+        : totalDiv / totalEntradas <= 3 ? 95
+        : totalDiv / totalEntradas <= 6 ? 45 : 0) : 0;
     pts.metas = (typeof metas !== 'undefined' && metas.length > 0)
       ? Math.round(Math.min(
           metas.reduce((s, m) => s + (m.atual || 0), 0) /
-          Math.max(metas.reduce((s, m) => s + m.objetivo, 0), 1), 1) * 250)
+          Math.max(metas.reduce((s, m) => s + m.objetivo, 0), 1), 1) * 200)
       : 0;
     pts.reserva = saldo <= 0 ? 0
       : totalEntradas > 0
@@ -3362,12 +3362,12 @@ function _atualizarMiniCardScore() {
     } catch(e) {}
     const total = pts.gastos + pts.dividas + pts.metas + pts.reserva + _ptsConsistMini;
     const iconStyle = 'width:44px;height:44px;object-fit:contain;vertical-align:middle;flex-shrink:0';
-    const iconSrc = total >= 900 ? 'icone-score-excelente.png'
-      : total >= 700 ? 'icone-score-bom.png'
-      : total >= 450 ? 'icone-score-estavel.png'
-      : total >= 220 ? 'icone-score-atencao.png'
+    const iconSrc = total >= 800 ? 'icone-score-excelente.png'
+      : total >= 600 ? 'icone-score-bom.png'
+      : total >= 400 ? 'icone-score-estavel.png'
+      : total >= 200 ? 'icone-score-atencao.png'
       : 'icone-score-critico.png';
-    const labelText = total >= 900 ? 'Excelente' : total >= 700 ? 'Bom' : total >= 450 ? 'Estável' : total >= 220 ? 'Atenção' : 'Crítico';
+    const labelText = total >= 800 ? 'Excelente' : total >= 600 ? 'Bom' : total >= 400 ? 'Estável' : total >= 200 ? 'Atenção' : 'Crítico';
     const miniEl    = document.getElementById('kpi-score-mini');
     const miniBadge = document.getElementById('kpi-score-mini-badge');
     const miniLabel = document.getElementById('kpi-score-mini-label');

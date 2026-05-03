@@ -78,9 +78,6 @@
       display: flex; align-items: center; justify-content: center;
       text-align: center; padding: 120px 24px 80px; overflow: hidden;
     }
-    @media(max-width:600px){
-      .hero { min-height: unset; padding-bottom: 60px; }
-    }
     .hero-bg { position: absolute; inset: 0; z-index: 0; }
     .hero-bg-circle { position: absolute; border-radius: 50%; filter: blur(80px); }
     .hero-bg-circle.c1 {
@@ -337,80 +334,250 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
     /* RESPONSIVE */
+    /* ─── TABLET (≤900px) ─────────────────────────────── */
     @media(max-width:900px){
-      nav{padding:0 20px}
-      .nav-links{display:none}
-      .features-grid{grid-template-columns:1fr 1fr}
-      .how-inner{grid-template-columns:1fr}
-      .how-preview{display:none}
-      .testim-grid{grid-template-columns:1fr 1fr}
-      footer{flex-direction:column;gap:12px;text-align:center;padding:24px}
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .how-inner { grid-template-columns: 1fr; }
+      .how-preview { display: none; }
+      .testim-grid { grid-template-columns: 1fr 1fr; }
+      footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
     }
+
+    /* ─── MOBILE (≤600px) ─────────────────────────────── */
     @media(max-width:600px){
       body { overflow-x: hidden; }
 
-      /* Nav */
-      nav { padding: 0 16px; height: 60px; }
+      /* ── Nav ── */
+      nav {
+        padding: 0 20px;
+        height: 58px;
+      }
       .nav-cta { gap: 8px; }
-      .btn-ghost { padding: 7px 14px; font-size: 0.82rem; }
-      .btn-solid { padding: 7px 14px; font-size: 0.82rem; }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+      }
+      .btn-solid {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+      }
 
-      /* Hero */
-      .hero { padding: 90px 16px 60px; }
-      .hero-title { font-size: clamp(2rem, 8vw, 2.8rem); letter-spacing: -0.5px; }
-      .hero-sub { font-size: 0.92rem; margin-bottom: 32px; }
-      .hero-form { flex-direction: column; gap: 10px; }
-      .hero-form input, .hero-form .btn-solid { width: 100%; padding: 14px 18px; border-radius: 12px; }
-      .hero-cards { display: flex; justify-content: center; margin-top: 24px; height: 170px; overflow: hidden; }
-      .float-card { padding: 12px 14px; border-radius: 14px; }
-      .fc1 { width: 118px; margin-left: -59px; top: 0; }
-      .fc2 { width: 118px; margin-left: -158px; top: 16px; }
-      .fc3 { width: 118px; margin-left: 38px; top: 28px; }
-      .card-chip { width: 22px; height: 16px; margin-bottom: 10px; }
-      .card-num { font-size: 0.58rem; margin-bottom: 10px; }
-      .card-name { font-size: 0.62rem; }
+      /* ── Hero ── */
+      .hero {
+        padding: 88px 20px 52px;
+        min-height: 100svh;
+        align-items: flex-start;
+        justify-content: flex-start;
+        text-align: left;
+      }
+      .hero-content {
+        width: 100%;
+        max-width: 100%;
+      }
+      .hero-bg-circle.c1 {
+        width: 320px; height: 320px;
+        opacity: 0.7;
+      }
+      .hero-bg-circle.c2,
+      .hero-bg-circle.c3 { display: none; }
+      .hero-grid {
+        background-size: 40px 40px;
+        opacity: 0.6;
+      }
+      .hero-badge {
+        font-size: 0.72rem;
+        padding: 5px 12px;
+        margin-bottom: 20px;
+      }
+      .hero-title {
+        font-size: clamp(2rem, 9vw, 2.6rem);
+        letter-spacing: -0.5px;
+        margin-bottom: 16px;
+        line-height: 1.12;
+      }
+      .hero-sub {
+        font-size: 0.9rem;
+        margin-bottom: 28px;
+        max-width: 100%;
+        text-align: left;
+      }
 
-      /* Stats */
-      .stats-strip { gap: 20px; padding: 28px 16px; }
-      .stat-val { font-size: 1.5rem; }
+      /* Form: input acima, botão abaixo — largura total */
+      .hero-form {
+        flex-direction: column;
+        gap: 10px;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        margin-bottom: 12px;
+      }
+      .hero-form input {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 1rem; /* evita zoom iOS */
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+      }
+      .hero-form .btn-solid {
+        width: 100%;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-size: 1rem;
+        text-align: center;
+        box-shadow: 0 8px 28px rgba(34,197,94,0.28);
+      }
+      .hero-note {
+        font-size: 0.75rem;
+        text-align: left;
+      }
 
-      /* Features */
-      .features-grid { grid-template-columns: 1fr; gap: 12px; }
-      .why-section { padding: 60px 16px; }
+      /* Cards flutuantes — só mostra 1 card centralizado e maior */
+      .hero-cards {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 32px;
+        height: 148px;
+        overflow: visible;
+        position: relative;
+      }
+      .float-card {
+        padding: 14px 16px;
+        border-radius: 16px;
+        /* para animação mais leve no mobile */
+        animation-duration: 8s;
+      }
+      /* card central — destaque */
+      .fc1 {
+        width: 180px;
+        top: 0;
+        left: 0;
+        margin-left: 0;
+        z-index: 3;
+      }
+      /* card esquerdo — parcialmente visível atrás */
+      .fc2 {
+        width: 160px;
+        top: 20px;
+        left: auto;
+        right: -10px;
+        margin-left: 0;
+        z-index: 2;
+        opacity: 0.7;
+      }
+      /* card direito — oculto no mobile (muito poluído) */
+      .fc3 { display: none; }
+
+      .card-chip { width: 26px; height: 18px; margin-bottom: 12px; }
+      .card-num { font-size: 0.65rem; margin-bottom: 12px; letter-spacing: 1.5px; }
+      .card-name { font-size: 0.7rem; }
+      .card-row { font-size: 0.65rem; }
+
+      /* ── Stats ── */
+      .stats-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        padding: 0;
+      }
+      .stat {
+        padding: 24px 16px;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .stat:nth-child(even) { border-right: none; }
+      .stat:nth-child(3),
+      .stat:nth-child(4) { border-bottom: none; }
+      .stat-val { font-size: 1.7rem; }
+      .stat-label { font-size: 0.75rem; }
+
+      /* ── Features ── */
+      .why-section { padding: 64px 20px; }
       .why-section::before { display: none; }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .feature-card { padding: 22px 20px; }
+      .feature-icon { width: 44px; height: 44px; margin-bottom: 14px; }
+      .feature-title { font-size: 0.95rem; }
+      .feature-desc { font-size: 0.83rem; }
 
-      /* How */
-      .how-section { padding: 60px 16px; }
+      /* ── How ── */
+      .how-section { padding: 64px 20px; }
+      .how-step { gap: 16px; padding: 18px 0; }
+      .step-num { width: 32px; height: 32px; font-size: 0.78rem; flex-shrink: 0; }
+      .step-text h3 { font-size: 0.9rem; }
+      .step-text p { font-size: 0.8rem; }
 
-      /* Testimonials */
-      .testim-grid { grid-template-columns: 1fr; }
-      .testim-section { padding: 60px 16px; }
-      .section-title { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+      /* ── Section headers ── */
+      .section-title {
+        font-size: clamp(1.55rem, 6.5vw, 2rem);
+        letter-spacing: -0.3px;
+      }
+      .section-sub {
+        font-size: 0.88rem;
+        max-width: 100%;
+        margin-bottom: 36px;
+      }
+      .section-eyebrow { font-size: 0.72rem; }
 
-      /* CTA */
-      .cta-section { padding: 60px 16px; }
-      .cta-btn { font-size: 0.92rem; padding: 14px 26px; }
+      /* ── Testimonials ── */
+      .testim-section { padding: 64px 20px; }
+      .testim-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 36px;
+      }
+      .testim-card { padding: 20px; }
+      .testim-text { font-size: 0.83rem; }
 
-      /* Auth modal */
+      /* ── CTA section ── */
+      .cta-section { padding: 72px 20px; }
+      .cta-btn {
+        width: 100%;
+        max-width: 340px;
+        justify-content: center;
+        font-size: 1rem;
+        padding: 16px 28px;
+        border-radius: 14px;
+        box-shadow: 0 10px 36px rgba(34,197,94,0.32);
+      }
+      .cta-glow {
+        width: 280px;
+        height: 280px;
+      }
+
+      /* ── Auth modal — bottom sheet ── */
       .auth-overlay { align-items: flex-end; }
       .auth-box {
         margin: 0;
-        padding: 28px 20px calc(28px + env(safe-area-inset-bottom));
-        border-radius: 20px 20px 0 0;
+        padding: 32px 20px calc(32px + env(safe-area-inset-bottom));
+        border-radius: 24px 24px 0 0;
         max-width: 100%;
         width: 100%;
-        max-height: 92vh;
+        max-height: 92svh;
         overflow-y: auto;
       }
       .auth-title { font-size: 1.15rem; }
-      .auth-submit { font-size: 0.9rem; padding: 13px; }
-      .auth-field input { font-size: 0.95rem; } /* evita zoom automático no iOS */
+      .auth-sub { font-size: 0.82rem; }
+      .auth-submit { font-size: 0.95rem; padding: 14px; }
+      /* Evita zoom automático no iOS */
+      .auth-field input,
+      .hero-form input { font-size: 1rem; }
     }
 
-    @media(max-width:380px){
-      .hero-title { font-size: 1.9rem; }
-      .btn-ghost { display: none; } /* esconde "Entrar" no nav em telas muito pequenas, sobra espaço pro logo */
-      .stat-val { font-size: 1.3rem; }
+    /* ─── MOBILE PEQUENO (≤390px) ────────────────────────── */
+    @media(max-width:390px){
+      .hero-title { font-size: 1.85rem; }
+      .hero-sub { font-size: 0.85rem; }
+      /* Esconde "Entrar" no nav — só mostra "Criar conta" */
+      .btn-ghost { display: none; }
+      .btn-solid { padding: 9px 18px; }
+      .stat-val { font-size: 1.45rem; }
+      .cta-btn { font-size: 0.92rem; padding: 14px 20px; }
     }
   </style>
 </head>
