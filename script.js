@@ -1789,6 +1789,56 @@ function carregarEstadoVida() {
     const [, campo, valor] = match;
     el.classList.toggle('selected', (perfil[campo] || []).includes(valor));
   });
+  // Restaurar itens customizados de streaming e ferramentas
+  _restaurarCustomVida(perfil);
+}
+
+function _restaurarCustomVida(perfil) {
+  const rotina = perfil.rotina || [];
+  const customStreaming = document.getElementById('idx-custom-streaming-tags');
+  const customFerramenta = document.getElementById('idx-custom-ferramenta-tags');
+  if (!customStreaming || !customFerramenta) return;
+  // Limpar tags existentes antes de re-renderizar
+  customStreaming.innerHTML = '';
+  customFerramenta.innerHTML = '';
+  const fixos = ['netflix','disney','hbo','prime','spotify','youtube','chatgpt','notion','canva','capcut',
+                  'academia','luta','futebol','internet','celular','carro','moto','publico','app','bike','nenhum','dependentes','pets'];
+  rotina.filter(r => r.startsWith('custom_')).forEach(chave => {
+    const nome = chave.replace('custom_','').replace(/_/g,' ');
+    // Determinar tipo pelo contexto (heurística: se não tem logo conhecida = pode ser qualquer um)
+    const tagsEl = window._customTipo?.[chave] === 'ferramenta' ? customFerramenta : customStreaming;
+    const tag = _criarTagCustomVida(chave, nome, tagsEl === customFerramenta ? 'ferramenta' : 'streaming');
+    tagsEl.appendChild(tag);
+  });
+}
+
+function _criarTagCustomVida(chave, nome, tipo) {
+  const tag = document.createElement('div');
+  tag.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,0.15);border:1px solid rgba(0,200,83,0.4);border-radius:20px;padding:4px 10px;font-size:.75rem;color:var(--primary,#00c853);cursor:pointer';
+  tag.innerHTML = `<span>${nome}</span><span style="font-size:.9rem;opacity:.7">×</span>`;
+  tag.querySelector('span:last-child').onclick = () => {
+    _inicializarRascunho();
+    window._perfilVidaTemp.rotina = (window._perfilVidaTemp.rotina || []).filter(r => r !== chave);
+    if (window._customTipo) delete window._customTipo[chave];
+    tag.remove();
+  };
+  return tag;
+}
+
+function adicionarCustomVida(tipo, input) {
+  const nome = input.value.trim();
+  if (!nome) return;
+  const chave = 'custom_' + nome.toLowerCase().replace(/\s+/g,'_');
+  _inicializarRascunho();
+  if (!window._perfilVidaTemp.rotina) window._perfilVidaTemp.rotina = [];
+  if (window._perfilVidaTemp.rotina.includes(chave)) { input.value = ''; return; }
+  window._perfilVidaTemp.rotina.push(chave);
+  if (!window._customTipo) window._customTipo = {};
+  window._customTipo[chave] = tipo;
+  const tagsEl = document.getElementById('idx-custom-' + tipo + '-tags');
+  const tag = _criarTagCustomVida(chave, nome, tipo);
+  tagsEl.appendChild(tag);
+  input.value = '';
 }
 
 function carregarEstadoFinancas() {
