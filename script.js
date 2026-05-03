@@ -3214,7 +3214,7 @@ function executarManualEngine() {
         id: 'academia_sem_lancamento',
         tipo: 'educativo',
         prioridade: 7,
-        icone: 'icone-saude.png',
+        icone: 'icone-academia.png',
         titulo: `${_nomeAtiv} no perfil, mas sem lançamento este mês`,
         descricao: 'Sua mensalidade ainda não foi registrada. Adicione para manter o controle completo.',
         acao: 'Registrar gasto',
