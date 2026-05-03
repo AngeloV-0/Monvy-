@@ -576,6 +576,24 @@
         </div>
 
         <!-- Dica -->
+        <!-- BUSCA DE ATIVOS B3 -->
+        <div style="margin-bottom:24px">
+          <div style="font-size:1rem;font-weight:700;margin-bottom:4px">Consultar ativo na B3</div>
+          <div style="font-size:.8rem;color:var(--gray);margin-bottom:14px">Ações e FIIs · dados com até 15 min de delay</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="b3-ticker-input" placeholder="Ex: PETR4, MXRF11, VALE3" maxlength="10"
+              style="flex:1;min-width:140px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:.9rem;font-family:inherit"
+              onkeydown="if(event.key==='Enter') buscarAtivo(this.value)">
+            <button onclick="buscarAtivo(document.getElementById('b3-ticker-input').value)"
+              style="padding:10px 20px;border-radius:10px;border:none;background:var(--primary);color:#000;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit">
+              Buscar
+            </button>
+          </div>
+          <div id="b3-loading" style="display:none;margin-top:10px;font-size:.85rem;color:var(--gray)">Buscando cotação...</div>
+          <div id="b3-erro" style="display:none;margin-top:10px;font-size:.85rem;color:#ef4444;padding:10px 14px;background:rgba(239,68,68,.08);border-radius:10px"></div>
+          <div id="b3-resultado" style="display:none;margin-top:14px"></div>
+        </div>
+
         <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.</div>
 
       </section>
@@ -762,6 +780,16 @@
           </div>
         </div>
 
+        <!-- BANNER ROTINA → CONTAS -->
+        <div id="banner-rotina-contas" style="display:none;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:14px 18px;margin-bottom:18px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:.85rem;font-weight:700;color:var(--white)">Gastos fixos detectados no seu perfil</div>
+            <div id="banner-rotina-desc" style="font-size:.75rem;color:var(--gray);margin-top:2px"></div>
+          </div>
+          <button onclick="criarContasDeRotina()" style="background:var(--primary);color:#000;border:none;border-radius:8px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Criar automaticamente</button>
+          <button onclick="document.getElementById('banner-rotina-contas').style.display='none'" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1.3rem;line-height:1;padding:0 4px">×</button>
+        </div>
+
         <div class="two-col" style="align-items:flex-start">
 
           <!-- Formulário cadastro -->
@@ -933,6 +961,20 @@
             <div class="score-bar-wrap">
               <div class="score-bar-track"><div class="score-bar-fill" id="sc-reserva-bar" style="width:0%;background:#8B5CF6"></div></div>
               <span class="score-bar-label" id="sc-reserva-label">–</span>
+            </div>
+          </div>
+
+          <div class="score-criteria-item">
+            <div class="score-criteria-header">
+              <div>
+                <div class="score-criteria-title">Consistência de Controle</div>
+                <div class="score-criteria-sub">gastos fixos registrados este mês</div>
+              </div>
+              <span class="score-pts" id="sc-consistencia-pts">0 pts</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track"><div class="score-bar-fill" id="sc-consistencia-bar" style="width:0%;background:#06B6D4"></div></div>
+              <span class="score-bar-label" id="sc-consistencia-label">–</span>
             </div>
           </div>
 
@@ -1237,6 +1279,42 @@
             <div class="vida-opt" onclick="selecionarVida(this,'filhos','nao')" id="vida-filhos-nao"><span><img src="icone-sem-filhos.png" style="width:28px;height:28px;object-fit:contain"></span>Sem filhos</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'familia','dependentes')"><span><img src="icone-dependentes.png" style="width:28px;height:28px;object-fit:contain"></span>Dependentes</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'familia','pets')"><span><img src="icone-pets.png" style="width:28px;height:28px;object-fit:contain"></span>Pets</div>
+          </div>
+        </div>
+
+        <!-- ROTINA -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">ROTINA <span style="font-weight:400;font-size:.7rem">(múltiplos)</span></div>
+
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Atividade física</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px" id="vida-rotina-atividades-opts">
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','academia')"><span>🏋️</span>Academia</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','luta')"><span>🥊</span>Luta</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','futebol')"><span>⚽</span>Futebol</div>
+          </div>
+
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Conectividade</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px" id="vida-rotina-servicos-opts">
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','internet')"><span>📡</span>Internet</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','celular')"><span>📱</span>Celular</div>
+          </div>
+
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Streaming</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px" id="vida-rotina-streaming-opts">
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','netflix')"><span>🎬</span>Netflix</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','disney')"><span>🎬</span>Disney+</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','spotify')"><span>🎵</span>Spotify</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','youtube')"><span>▶️</span>YouTube Premium</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','hbo')"><span>🎭</span>Max (HBO)</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','prime')"><span>📦</span>Prime Video</div>
+          </div>
+
+          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Ferramentas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="vida-rotina-ferramentas-opts">
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','chatgpt')"><span>🤖</span>ChatGPT Plus</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','notion')"><span>📝</span>Notion</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','adobe')"><span>🎨</span>Adobe CC</div>
+            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','office')"><span>💼</span>Office 365</div>
           </div>
         </div>
 
