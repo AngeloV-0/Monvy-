@@ -3520,26 +3520,27 @@ async function buscarAtivo(ticker) {
   if (resultado) { resultado.style.display = 'none'; resultado.innerHTML = ''; }
 
   try {
-    const resp = await fetch(`/api/brapi?ticker=${encodeURIComponent(t)}`);
+    const url = `https://brapi.dev/api/quote/${encodeURIComponent(t)}?range=1d&interval=1d&fundamental=true`;
+    const resp = await fetch(url);
     const json = await resp.json();
     if (loading) loading.style.display = 'none';
 
-    if (!json.ok || !json.ativo) {
-      if (erroEl) { erroEl.textContent = json.erro || 'Ativo não encontrado.'; erroEl.style.display = 'block'; }
+    if (!json.results?.length) {
+      if (erroEl) { erroEl.textContent = 'Ativo não encontrado. Verifique o código e tente novamente.'; erroEl.style.display = 'block'; }
       return;
     }
 
-    const a = json.ativo;
-    const positivo = a.variacao >= 0;
+    const a = json.results[0];
+    const positivo = a.regularMarketChangePercent >= 0;
     const corVar   = positivo ? '#22c55e' : '#ef4444';
     const sinal    = positivo ? '+' : '';
     const fmtR     = v => v != null ? 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-    const fmtPct   = v => v != null ? sinal + Number(v).toFixed(2) + '%' : '—';
+    const fmtPct   = v => v != null ? Number(v).toFixed(2) + '%' : '—';
 
     const extras = [];
-    if (a.p_vp        != null) extras.push(`<span>P/VP</span><strong>${Number(a.p_vp).toFixed(2)}</strong>`);
-    if (a.dividend_yield != null) extras.push(`<span>DY</span><strong>${Number(a.dividend_yield).toFixed(2)}%</strong>`);
-    if (a.market_cap   != null) extras.push(`<span>Mkt Cap</span><strong>${(a.market_cap / 1e9).toFixed(1)}B</strong>`);
+    if (a.priceToBook     != null) extras.push(`<span>P/VP</span><strong>${Number(a.priceToBook).toFixed(2)}</strong>`);
+    if (a.dividendYield   != null) extras.push(`<span>DY</span><strong>${Number(a.dividendYield).toFixed(2)}%</strong>`);
+    if (a.marketCap       != null) extras.push(`<span>Mkt Cap</span><strong>${(a.marketCap / 1e9).toFixed(1)}B</strong>`);
 
     if (resultado) {
       resultado.style.display = 'block';
@@ -3547,21 +3548,21 @@ async function buscarAtivo(ticker) {
         <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
             <div>
-              <div style="font-size:1.1rem;font-weight:700">${a.ticker}</div>
-              <div style="font-size:.78rem;color:var(--gray)">${a.nome}</div>
+              <div style="font-size:1.1rem;font-weight:700">${a.symbol}</div>
+              <div style="font-size:.78rem;color:var(--gray)">${a.longName || a.shortName || t}</div>
             </div>
             <div style="text-align:right">
-              <div style="font-size:1.3rem;font-weight:700">${fmtR(a.preco)}</div>
-              <div style="font-size:.85rem;font-weight:600;color:${corVar}">${sinal}${fmtPct(a.variacao)} (${sinal}${fmtR(a.variacao_valor)})</div>
+              <div style="font-size:1.3rem;font-weight:700">${fmtR(a.regularMarketPrice)}</div>
+              <div style="font-size:.85rem;font-weight:600;color:${corVar}">${sinal}${fmtPct(a.regularMarketChangePercent)} (${sinal}${fmtR(a.regularMarketChange)})</div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:.78rem;color:var(--gray);margin-bottom:${extras.length ? '10px' : '0'}">
-            <div>Abertura<br><strong style="color:var(--text)">${fmtR(a.abertura)}</strong></div>
-            <div>Mínimo<br><strong style="color:var(--text)">${fmtR(a.minimo)}</strong></div>
-            <div>Máximo<br><strong style="color:var(--text)">${fmtR(a.maximo)}</strong></div>
+            <div>Abertura<br><strong style="color:var(--text)">${fmtR(a.regularMarketOpen)}</strong></div>
+            <div>Mínimo<br><strong style="color:var(--text)">${fmtR(a.regularMarketDayLow)}</strong></div>
+            <div>Máximo<br><strong style="color:var(--text)">${fmtR(a.regularMarketDayHigh)}</strong></div>
           </div>
           ${extras.length ? `<div style="display:flex;gap:16px;font-size:.78rem;color:var(--gray);border-top:1px solid var(--border);padding-top:10px;flex-wrap:wrap">${extras.map(e => `<div style="display:flex;flex-direction:column;gap:2px">${e}</div>`).join('')}</div>` : ''}
-          <div style="font-size:.7rem;color:var(--gray);margin-top:8px;text-align:right">Atualizado: ${new Date(a.atualizado_em).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })} · delay ~15min</div>
+          <div style="font-size:.7rem;color:var(--gray);margin-top:8px;text-align:right">Dados com delay de ~15min · BRAPI</div>
         </div>`;
     }
   } catch(e) {
