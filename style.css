@@ -2229,7 +2229,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   background: rgba(0,200,83,0.1);
   color: var(--primary, #00c853);
 }
-.vida-opt span { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 34px; }
+.vida-opt span { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 34px; margin-bottom: 6px; }
 .vida-opt span img { display: block; }
 
 /* KPIs de Dívidas */
