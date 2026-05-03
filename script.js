@@ -1872,6 +1872,42 @@ try {
 // MÓDULO 2 — GASTOS ADAPTATIVOS
 // ==============================
 
+// SVGs inline para os ícones de categoria (garante exibição mesmo sem arquivos PNG)
+const CAT_SVG = {
+  'alimentacao': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M20 18c0 0 0 10 4 14s4 14 4 14h8s0-10 4-14 4-14 4-14" stroke="#00C853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="32" cy="32" r="6" fill="#00C853" opacity=".5"/><path d="M32 22v20M24 30h16" stroke="#00C853" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  'moradia': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M14 32L32 16l18 16v18H40v-10h-16v10H14V32z" stroke="#00C853" stroke-width="3" stroke-linejoin="round" fill="none"/><rect x="28" y="40" width="8" height="10" rx="1" fill="#00C853" opacity=".4"/></svg>`,
+  'financiamento': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><rect x="12" y="22" width="40" height="28" rx="4" stroke="#00C853" stroke-width="3" fill="none"/><path d="M12 30h40M24 22V20a8 8 0 0116 0v2" stroke="#00C853" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="32" cy="38" r="4" fill="#00C853" opacity=".5"/></svg>`,
+  'carro': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M10 36l5-12h24l5 12" stroke="#00C853" stroke-width="3" stroke-linejoin="round" fill="none"/><rect x="8" y="34" width="48" height="14" rx="4" stroke="#00C853" stroke-width="3" fill="none"/><circle cx="20" cy="48" r="5" stroke="#00C853" stroke-width="3" fill="none"/><circle cx="44" cy="48" r="5" stroke="#00C853" stroke-width="3" fill="none"/><path d="M25 48h14" stroke="#00C853" stroke-width="2" stroke-linecap="round"/></svg>`,
+  'moto': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><circle cx="16" cy="42" r="8" stroke="#00C853" stroke-width="3" fill="none"/><circle cx="48" cy="42" r="8" stroke="#00C853" stroke-width="3" fill="none"/><path d="M24 42h16M32 42l-4-14h10l6 8H32" stroke="#00C853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="38" cy="22" r="4" stroke="#00C853" stroke-width="2.5" fill="none"/></svg>`,
+  'transporte': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><rect x="10" y="20" width="44" height="28" rx="5" stroke="#00C853" stroke-width="3" fill="none"/><path d="M10 32h44M20 48v4M44 48v4" stroke="#00C853" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="40" r="3" fill="#00C853" opacity=".5"/><circle cx="44" cy="40" r="3" fill="#00C853" opacity=".5"/></svg>`,
+  'educacao': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M12 28l20-12 20 12-20 12z" stroke="#00C853" stroke-width="3" stroke-linejoin="round" fill="none"/><path d="M20 34v12c4 4 20 4 24 0V34M52 28v12" stroke="#00C853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+  'saude': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M32 50C32 50 12 38 12 24a12 12 0 0120-9 12 12 0 0120 9c0 14-20 26-20 26z" stroke="#00C853" stroke-width="3" stroke-linejoin="round" fill="none"/><path d="M26 28h12M32 22v12" stroke="#00C853" stroke-width="3" stroke-linecap="round"/></svg>`,
+  'pets': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><ellipse cx="32" cy="38" rx="14" ry="10" stroke="#00C853" stroke-width="3" fill="none"/><circle cx="22" cy="22" r="5" stroke="#00C853" stroke-width="2.5" fill="none"/><circle cx="42" cy="22" r="5" stroke="#00C853" stroke-width="2.5" fill="none"/><circle cx="14" cy="30" r="4" stroke="#00C853" stroke-width="2.5" fill="none"/><circle cx="50" cy="30" r="4" stroke="#00C853" stroke-width="2.5" fill="none"/><circle cx="30" cy="38" r="2" fill="#00C853" opacity=".6"/><circle cx="34" cy="38" r="2" fill="#00C853" opacity=".6"/></svg>`,
+  'lazer': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><circle cx="32" cy="32" r="18" stroke="#00C853" stroke-width="3" fill="none"/><path d="M22 32l6 6 14-14" stroke="#00C853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 14v4M32 46v4M14 32h4M46 32h4" stroke="#00C853" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  'outros': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><circle cx="20" cy="32" r="4" fill="#00C853" opacity=".7"/><circle cx="32" cy="32" r="4" fill="#00C853" opacity=".7"/><circle cx="44" cy="32" r="4" fill="#00C853" opacity=".7"/></svg>`,
+  'academia': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M10 32h6M48 32h6M16 24v16M48 24v16M22 32h20" stroke="#00C853" stroke-width="3.5" stroke-linecap="round"/><rect x="20" y="26" width="4" height="12" rx="2" fill="#00C853" opacity=".5"/><rect x="40" y="26" width="4" height="12" rx="2" fill="#00C853" opacity=".5"/></svg>`,
+  'luta': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><path d="M20 44l8-16 8 8 8-16" stroke="#00C853" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="20" cy="20" r="5" stroke="#00C853" stroke-width="2.5" fill="none"/></svg>`,
+  'streaming': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><rect x="12" y="18" width="40" height="24" rx="4" stroke="#00C853" stroke-width="3" fill="none"/><path d="M24 42h16M32 42v6M22 48h20" stroke="#00C853" stroke-width="3" stroke-linecap="round"/><polygon points="26,24 26,36 42,30" fill="#00C853" opacity=".7"/></svg>`,
+  'assinaturas': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><rect x="14" y="16" width="36" height="32" rx="4" stroke="#00C853" stroke-width="3" fill="none"/><path d="M22 26h20M22 32h14M22 38h10" stroke="#00C853" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  'internet': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#00C853" opacity=".15"/><circle cx="32" cy="32" r="18" stroke="#00C853" stroke-width="3" fill="none"/><path d="M32 14c-6 6-6 26 0 36M32 14c6 6 6 26 0 36M14 32h36" stroke="#00C853" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>`,
+};
+
+function getIconHtml(iconFile, catId) {
+  // Tenta retornar SVG inline se disponível, senão usa img com fallback
+  const key = catId ? catId.replace('cat-','') : (iconFile||'').replace('icone-','').replace('.png','').replace('-','');
+  if (CAT_SVG[key]) {
+    return `<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">${CAT_SVG[key]}</div>`;
+  }
+  // Fallback para chaves compostas como "casa-aluguel" → moradia
+  const altMap = {'casa-aluguel':'moradia','casa-propria':'moradia','financiamento':'financiamento','onibus':'transporte','bicicleta':'transporte','app':'transporte','bebe':'educacao','ferramenta-cognitiva':'assinaturas','celular':'internet'};
+  const normalized = (iconFile||'').replace('icone-','').replace('.png','');
+  const altKey = altMap[normalized] || normalized.split('-')[0];
+  if (CAT_SVG[altKey]) {
+    return `<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">${CAT_SVG[altKey]}</div>`;
+  }
+  return `<img src="${iconFile}" alt="" style="width:56px;height:56px;object-fit:contain;" onerror="this.parentNode.innerHTML=CAT_SVG['outros']||''">`;
+}
+
 // Mapa completo de categorias com ícone, label, id e perfis que a ativam
 const CATEGORIAS_CONFIG = [
   {
@@ -1880,6 +1916,7 @@ const CATEGORIAS_CONFIG = [
     labelAlt: 'Financiamento',// financiada
     icon: 'icone-casa-aluguel.png',
     iconFn: (p) => p.moradia === 'financiada' ? 'icone-financiamento.png' : 'icone-casa-aluguel.png',
+    iconKey: (p) => p.moradia === 'financiada' ? 'financiamento' : 'moradia',
     ativo: (p) => ['aluguel','financiada'].includes(p.moradia),
     labelFn: (p) => p.moradia === 'financiada' ? 'Financiamento' : 'Aluguel',
     cat: (p) => p.moradia === 'financiada' ? 'Financiamento' : 'Aluguel',
@@ -1890,6 +1927,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-alimentacao',
     label: 'Alimentação',
     icon: 'icone-alimentacao.png',
+    iconKey: () => 'alimentacao',
     ativo: () => true,       // sempre ativo
     cat: () => 'Alimentação',
     metaPct: 0.15,
@@ -1899,6 +1937,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-carro',
     label: 'Carro',
     icon: 'icone-carro.png',
+    iconKey: () => 'carro',
     ativo: (p) => (p.transporte || []).includes('carro'),
     cat: () => 'Carro',
     metaPct: 0.10,
@@ -1908,6 +1947,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-moto',
     label: 'Moto',
     icon: 'icone-moto.png',
+    iconKey: () => 'moto',
     ativo: (p) => (p.transporte || []).includes('moto'),
     cat: () => 'Moto',
     metaPct: 0.07,
@@ -1917,6 +1957,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-transporte',
     label: 'Transporte',
     icon: 'icone-onibus.png',
+    iconKey: () => 'transporte',
     iconFn: (p) => {
       const t = p.transporte || [];
       if (t.includes('app') && !t.includes('publico') && !t.includes('bike')) return 'icone-app.png';
@@ -1935,6 +1976,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-educacao',
     label: 'Educação',
     icon: 'icone-bebe.png',
+    iconKey: () => 'educacao',
     ativo: (p) => p.filhos === 'sim',
     cat: () => 'Educação',
     metaPct: 0.08,
@@ -1944,6 +1986,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-saude',
     label: 'Saúde',
     icon: 'icone-saude.png',
+    iconKey: () => 'saude',
     ativo: () => true,
     cat: () => 'Saúde',
     metaPct: 0.08,
@@ -1953,6 +1996,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-pets',
     label: 'Pets',
     icon: 'icone-pets.png',
+    iconKey: () => 'pets',
     ativo: (p) => (p.familia || []).includes('pets'),
     cat: () => 'Pets',
     metaPct: 0.05,
@@ -1962,6 +2006,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-lazer',
     label: 'Lazer',
     icon: 'icone-lazer.png',
+    iconKey: () => 'lazer',
     ativo: () => true,
     cat: () => 'Lazer',
     metaPct: 0.10,
@@ -1971,6 +2016,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-outros',
     label: 'Outros',
     icon: 'icone-outros.png',
+    iconKey: () => 'outros',
     ativo: () => true,
     cat: () => 'Outros',
     metaPct: 0.05,
@@ -1981,6 +2027,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-academia',
     label: 'Academia',
     icon: 'icone-academia.png',
+    iconKey: () => 'academia',
     ativo: (p) => (p.rotina || []).includes('academia'),
     cat: () => 'Academia',
     metaPct: 0.05,
@@ -1990,13 +2037,17 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-luta',
     label: 'Aula de Luta',
     icon: 'icone-luta.png',
+    iconKey: () => 'luta',
     ativo: (p) => (p.rotina || []).includes('luta'),
     cat: () => 'Aula de Luta',
     metaPct: 0.05,
     novo: true,
   },
   {
+    id: 'cat-streaming',
+    label: 'Streaming',
     icon: 'icone-streaming.png',
+    iconKey: () => 'streaming',
     ativo: (p) => {
       const r = p.rotina || [];
       return ['netflix','disney','spotify','youtube','hbo','prime'].some(s => r.includes(s));
@@ -2009,6 +2060,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-assinaturas',
     label: 'Assinaturas',
     icon: 'icone-ferramenta-cognitiva.png',
+    iconKey: () => 'assinaturas',
     ativo: (p) => {
       const r = p.rotina || [];
       return ['chatgpt','notion','adobe','office'].some(s => r.includes(s));
@@ -2021,6 +2073,7 @@ const CATEGORIAS_CONFIG = [
     id: 'cat-internet',
     label: 'Internet/Celular',
     icon: 'icone-internet.png',
+    iconKey: () => 'internet',
     ativo: (p) => {
       const r = p.rotina || [];
       return r.includes('internet') || r.includes('celular');
@@ -2107,8 +2160,13 @@ function renderizarGridCategorias() {
         <div class="cat-meta-label ${warnClass}" style="margin-top:5px">${pct}% do limite</div>`;
     }
 
+    const iconKey = c.iconKey ? c.iconKey(p) : null;
+    const iconHtml = iconKey && CAT_SVG[iconKey]
+      ? `<div style="width:56px;height:56px;display:flex;align-items:center;justify-content:center">${CAT_SVG[iconKey]}</div>`
+      : getIconHtml(icon, c.id);
+
     return `<div class="cat-card${isNovo ? ' cat-novo' : ''}" style="position:relative;padding-bottom:${meta > 0 ? '18px' : ''}">
-      <div class="cat-icon"><img src="${icon}" alt="${catNome}" style="width:56px;height:56px;object-fit:contain;"></div>
+      <div class="cat-icon">${iconHtml}</div>
       <div class="cat-nome">${catNome}</div>
       <div class="cat-valor" id="${idEl}">${fmt(gasto)}</div>
       ${metaHtml}
