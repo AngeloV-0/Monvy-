@@ -3,17 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monvay — Entrar</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#060D0A">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Monvay">
-  <link rel="apple-touch-icon" href="logo.png">
+  <title>Monvy — Entrar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #22C55E;
@@ -28,7 +20,7 @@
       --gray: #6B7280;
       --gray-2: #9CA3AF;
       --red: #EF4444;
-      --font-title: 'Plus Jakarta Sans', sans-serif;
+      --font-title: 'Syne', sans-serif;
       --font-body: 'DM Sans', sans-serif;
     }
 
@@ -90,7 +82,17 @@
       z-index: 1;
     }
 
-    .logo-icon { width: 44px; height: 44px; background: none; border-radius: 0; display: flex; align-items: center; justify-content: center; }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: var(--grad);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #060D0A;
+      box-shadow: 0 0 18px rgba(34,197,94,0.4);
+    }
 
     .left-content {
       flex: 1;
@@ -460,25 +462,6 @@
       .left-panel { display: none; }
       .right-panel { width: 100%; padding: 40px 28px; }
     }
-
-    @media (max-width: 600px) {
-      body { overflow: auto; }
-      .right-panel {
-        width: 100%;
-        min-height: 100vh;
-        padding: 60px 20px 48px;
-        align-items: flex-start;
-        justify-content: center;
-      }
-      .auth-box { max-width: 100%; }
-      .back-link { top: 16px; left: 16px; }
-      .tab-btn { font-size: 0.8rem; padding: 8px 6px; }
-      .auth-title { font-size: 1.2rem; }
-      .btn-submit { font-size: 0.88rem; padding: 12px; }
-      .btn-google { font-size: 0.82rem; padding: 10px; }
-      .form-input { font-size: 0.95rem; }
-      .toast { bottom: 16px; right: 12px; left: 12px; font-size: 0.82rem; }
-    }
   </style>
 </head>
 <body>
@@ -486,7 +469,8 @@
   <!-- LEFT -->
   <div class="left-panel">
     <a href="landing.html" class="left-logo">
-      <img src="logo.png" alt="Monvay" style="height:32px;width:auto;display:block;">
+      <div class="logo-icon">M</div>
+      Monvy
     </a>
 
     <div class="left-content">
@@ -495,19 +479,19 @@
 
       <div class="features-list">
         <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+          <div class="feat-icon">📊</div>
           <span>Dashboard completo com saldo e fluxo financeiro</span>
         </div>
         <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <div class="feat-icon">🎯</div>
           <span>Metas de economia com barra de progresso visual</span>
         </div>
         <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div class="feat-icon">📈</div>
           <span>Simulador de investimentos e comparação de rendimentos</span>
         </div>
         <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+          <div class="feat-icon">🤔</div>
           <span>Pergunta "necessidade ou desejo?" antes de cada gasto</span>
         </div>
       </div>
@@ -549,7 +533,7 @@
 
       <!-- LOGIN -->
       <div id="form-login">
-        <div class="auth-title">Bem-vindo de volta</div>
+        <div class="auth-title">Bem-vindo de volta 👋</div>
         <div class="auth-sub">Entre na sua conta para continuar</div>
 
         <div class="form-group">
@@ -560,60 +544,29 @@
 
         <div class="form-group">
           <label class="form-label">Senha</label>
-          <div style="position:relative">
-            <input type="password" class="form-input" id="login-senha" placeholder="••••••••" style="padding-right:44px">
-            <button type="button" onclick="toggleSenhaAuth('login-senha','eye-login-show','eye-login-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#1a1a1a;padding:0;display:flex;align-items:center">
-              <svg id="eye-login-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg id="eye-login-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </button>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;min-height:18px">
-            <div class="error-msg" id="err-login-senha" style="margin-top:0">Senha incorreta</div>
-            <a href="#" onclick="mudarAba('esqueci')" style="font-size:.78rem;color:var(--primary);text-decoration:none;font-weight:600;white-space:nowrap;margin-left:auto">Esqueci a senha</a>
-          </div>
+          <input type="password" class="form-input" id="login-senha" placeholder="••••••••">
+          <div class="error-msg" id="err-login-senha">Senha incorreta</div>
         </div>
-
-        <button class="btn-submit" onclick="fazerLogin()">Entrar na conta</button>
 
         <div class="divider">ou</div>
 
-        <button class="btn-google" onclick="loginGoogle()">
+        <button class="btn-google" onclick="entrarDemo()">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Continuar com Google
+          Continuar com Google (demo)
         </button>
+
+        <div class="divider">ou acesse com e-mail</div>
+
+        <button class="btn-submit" onclick="fazerLogin()">Entrar na conta</button>
 
         <p style="text-align:center;font-size:.8rem;color:var(--gray)">
           Não tem conta? <a href="#" onclick="mudarAba('cadastro')" style="color:var(--primary);text-decoration:none">Criar grátis →</a>
         </p>
       </div>
 
-      <!-- ESQUECI A SENHA -->
-      <div id="form-esqueci" style="display:none">
-        <div class="auth-title">Recuperar senha</div>
-        <div class="auth-sub">Digite seu e-mail cadastrado e mostraremos como acessar sua conta</div>
-
-        <div class="form-group" style="margin-top:24px">
-          <label class="form-label">E-mail cadastrado</label>
-          <input type="email" class="form-input" id="esqueci-email" placeholder="seu@email.com">
-          <div class="error-msg" id="err-esqueci-email">E-mail não encontrado</div>
-        </div>
-
-        <div id="esqueci-resultado" style="display:none;margin:16px 0;padding:16px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:12px">
-          <div style="font-size:.82rem;color:var(--gray);margin-bottom:6px">Conta encontrada! Sua senha é:</div>
-          <div id="esqueci-senha-reveal" style="font-size:1.1rem;font-weight:700;color:var(--primary);letter-spacing:2px;font-family:monospace"></div>
-          <div style="font-size:.75rem;color:var(--gray);margin-top:8px;opacity:.7">Anote sua senha e faça login normalmente.</div>
-        </div>
-
-        <button class="btn-submit" onclick="recuperarSenha()" style="margin-top:4px">Recuperar senha</button>
-
-        <p style="text-align:center;font-size:.8rem;color:var(--gray);margin-top:16px">
-          Lembrou? <a href="#" onclick="mudarAba('login')" style="color:var(--primary);text-decoration:none">Voltar ao login →</a>
-        </p>
-      </div>
-
       <!-- CADASTRO -->
       <div id="form-cadastro">
-        <div class="auth-title">Criar conta grátis</div>
+        <div class="auth-title">Criar conta grátis ✨</div>
         <div class="auth-sub">Em 30 segundos você está dentro</div>
 
         <div class="form-group">
@@ -630,20 +583,14 @@
 
         <div class="form-group">
           <label class="form-label">Senha</label>
-          <div style="position:relative">
-            <input type="password" class="form-input" id="cad-senha" placeholder="Mínimo 6 caracteres" oninput="verificarSenha(this)" style="padding-right:44px">
-            <button type="button" onclick="toggleSenhaAuth('cad-senha','eye-cad-show','eye-cad-hide')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#1a1a1a;padding:0;display:flex;align-items:center">
-              <svg id="eye-cad-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg id="eye-cad-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </button>
-          </div>
+          <input type="password" class="form-input" id="cad-senha" placeholder="Mínimo 6 caracteres" oninput="verificarSenha(this)">
           <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
           <div class="error-msg" id="err-cad-senha">Mínimo 6 caracteres</div>
         </div>
 
         <div class="form-check">
           <input type="checkbox" id="termos">
-          <label for="termos">Concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a> do Monvay</label>
+          <label for="termos">Concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a> do Monvy</label>
         </div>
 
         <button class="btn-submit" onclick="fazerCadastro()">Criar minha conta</button>
@@ -658,251 +605,142 @@
 
   <!-- Toast -->
   <div class="toast" id="toast">
-    <span class="toast-icon" id="toast-icon"></span>
+    <span class="toast-icon" id="toast-icon">✅</span>
     <span id="toast-msg">Tudo certo!</span>
   </div>
 
-  <script type="module">
-  import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle, waitAuthReady, getPerfil } from './firebase.js';
-
-    // Aguarda persistence estar pronta ANTES de ouvir mudanças de auth
-    // Isso evita race condition em novos dispositivos onde localStorage ainda não carregou
-    let authResolved = false;
-
-    async function rotearUsuario(user) {
-      if (authResolved) return;
-      authResolved = true;
-
-      // SEMPRE verifica Firestore para garantir que a sessão é válida.
-      // O cache do localStorage era a causa do bug: ao sair e entrar novamente,
-      // o cache indicava onboarding feito mas a sessão Firebase ainda não havia
-      // sido restaurada, causando loop de redirecionamento.
-      try {
-        const perfil = await getPerfil(user.uid);
-        if (perfil && perfil.onboardingDone) {
-          localStorage.setItem('monvy_onboarding_done', '1');
-          window.location.href = 'index.html';
-        } else if (perfil && perfil.email) {
-          window.location.href = 'onboarding.html';
-        } else {
-          window.location.href = 'onboarding.html';
-        }
-      } catch(e) {
-        console.warn('Erro ao verificar perfil:', e);
-        // Só vai ao painel se o localStorage confirmar onboarding feito
-        // (evita mandar usuário sem sessão para o painel)
-        if (localStorage.getItem('monvy_onboarding_done') === '1') {
-          window.location.href = 'index.html';
-        }
-      }
-    }
-
-    // Só começa a ouvir onAuth DEPOIS que a persistência está configurada
-    waitAuthReady().then(() => {
-      onAuth(async user => {
-        if (user) {
-          await rotearUsuario(user);
-        }
-      });
-    });
-
-    // Captura resultado do redirect Google (mobile) — também verifica onboarding
-    verificarRedirectGoogle().then(async user => {
-      if (user) {
-        // Limpa flag de redirect
-        try { sessionStorage.removeItem('monvy_google_redirect'); } catch(_) {}
-        await rotearUsuario(user);
-      }
-    });
-
-    // ── Params da URL ──
+  <script>
+    // ── Ler params ──
     const params = new URLSearchParams(window.location.search);
-    window.addEventListener('DOMContentLoaded', () => {
-      if (params.get('modo') === 'cadastro') mudarAba('cadastro');
-      const ep = params.get('email');
-      if (ep) {
-        const el = document.getElementById('login-email') || document.getElementById('cad-email');
-        if (el) el.value = ep;
-      }
-    });
+    if (params.get('modo') === 'cadastro') mudarAba('cadastro');
+    const emailParam = params.get('email');
+    if (emailParam) {
+      const input = document.getElementById('cad-email') || document.getElementById('login-email');
+      if (input) input.value = emailParam;
+    }
 
     // ── Tabs ──
-    window.mudarAba = function(aba) {
+    function mudarAba(aba) {
       document.getElementById('tab-login').classList.toggle('active', aba === 'login');
       document.getElementById('tab-cadastro').classList.toggle('active', aba === 'cadastro');
-      document.getElementById('form-login').style.display    = aba === 'login'    ? 'block' : 'none';
+      document.getElementById('form-login').style.display = aba === 'login' ? 'block' : 'none';
       document.getElementById('form-cadastro').style.display = aba === 'cadastro' ? 'block' : 'none';
-      document.getElementById('form-esqueci').style.display  = aba === 'esqueci'  ? 'block' : 'none';
-      document.querySelector('.auth-tabs').style.display = aba === 'esqueci' ? 'none' : 'flex';
-      if (aba === 'esqueci') {
-        const res = document.getElementById('esqueci-resultado');
-        if (res) res.style.display = 'none';
-        const emailEl = document.getElementById('esqueci-email');
-        if (emailEl) emailEl.value = '';
-        erro('err-esqueci-email', false);
-      }
-    };
-
-    // ── Google OAuth ──
-    window.loginGoogle = async function() {
-      try {
-        setBusy(true);
-        await loginComGoogle();
-        // onAuth vai redirecionar automaticamente
-      } catch(e) {
-        setBusy(false);
-        showToast(traduzirErro(e.code));
-      }
-    };
-
-    // ── Login e-mail ──
-    window.fazerLogin = async function() {
-      const email = document.getElementById('login-email').value.trim();
-      // Força leitura do valor mesmo com autopreenchimento do Safari
-      const senhaEl = document.getElementById('login-senha');
-      const senha = senhaEl.value || senhaEl.getAttribute('data-autofill') || '';
-      let ok = true;
-      if (!email || !email.includes('@')) { erro('err-login-email', true); ok = false; } else erro('err-login-email', false);
-      if (!senha) { erro('err-login-senha', true); document.getElementById('err-login-senha').textContent = 'Digite sua senha'; ok = false; } else erro('err-login-senha', false);
-      if (!ok) return;
-      try {
-        setBusy(true);
-        await loginComEmail(email, senha);
-        showToast('Bem-vindo de volta! ✓');
-      } catch(e) {
-        setBusy(false);
-        const msg = traduzirErro(e.code);
-        // Mostra erro no campo de senha (não revela se e-mail existe ou não)
-        erro('err-login-senha', true);
-        document.getElementById('err-login-senha').innerHTML =
-          msg + ' &nbsp;·&nbsp; <a href="#" onclick="mudarAba(\'esqueci\')" style="color:var(--primary)">Esqueci a senha</a>';
-        showToast(msg);
-      }
-    };
-
-    // ── Cadastro ──
-    window.fazerCadastro = async function() {
-      const nome  = document.getElementById('cad-nome').value.trim();
-      const email = document.getElementById('cad-email').value.trim();
-      const senha = document.getElementById('cad-senha').value;
-      const termos = document.getElementById('termos').checked;
-      let ok = true;
-      if (!nome)                   { erro('err-cad-nome', true); ok = false; }  else erro('err-cad-nome', false);
-      if (!email||!email.includes('@')) { erro('err-cad-email', true); ok = false; } else erro('err-cad-email', false);
-      if (senha.length < 6)        { erro('err-cad-senha', true); ok = false; } else erro('err-cad-senha', false);
-      if (!termos) { showToast('Aceite os Termos para continuar'); ok = false; }
-      if (!ok) return;
-      try {
-        setBusy(true);
-        await cadastrarComEmail(nome, email, senha);
-        showToast(`Conta criada! Bem-vindo, ${nome}! ✓`);
-        // Marca que precisa de onboarding e redireciona imediatamente
-        localStorage.removeItem('monvy_onboarding_done');
-        setTimeout(() => { window.location.href = 'onboarding.html'; }, 600);
-      } catch(e) {
-        setBusy(false);
-        if (e.code === 'auth/email-already-in-use') {
-          erro('err-cad-email', true);
-          document.getElementById('err-cad-email').textContent = 'E-mail já cadastrado';
-        }
-        showToast(traduzirErro(e.code));
-      }
-    };
-
-    // ── Recuperar senha (Firebase envia e-mail real) ──
-    window.recuperarSenha = async function() {
-      const email = document.getElementById('esqueci-email').value.trim();
-      if (!email || !email.includes('@')) {
-        erro('err-esqueci-email', true);
-        document.getElementById('err-esqueci-email').textContent = 'Digite um e-mail válido';
-        return;
-      }
-      erro('err-esqueci-email', false);
-      const btn = document.querySelector('#form-esqueci .btn-submit');
-      if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
-      try {
-        await enviarResetSenha(email);
-        const res = document.getElementById('esqueci-resultado');
-        document.getElementById('esqueci-senha-reveal').innerHTML =
-          `<strong>E-mail enviado para ${email}!</strong><br><br>` +
-          `📬 Verifique sua caixa de entrada (e o spam).<br>` +
-          `Clique no link do e-mail para criar uma nova senha.<br><br>` +
-          `<span style="font-size:0.8rem;opacity:0.6">Não recebeu? Aguarde 1 minuto e tente novamente.</span>`;
-        if (res) res.style.display = 'block';
-        showToast('E-mail de recuperação enviado ✓');
-      } catch(e) {
-        erro('err-esqueci-email', true);
-        const msg = e.code === 'auth/user-not-found'
-          ? 'Nenhuma conta encontrada com este e-mail'
-          : traduzirErro(e.code);
-        document.getElementById('err-esqueci-email').textContent = msg;
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Enviar link de recuperação'; }
-      }
-    };
-
-    // ── Helpers ──
-    function erro(id, show) {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('show', show);
     }
 
-    function showToast(msg) {
+    // ── Toast ──
+    function showToast(msg, icon = '✅') {
       const t = document.getElementById('toast');
       document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
-    function setBusy(state) {
-      document.querySelectorAll('.btn-submit, .btn-google').forEach(b => b.disabled = state);
-    }
-
-    window.verificarSenha = function(input) {
-      const len  = input.value.length;
+    // ── Senha strength ──
+    function verificarSenha(input) {
+      const len = input.value.length;
       const fill = document.getElementById('strength-fill');
-      if (len === 0)     { fill.style.width = '0%'; fill.style.background = ''; }
-      else if (len < 4)  { fill.style.width = '25%'; fill.style.background = '#EF4444'; }
-      else if (len < 6)  { fill.style.width = '50%'; fill.style.background = '#F59E0B'; }
-      else if (len < 10) { fill.style.width = '75%'; fill.style.background = '#22C55E'; }
-      else               { fill.style.width = '100%'; fill.style.background = 'linear-gradient(90deg,#22C55E,#A3E635)'; }
-    };
-
-    function traduzirErro(code) {
-      const map = {
-        // Firebase v9+: auth/user-not-found + auth/wrong-password → auth/invalid-credential
-        'auth/invalid-credential':      'E-mail ou senha incorretos. Verifique e tente novamente',
-        'auth/user-not-found':          'E-mail ou senha incorretos. Verifique e tente novamente',
-        'auth/wrong-password':          'E-mail ou senha incorretos. Verifique e tente novamente',
-        'auth/email-already-in-use':    'E-mail já cadastrado',
-        'auth/weak-password':           'Senha muito fraca (mínimo 6 caracteres)',
-        'auth/invalid-email':           'Formato de e-mail inválido',
-        'auth/popup-closed-by-user':    'Login cancelado',
-        'auth/popup-blocked':           'Popup bloqueado pelo navegador. Tentando redirect...',
-        'auth/network-request-failed':  'Sem conexão. Verifique a internet',
-        'auth/too-many-requests':       'Conta temporariamente bloqueada por muitas tentativas. Tente mais tarde ou redefina sua senha',
-        'auth/user-disabled':           'Esta conta foi desativada. Entre em contato com o suporte',
-        'auth/operation-not-allowed':   'Método de login não permitido',
-        'auth/requires-recent-login':   'Por segurança, faça login novamente para continuar',
-      };
-      return map[code] || 'Algo deu errado. Tente novamente';
+      if (len === 0)       { fill.style.width = '0%'; fill.style.background = ''; }
+      else if (len < 4)    { fill.style.width = '25%'; fill.style.background = '#EF4444'; }
+      else if (len < 6)    { fill.style.width = '50%'; fill.style.background = '#F59E0B'; }
+      else if (len < 10)   { fill.style.width = '75%'; fill.style.background = '#22C55E'; }
+      else                 { fill.style.width = '100%'; fill.style.background = 'linear-gradient(90deg,#22C55E,#A3E635)'; }
     }
+
+    // ── Validação ──
+    function erro(id, mostrar) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('show', mostrar);
+    }
+
+    // ── Login ──
+    const USUARIOS = JSON.parse(localStorage.getItem('monvy_users') || '[]');
+
+    function fazerLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      let valido = true;
+
+      if (!email || !email.includes('@')) { erro('err-login-email', true); valido = false; }
+      else erro('err-login-email', false);
+
+      if (!senha) { erro('err-login-senha', true); valido = false; }
+      else erro('err-login-senha', false);
+
+      if (!valido) return;
+
+      const usuarios = JSON.parse(localStorage.getItem('monvy_users') || '[]');
+      const user = usuarios.find(u => u.email === email && u.senha === senha);
+
+      if (!user) {
+        erro('err-login-senha', true);
+        document.getElementById('err-login-senha').textContent = 'E-mail ou senha incorretos';
+        showToast('Credenciais inválidas', '❌');
+        return;
+      }
+
+      localStorage.setItem('monvy_logado', JSON.stringify(user));
+      showToast(`Bem-vindo de volta, ${user.nome}! 👋`);
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    }
+
+    // ── Cadastro ──
+    function fazerCadastro() {
+      const nome  = document.getElementById('cad-nome').value.trim();
+      const email = document.getElementById('cad-email').value.trim();
+      const senha = document.getElementById('cad-senha').value;
+      const termos = document.getElementById('termos').checked;
+      let valido = true;
+
+      if (!nome) { erro('err-cad-nome', true); valido = false; }
+      else erro('err-cad-nome', false);
+
+      if (!email || !email.includes('@')) { erro('err-cad-email', true); valido = false; }
+      else erro('err-cad-email', false);
+
+      if (senha.length < 6) { erro('err-cad-senha', true); valido = false; }
+      else erro('err-cad-senha', false);
+
+      if (!termos) { showToast('Aceite os Termos de Uso para continuar', '⚠️'); valido = false; }
+
+      if (!valido) return;
+
+      const usuarios = JSON.parse(localStorage.getItem('monvy_users') || '[]');
+
+      if (usuarios.find(u => u.email === email)) {
+        erro('err-cad-email', true);
+        document.getElementById('err-cad-email').textContent = 'Este e-mail já está cadastrado';
+        showToast('E-mail já cadastrado', '⚠️');
+        return;
+      }
+
+      const novoUser = { nome, email, senha, criadoEm: new Date().toISOString() };
+      usuarios.push(novoUser);
+      localStorage.setItem('monvy_users', JSON.stringify(usuarios));
+      localStorage.setItem('monvy_logado', JSON.stringify(novoUser));
+
+      showToast(`Conta criada! Bem-vindo ao Monvy, ${nome}! 🎉`);
+      setTimeout(() => window.location.href = 'index.html', 1400);
+    }
+
+    // ── Demo (sem senha) ──
+    function entrarDemo() {
+      const demoUser = { nome: 'Visitante', email: 'demo@monvy.app', senha: '', demo: true };
+      localStorage.setItem('monvy_logado', JSON.stringify(demoUser));
+      showToast('Entrando no modo demo... 🚀');
+      setTimeout(() => window.location.href = 'index.html', 1000);
+    }
+
+    // Pré-preencher email da landing
+    window.addEventListener('DOMContentLoaded', () => {
+      const ep = params.get('email');
+      if (ep) {
+        const inLogin = document.getElementById('login-email');
+        const inCad   = document.getElementById('cad-email');
+        if (inLogin) inLogin.value = ep;
+        if (inCad)   inCad.value   = ep;
+      }
+    });
   </script>
-<script>
-function toggleSenhaAuth(inputId, showId, hideId) {
-  const input = document.getElementById(inputId);
-  const eyeShow = document.getElementById(showId);
-  const eyeHide = document.getElementById(hideId);
-  if (input.type === 'password') {
-    input.type = 'text';
-    eyeShow.style.display = 'none';
-    eyeHide.style.display = 'block';
-  } else {
-    input.type = 'password';
-    eyeShow.style.display = 'block';
-    eyeHide.style.display = 'none';
-  }
-}
-</script>
 </body>
 </html>

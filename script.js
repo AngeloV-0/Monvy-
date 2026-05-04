@@ -722,7 +722,4 @@ function logout() {
     // Nome curto na topbar ao iniciar
   }
 })();
-const script = document.createElement('script');
-script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
-script.onload = () => atualizarChart();
-document.head.appendChild(script);
+

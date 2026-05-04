@@ -7,11 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script>
-    // Auth guard — redireciona para auth.html se não estiver logado
-    const _user = localStorage.getItem('monvy_logado');
-    if (!_user) window.location.href = 'auth.html';
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -395,25 +391,16 @@
 
   <script src="script.js"></script>
   <script>
-    // Auth guard
     (function() {
-      const logged = JSON.parse(localStorage.getItem('monvy_logged') || 'null');
+      const logged = JSON.parse(localStorage.getItem('monvy_logado') || 'null');
       if (!logged) { window.location.href = 'landing.html'; return; }
-      // Set avatar letter and greeting
-      const initial = (logged.name || 'U')[0].toUpperCase();
+      const initial = (logged.nome || logged.name || 'U')[0].toUpperCase();
       const avatarEl = document.getElementById('user-avatar');
       if (avatarEl) avatarEl.textContent = initial;
-      // Greeting in topbar
       const greetEl = document.getElementById('topbar-greeting');
-      if (greetEl) greetEl.textContent = 'Olá, ' + logged.name.split(' ')[0] + ' 👋';
+      const nome = logged.nome || logged.name || '';
+      if (greetEl && nome) greetEl.textContent = 'Olá, ' + nome.split(' ')[0] + ' 👋';
     })();
-
-    function logout() {
-      if (confirm('Deseja sair da sua conta?')) {
-        localStorage.removeItem('monvy_logged');
-        window.location.href = 'landing.html';
-      }
-    }
   </script>
 </body>
 </html>

@@ -3,17 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monvay — Finanças que fazem sentido</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#060D0A">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Monvay">
-  <link rel="apple-touch-icon" href="logo.png">
+  <title>Monvy — Finanças que fazem sentido</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <style>
     :root {
       --p: #22C55E;
@@ -25,7 +17,7 @@
       --border: rgba(255,255,255,0.08);
       --white: #FFFFFF;
       --muted: rgba(255,255,255,0.55);
-      --font-h: 'Plus Jakarta Sans', sans-serif;
+      --font-h: 'Syne', sans-serif;
       --font-b: 'DM Sans', sans-serif;
     }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -52,8 +44,9 @@
       text-decoration: none; color: var(--white);
     }
     .nav-logo-icon {
-      height: 28px; width: auto; background: none; border-radius: 0;
+      width: 36px; height: 36px; background: var(--grad); border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; color: #061209;
     }
     .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
     .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
@@ -126,13 +119,12 @@
     }
     .hero-form {
       display: flex; gap: 10px; max-width: 420px; margin: 0 auto 16px;
-      animation: fadeUp 0.6s 0.3s ease both; width: 100%;
+      animation: fadeUp 0.6s 0.3s ease both;
     }
     .hero-form input {
-      flex: 1; min-width: 0; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
       border-radius: 12px; padding: 14px 18px; color: var(--white);
       font-family: var(--font-b); font-size: 0.9rem; outline: none; transition: border-color 0.2s;
-      box-sizing: border-box;
     }
     .hero-form input:focus { border-color: rgba(34,197,94,0.5); }
     .hero-form input::placeholder { color: rgba(255,255,255,0.3); }
@@ -141,22 +133,18 @@
     .hero-note a { color: var(--p); text-decoration: none; }
 
     /* Floating Cards */
-    .hero-cards {
-      display: flex; justify-content: center; align-items: flex-start;
-      gap: 0; position: relative; margin-top: 64px; height: 220px;
-      animation: fadeUp 0.8s 0.5s ease both;
-    }
+    .hero-cards { position: relative; margin-top: 64px; height: 260px; animation: fadeUp 0.8s 0.5s ease both; }
     .float-card {
       position: absolute; border-radius: 20px; padding: 20px 24px;
       border: 1px solid rgba(255,255,255,0.1);
       backdrop-filter: blur(20px);
     }
-    .fc1 { background: rgba(255,255,255,0.05); width: 220px; top: 0; left: 50%; margin-left: -110px; z-index: 3; animation: floatA 6s ease-in-out infinite; }
-    .fc2 { background: linear-gradient(135deg,rgba(34,197,94,0.18),rgba(163,230,53,0.08)); border-color: rgba(34,197,94,0.3); width: 220px; top: 30px; left: 50%; margin-left: -290px; z-index: 2; animation: floatB 6s ease-in-out infinite; }
-    .fc3 { background: rgba(255,255,255,0.04); width: 220px; top: 50px; left: 50%; margin-left: 80px; z-index: 1; animation: floatC 6s ease-in-out infinite; }
-    @keyframes floatA { 0%,100%{transform:rotate(-3deg) translateY(0)} 50%{transform:rotate(-3deg) translateY(-12px)} }
-    @keyframes floatB { 0%,100%{transform:rotate(3deg) translateY(0)} 50%{transform:rotate(3deg) translateY(-14px)} }
-    @keyframes floatC { 0%,100%{transform:rotate(7deg) translateY(0)} 50%{transform:rotate(7deg) translateY(-8px)} }
+    .fc1 { background: rgba(255,255,255,0.05); left: 50%; top: 0; width: 240px; animation: floatA 6s ease-in-out infinite; }
+    .fc2 { background: linear-gradient(135deg,rgba(34,197,94,0.18),rgba(163,230,53,0.08)); border-color: rgba(34,197,94,0.3); left: 50%; top: 28px; width: 220px; animation: floatB 6s ease-in-out infinite; }
+    .fc3 { background: rgba(255,255,255,0.04); left: 50%; top: 48px; width: 200px; animation: floatC 6s ease-in-out infinite; }
+    @keyframes floatA { 0%,100%{transform:translateX(-50%) rotate(-6deg) translateY(0)} 50%{transform:translateX(-50%) rotate(-6deg) translateY(-10px)} }
+    @keyframes floatB { 0%,100%{transform:translateX(-80px) rotate(2deg) translateY(0)} 50%{transform:translateX(-80px) rotate(2deg) translateY(-14px)} }
+    @keyframes floatC { 0%,100%{transform:translateX(20px) rotate(8deg) translateY(0)} 50%{transform:translateX(20px) rotate(8deg) translateY(-8px)} }
     .card-chip { width: 32px; height: 24px; background: var(--grad); border-radius: 5px; margin-bottom: 18px; opacity: 0.9; }
     .card-chip.dark { background: linear-gradient(135deg,#1e293b,#334155); }
     .card-num { font-family: var(--font-h); font-size: 0.8rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
@@ -202,13 +190,9 @@
     .feature-card:hover { border-color: rgba(34,197,94,0.3); transform: translateY(-4px); }
     .feature-card:hover::after { opacity: 1; }
     .feature-icon {
-      width: 52px; height: 52px; border-radius: 14px;
+      width: 48px; height: 48px; border-radius: 14px;
       background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
-      display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
-      padding: 10px;
-    }
-    .feature-icon img {
-      width: 100%; height: 100%; object-fit: contain;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 18px;
     }
     .feature-title { font-family: var(--font-h); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
     .feature-desc { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
@@ -304,7 +288,7 @@
     }
     .auth-close:hover { color: var(--white); background: rgba(255,255,255,0.1); }
     .auth-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-h); font-weight: 800; font-size: 1.1rem; margin-bottom: 20px; }
-    .auth-logo-icon { width: 38px; height: 38px; background: none; border-radius: 0; display: flex; align-items: center; justify-content: center; }
+    .auth-logo-icon { width: 34px; height: 34px; background: var(--grad); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; color: #061209; }
     .auth-title { font-family: var(--font-h); font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; }
     .auth-sub { font-size: 0.84rem; color: var(--muted); margin-bottom: 26px; }
     .auth-tab-row { display: flex; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
@@ -335,281 +319,20 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
     /* RESPONSIVE */
-    /* ─── TABLET (≤900px) ─────────────────────────────── */
     @media(max-width:900px){
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .features-grid { grid-template-columns: 1fr 1fr; }
-      .how-inner { grid-template-columns: 1fr; }
-      .how-preview { display: none; }
-      .testim-grid { grid-template-columns: 1fr 1fr; }
-      footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
+      nav{padding:0 20px}
+      .nav-links{display:none}
+      .features-grid{grid-template-columns:1fr 1fr}
+      .how-inner{grid-template-columns:1fr}
+      .how-preview{display:none}
+      .testim-grid{grid-template-columns:1fr}
+      footer{flex-direction:column;gap:12px;text-align:center;padding:24px}
     }
-
-    /* ─── MOBILE (≤600px) ─────────────────────────────── */
     @media(max-width:600px){
-      body { overflow-x: hidden; }
-
-      /* ── Nav ── */
-      nav {
-        padding: 0 16px;
-        height: 58px;
-      }
-      .nav-cta { gap: 8px; }
-      .btn-ghost {
-        padding: 8px 14px;
-        font-size: 0.82rem;
-      }
-      .btn-solid {
-        padding: 8px 14px;
-        font-size: 0.82rem;
-        white-space: nowrap;
-      }
-
-      /* ── Hero ── */
-      .hero {
-        padding: 80px 20px 48px;
-        min-height: 100svh;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
-      .hero-content {
-        width: 100%;
-        max-width: 100%;
-      }
-      .hero-bg-circle.c1 {
-        width: 280px; height: 280px;
-        opacity: 0.6;
-        top: -60px;
-      }
-      .hero-bg-circle.c2,
-      .hero-bg-circle.c3 { display: none; }
-      .hero-grid {
-        background-size: 40px 40px;
-        opacity: 0.5;
-      }
-      .hero-badge {
-        font-size: 0.72rem;
-        padding: 5px 12px;
-        margin-bottom: 18px;
-      }
-      .hero-title {
-        font-size: clamp(1.9rem, 8.5vw, 2.4rem);
-        letter-spacing: -0.5px;
-        margin-bottom: 14px;
-        line-height: 1.12;
-      }
-      .hero-sub {
-        font-size: 0.88rem;
-        margin-bottom: 24px;
-        max-width: 100%;
-        text-align: center;
-      }
-
-      /* Form: input acima, botão abaixo — largura total */
-      .hero-form {
-        flex-direction: column;
-        gap: 10px;
-        max-width: 100%;
-        width: 100%;
-        margin: 0 auto 12px;
-      }
-      .hero-form input {
-        width: 100%;
-        min-width: 0;
-        padding: 14px 16px;
-        border-radius: 12px;
-        font-size: 1rem; /* evita zoom iOS */
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        box-sizing: border-box;
-      }
-      .hero-form .btn-solid {
-        width: 100%;
-        padding: 15px 20px;
-        border-radius: 12px;
-        font-size: 1rem;
-        text-align: center;
-        box-shadow: 0 8px 28px rgba(34,197,94,0.28);
-        box-sizing: border-box;
-      }
-      .hero-note {
-        font-size: 0.75rem;
-        text-align: center;
-      }
-
-      /* ── Cards flutuantes — empilhados com profundidade no mobile ── */
-      .hero-cards {
-        position: relative;
-        height: 210px;
-        margin-top: 32px;
-        overflow: hidden;
-      }
-
-      /* Reset completo do posicionamento desktop */
-      .float-card {
-        position: absolute;
-        width: 52%;
-        max-width: 185px;
-        min-width: 130px;
-        padding: 14px 15px;
-        border-radius: 16px;
-        box-sizing: border-box;
-      }
-
-      /* fc2 (verde/Pro) — frente, à esquerda */
-      .fc2 {
-        top: 0;
-        left: 2%;
-        z-index: 3;
-        transform: rotate(-3deg);
-        animation: floatMobileB 7s ease-in-out infinite;
-      }
-
-      /* fc1 (João Silva) — meio, centro */
-      .fc1 {
-        top: 14px;
-        left: 24%;
-        z-index: 2;
-        opacity: 0.85;
-        transform: rotate(3deg);
-        animation: floatMobileA 8s ease-in-out infinite;
-      }
-
-      /* fc3 (Ana Costa) — fundo, à direita */
-      .fc3 {
-        display: block;
-        top: 28px;
-        left: 44%;
-        z-index: 1;
-        opacity: 0.55;
-        transform: rotate(8deg);
-        animation: floatMobileC 9s ease-in-out infinite;
-      }
-
-      @keyframes floatMobileA {
-        0%, 100% { transform: rotate(3deg) translateY(0); }
-        50%       { transform: rotate(3deg) translateY(-8px); }
-      }
-      @keyframes floatMobileB {
-        0%, 100% { transform: rotate(-3deg) translateY(0); }
-        50%       { transform: rotate(-3deg) translateY(-10px); }
-      }
-      @keyframes floatMobileC {
-        0%, 100% { transform: rotate(8deg) translateY(0); }
-        50%       { transform: rotate(8deg) translateY(-6px); }
-      }
-
-      /* Textos internos dos cards */
-      .card-chip { width: 24px; height: 17px; margin-bottom: 10px; border-radius: 3px; }
-      .card-num  { font-size: 0.6rem; margin-bottom: 10px; letter-spacing: 1px; }
-      .card-name { font-size: 0.68rem; }
-      .card-row  { font-size: 0.62rem; }
-
-      /* ── Stats ── */
-      .stats-strip {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-        padding: 0;
-      }
-      .stat {
-        padding: 24px 16px;
-        border-right: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-      }
-      .stat:nth-child(even) { border-right: none; }
-      .stat:nth-child(3),
-      .stat:nth-child(4) { border-bottom: none; }
-      .stat-val { font-size: 1.7rem; }
-      .stat-label { font-size: 0.75rem; }
-
-      /* ── Features ── */
-      .why-section { padding: 64px 20px; }
-      .why-section::before { display: none; }
-      .features-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .feature-card { padding: 22px 20px; }
-      .feature-icon { width: 44px; height: 44px; margin-bottom: 14px; }
-      .feature-title { font-size: 0.95rem; }
-      .feature-desc { font-size: 0.83rem; }
-
-      /* ── How ── */
-      .how-section { padding: 64px 20px; }
-      .how-step { gap: 16px; padding: 18px 0; }
-      .step-num { width: 32px; height: 32px; font-size: 0.78rem; flex-shrink: 0; }
-      .step-text h3 { font-size: 0.9rem; }
-      .step-text p { font-size: 0.8rem; }
-
-      /* ── Section headers ── */
-      .section-title {
-        font-size: clamp(1.55rem, 6.5vw, 2rem);
-        letter-spacing: -0.3px;
-      }
-      .section-sub {
-        font-size: 0.88rem;
-        max-width: 100%;
-        margin-bottom: 36px;
-      }
-      .section-eyebrow { font-size: 0.72rem; }
-
-      /* ── Testimonials ── */
-      .testim-section { padding: 64px 20px; }
-      .testim-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-top: 36px;
-      }
-      .testim-card { padding: 20px; }
-      .testim-text { font-size: 0.83rem; }
-
-      /* ── CTA section ── */
-      .cta-section { padding: 72px 20px; }
-      .cta-btn {
-        width: 100%;
-        max-width: 340px;
-        justify-content: center;
-        font-size: 1rem;
-        padding: 16px 28px;
-        border-radius: 14px;
-        box-shadow: 0 10px 36px rgba(34,197,94,0.32);
-      }
-      .cta-glow {
-        width: 280px;
-        height: 280px;
-      }
-
-      /* ── Auth modal — bottom sheet ── */
-      .auth-overlay { align-items: flex-end; }
-      .auth-box {
-        margin: 0;
-        padding: 32px 20px calc(32px + env(safe-area-inset-bottom));
-        border-radius: 24px 24px 0 0;
-        max-width: 100%;
-        width: 100%;
-        max-height: 92svh;
-        overflow-y: auto;
-      }
-      .auth-title { font-size: 1.15rem; }
-      .auth-sub { font-size: 0.82rem; }
-      .auth-submit { font-size: 0.95rem; padding: 14px; }
-      /* Evita zoom automático no iOS */
-      .auth-field input,
-      .hero-form input { font-size: 1rem; }
-    }
-
-    /* ─── MOBILE PEQUENO (≤390px) ────────────────────────── */
-    @media(max-width:390px){
-      .hero-title { font-size: 1.85rem; }
-      .hero-sub { font-size: 0.85rem; }
-      /* Esconde "Entrar" no nav — só mostra "Criar conta" */
-      .btn-ghost { display: none; }
-      .btn-solid { padding: 9px 18px; }
-      .stat-val { font-size: 1.45rem; }
-      .cta-btn { font-size: 0.92rem; padding: 14px 20px; }
+      .features-grid{grid-template-columns:1fr}
+      .hero-form{flex-direction:column}
+      .auth-box{margin:16px;padding:32px 22px}
+      .stats-strip{gap:32px}
     }
   </style>
 </head>
@@ -618,8 +341,8 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">
-    <img src="logo.png" alt="Monvay" style="height:28px;width:auto;display:block;">
-    Monvay
+    <div class="nav-logo-icon">M</div>
+    Monvy
   </a>
   <ul class="nav-links">
     <li><a href="#features">Funcionalidades</a></li>
@@ -627,8 +350,8 @@
     <li><a href="#depoimentos">Depoimentos</a></li>
   </ul>
   <div class="nav-cta">
-    <button class="btn-ghost" onclick="window.location.href='auth.html'">Entrar</button>
-    <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Criar conta grátis</button>
+    <button class="btn-ghost" onclick="openAuth('login')">Entrar</button>
+    <button class="btn-solid" onclick="openAuth('signup')">Criar conta grátis</button>
   </div>
 </nav>
 
@@ -647,21 +370,21 @@
       Controle seu dinheiro<br>com <span class="hl">clareza real</span>
     </h1>
     <p class="hero-sub">
-      Monvay é o site de finanças pessoais que te ajuda a entender para onde vai seu dinheiro — e a tomar decisões muito melhores.
+      Monvy é o app de finanças pessoais que te ajuda a entender para onde vai seu dinheiro — e a tomar decisões muito melhores.
     </p>
     <div class="hero-form">
       <input type="email" id="hero-email" placeholder="Seu melhor e-mail">
-      <button class="btn-solid" onclick="window.location.href='auth.html?modo=cadastro'">Começar grátis →</button>
+      <button class="btn-solid" onclick="openAuthWithEmail()">Começar grátis →</button>
     </div>
-    <p class="hero-note">Gratuito para sempre. Sem cartão de crédito. <a href="#" onclick="window.location.href='auth.html';return false;">Já tem conta? Entre aqui</a></p>
+    <p class="hero-note">Gratuito para sempre. Sem cartão de crédito. <a href="#" onclick="openAuth('login');return false;">Já tem conta? Entre aqui</a></p>
 
-    <div class="hero-cards" id="hero-cards-wrap">
+    <div class="hero-cards">
       <div class="float-card fc3">
         <div class="card-chip dark"></div>
         <div class="card-num">•••• •••• •••• 4892</div>
         <div class="card-row">
           <div><div style="font-size:.63rem;color:rgba(255,255,255,.35);margin-bottom:2px">Titular</div><div class="card-name">Ana Costa</div></div>
-          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvay</div>
+          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvy</div>
         </div>
       </div>
       <div class="float-card fc1">
@@ -669,7 +392,7 @@
         <div class="card-num">•••• •••• •••• 7741</div>
         <div class="card-row">
           <div><div style="font-size:.63rem;color:rgba(255,255,255,.35);margin-bottom:2px">Titular</div><div class="card-name">João Silva</div></div>
-          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvay</div>
+          <div style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.4)">Monvy</div>
         </div>
       </div>
       <div class="float-card fc2">
@@ -699,12 +422,12 @@
   <p class="section-sub">Seis módulos pensados para quem quer organizar a vida financeira sem complicação.</p>
 
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon"><img src="icone-casa-propria.png" alt="Dashboard"></div><div class="feature-title">Dashboard completo</div><div class="feature-desc">Saldo em destaque, entradas, saídas e últimas movimentações numa tela só. Visão geral imediata.</div></div>
-    <div class="feature-card"><div class="feature-icon"><img src="icone-grafico-02.png" alt="Gastos"></div><div class="feature-title">Gastos por categoria</div><div class="feature-desc">Organize seus gastos em Casa, Alimentação, Transporte, Lazer, Saúde e Outros. Com gráfico de fluxo.</div></div>
-    <div class="feature-card"><div class="feature-icon"><img src="icone-meta.png" alt="Metas"></div><div class="feature-title">Metas de economia</div><div class="feature-desc">Crie metas com valor-alvo e acompanhe com barra de progresso. Adicione valores quando quiser.</div></div>
-    <div class="feature-card"><div class="feature-icon"><img src="icone-cartao-01.png" alt="Dívidas"></div><div class="feature-title">Simulador de dívidas</div><div class="feature-desc">Descubra o valor real que você vai pagar com juros antes de assumir qualquer dívida.</div></div>
-    <div class="feature-card"><div class="feature-icon"><img src="icone-investimento.png" alt="Investimentos"></div><div class="feature-title">Comparador de investimentos</div><div class="feature-desc">Poupança, Tesouro Selic e CDB 110% lado a lado. Simule com seu valor e prazo.</div></div>
-    <div class="feature-card"><div class="feature-icon"><img src="icone-cerebro.png" alt="Necessidade vs Desejo"></div><div class="feature-title">Necessidade vs Desejo</div><div class="feature-desc">Ao registrar um gasto o Monvay te pergunta: isso é necessidade ou impulso? E pede confirmação se for desejo.</div></div>
+    <div class="feature-card"><div class="feature-icon">🏠</div><div class="feature-title">Dashboard completo</div><div class="feature-desc">Saldo em destaque, entradas, saídas e últimas movimentações numa tela só. Visão geral imediata.</div></div>
+    <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Gastos por categoria</div><div class="feature-desc">Organize seus gastos em Casa, Alimentação, Transporte, Lazer, Saúde e Outros. Com gráfico de fluxo.</div></div>
+    <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Metas de economia</div><div class="feature-desc">Crie metas com valor-alvo e acompanhe com barra de progresso. Adicione valores quando quiser.</div></div>
+    <div class="feature-card"><div class="feature-icon">💳</div><div class="feature-title">Simulador de dívidas</div><div class="feature-desc">Descubra o valor real que você vai pagar com juros antes de assumir qualquer dívida.</div></div>
+    <div class="feature-card"><div class="feature-icon">📈</div><div class="feature-title">Comparador de investimentos</div><div class="feature-desc">Poupança, Tesouro Selic e CDB 110% lado a lado. Simule com seu valor e prazo.</div></div>
+    <div class="feature-card"><div class="feature-icon">🧠</div><div class="feature-title">Necessidade vs Desejo</div><div class="feature-desc">Ao registrar um gasto o Monvy te pergunta: isso é necessidade ou impulso? E pede confirmação se for desejo.</div></div>
   </div>
 </section>
 
@@ -722,7 +445,7 @@
         </div>
         <div class="how-step" onclick="setStep(this)">
           <div class="step-num">2</div>
-          <div class="step-text"><h3>Registre suas movimentações</h3><p>Adicione entradas e saídas com um clique. O Monvay categoriza tudo.</p></div>
+          <div class="step-text"><h3>Registre suas movimentações</h3><p>Adicione entradas e saídas com um clique. O Monvy categoriza tudo.</p></div>
         </div>
         <div class="how-step" onclick="setStep(this)">
           <div class="step-num">3</div>
@@ -744,7 +467,7 @@
 <!-- DEPOIMENTOS -->
 <section class="testim-section" id="depoimentos">
   <div class="section-eyebrow">Depoimentos</div>
-  <h2 class="section-title">O que dizem sobre o Monvay</h2>
+  <h2 class="section-title">O que dizem sobre o Monvy</h2>
   <div class="testim-grid">
     <div class="testim-card">
       <div class="testim-stars">★★★★★</div>
@@ -779,7 +502,7 @@
   <div class="section-eyebrow" style="position:relative;z-index:1">Comece hoje</div>
   <h2 class="section-title" style="position:relative;z-index:1">Seu dinheiro merece<br>atenção real</h2>
   <p class="section-sub" style="position:relative;z-index:1">Crie sua conta gratuita e comece a enxergar suas finanças com clareza.</p>
-  <a href="#" class="cta-btn" onclick="window.location.href='auth.html?modo=cadastro';return false;">
+  <a href="#" class="cta-btn" onclick="openAuth('signup');return false;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Criar conta gratuita
   </a>
@@ -788,10 +511,10 @@
 <!-- FOOTER -->
 <footer>
   <div class="nav-logo" style="font-size:.95rem">
-    <img src="logo.png" alt="Monvay" style="height:22px;width:auto;display:block;">
-    Monvay
+    <div class="nav-logo-icon" style="width:28px;height:28px;font-size:.82rem">M</div>
+    Monvy
   </div>
-  <div class="footer-copy">© 2026 Monvay. Feito com 💚 para quem quer crescer.</div>
+  <div class="footer-copy">© 2025 Monvy. Feito com 💚 para quem quer crescer.</div>
 </footer>
 
 <!-- AUTH MODAL -->
@@ -801,8 +524,8 @@
 
     <div id="auth-form-area">
       <div class="auth-logo">
-        <img src="logo.png" alt="Monvay" style="height:26px;width:auto;display:block;">
-        Monvay
+        <div class="auth-logo-icon">M</div>
+        Monvy
       </div>
       <h2 class="auth-title" id="auth-title">Criar conta</h2>
       <p class="auth-sub" id="auth-sub">Grátis para sempre. Sem cartão.</p>
@@ -825,30 +548,8 @@
       </div>
       <div class="auth-field">
         <label>Senha</label>
-        <div style="position:relative">
-          <input type="password" id="auth-password" placeholder="Mínimo 6 caracteres" style="padding-right:44px;width:100%;box-sizing:border-box">
-          <button type="button" onclick="toggleSenha()" id="btn-toggle-senha" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);padding:0;display:flex;align-items:center" title="Mostrar senha">
-            <svg id="icon-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <svg id="icon-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-          </button>
-        </div>
+        <input type="password" id="auth-password" placeholder="Mínimo 6 caracteres">
       </div>
-      <script>
-      function toggleSenha() {
-        const input = document.getElementById('auth-password');
-        const eyeShow = document.getElementById('icon-eye-show');
-        const eyeHide = document.getElementById('icon-eye-hide');
-        if (input.type === 'password') {
-          input.type = 'text';
-          eyeShow.style.display = 'none';
-          eyeHide.style.display = 'block';
-        } else {
-          input.type = 'password';
-          eyeShow.style.display = 'block';
-          eyeHide.style.display = 'none';
-        }
-      }
-      </script>
 
       <div class="auth-error" id="auth-error"></div>
       <button class="auth-submit" id="auth-submit" onclick="handleAuth()">Criar minha conta →</button>
@@ -857,7 +558,7 @@
     <div id="auth-success-area" class="auth-success-area" style="display:none">
       <div class="success-check">✓</div>
       <h3 id="success-title">Conta criada!</h3>
-      <p id="success-msg">Bem-vindo ao Monvay.</p>
+      <p id="success-msg">Bem-vindo ao Monvy.</p>
       <button class="auth-submit" onclick="goToDashboard()">Entrar no Dashboard →</button>
     </div>
   </div>
@@ -928,9 +629,6 @@
   }
 
   function goToDashboard() { window.location.href = 'index.html'; }
-
-  // Usuário logado é redirecionado apenas ao clicar em Entrar/Criar conta
-  // (removido auto-redirect que causava loop)
 
   function setStep(el) {
     document.querySelectorAll('.how-step').forEach(s => s.classList.remove('active'));
