@@ -434,7 +434,7 @@ async function carregarAtivosB3() {
   lista.innerHTML = '<div class="b3-loading" style="padding:20px 16px">⏳ Carregando ativos...</div>';
   try {
     const tickers = TODOS_B3.join(',');
-    const res = await fetch(`https://brapi.dev/api/quote/${tickers}?fundamental=false&logourl=true`, {headers:{"Authorization":"Bearer eHcu2c4JXhGAFG4MGj7Zim"}});
+    const res = await fetch(`https://brapi.dev/api/quote/${tickers}?fundamental=false&logourl=true&token=eHcu2c4JXhGAFG4MGj7Zim`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (!json.results || json.results.length === 0) throw new Error('Sem resultados');
@@ -656,7 +656,7 @@ async function buscarAtivoB3() {
   if (!input) { res.innerHTML = '<div class="b3-erro">Digite um ticker válido.</div>'; return; }
   res.innerHTML = '<div class="b3-loading">⏳ Buscando...</div>';
   try {
-    const r = await fetch(`https://brapi.dev/api/quote/${input}?fundamental=false&logourl=true`, {headers:{"Authorization":"Bearer eHcu2c4JXhGAFG4MGj7Zim"}});
+    const r = await fetch(`https://brapi.dev/api/quote/${input}?fundamental=false&logourl=true&token=eHcu2c4JXhGAFG4MGj7Zim`);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const json = await r.json();
     const a = json.results?.[0];
