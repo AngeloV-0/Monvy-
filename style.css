@@ -2198,14 +2198,6 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   cursor: pointer;
   transition: all .2s;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-@media (max-width: 420px) {
-  .perfil-tab { font-size: .68rem; padding: 7px 4px; flex-direction: column; gap: 3px; white-space: normal; text-align: center; }
-  .perfil-tab img { margin-right: 0 !important; }
 }
 .perfil-tab.active {
   background: var(--card-bg, #1a1f2e);
