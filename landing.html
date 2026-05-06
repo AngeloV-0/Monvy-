@@ -89,8 +89,8 @@
 
     .nav-logo-icon {
       width: 36px; height: 36px;
-      background: var(--grad);
-      border-radius: 10px;
+      background: none;
+      border-radius: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -905,6 +905,9 @@
 
     .score-svg { width: 80px; height: 50px; display: block; }
   </style>
+  <!-- Prefetch auth.html para carregamento instantâneo -->
+  <link rel="prefetch" href="auth.html">
+  <link rel="prefetch" href="firebase.js">
 </head>
 <body>
 
@@ -923,8 +926,8 @@
         <li><a href="#ferramentas">Ferramentas</a></li>
       </ul>
       <div class="nav-actions">
-        <a href="auth.html" class="btn-ghost">Entrar</a>
-        <a href="auth.html" class="btn-primary">
+        <a onclick="window.location.replace('auth.html')" class="btn-ghost" style="cursor:pointer">Entrar</a>
+        <a onclick="window.location.replace('auth.html')" class="btn-primary" style="cursor:pointer">
           Começar agora
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
@@ -952,11 +955,11 @@
     </p>
 
     <div class="hero-actions">
-      <a href="auth.html" class="btn-primary btn-xl">
+      <a onclick="window.location.replace('auth.html')" class="btn-primary btn-xl" style="cursor:pointer">
         Criar minha conta
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
-      <a href="auth.html" class="btn-ghost btn-xl">Ver demonstração</a>
+      <a onclick="window.location.replace('auth.html')" class="btn-ghost btn-xl" style="cursor:pointer">Ver demonstração</a>
     </div>
 
     <p class="hero-note">✓ Plano gratuito disponível &nbsp;&nbsp;✓ Cancele quando quiser &nbsp;&nbsp;✓ Dados seguros</p>
@@ -1303,7 +1306,7 @@
         <h2>Pronto para ter <span class="gradient-text">controle total</span><br>do seu dinheiro?</h2>
         <p>Junte-se a mais de 50 mil pessoas que já transformaram sua relação com o dinheiro usando o Monvay.</p>
         <div class="cta-actions">
-          <a href="auth.html" class="btn-primary btn-xl">
+          <a onclick="window.location.replace('auth.html')" class="btn-primary btn-xl" style="cursor:pointer">
             Criar minha conta
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
