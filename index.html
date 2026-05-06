@@ -156,6 +156,35 @@
           <button class="dica-dia-close" onclick="this.closest('.dica-dia-card').style.display='none'" title="Fechar">×</button>
         </div>
 
+        <!-- Banner Modo Empresa -->
+        <div id="banner-empresa" style="display:none;margin-bottom:16px">
+          <div style="position:relative;padding:18px 20px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.25);border-radius:16px">
+            <!-- Botão X — fecha mas pode voltar depois -->
+            <button onclick="fecharBannerEmpresa('talvez')" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px" title="Fechar">×</button>
+            <!-- Conteúdo -->
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+              <img src="icone-marketing.png" alt="Empresa" style="width:46px;height:46px;object-fit:contain;border-radius:10px;flex-shrink:0">
+              <div>
+                <div style="font-size:.92rem;font-weight:700;color:var(--white);margin-bottom:4px">Você tem um negócio ou empresa?</div>
+                <div style="font-size:.78rem;color:var(--gray);line-height:1.5">O Monvay tem um modo especial para ajudar você a controlar as finanças do seu negócio. Você teria interesse?</div>
+              </div>
+            </div>
+            <!-- Botões de resposta -->
+            <div style="display:flex;gap:10px">
+              <button onclick="fecharBannerEmpresa('sim')"
+                style="flex:1;padding:10px;background:var(--primary);color:#000;border:none;border-radius:11px;font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer;transition:filter .2s"
+                onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
+                Sim, quero conhecer →
+              </button>
+              <button onclick="fecharBannerEmpresa('nao')"
+                style="flex:1;padding:10px;background:rgba(255,255,255,0.06);color:var(--gray);border:1px solid var(--border);border-radius:11px;font-size:.88rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s"
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">
+                Não, obrigado
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- KPI Row -->
         <div class="kpi-row">
           <div class="kpi-card primary-card">
@@ -165,25 +194,25 @@
 
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
+            <div class="kpi-icon green"><img src="icone-dinheiro-01.png" alt="Entradas" style="width:28px;height:28px;object-fit:contain"></div>
             <div class="kpi-label">Entradas</div>
             <div class="kpi-value green" id="kpi-entradas">R$ 0,00</div>
             <div class="kpi-sub">no período</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg></div>
+            <div class="kpi-icon red"><img src="icone-bolsa-de-dinheiro.png" alt="Saídas" style="width:28px;height:28px;object-fit:contain"></div>
             <div class="kpi-label">Saídas</div>
             <div class="kpi-value red" id="kpi-saidas">R$ 0,00</div>
             <div class="kpi-sub">no período</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="kpi-icon yellow"><img src="icone-conta.png" alt="Movimentações" style="width:28px;height:28px;object-fit:contain"></div>
             <div class="kpi-label">Movimentações</div>
             <div class="kpi-value yellow" id="kpi-movs">0</div>
             <div class="kpi-sub">registradas</div>
           </div>
           <div class="kpi-card score-mini-card" onclick="(window.irPara||irPara)('score')" style="cursor:pointer;position:relative;overflow:hidden">
-            <div id="kpi-score-mini-badge" style="margin-bottom:10px;"><div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div></div>
+            <div id="kpi-score-mini-badge" style="margin-bottom:10px;"><div class="kpi-icon green" id="kpi-score-mini-icon"><img src="icone-score-estavel.png" id="kpi-score-mini-img" alt="Score" style="width:28px;height:28px;object-fit:contain"></div></div>
             <div class="kpi-label">Score Financeiro</div>
             <div class="kpi-value" id="kpi-score-mini" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">–</div>
             <div class="kpi-sub" id="kpi-score-mini-label">Ver detalhes →</div>
@@ -1467,14 +1496,9 @@ bvRender();
           <input type="date" id="modal-data" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none">
         </div>
         <div id="modal-categoria-area">
-          <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
-          <select id="modal-categoria">
-            <option value="Alimentação">Alimentação</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Lazer">Lazer</option>
-            <option value="Saúde">Saúde</option>
-            <option value="Outros">Outros</option>
-          </select>
+          <label style="font-size:.85rem;color:var(--gray);margin-bottom:8px;display:block">Categoria</label>
+          <input type="hidden" id="modal-categoria" value="Outros">
+          <div id="modal-categoria-picker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:220px;overflow-y:auto;padding-right:2px"></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">
           <input type="checkbox" id="modal-recorrente" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;flex-shrink:0">
@@ -1505,14 +1529,9 @@ bvRender();
           <input type="date" id="edit-data" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none">
         </div>
         <div id="edit-categoria-area">
-          <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
-          <select id="edit-categoria">
-            <option value="Alimentação">Alimentação</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Lazer">Lazer</option>
-            <option value="Saúde">Saúde</option>
-            <option value="Outros">Outros</option>
-          </select>
+          <label style="font-size:.85rem;color:var(--gray);margin-bottom:8px;display:block">Categoria</label>
+          <input type="hidden" id="edit-categoria" value="Outros">
+          <div id="edit-categoria-picker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:220px;overflow-y:auto;padding-right:2px"></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px">
           <button class="btn-primary" style="flex:1" onclick="salvarEdicao()">Salvar</button>
@@ -1778,22 +1797,22 @@ bvRender();
           <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Streaming</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px" id="vida-rotina-streaming-opts">
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','netflix')"><span>
-              <img src="logo-netflix.png" alt="Netflix" style="height:44px;object-fit:contain;">
+              <img src="logo-netflix.png" alt="Netflix" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>Netflix</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','disney')"><span>
-              <img src="logo-disney.png" alt="Disney+" style="height:44px;object-fit:contain;">
+              <img src="logo-disney.png" alt="Disney+" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>Disney+</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','spotify')"><span>
-              <img src="logo-spotify.png" alt="Spotify" style="height:44px;object-fit:contain;">
+              <img src="logo-spotify.png" alt="Spotify" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>Spotify</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','youtube')"><span>
-              <img src="logo-youtube.png" alt="YouTube Premium" style="height:44px;object-fit:contain;">
+              <img src="logo-youtube.png" alt="YouTube Premium" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>YouTube Premium</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','hbo')"><span>
-              <img src="logo-hbo.png" alt="Max (HBO)" style="height:44px;object-fit:contain;">
+              <img src="logo-hbo.png" alt="Max (HBO)" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>Max (HBO)</div>
             <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','prime')"><span>
-              <img src="logo-prime.png" alt="Prime Video" style="height:44px;width:44px;object-fit:contain;">
+              <img src="logo-prime.png" alt="Prime Video" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
             </span>Prime Video</div>
           </div>
           <!-- Streaming customizado -->

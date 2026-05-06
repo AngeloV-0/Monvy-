@@ -207,6 +207,24 @@
     }
     .fab-empresa:hover { transform: scale(1.05); }
 
+    /* Calculadora */
+    .calc-field { margin-bottom:14px; }
+    .calc-field label { display:block;font-size:.75rem;font-weight:600;color:var(--gray);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em; }
+    .calc-field input { width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;color:var(--white);font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s; }
+    .calc-field input:focus { border-color:var(--primary); }
+    .calc-hint { font-size:.72rem;color:var(--gray);margin-top:4px;display:block;line-height:1.4; }
+    .calc-preset { padding:5px 11px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.75rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s; }
+    .calc-preset:hover { border-color:var(--primary);color:var(--primary); }
+    .calc-preset.active { background:rgba(34,197,94,0.15);border-color:var(--primary);color:var(--primary); }
+    .calc-break-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:.83rem; }
+    .calc-break-row:last-child { border-bottom:none; }
+    .calc-break-label { color:var(--gray); }
+    .calc-break-val { font-weight:700;color:var(--white); }
+    .calc-break-val.neg { color:var(--red); }
+    .calc-break-val.pos { color:var(--primary); }
+    .calc-break-row.total .calc-break-label { font-weight:700;color:var(--white); }
+    .calc-break-row.total .calc-break-val { font-size:.95rem; }
+
     @media (max-width: 768px) {
       .emp-kpi-row { grid-template-columns: 1fr 1fr; }
       .emp-grid2 { grid-template-columns: 1fr; }
@@ -296,6 +314,7 @@
         <button class="emp-tab" onclick="irParaTela('contas',this)">Contas</button>
         <button class="emp-tab" onclick="irParaTela('produtos',this)">Produtos</button>
         <button class="emp-tab" onclick="irParaTela('dre',this)">DRE</button>
+        <button class="emp-tab" onclick="irParaTela('calculadora',this)">Calculadora</button>
       </div>
 
       <!-- ===== TELA: PAINEL ===== -->
@@ -353,7 +372,7 @@
             <div class="emp-card-title">Diagnóstico do mês</div>
             <div id="diagnostico-lista">
               <div class="empty-state" style="padding:20px 0">
-                <div class="empty-icon">📊</div>
+                <div class="empty-icon"><img src="icone-grafico-01.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div>
                 <p>Adicione lançamentos para ver o diagnóstico.</p>
               </div>
             </div>
@@ -366,7 +385,7 @@
             <div class="emp-card-title">Próximas contas a pagar</div>
             <div id="painel-contas-pagar">
               <div class="empty-state" style="padding:16px 0">
-                <div class="empty-icon">📅</div>
+                <div class="empty-icon"><img src="icone-conta.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div>
                 <p>Nenhuma conta cadastrada.</p>
               </div>
             </div>
@@ -415,7 +434,7 @@
           <div class="emp-card-title">Movimentações</div>
           <div id="caixa-lista">
             <div class="empty-state">
-              <div class="empty-icon">💸</div>
+              <div class="empty-icon"><img src="icone-dinheiro-01.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div>
               <p>Nenhuma movimentação ainda.<br>Clique em "Nova entrada" ou "Novo gasto" para começar.</p>
             </div>
           </div>
@@ -440,7 +459,7 @@
             <div class="emp-card-title">A receber</div>
             <div id="contas-receber-lista">
               <div class="empty-state" style="padding:20px 0">
-                <div class="empty-icon">📥</div>
+                <div class="empty-icon"><img src="icone-dinheiro-01.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div>
                 <p>Nenhuma conta a receber.</p>
               </div>
             </div>
@@ -449,7 +468,7 @@
             <div class="emp-card-title">A pagar</div>
             <div id="contas-pagar-lista">
               <div class="empty-state" style="padding:20px 0">
-                <div class="empty-icon">📤</div>
+                <div class="empty-icon"><img src="icone-produto.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;opacity:.5"></div>
                 <p>Nenhuma conta a pagar.</p>
               </div>
             </div>
@@ -473,7 +492,7 @@
           <div class="emp-card-title">Seus produtos e serviços</div>
           <div id="produtos-lista-tela">
             <div class="empty-state">
-              <div class="empty-icon">📦</div>
+              <div class="empty-icon"><img src="icone-produto.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;opacity:.5"></div>
               <p>Nenhum produto cadastrado.<br>Adicione para ver a margem de cada um.</p>
             </div>
           </div>
@@ -494,7 +513,7 @@
             <div class="emp-card-title">Demonstrativo de resultado</div>
             <div id="dre-content">
               <div class="empty-state">
-                <div class="empty-icon">📋</div>
+                <div class="empty-icon"><img src="icone-dre.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div>
                 <p>Adicione lançamentos para ver o DRE.</p>
               </div>
             </div>
@@ -508,7 +527,160 @@
         </div>
       </div>
 
+      <!-- ===== TELA: CALCULADORA ===== -->
+      <div class="emp-tela" id="emp-tela-calculadora">
+        <div class="emp-topbar">
+          <div class="emp-topbar-left">
+            <h2>Calculadora de preço</h2>
+            <p>Descubra o preço ideal para vender com lucro</p>
+          </div>
+        </div>
+
+        <div class="emp-grid2b">
+
+          <!-- Coluna esquerda: Inputs -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <!-- Custo de produção -->
+            <div class="emp-card">
+              <div class="emp-card-title">Custo do produto / serviço</div>
+
+              <div class="calc-field">
+                <label>Custo de matéria-prima (R$)</label>
+                <input type="number" id="calc-materia" placeholder="0,00" min="0" step="0.01" oninput="calcularPreco()">
+                <span class="calc-hint">Tudo que você gastou para produzir</span>
+              </div>
+              <div class="calc-field">
+                <label>Mão de obra (R$)</label>
+                <input type="number" id="calc-mao-obra" placeholder="0,00" min="0" step="0.01" oninput="calcularPreco()">
+                <span class="calc-hint">Seu tempo ou de funcionários por unidade</span>
+              </div>
+              <div class="calc-field">
+                <label>Custo fixo por unidade (R$)</label>
+                <input type="number" id="calc-fixo" placeholder="0,00" min="0" step="0.01" oninput="calcularPreco()">
+                <span class="calc-hint">Aluguel, energia etc dividido pela produção mensal</span>
+              </div>
+              <div class="calc-field">
+                <label>Outros custos (R$)</label>
+                <input type="number" id="calc-outros" placeholder="0,00" min="0" step="0.01" oninput="calcularPreco()">
+              </div>
+
+              <div id="calc-custo-total-box" style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:.82rem;color:var(--gray)">Custo total por unidade</span>
+                <span id="calc-custo-total" style="font-size:1.1rem;font-weight:800;color:var(--white)">R$ 0,00</span>
+              </div>
+            </div>
+
+            <!-- Taxas e encargos -->
+            <div class="emp-card">
+              <div class="emp-card-title">Taxas e encargos</div>
+
+              <div class="calc-field">
+                <label>Margem de lucro desejada (%)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="margem-presets">
+                  <button class="calc-preset" onclick="setPreset('calc-margem',20,this)">20%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-margem',30,this)">30%</button>
+                  <button class="calc-preset active" onclick="setPreset('calc-margem',40,this)">40%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-margem',50,this)">50%</button>
+                </div>
+                <input type="number" id="calc-margem" value="40" min="0" max="100" step="1" oninput="calcularPreco();limparPresets('margem-presets')">
+              </div>
+
+              <div class="calc-field">
+                <label>Taxa de imposto / simples (%)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="imposto-presets">
+                  <button class="calc-preset" onclick="setPreset('calc-imposto',0,this)">Isento</button>
+                  <button class="calc-preset" onclick="setPreset('calc-imposto',4,this)">Simples 4%</button>
+                  <button class="calc-preset active" onclick="setPreset('calc-imposto',6,this)">Simples 6%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-imposto',11.31,this)">Lucro Presumido</button>
+                </div>
+                <input type="number" id="calc-imposto" value="6" min="0" max="100" step="0.01" oninput="calcularPreco();limparPresets('imposto-presets')">
+              </div>
+
+              <div class="calc-field">
+                <label>Maquininha de cartão (%)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="cartao-presets">
+                  <button class="calc-preset active" onclick="setPreset('calc-cartao',0,this)">Sem cartão</button>
+                  <button class="calc-preset" onclick="setPreset('calc-cartao',1.5,this)">Débito 1,5%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-cartao',2.5,this)">Crédito 2,5%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-cartao',3.5,this)">Parcelado 3,5%</button>
+                </div>
+                <input type="number" id="calc-cartao" value="0" min="0" max="20" step="0.01" oninput="calcularPreco();limparPresets('cartao-presets')">
+              </div>
+
+              <div class="calc-field">
+                <label>Taxa de marketplace / plataforma (%)</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="plat-presets">
+                  <button class="calc-preset active" onclick="setPreset('calc-plataforma',0,this)">Nenhuma</button>
+                  <button class="calc-preset" onclick="setPreset('calc-plataforma',12,this)">Shopee 12%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-plataforma',16,this)">Mercado Livre 16%</button>
+                  <button class="calc-preset" onclick="setPreset('calc-plataforma',20,this)">iFood 20%</button>
+                </div>
+                <input type="number" id="calc-plataforma" value="0" min="0" max="50" step="0.01" oninput="calcularPreco();limparPresets('plat-presets')">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Coluna direita: Resultado -->
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <!-- Resultado principal -->
+            <div class="emp-card" style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border-color:rgba(34,197,94,0.3)">
+              <div class="emp-card-title" style="color:var(--primary)">Preço ideal de venda</div>
+              <div id="calc-preco-ideal" style="font-size:2.4rem;font-weight:800;color:var(--primary);margin-bottom:4px">R$ 0,00</div>
+              <div id="calc-preco-desc" style="font-size:.78rem;color:var(--gray);line-height:1.5">Informe os custos para calcular</div>
+            </div>
+
+            <!-- Breakdown -->
+            <div class="emp-card">
+              <div class="emp-card-title">Composição do preço</div>
+              <div id="calc-breakdown" style="display:flex;flex-direction:column;gap:0">
+                <div class="calc-break-row" style="color:var(--gray)">— Informe os dados ao lado</div>
+              </div>
+            </div>
+
+            <!-- Simulador de cenários -->
+            <div class="emp-card">
+              <div class="emp-card-title">E se eu cobrar...?</div>
+              <div style="font-size:.78rem;color:var(--gray);margin-bottom:12px">Teste diferentes preços e veja o impacto na margem</div>
+              <div class="calc-field" style="margin-bottom:10px">
+                <label>Preço que você quer cobrar (R$)</label>
+                <input type="number" id="calc-teste" placeholder="0,00" min="0" step="0.01" oninput="calcularCenario()">
+              </div>
+              <div id="calc-cenario-resultado" style="display:none;padding:12px 14px;border-radius:12px;border:1px solid var(--border)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <span style="font-size:.82rem;color:var(--gray)">Margem real</span>
+                  <span id="calc-cen-margem" style="font-size:1rem;font-weight:800"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <span style="font-size:.82rem;color:var(--gray)">Lucro por unidade</span>
+                  <span id="calc-cen-lucro" style="font-size:.95rem;font-weight:700"></span>
+                </div>
+                <div id="calc-cen-alerta" style="font-size:.78rem;margin-top:6px;padding:8px 10px;border-radius:8px;line-height:1.4"></div>
+              </div>
+            </div>
+
+            <!-- Quantas vendas para pagar os fixos -->
+            <div class="emp-card">
+              <div class="emp-card-title">Ponto de equilíbrio</div>
+              <div class="calc-field" style="margin-bottom:8px">
+                <label>Seus custos fixos mensais (R$)</label>
+                <input type="number" id="calc-fixos-mensais" placeholder="0,00" min="0" step="0.01" oninput="calcularEquilibrio()">
+              </div>
+              <div id="calc-equilibrio-resultado" style="display:none;padding:12px 14px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid var(--border)">
+                <div style="font-size:.82rem;color:var(--gray);margin-bottom:4px">Você precisa vender</div>
+                <div id="calc-eq-unidades" style="font-size:1.4rem;font-weight:800;color:var(--white)">0 unidades/mês</div>
+                <div id="calc-eq-faturamento" style="font-size:.78rem;color:var(--gray);margin-top:3px"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div><!-- /calculadora -->
+
     </main>
+    <div id="app-loading-overlay" style="display:flex;position:fixed;inset:0;background:var(--bg,#0A0F1A);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:14px">
   </div><!-- /main-wrapper -->
 
   <!-- FAB mobile -->
@@ -669,7 +841,7 @@
 
     // ── Auth + Init ───────────────────────────────────
     onAuth(async user => {
-      if (!user) { window.location.replace('auth.html'); return; }
+      if (!user) { window.location.replace('landing.html'); return; }
       uid = user.uid;
 
       // Avatar
@@ -881,7 +1053,7 @@
       const proximas = contas.filter(c => c.tipo === 'pagar' && !c.paga)
         .sort((a, b) => (a.vencimento || '').localeCompare(b.vencimento || ''))
         .slice(0, 3);
-      if (!proximas.length) { el.innerHTML = '<div class="empty-state" style="padding:16px 0"><div class="empty-icon">📅</div><p>Nenhuma conta a pagar.</p></div>'; return; }
+      if (!proximas.length) { el.innerHTML = '<div class="empty-state" style="padding:16px 0"><div class="empty-icon"><img src="icone-conta.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div><p>Nenhuma conta a pagar.</p></div>'; return; }
       el.innerHTML = proximas.map(c => {
         const hoje = new Date().toISOString().slice(0,10);
         const amanha = new Date(Date.now() + 86400000).toISOString().slice(0,10);
@@ -917,7 +1089,7 @@
     function renderCaixa(d) {
       const lista = document.getElementById('caixa-lista');
       const movs = movsDoMes();
-      if (!movs.length) { lista.innerHTML = '<div class="empty-state"><div class="empty-icon">💸</div><p>Nenhuma movimentação ainda.</p></div>'; return; }
+      if (!movs.length) { lista.innerHTML = '<div class="empty-state"><div class="empty-icon"><img src="icone-dinheiro-01.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div><p>Nenhuma movimentação ainda.</p></div>'; return; }
       lista.innerHTML = `<table style="width:100%;border-collapse:collapse">
         <thead><tr style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">
           <th style="text-align:left;padding:8px 0;font-weight:600">Descrição</th>
@@ -968,7 +1140,7 @@
 
     function renderProdutos() {
       const el = document.getElementById('produtos-lista-tela');
-      if (!produtos.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Nenhum produto cadastrado.</p></div>'; return; }
+      if (!produtos.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon"><img src="icone-produto.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;opacity:.5"></div><p>Nenhum produto cadastrado.</p></div>'; return; }
       el.innerHTML = `<table style="width:100%;border-collapse:collapse">
         <thead><tr style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">
           <th style="text-align:left;padding:8px 0;font-weight:600">Nome</th>
@@ -982,7 +1154,7 @@
             const margem = p.preco > 0 ? ((p.preco - p.custo) / p.preco * 100) : 0;
             const cls = margem >= 30 ? 'margem-ok' : margem >= 15 ? 'margem-atencao' : 'margem-ruim';
             return `<tr style="border-top:1px solid var(--border)">
-              <td style="padding:10px 0"><div class="prod-nome">${p.nome}</div><div class="prod-tipo">${p.tipo === 'servico' ? '🛠 Serviço' : '📦 Produto'}</div></td>
+              <td style="padding:10px 0"><div class="prod-nome">${p.nome}</div><div class="prod-tipo">${p.tipo === 'servico' ? '<img src="icone-servico.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:3px"> Serviço' : '<img src="icone-produto.png" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-right:3px;border-radius:3px"> Produto'}</div></td>
               <td style="padding:10px 0;text-align:right;font-size:.83rem;color:var(--gray)">${fmt(p.custo)}</td>
               <td style="padding:10px 0;text-align:right;font-size:.83rem;color:var(--white)">${fmt(p.preco)}</td>
               <td style="padding:10px 0;text-align:right;font-size:.85rem;font-weight:700" class="${cls}">${margem.toFixed(0)}%</td>
@@ -995,7 +1167,7 @@
 
     function renderDRE(d) {
       const el = document.getElementById('dre-content');
-      if (d.entradas === 0 && d.saidas === 0) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Adicione lançamentos para ver o DRE.</p></div>'; return; }
+      if (d.entradas === 0 && d.saidas === 0) { el.innerHTML = '<div class="empty-state"><div class="empty-icon"><img src="icone-dre.png" style="width:40px;height:40px;object-fit:contain;opacity:.5"></div><p>Adicione lançamentos para ver o DRE.</p></div>'; return; }
       const lucroB = d.entradas - d.saidas;
       const rows = [
         { label: 'Receita bruta', val: d.entradas, color: 'var(--primary)', info: 'Total de vendas e entradas' },
@@ -1149,6 +1321,152 @@
 
     window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
     window.fecharModalSeOverlay = function(e, id) { if (e.target.classList.contains('modal-overlay')) fecharModal(id); };
+
+    // ── Calculadora ──────────────────────────────────
+    function fmtR(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    function fmtPct(v){ return v.toFixed(1)+'%'; }
+
+    window.setPreset = function(inputId, val, btn) {
+      document.getElementById(inputId).value = val;
+      btn.closest('[id]').querySelectorAll('.calc-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      calcularPreco();
+    };
+
+    window.limparPresets = function(groupId) {
+      document.getElementById(groupId)?.querySelectorAll('.calc-preset').forEach(b => b.classList.remove('active'));
+    };
+
+    function getVal(id){ return parseFloat(document.getElementById(id)?.value) || 0; }
+
+    window.calcularPreco = function() {
+      const materia   = getVal('calc-materia');
+      const maoObra   = getVal('calc-mao-obra');
+      const fixo      = getVal('calc-fixo');
+      const outros    = getVal('calc-outros');
+      const margem    = getVal('calc-margem');
+      const imposto   = getVal('calc-imposto');
+      const cartao    = getVal('calc-cartao');
+      const plat      = getVal('calc-plataforma');
+
+      const custoTotal = materia + maoObra + fixo + outros;
+      document.getElementById('calc-custo-total').textContent = fmtR(custoTotal);
+
+      if (custoTotal <= 0) {
+        document.getElementById('calc-preco-ideal').textContent = 'R$ 0,00';
+        document.getElementById('calc-preco-desc').textContent = 'Informe os custos para calcular';
+        document.getElementById('calc-breakdown').innerHTML = '<div class="calc-break-row" style="color:var(--gray)">— Informe os dados ao lado</div>';
+        return;
+      }
+
+      // Fórmula: Preço = Custo / (1 - margem% - imposto% - cartão% - plataforma%)
+      const totalDesc = (margem + imposto + cartao + plat) / 100;
+      if (totalDesc >= 1) {
+        document.getElementById('calc-preco-ideal').textContent = '⚠ Inválido';
+        document.getElementById('calc-preco-desc').textContent = 'A soma das taxas passa de 100%';
+        return;
+      }
+      const preco = custoTotal / (1 - totalDesc);
+      const lucroUnit = preco * (margem / 100);
+      const vlImposto = preco * (imposto / 100);
+      const vlCartao  = preco * (cartao / 100);
+      const vlPlat    = preco * (plat / 100);
+
+      document.getElementById('calc-preco-ideal').textContent = fmtR(preco);
+      document.getElementById('calc-preco-desc').textContent =
+        `Com margem de ${fmtPct(margem)}, seu lucro por unidade é ${fmtR(lucroUnit)}`;
+
+      // Breakdown
+      let rows = `
+        <div class="calc-break-row"><span class="calc-break-label">Custo de produção</span><span class="calc-break-val neg">−${fmtR(custoTotal)}</span></div>`;
+      if (vlImposto > 0)
+        rows += `<div class="calc-break-row"><span class="calc-break-label">Impostos (${fmtPct(imposto)})</span><span class="calc-break-val neg">−${fmtR(vlImposto)}</span></div>`;
+      if (vlCartao > 0)
+        rows += `<div class="calc-break-row"><span class="calc-break-label">Taxa cartão (${fmtPct(cartao)})</span><span class="calc-break-val neg">−${fmtR(vlCartao)}</span></div>`;
+      if (vlPlat > 0)
+        rows += `<div class="calc-break-row"><span class="calc-break-label">Taxa plataforma (${fmtPct(plat)})</span><span class="calc-break-val neg">−${fmtR(vlPlat)}</span></div>`;
+      rows += `<div class="calc-break-row total"><span class="calc-break-label">Seu lucro líquido</span><span class="calc-break-val pos">+${fmtR(lucroUnit)}</span></div>`;
+      document.getElementById('calc-breakdown').innerHTML = rows;
+
+      // Atualizar cenário se tiver valor
+      calcularCenario();
+      calcularEquilibrio();
+    };
+
+    window.calcularCenario = function() {
+      const teste = getVal('calc-teste');
+      const el = document.getElementById('calc-cenario-resultado');
+      if (teste <= 0) { el.style.display = 'none'; return; }
+
+      const materia = getVal('calc-materia');
+      const maoObra = getVal('calc-mao-obra');
+      const fixo    = getVal('calc-fixo');
+      const outros  = getVal('calc-outros');
+      const imposto = getVal('calc-imposto');
+      const cartao  = getVal('calc-cartao');
+      const plat    = getVal('calc-plataforma');
+
+      const custoTotal = materia + maoObra + fixo + outros;
+      const taxas = (imposto + cartao + plat) / 100;
+      const recebeLiq = teste * (1 - taxas);
+      const lucro = recebeLiq - custoTotal;
+      const margemReal = teste > 0 ? (lucro / teste * 100) : 0;
+
+      el.style.display = 'block';
+      const mEl = document.getElementById('calc-cen-margem');
+      const lEl = document.getElementById('calc-cen-lucro');
+      const aEl = document.getElementById('calc-cen-alerta');
+
+      mEl.textContent = fmtPct(margemReal);
+      mEl.style.color = margemReal >= 30 ? 'var(--primary)' : margemReal >= 15 ? 'var(--yellow)' : 'var(--red)';
+      lEl.textContent = fmtR(lucro);
+      lEl.style.color = lucro >= 0 ? 'var(--primary)' : 'var(--red)';
+
+      if (lucro < 0) {
+        aEl.style.background = 'rgba(239,68,68,0.1)'; aEl.style.color = 'var(--red)';
+        aEl.textContent = `⚠ Prejuízo! Este preço não cobre seus custos. Você perde ${fmtR(Math.abs(lucro))} por unidade.`;
+      } else if (margemReal < 15) {
+        aEl.style.background = 'rgba(245,158,11,0.1)'; aEl.style.color = 'var(--yellow)';
+        aEl.textContent = `Margem muito baixa. O ideal é pelo menos 30% para cobrir imprevistos.`;
+      } else if (margemReal < 30) {
+        aEl.style.background = 'rgba(245,158,11,0.08)'; aEl.style.color = 'var(--yellow)';
+        aEl.textContent = `Margem razoável, mas abaixo do ideal de 30%.`;
+      } else {
+        aEl.style.background = 'rgba(34,197,94,0.08)'; aEl.style.color = 'var(--primary)';
+        aEl.textContent = `Boa margem! Este preço é sustentável para seu negócio.`;
+      }
+    };
+
+    window.calcularEquilibrio = function() {
+      const fixosMensais = getVal('calc-fixos-mensais');
+      const el = document.getElementById('calc-equilibrio-resultado');
+      if (fixosMensais <= 0) { el.style.display = 'none'; return; }
+
+      const materia = getVal('calc-materia');
+      const maoObra = getVal('calc-mao-obra');
+      const fixo    = getVal('calc-fixo');
+      const outros  = getVal('calc-outros');
+      const margem  = getVal('calc-margem');
+      const imposto = getVal('calc-imposto');
+      const cartao  = getVal('calc-cartao');
+      const plat    = getVal('calc-plataforma');
+      const custo   = materia + maoObra + fixo + outros;
+      const totalDesc = (margem + imposto + cartao + plat) / 100;
+
+      if (custo <= 0 || totalDesc >= 1) { el.style.display = 'none'; return; }
+
+      const preco = custo / (1 - totalDesc);
+      const lucroUnit = preco * (margem / 100);
+      if (lucroUnit <= 0) { el.style.display = 'none'; return; }
+
+      const unidades = Math.ceil(fixosMensais / lucroUnit);
+      const faturamento = unidades * preco;
+
+      el.style.display = 'block';
+      document.getElementById('calc-eq-unidades').textContent = `${unidades.toLocaleString('pt-BR')} unidades / mês`;
+      document.getElementById('calc-eq-faturamento').textContent =
+        `Faturamento mínimo: ${fmtR(faturamento)} para cobrir todos os custos fixos`;
+    };
 
     // ── Navegação ─────────────────────────────────────
     window.irParaTela = function(tela, btn) {
