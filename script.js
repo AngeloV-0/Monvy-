@@ -241,7 +241,22 @@ waitAuthReady().then(()=>{
     // Esconder overlay de loading
     const appOverlay=document.getElementById('app-loading-overlay');
     if(appOverlay) appOverlay.style.display='none';
-    if(!user){window.location.href='landing.html';return;}
+    if(!user){
+      // Se cache local diz logado mas Firebase retornou null,
+      // pode ser race condition — aguardar mais um pouco antes de redirecionar
+      if(window.__cacheLogado){
+        // Firebase ainda está inicializando — não redirecionar agora
+        // O próximo onAuth vai resolver corretamente
+        window.__cacheLogado = false;
+        return;
+      }
+      localStorage.removeItem('monvy_onboarding_done');
+      localStorage.removeItem('monvy_modo_empresa');
+      window.location.href='landing.html';
+      return;
+    }
+    // Sessão confirmada — salvar cache
+    localStorage.setItem('monvy_onboarding_done','1');
     uidAtual=user.uid;
     window._firebaseExports={auth:{currentUser:user}};
     const nome=user.displayName||'Usuário';
