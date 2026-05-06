@@ -838,8 +838,19 @@
   window.loginGoogle = async function() {
     try {
       setBusy(true, 'Abrindo Google...');
-      await loginComGoogle();
-      // Se redirect: página vai recarregar; se popup: onAuth vai redirecionar
+      const user = await loginComGoogle();
+      if (user) {
+        // Login por popup — redirecionar diretamente
+        localStorage.setItem('monvy_onboarding_done', '1');
+        showToast('✓ Bem-vindo!', 'success');
+        const temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
+        mostrarOverlayRedirecionando();
+        setTimeout(() => {
+          if (temEmpresa) { mostrarSelecaoModo(); }
+          else { window.location.replace('index.html'); }
+        }, 600);
+      }
+      // Se redirect (mobile): página vai recarregar e verificarRedirectGoogle cuida do resto
     } catch(e) {
       setBusy(false);
       showToast('❌ ' + traduzirErro(e.code), 'error');
@@ -863,6 +874,17 @@
       setBusy(true, 'Entrando...');
       await loginComEmail(email, senha);
       showToast('✓ Bem-vindo de volta!', 'success');
+      // Salvar sessão e redirecionar diretamente
+      localStorage.setItem('monvy_onboarding_done', '1');
+      const temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
+      mostrarOverlayRedirecionando();
+      setTimeout(() => {
+        if (temEmpresa) {
+          mostrarSelecaoModo();
+        } else {
+          window.location.replace('index.html');
+        }
+      }, 600);
     } catch(e) {
       setBusy(false);
       const msg = traduzirErro(e.code);
