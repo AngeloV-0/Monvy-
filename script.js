@@ -239,18 +239,25 @@ function atualizarChart(){
   if(!canvas) return;
   if(movimentacoes.length===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';return;}
   canvas.style.display='block';if(emptyEl)emptyEl.style.display='none';
+  // Garante que o canvas tem dimensões antes de renderizar
+  if(!canvas.offsetWidth){setTimeout(atualizarChart,100);return;}
+  // Define tamanho explícito do canvas para o Chart.js não extrapolar
+  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
+  canvas.width=w;
+  canvas.height=180;
   const lista=fluxoModo==='recentes'?movimentacoes.slice(0,10):movimentacoes;
   const labels=lista.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`).reverse();
   const entradas=lista.map(m=>m.tipo==='ganho'?m.valor:0).reverse();
   const saidas=lista.map(m=>m.tipo==='gasto'?m.valor:0).reverse();
-  if(chartFluxo) chartFluxo.destroy();
+  if(chartFluxo){chartFluxo.destroy();chartFluxo=null;}
+  // Força o canvas a ter altura correta antes de criar o gráfico
   const ctx=canvas.getContext('2d');
   const gG=ctx.createLinearGradient(0,0,0,180);gG.addColorStop(0,'rgba(34,197,94,0.3)');gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR=ctx.createLinearGradient(0,0,0,180);gR.addColorStop(0,'rgba(239,68,68,0.25)');gR.addColorStop(1,'rgba(239,68,68,0)');
   chartFluxo=new Chart(ctx,{type:'line',data:{labels,datasets:[
     {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#22C55E'},
     {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#EF4444'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+  ]},options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
     x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
     y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}}
   }}});

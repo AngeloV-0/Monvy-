@@ -629,7 +629,7 @@ nav {
 .see-all:hover { opacity: 0.8; }
 
 /* Canvas Chart */
-#chart-fluxo { display: block; width: 100% !important; }
+#chart-fluxo { display: block !important; width: 100% !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; }
 
 .chart-empty {
   display: flex;
@@ -1433,7 +1433,7 @@ select option { background: var(--surface-2); }
   select { font-size: 0.95rem; }
 
   /* Card de gráfico: altura reduzida */
-  #chart-fluxo { max-height: 160px; }
+  #chart-fluxo { width: 100% !important; height: 160px !important; min-height: 160px !important; max-height: 160px !important; }
 
   /* Dropdown de busca: largura total no mobile */
   #search-dropdown {
