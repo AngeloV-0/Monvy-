@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monvay — Ativar modo empresa</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#060D0A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg, #0d1117);
+      color: var(--white, #f1f5f9);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .ob-wrap { width: 100%; max-width: 560px; }
+    .ob-logo { display: flex; justify-content: center; margin-bottom: 28px; align-items: center; gap: 10px; }
+    .ob-logo img { height: 36px; }
+    .ob-logo-badge {
+      padding: 3px 10px; border-radius: 99px;
+      background: rgba(0,200,83,0.15);
+      border: 1px solid rgba(0,200,83,0.3);
+      font-size: .78rem; font-weight: 700;
+      color: #00c853; letter-spacing: .04em;
+    }
+    .ob-card {
+      background: var(--card-bg, #161b27);
+      border: 1px solid var(--border, rgba(255,255,255,0.08));
+      border-radius: 20px;
+      padding: 36px 32px;
+    }
+    .ob-step-indicator { display: flex; gap: 6px; margin-bottom: 28px; justify-content: center; }
+    .ob-step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border, rgba(255,255,255,0.1)); transition: all .3s; }
+    .ob-step-dot.active { background: #00c853; width: 24px; border-radius: 4px; }
+    .ob-step-dot.done { background: rgba(0,200,83,0.4); }
+    .ob-step { display: none; }
+    .ob-step.active { display: block; animation: fadeUp .35s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .ob-step-label { font-size: .75rem; font-weight: 600; color: #00c853; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    .ob-title { font-size: 1.4rem; font-weight: 800; color: var(--white, #f1f5f9); margin-bottom: 8px; line-height: 1.3; }
+    .ob-subtitle { font-size: .9rem; color: var(--gray, #64748b); margin-bottom: 28px; line-height: 1.5; }
+    .ob-options { display: grid; gap: 10px; }
+    .ob-options.cols-2 { grid-template-columns: 1fr 1fr; }
+    .ob-options.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .ob-opt {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 16px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid var(--border, rgba(255,255,255,0.08));
+      border-radius: 14px; cursor: pointer; transition: all .2s;
+      user-select: none; text-align: center; position: relative;
+    }
+    .ob-opt:hover { border-color: rgba(0,200,83,0.4); background: rgba(0,200,83,0.04); }
+    .ob-opt.selected { border-color: #00c853; background: rgba(0,200,83,0.1); }
+    .ob-opt-icon { font-size: 2rem; line-height: 1; }
+    .ob-opt-label { font-size: .85rem; font-weight: 600; color: var(--white, #f1f5f9); }
+    .ob-opt-sub { font-size: .75rem; color: var(--gray, #64748b); line-height: 1.3; }
+    .ob-opt.selected .ob-opt-label { color: #00c853; }
+    .ob-check { display: none; width: 18px; height: 18px; border-radius: 50%; background: #00c853; color: #000; font-size: .7rem; align-items: center; justify-content: center; position: absolute; top: 8px; right: 8px; }
+    .ob-opt.selected .ob-check { display: flex; }
+
+    /* Input field */
+    .ob-input-wrap { margin-bottom: 14px; }
+    .ob-input-wrap label { display: block; font-size: .8rem; font-weight: 600; color: var(--gray, #94a3b8); margin-bottom: 6px; }
+    .ob-input-wrap input, .ob-input-wrap select {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--white, #f1f5f9);
+      font-size: .92rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .ob-input-wrap input:focus, .ob-input-wrap select:focus { border-color: #00c853; }
+    .ob-input-wrap select option { background: #1a1a2e; }
+    .ob-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Produto card */
+    .produto-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; margin-bottom: 8px;
+    }
+    .produto-card .p-info { flex: 1; }
+    .produto-card .p-nome { font-size: .88rem; font-weight: 600; color: var(--white, #f1f5f9); }
+    .produto-card .p-margem { font-size: .78rem; }
+    .margem-ok { color: #00c853; }
+    .margem-atencao { color: #fbbf24; }
+    .margem-ruim { color: #f87171; }
+    .produto-card .p-del { background: none; border: none; color: rgba(255,255,255,0.25); cursor: pointer; font-size: 1.1rem; padding: 0 4px; transition: color .2s; }
+    .produto-card .p-del:hover { color: #f87171; }
+
+    /* Custo fixo */
+    .custo-row {
+      display: flex; gap: 8px; align-items: center;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; margin-bottom: 8px;
+    }
+    .custo-emoji { font-size: 1.3rem; flex-shrink: 0; }
+    .custo-info { flex: 1; }
+    .custo-nome { font-size: .85rem; font-weight: 600; color: var(--white, #f1f5f9); margin-bottom: 3px; }
+    .custo-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 6px 10px; color: var(--white,#f1f5f9); font-size: .83rem; font-family: inherit; outline: none; }
+    .custo-input:focus { border-color: #00c853; }
+    .custo-toggle { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid rgba(255,255,255,0.1); background: transparent; color: var(--gray, #64748b); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
+    .custo-toggle.ativo { background: rgba(0,200,83,0.15); border-color: #00c853; color: #00c853; }
+
+    /* Add produto form */
+    .add-form {
+      background: rgba(0,200,83,0.04);
+      border: 1.5px dashed rgba(0,200,83,0.25);
+      border-radius: 14px; padding: 16px; margin-top: 12px;
+      display: none;
+    }
+    .add-form.open { display: block; animation: fadeUp .25s ease; }
+    .add-form-title { font-size: .8rem; font-weight: 700; color: #00c853; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .05em; }
+    .add-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .add-form input {
+      width: 100%; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 12px; color: var(--white,#f1f5f9); font-size: .85rem;
+      font-family: inherit; outline: none; transition: border-color .2s;
+    }
+    .add-form input:focus { border-color: #00c853; }
+    .add-form-label { font-size: .72rem; color: var(--gray, #64748b); margin-bottom: 3px; }
+    .btn-add-produto {
+      width: 100%; padding: 9px; background: rgba(0,200,83,0.15);
+      border: 1.5px solid rgba(0,200,83,0.3); border-radius: 10px;
+      color: #00c853; font-size: .88rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all .2s; margin-top: 4px;
+    }
+    .btn-add-produto:hover { background: rgba(0,200,83,0.25); }
+    .open-add-form-btn {
+      width: 100%; padding: 10px; background: transparent;
+      border: 1.5px dashed rgba(0,200,83,0.25); border-radius: 12px;
+      color: rgba(0,200,83,0.7); font-size: .88rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all .2s; margin-top: 4px;
+    }
+    .open-add-form-btn:hover { border-color: rgba(0,200,83,0.5); color: #00c853; }
+
+    /* Score preview */
+    .score-preview {
+      text-align: center; padding: 20px 16px;
+      background: rgba(0,200,83,0.05);
+      border: 1px solid rgba(0,200,83,0.15);
+      border-radius: 16px; margin-bottom: 16px;
+    }
+    .score-circle-big {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 4px solid #00c853;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .score-num-big { font-size: 1.8rem; font-weight: 800; color: #00c853; line-height: 1; }
+    .score-label-big { font-size: .65rem; font-weight: 700; color: rgba(0,200,83,.7); text-transform: uppercase; }
+    .score-title-big { font-size: 1rem; font-weight: 700; color: var(--white, #f1f5f9); margin-bottom: 6px; }
+    .score-desc-big { font-size: .85rem; color: var(--gray, #64748b); line-height: 1.5; }
+
+    /* Footer */
+    .ob-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; gap: 12px; }
+    .ob-btn-back { background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--gray,#64748b); border-radius: 12px; padding: 12px 20px; font-size: .9rem; font-family: inherit; cursor: pointer; transition: all .2s; }
+    .ob-btn-back:hover { border-color: rgba(255,255,255,0.2); color: var(--white, #f1f5f9); }
+    .ob-btn-next { flex: 1; background: #00c853; color: #000; border: none; border-radius: 12px; padding: 13px 24px; font-size: .95rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s; }
+    .ob-btn-next:hover { filter: brightness(1.1); }
+    .ob-btn-next:disabled { opacity: .4; cursor: not-allowed; }
+    .ob-skip { text-align: center; margin-top: 16px; font-size: .8rem; color: var(--gray,#64748b); }
+    .ob-skip a { color: var(--gray,#64748b); text-decoration: underline; cursor: pointer; }
+
+    .margem-preview {
+      font-size: .78rem; padding: 4px 8px; border-radius: 8px; margin-top: 6px; display: inline-block;
+    }
+
+    @media (max-width: 480px) {
+      .ob-card { padding: 28px 18px; }
+      .ob-options.cols-3 { grid-template-columns: 1fr 1fr; }
+      .add-form-row { grid-template-columns: 1fr 1fr; }
+      .ob-input-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ob-wrap">
+    <div class="ob-logo">
+      <img src="logo.png" alt="Monvay">
+      <span class="ob-logo-badge">empresa</span>
+    </div>
+    <div class="ob-card">
+      <div class="ob-step-indicator" id="step-indicator">
+        <div class="ob-step-dot active" id="dot-0"></div>
+        <div class="ob-step-dot" id="dot-1"></div>
+        <div class="ob-step-dot" id="dot-2"></div>
+        <div class="ob-step-dot" id="dot-3"></div>
+        <div class="ob-step-dot" id="dot-4"></div>
+      </div>
+
+      <!-- STEP 0: Tipo de negócio -->
+      <div class="ob-step active" id="step-0">
+        <div class="ob-step-label">Passo 1 de 5 · Seu negócio</div>
+        <div class="ob-title">Como você vende?</div>
+        <div class="ob-subtitle">Não precisa ter CNPJ. Qualquer negócio conta.</div>
+        <div class="ob-options cols-3" id="tipo-opts">
+          <div class="ob-opt" onclick="selecionar(this,'tipoNegocio','fisico')">
+            <div class="ob-opt-icon">🏪</div>
+            <div class="ob-opt-label">Físico</div>
+            <div class="ob-opt-sub">Loja, salão, oficina, padaria</div>
+            <div class="ob-check">✓</div>
+          </div>
+          <div class="ob-opt" onclick="selecionar(this,'tipoNegocio','virtual')">
+            <div class="ob-opt-icon">📱</div>
+            <div class="ob-opt-label">Virtual</div>
+            <div class="ob-opt-sub">Instagram, Shopee, freelancer</div>
+            <div class="ob-check">✓</div>
+          </div>
+          <div class="ob-opt" onclick="selecionar(this,'tipoNegocio','hibrido')">
+            <div class="ob-opt-icon">🔁</div>
+            <div class="ob-opt-label">Os dois</div>
+            <div class="ob-opt-sub">Loja física e online</div>
+            <div class="ob-check">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1: Identificação -->
+      <div class="ob-step" id="step-1">
+        <div class="ob-step-label">Passo 2 de 5 · Identificação</div>
+        <div class="ob-title">Qual o nome do seu negócio?</div>
+        <div class="ob-subtitle">Pode ser um apelido. Você muda depois se quiser.</div>
+        <div class="ob-input-wrap">
+          <label>Nome do negócio *</label>
+          <input type="text" id="nome-negocio" placeholder="Ex: Salão da Ana, Loja do João..." maxlength="60" oninput="validarStep1()">
+        </div>
+        <div class="ob-input-wrap">
+          <label>Setor de atuação</label>
+          <select id="setor-negocio">
+            <option value="">Selecione...</option>
+            <option value="alimentacao">Alimentação / Gastronomia</option>
+            <option value="beleza">Beleza / Estética</option>
+            <option value="moda">Moda / Roupas / Acessórios</option>
+            <option value="saude">Saúde / Bem-estar</option>
+            <option value="servicos">Serviços em geral</option>
+            <option value="tecnologia">Tecnologia / Digital</option>
+            <option value="educacao">Educação / Cursos</option>
+            <option value="comercio">Comércio / Varejo</option>
+            <option value="artesanato">Artesanato / Produtos feitos à mão</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="ob-input-wrap">
+          <label>CNPJ (opcional — pode preencher depois)</label>
+          <input type="text" id="cnpj-negocio" placeholder="XX.XXX.XXX/XXXX-XX" maxlength="18" oninput="mascaraCNPJ(this)">
+        </div>
+      </div>
+
+      <!-- STEP 2: Produtos/Serviços -->
+      <div class="ob-step" id="step-2">
+        <div class="ob-step-label">Passo 3 de 5 · Produtos e serviços</div>
+        <div class="ob-title">O que você vende?</div>
+        <div class="ob-subtitle">Cadastre pelo menos 1 produto ou serviço com custo e preço. Isso ativa o cálculo de margem.</div>
+
+        <div id="produtos-lista"></div>
+
+        <button class="open-add-form-btn" id="btn-abrir-form" onclick="toggleAddForm()">
+          + Adicionar produto ou serviço
+        </button>
+
+        <div class="add-form" id="add-form">
+          <div class="add-form-title">Novo produto / serviço</div>
+          <div class="ob-input-wrap" style="margin-bottom:10px">
+            <div class="add-form-label">Nome *</div>
+            <input type="text" id="pnome" placeholder="Ex: Corte feminino, Camiseta M, Aula de inglês..." maxlength="60">
+          </div>
+          <div class="add-form-row">
+            <div>
+              <div class="add-form-label">Custo (R$)</div>
+              <input type="number" id="pcusto" placeholder="0,00" min="0" step="0.01" oninput="calcMargemPreview()">
+            </div>
+            <div>
+              <div class="add-form-label">Preço de venda (R$)</div>
+              <input type="number" id="ppreco" placeholder="0,00" min="0" step="0.01" oninput="calcMargemPreview()">
+            </div>
+            <div>
+              <div class="add-form-label">Tipo</div>
+              <select id="ptipo" style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;color:var(--white,#f1f5f9);font-size:.85rem;font-family:inherit;outline:none">
+                <option value="produto">Produto</option>
+                <option value="servico">Serviço</option>
+              </select>
+            </div>
+          </div>
+          <div id="margem-preview-wrap" style="margin-bottom:10px;display:none">
+            <span class="margem-preview" id="margem-preview-badge"></span>
+          </div>
+          <button class="btn-add-produto" onclick="adicionarProduto()">Salvar produto</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Custos Fixos -->
+      <div class="ob-step" id="step-3">
+        <div class="ob-step-label">Passo 4 de 5 · Custos fixos</div>
+        <div class="ob-title">Quais são seus custos fixos?</div>
+        <div class="ob-subtitle">São gastos que você tem todo mês independente das vendas. Marque os que se aplicam e informe o valor.</div>
+
+        <div id="custos-lista">
+          <div class="custo-row" id="custo-aluguel-row">
+            <div class="custo-emoji">🏠</div>
+            <div class="custo-info">
+              <div class="custo-nome">Aluguel do espaço</div>
+              <div id="custo-aluguel-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-aluguel" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-aluguel" onclick="toggleCusto('aluguel')">+</button>
+          </div>
+          <div class="custo-row">
+            <div class="custo-emoji">💡</div>
+            <div class="custo-info">
+              <div class="custo-nome">Energia elétrica</div>
+              <div id="custo-energia-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-energia" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-energia" onclick="toggleCusto('energia')">+</button>
+          </div>
+          <div class="custo-row">
+            <div class="custo-emoji">📦</div>
+            <div class="custo-info">
+              <div class="custo-nome">Fornecedores / Insumos fixos</div>
+              <div id="custo-fornecedor-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-fornecedor" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-fornecedor" onclick="toggleCusto('fornecedor')">+</button>
+          </div>
+          <div class="custo-row">
+            <div class="custo-emoji">👤</div>
+            <div class="custo-info">
+              <div class="custo-nome">Funcionário / Freelancer fixo</div>
+              <div id="custo-funcionario-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-funcionario" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-funcionario" onclick="toggleCusto('funcionario')">+</button>
+          </div>
+          <div class="custo-row">
+            <div class="custo-emoji">📱</div>
+            <div class="custo-info">
+              <div class="custo-nome">Internet / Celular / Plataformas</div>
+              <div id="custo-internet-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-internet" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-internet" onclick="toggleCusto('internet')">+</button>
+          </div>
+          <div class="custo-row">
+            <div class="custo-emoji">📣</div>
+            <div class="custo-info">
+              <div class="custo-nome">Marketing / Impulsionamento</div>
+              <div id="custo-marketing-expand" style="display:none;margin-top:6px">
+                <input type="number" class="custo-input" id="val-marketing" placeholder="R$ 0,00" min="0">
+              </div>
+            </div>
+            <button class="custo-toggle" id="btn-marketing" onclick="toggleCusto('marketing')">+</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:.78rem;color:var(--gray,#64748b);text-align:center">Pode pular se não souber agora. Você cadastra depois.</div>
+      </div>
+
+      <!-- STEP 4: Resumo / Tudo pronto -->
+      <div class="ob-step" id="step-4">
+        <div class="ob-step-label">Passo 5 de 5 · Pronto!</div>
+        <div class="ob-title" id="resumo-titulo">Tudo configurado 🎉</div>
+        <div class="ob-subtitle" id="resumo-subtitulo">Seu modo empresa está ativado. Veja o resumo do que configuramos:</div>
+
+        <div id="resumo-cards" style="margin-bottom:20px"></div>
+
+        <div class="score-preview" id="score-preview" style="display:none">
+          <div class="score-circle-big">
+            <div class="score-num-big" id="preview-score-num">–</div>
+            <div class="score-label-big">score</div>
+          </div>
+          <div class="score-title-big" id="preview-score-titulo">Calculando...</div>
+          <div class="score-desc-big" id="preview-score-desc">Complete mais informações para um diagnóstico preciso.</div>
+        </div>
+
+        <button class="ob-btn-next" style="width:100%;margin-top:0" onclick="irParaEmpresa()">
+          Entrar no modo empresa →
+        </button>
+      </div>
+
+      <div class="ob-footer" id="ob-footer">
+        <button class="ob-btn-back" id="ob-back" onclick="voltarStep()" style="display:none">← Voltar</button>
+        <button class="ob-btn-next" id="ob-next" onclick="avancarStep()">Continuar →</button>
+      </div>
+      <div class="ob-skip" id="ob-skip">
+        <a onclick="pularOnboarding()">Configurar depois</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { onAuth, salvarEmpresa, adicionarProduto as fbAdicionarProduto } from './firebase.js';
+
+    const tema = localStorage.getItem('monvy_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', tema);
+
+    let currentUser = null;
+    let stepAtual = 0;
+    const totalSteps = 5;
+
+    const dados = {
+      tipoNegocio: null,
+      nomeNegocio: '',
+      setorNegocio: '',
+      cnpj: '',
+      produtos: [],
+      custosFixos: {}
+    };
+
+    const authPronto = new Promise(resolve => {
+      let timer = null;
+      onAuth(user => {
+        if (timer) { clearTimeout(timer); timer = null; }
+        if (!user) {
+          timer = setTimeout(() => window.location.replace('auth.html'), 5000);
+          return;
+        }
+        currentUser = user;
+        resolve(user);
+      });
+    });
+
+    // ── Helpers ───────────────────────────────────────
+
+    window.selecionar = function(el, campo, valor) {
+      el.closest('.ob-options').querySelectorAll('.ob-opt').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      dados[campo] = valor;
+      atualizarBotao();
+    };
+
+    window.validarStep1 = function() { atualizarBotao(); };
+
+    window.mascaraCNPJ = function(input) {
+      let v = input.value.replace(/\D/g, '').slice(0, 14);
+      if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/, '$1.$2.$3/$4');
+      else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d+)$/, '$1.$2.$3');
+      else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, '$1.$2');
+      input.value = v;
+    };
+
+    window.calcMargemPreview = function() {
+      const custo = parseFloat(document.getElementById('pcusto').value) || 0;
+      const preco = parseFloat(document.getElementById('ppreco').value) || 0;
+      const wrap = document.getElementById('margem-preview-wrap');
+      const badge = document.getElementById('margem-preview-badge');
+      if (preco > 0) {
+        const margem = preco > 0 ? ((preco - custo) / preco * 100) : 0;
+        wrap.style.display = 'block';
+        if (margem >= 30) {
+          badge.style.background = 'rgba(0,200,83,0.15)'; badge.style.color = '#00c853';
+          badge.textContent = `Margem: ${margem.toFixed(0)}% ✓ Boa`;
+        } else if (margem >= 15) {
+          badge.style.background = 'rgba(251,191,36,0.15)'; badge.style.color = '#fbbf24';
+          badge.textContent = `Margem: ${margem.toFixed(0)}% ⚠ Abaixo do ideal`;
+        } else if (margem > 0) {
+          badge.style.background = 'rgba(248,113,113,0.15)'; badge.style.color = '#f87171';
+          badge.textContent = `Margem: ${margem.toFixed(0)}% ✗ Muito baixa`;
+        } else {
+          badge.style.background = 'rgba(248,113,113,0.15)'; badge.style.color = '#f87171';
+          badge.textContent = `Prejuízo! Custo maior que preço`;
+        }
+      } else {
+        wrap.style.display = 'none';
+      }
+    };
+
+    window.toggleAddForm = function() {
+      const form = document.getElementById('add-form');
+      const btn = document.getElementById('btn-abrir-form');
+      const open = form.classList.toggle('open');
+      btn.textContent = open ? '− Fechar' : '+ Adicionar produto ou serviço';
+    };
+
+    window.adicionarProduto = function() {
+      const nome = document.getElementById('pnome').value.trim();
+      const custo = parseFloat(document.getElementById('pcusto').value) || 0;
+      const preco = parseFloat(document.getElementById('ppreco').value) || 0;
+      const tipo = document.getElementById('ptipo').value;
+      if (!nome) { document.getElementById('pnome').focus(); return; }
+      const margem = preco > 0 ? ((preco - custo) / preco * 100) : 0;
+      const prod = { nome, custo, preco, tipo, margem };
+      dados.produtos.push(prod);
+      renderProdutos();
+      document.getElementById('pnome').value = '';
+      document.getElementById('pcusto').value = '';
+      document.getElementById('ppreco').value = '';
+      document.getElementById('margem-preview-wrap').style.display = 'none';
+      document.getElementById('add-form').classList.remove('open');
+      document.getElementById('btn-abrir-form').textContent = '+ Adicionar produto ou serviço';
+      atualizarBotao();
+    };
+
+    function renderProdutos() {
+      const lista = document.getElementById('produtos-lista');
+      lista.innerHTML = dados.produtos.map((p, i) => {
+        const margemClass = p.margem >= 30 ? 'margem-ok' : p.margem >= 15 ? 'margem-atencao' : 'margem-ruim';
+        const margemLabel = p.margem >= 30 ? `✓ Margem ${p.margem.toFixed(0)}%` : p.margem >= 15 ? `⚠ Margem ${p.margem.toFixed(0)}%` : `✗ Margem ${p.margem.toFixed(0)}%`;
+        return `<div class="produto-card">
+          <div style="font-size:1.3rem">${p.tipo === 'servico' ? '🛠' : '📦'}</div>
+          <div class="p-info">
+            <div class="p-nome">${p.nome}</div>
+            <div class="p-margem ${margemClass}">${margemLabel} · venda R$${p.preco.toFixed(2)}</div>
+          </div>
+          <button class="p-del" onclick="removerProduto(${i})">×</button>
+        </div>`;
+      }).join('');
+    }
+
+    window.removerProduto = function(i) {
+      dados.produtos.splice(i, 1);
+      renderProdutos();
+      atualizarBotao();
+    };
+
+    window.toggleCusto = function(tipo) {
+      const btn = document.getElementById('btn-' + tipo);
+      const exp = document.getElementById('custo-' + tipo + '-expand');
+      const ativo = btn.classList.toggle('ativo');
+      btn.textContent = ativo ? '−' : '+';
+      exp.style.display = ativo ? 'block' : 'none';
+      if (!ativo) document.getElementById('val-' + tipo).value = '';
+    };
+
+    function coletarCustos() {
+      ['aluguel','energia','fornecedor','funcionario','internet','marketing'].forEach(t => {
+        const btn = document.getElementById('btn-' + t);
+        if (btn && btn.classList.contains('ativo')) {
+          const val = parseFloat(document.getElementById('val-' + t).value) || 0;
+          if (val > 0) dados.custosFixos[t] = val;
+        }
+      });
+    }
+
+    // ── Navegação ─────────────────────────────────────
+
+    function atualizarBotao() {
+      const btn = document.getElementById('ob-next');
+      if (stepAtual === 0) btn.disabled = !dados.tipoNegocio;
+      else if (stepAtual === 1) btn.disabled = !document.getElementById('nome-negocio').value.trim();
+      else btn.disabled = false;
+    }
+
+    function atualizarIndicador() {
+      for (let i = 0; i < totalSteps; i++) {
+        const dot = document.getElementById('dot-' + i);
+        dot.className = 'ob-step-dot';
+        if (i === stepAtual) dot.classList.add('active');
+        else if (i < stepAtual) dot.classList.add('done');
+      }
+      const back = document.getElementById('ob-back');
+      const footer = document.getElementById('ob-footer');
+      const skip = document.getElementById('ob-skip');
+      back.style.display = stepAtual > 0 ? 'block' : 'none';
+      const isLast = stepAtual === totalSteps - 1;
+      footer.style.display = isLast ? 'none' : 'flex';
+      skip.style.display = isLast ? 'none' : 'block';
+    }
+
+    window.avancarStep = function() {
+      if (stepAtual === 1) {
+        dados.nomeNegocio = document.getElementById('nome-negocio').value.trim();
+        dados.setorNegocio = document.getElementById('setor-negocio').value;
+        dados.cnpj = document.getElementById('cnpj-negocio').value.trim();
+      }
+      if (stepAtual === totalSteps - 2) {
+        coletarCustos();
+        mostrarResumo();
+        salvarDados();
+      }
+      document.getElementById('step-' + stepAtual).classList.remove('active');
+      stepAtual++;
+      document.getElementById('step-' + stepAtual).classList.add('active');
+      atualizarIndicador();
+      atualizarBotao();
+    };
+
+    window.voltarStep = function() {
+      document.getElementById('step-' + stepAtual).classList.remove('active');
+      stepAtual--;
+      document.getElementById('step-' + stepAtual).classList.add('active');
+      atualizarIndicador();
+      atualizarBotao();
+    };
+
+    function mostrarResumo() {
+      const tipoLabel = { fisico: '🏪 Físico', virtual: '📱 Virtual', hibrido: '🔁 Físico e virtual' };
+      const totalFixo = Object.values(dados.custosFixos).reduce((s, v) => s + v, 0);
+      const cards = [
+        { icon: tipoLabel[dados.tipoNegocio] || '💼', label: 'Tipo de negócio', val: tipoLabel[dados.tipoNegocio] || '–' },
+        { icon: '🏷', label: 'Nome', val: dados.nomeNegocio || '–' },
+        { icon: '📦', label: 'Produtos cadastrados', val: `${dados.produtos.length} produto(s)` },
+        { icon: '💰', label: 'Total de custos fixos', val: totalFixo > 0 ? `R$${totalFixo.toFixed(2)}/mês` : 'Não informado' },
+      ];
+      document.getElementById('resumo-cards').innerHTML = cards.map(c => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(0,200,83,0.06);border:1px solid rgba(0,200,83,0.15);border-radius:12px;margin-bottom:8px">
+          <span style="font-size:1.2rem">${c.icon}</span>
+          <div style="flex:1">
+            <div style="font-size:.75rem;color:var(--gray,#64748b);margin-bottom:1px">${c.label}</div>
+            <div style="font-size:.9rem;font-weight:600;color:var(--white,#f1f5f9)">${c.val}</div>
+          </div>
+        </div>`).join('');
+
+      // Score preview simples
+      let score = 50;
+      if (dados.produtos.length > 0) score += 15;
+      if (totalFixo > 0) score += 10;
+      if (dados.produtos.some(p => p.margem >= 30)) score += 10;
+      if (dados.cnpj) score += 5;
+      score = Math.min(score, 90);
+      document.getElementById('preview-score-num').textContent = score;
+      document.getElementById('preview-score-titulo').textContent = score >= 70 ? 'Bom começo!' : 'Em configuração';
+      document.getElementById('preview-score-desc').textContent = 'Complete mais lançamentos para um diagnóstico completo do seu negócio.';
+      document.getElementById('score-preview').style.display = 'block';
+    }
+
+    async function salvarDados() {
+      const user = currentUser || await Promise.race([authPronto, new Promise(r => setTimeout(() => r(null), 3000))]);
+      if (!user) return;
+      try {
+        await salvarEmpresa(user.uid, {
+          tipoNegocio: dados.tipoNegocio,
+          nomeNegocio: dados.nomeNegocio,
+          setorNegocio: dados.setorNegocio,
+          cnpj: dados.cnpj,
+          custosFixos: dados.custosFixos,
+          onboardingEmpresaDone: true,
+        });
+        for (const prod of dados.produtos) {
+          await fbAdicionarProduto(user.uid, prod);
+        }
+        localStorage.setItem('monvy_modo_empresa', '1');
+        localStorage.setItem('monvy_nome_negocio', dados.nomeNegocio);
+      } catch(e) {
+        console.warn('Erro ao salvar empresa:', e);
+        localStorage.setItem('monvy_modo_empresa', '1');
+        localStorage.setItem('monvy_nome_negocio', dados.nomeNegocio);
+        localStorage.setItem('monvy_empresa_pendente', JSON.stringify(dados));
+      }
+    }
+
+    window.irParaEmpresa = function() {
+      window.location.replace('empresa.html');
+    };
+
+    window.pularOnboarding = async function() {
+      const user = currentUser || await Promise.race([authPronto, new Promise(r => setTimeout(() => r(null), 2000))]);
+      if (user) {
+        try {
+          await salvarEmpresa(user.uid, { onboardingEmpresaDone: true, tipoNegocio: 'nao_informado' });
+        } catch(e) {}
+      }
+      localStorage.setItem('monvy_modo_empresa', '1');
+      window.location.replace('empresa.html');
+    };
+
+    // Init
+    atualizarBotao();
+    atualizarIndicador();
+  </script>
+</body>
+</html>

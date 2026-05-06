@@ -674,8 +674,21 @@
     let currentUser = null;
     // Guardar a Promise para que salvarESair() possa aguardar o auth estar pronto
     const authPronto = new Promise(resolve => {
+      let _authTimer = null;
+      // Novo usuário recém-cadastrado: aguardar mais tempo para Firebase propagar sessão
+      const isNovoUsuario = sessionStorage.getItem('monvay_novo_usuario') === '1';
+      const tempoEspera = isNovoUsuario ? 10000 : 5000;
+
       onAuth(user => {
-        if (!user) { window.location.href = 'auth.html'; return; }
+        if (_authTimer) { clearTimeout(_authTimer); _authTimer = null; }
+        if (!user) {
+          _authTimer = setTimeout(() => {
+            window.location.replace('auth.html');
+          }, tempoEspera);
+          return;
+        }
+        // Limpar flag de novo usuário
+        try { sessionStorage.removeItem('monvay_novo_usuario'); } catch(_) {}
         currentUser = user;
         resolve(user);
       });
@@ -850,7 +863,7 @@
     }
 
     window.irParaApp = function() {
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     };
 
     window.pularOnboarding = async function() {
@@ -858,7 +871,7 @@
         try { await marcarOnboardingFeito(currentUser.uid); } catch(e) {}
       }
       localStorage.setItem('monvy_onboarding_done', '1');
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     };
   </script>
 </body>
