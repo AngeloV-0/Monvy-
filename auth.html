@@ -461,14 +461,12 @@
     #auth-loading-overlay {
       position: fixed; inset: 0;
       background: #060D0A;
-      display: flex; flex-direction: column;
+      display: none; flex-direction: column;
       align-items: center; justify-content: center;
       z-index: 9999;
       transition: opacity 0.3s;
     }
-    /* Formulário oculto até confirmar que não há sessão */
-    .auth-panels { opacity: 0; transition: opacity 0.2s; }
-    .auth-panels.visivel { opacity: 1; }
+    .auth-panels { opacity: 1; }
     .auth-spinner {
       width: 40px; height: 40px;
       border: 3px solid rgba(34,197,94,0.15);
@@ -524,6 +522,22 @@
       .toast { bottom: 16px; right: 12px; left: 12px; font-size: 0.82rem; }
     }
   </style>
+  <!-- Script síncrono: redireciona ANTES da página renderizar -->
+  <script>
+    (function() {
+      var jaLogado = localStorage.getItem('monvy_onboarding_done') === '1';
+      var temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
+      if (jaLogado) {
+        if (temEmpresa) {
+          // Mostra overlay de "Entrando..." e vai para seleção
+          document.write('<style>body{background:#060D0A}.right-panel,.left-panel{display:none!important}</style>');
+        } else {
+          // Redireciona instantaneamente
+          window.location.replace('index.html');
+        }
+      }
+    })();
+  </script>
 </head>
 <body>
 
