@@ -727,14 +727,25 @@
   <script type="module">
   import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle, waitAuthReady, getPerfil, getEmpresa } from './firebase.js';
 
-  // ── Loading overlay: mostrar enquanto Firebase verifica sessão ──
+  // ── Loading overlay: esconde imediatamente, mostra só se redirecionar ──
   const overlay = document.getElementById('auth-loading-overlay');
   let authCheckDone = false;
+
+  // Mostrar o formulário imediatamente — sem esperar Firebase
+  if (overlay) { overlay.style.display = 'none'; }
 
   function esconderOverlay() {
     if (overlay) {
       overlay.style.opacity = '0';
       setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+  }
+
+  function mostrarOverlayRedirecionando() {
+    if (overlay) {
+      overlay.querySelector('.auth-loading-txt').textContent = 'Entrando...';
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
     }
   }
 
@@ -764,19 +775,19 @@
           }
         } catch(e) {}
         // Só pessoal
-        window.location.replace('index.html');
+        mostrarOverlayRedirecionando(); window.location.replace('index.html');
         return;
       }
       // Perfil vazio ou inexistente → novo usuário → onboarding
       try { sessionStorage.setItem('monvay_novo_usuario', '1'); } catch(_) {}
-      window.location.replace('onboarding.html');
+      mostrarOverlayRedirecionando(); window.location.replace('onboarding.html');
     } catch(e) {
       console.warn('Erro ao verificar perfil:', e);
       // Fallback seguro: cache local diz que já fez onboarding → index
       if (localStorage.getItem('monvy_onboarding_done') === '1') {
-        window.location.replace('index.html');
+        mostrarOverlayRedirecionando(); window.location.replace('index.html');
       } else {
-        window.location.replace('onboarding.html');
+        mostrarOverlayRedirecionando(); window.location.replace('onboarding.html');
       }
     }
   }
@@ -792,7 +803,7 @@
     if (modo === 'empresa') {
       window.location.replace('empresa.html');
     } else {
-      window.location.replace('index.html');
+      mostrarOverlayRedirecionando(); window.location.replace('index.html');
     }
   };
 
@@ -927,7 +938,7 @@
       // Redireciona diretamente — não espera onAuth para evitar delay
       _roteado = true;
       setTimeout(() => {
-        window.location.replace('onboarding.html');
+        mostrarOverlayRedirecionando(); window.location.replace('onboarding.html');
       }, 800);
     } catch(e) {
       setBusy(false);
