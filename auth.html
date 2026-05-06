@@ -466,6 +466,9 @@
       z-index: 9999;
       transition: opacity 0.3s;
     }
+    /* Formulário oculto até confirmar que não há sessão */
+    .auth-panels { opacity: 0; transition: opacity 0.2s; }
+    .auth-panels.visivel { opacity: 1; }
     .auth-spinner {
       width: 40px; height: 40px;
       border: 3px solid rgba(34,197,94,0.15);
@@ -577,7 +580,7 @@
   </div>
 
   <!-- RIGHT -->
-  <div class="right-panel">
+  <div class="right-panel auth-panels">
     <a href="landing.html" class="back-link">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       Voltar
@@ -731,8 +734,15 @@
   const overlay = document.getElementById('auth-loading-overlay');
   let authCheckDone = false;
 
-  // Mostrar o formulário imediatamente — sem esperar Firebase
-  if (overlay) { overlay.style.display = 'none'; }
+  // Overlay visível por padrão — esconde e mostra formulário só se sem sessão
+  function mostrarFormulario() {
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => { overlay.style.display = 'none'; }, 200);
+    }
+    const panels = document.querySelector('.auth-panels');
+    if (panels) panels.classList.add('visivel');
+  }
 
   function esconderOverlay() {
     if (overlay) {
@@ -743,9 +753,9 @@
 
   function mostrarOverlayRedirecionando() {
     if (overlay) {
-      overlay.querySelector('.auth-loading-txt').textContent = 'Entrando...';
+      const txt = overlay.querySelector('.auth-loading-txt');
+      if (txt) txt.textContent = 'Entrando...';
       overlay.style.display = 'flex';
-      overlay.style.opacity = '1';
     }
   }
 
@@ -825,12 +835,12 @@
       if (user) {
         await rotearUsuario(user);
       } else {
-        // Nenhum usuário logado — mostrar tela de login
-        esconderOverlay();
+        // Nenhum usuário logado — mostrar formulário de login
+        mostrarFormulario();
       }
     });
-    // Safety timeout: se Firebase demorar >4s, mostrar tela mesmo assim
-    setTimeout(() => { if (!authCheckDone) { authCheckDone = true; esconderOverlay(); }}, 4000);
+    // Safety timeout: se Firebase demorar >3s, mostrar formulário mesmo assim
+    setTimeout(() => { if (!authCheckDone) { authCheckDone = true; mostrarFormulario(); }}, 3000);
   });
 
   // ── Params da URL ──
