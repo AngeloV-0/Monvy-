@@ -522,22 +522,7 @@
       .toast { bottom: 16px; right: 12px; left: 12px; font-size: 0.82rem; }
     }
   </style>
-  <!-- Script síncrono: redireciona ANTES da página renderizar -->
-  <script>
-    (function() {
-      var jaLogado = localStorage.getItem('monvy_onboarding_done') === '1';
-      var temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
-      if (jaLogado) {
-        if (temEmpresa) {
-          // Mostra overlay de "Entrando..." e vai para seleção
-          document.write('<style>body{background:#060D0A}.right-panel,.left-panel{display:none!important}</style>');
-        } else {
-          // Redireciona instantaneamente
-          window.location.replace('index.html');
-        }
-      }
-    })();
-  </script>
+
 </head>
 <body>
 
@@ -766,47 +751,7 @@
   }
   function esconderOverlay() { mostrarFormulario(); }
 
-  // ── ROTEAMENTO — UM ÚNICO CAMINHO ──────────────────────────────────
-  // Passo 1: verificar cache local ANTES do Firebase (0ms)
-  (function verificarCacheLocal() {
-    const jaLogado = localStorage.getItem('monvy_onboarding_done') === '1';
-    const temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
-
-    if (jaLogado) {
-      // Cache diz que está logado — redirecionar imediatamente
-      if (temEmpresa) {
-        // Mostrar tela de seleção (sem precisar de Firebase)
-        mostrarSelecaoModo();
-      } else {
-        _ir('index.html');
-      }
-      // Firebase confirma em background — se sessão expirou, index.html vai redirecionar
-      return;
-    }
-
-    // Sem cache — esperar Firebase (com timeout de 1s)
-    const fallback = setTimeout(() => mostrarFormulario(), 1000);
-
-    import('./firebase.js').then(({ auth }) => {
-      auth.onAuthStateChanged(user => {
-        clearTimeout(fallback);
-        if (_done) return;
-        if (user) {
-          localStorage.setItem('monvy_onboarding_done', '1');
-          const temEmpresaCache = localStorage.getItem('monvy_modo_empresa') === '1';
-          if (temEmpresaCache) {
-            mostrarSelecaoModo();
-          } else {
-            _ir('index.html');
-          }
-        } else {
-          localStorage.removeItem('monvy_onboarding_done');
-          localStorage.removeItem('monvy_modo_empresa');
-          mostrarFormulario();
-        }
-      });
-    }).catch(() => mostrarFormulario());
-  })();
+  // Formulário sempre visível — redirecionamento só ocorre após login manual
 
   // ── Roteador legado — só usado pelo redirect Google ──
   let _roteado = false;
