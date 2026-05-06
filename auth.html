@@ -731,96 +731,79 @@
   import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle, waitAuthReady, getPerfil, getEmpresa } from './firebase.js';
 
   const overlay = document.getElementById('auth-loading-overlay');
-  let authCheckDone = false;
+  let _done = false;
 
-  // ── Redirecionamento instantâneo via cache local ──────────────────
-  // Se já sabemos que o usuário está logado, redireciona ANTES do Firebase inicializar
-  (function redirecionarSeLogado() {
-    const onboardingDone  = localStorage.getItem('monvy_onboarding_done');
-    const modoEmpresa     = localStorage.getItem('monvy_modo_empresa');
-    const respostaBanner  = localStorage.getItem('monvy_banner_empresa_resp');
-
-    if (onboardingDone === '1') {
-      // Usuário logado — redirecionar imediatamente sem esperar Firebase
-      if (modoEmpresa === '1') {
-        // Tem empresa — mostrar seleção de modo (Firebase confirma depois)
-        // Por ora redireciona para index, a seleção fica para quando Firebase carregar
-        window.location.replace('index.html');
-      } else {
-        window.location.replace('index.html');
-      }
-      return; // não executa mais nada
-    }
-
-    // Sem cache → mostrar formulário imediatamente
-    mostrarFormulario();
-  })();
-
-  function mostrarFormulario() {
-    if (overlay) {
-      overlay.style.opacity = '0';
-      setTimeout(() => { overlay.style.display = 'none'; }, 150);
-    }
-    const panels = document.querySelector('.auth-panels');
-    if (panels) panels.classList.add('visivel');
+  function _ir(url) {
+    if (_done) return; _done = true;
+    window.location.replace(url);
   }
 
-  function esconderOverlay() {
-    if (overlay) {
-      overlay.style.opacity = '0';
-      setTimeout(() => { overlay.style.display = 'none'; }, 150);
-    }
+  function mostrarFormulario() {
+    if (_done) return; _done = true;
+    if (overlay) { overlay.style.opacity='0'; setTimeout(()=>{ overlay.style.display='none'; },120); }
+    const p = document.querySelector('.auth-panels');
+    if (p) p.classList.add('visivel');
   }
 
   function mostrarOverlayRedirecionando() {
-    if (overlay) {
-      const txt = overlay.querySelector('.auth-loading-txt');
-      if (txt) txt.textContent = 'Entrando...';
-      overlay.style.display = 'flex';
-    }
+    const txt = overlay?.querySelector('.auth-loading-txt');
+    if (txt) txt.textContent = 'Entrando...';
+    if (overlay) overlay.style.display='flex';
   }
+  function esconderOverlay() { mostrarFormulario(); }
 
-  // ── Roteador principal — executa UMA vez ──
+  // ── ROTEAMENTO — UM ÚNICO CAMINHO ──────────────────────────────────
+  // Passo 1: verificar cache local ANTES do Firebase (0ms)
+  (function verificarCacheLocal() {
+    const jaLogado = localStorage.getItem('monvy_onboarding_done') === '1';
+    const temEmpresa = localStorage.getItem('monvy_modo_empresa') === '1';
+
+    if (jaLogado) {
+      // Cache diz que está logado — redirecionar imediatamente
+      if (temEmpresa) {
+        // Mostrar tela de seleção (sem precisar de Firebase)
+        mostrarSelecaoModo();
+      } else {
+        _ir('index.html');
+      }
+      // Firebase confirma em background — se sessão expirou, index.html vai redirecionar
+      return;
+    }
+
+    // Sem cache — esperar Firebase (com timeout de 1s)
+    const fallback = setTimeout(() => mostrarFormulario(), 1000);
+
+    import('./firebase.js').then(({ auth }) => {
+      auth.onAuthStateChanged(user => {
+        clearTimeout(fallback);
+        if (_done) return;
+        if (user) {
+          localStorage.setItem('monvy_onboarding_done', '1');
+          const temEmpresaCache = localStorage.getItem('monvy_modo_empresa') === '1';
+          if (temEmpresaCache) {
+            mostrarSelecaoModo();
+          } else {
+            _ir('index.html');
+          }
+        } else {
+          localStorage.removeItem('monvy_onboarding_done');
+          localStorage.removeItem('monvy_modo_empresa');
+          mostrarFormulario();
+        }
+      });
+    }).catch(() => mostrarFormulario());
+  })();
+
+  // ── Roteador legado — só usado pelo redirect Google ──
   let _roteado = false;
   async function rotearUsuario(user) {
-    if (_roteado) return;
+    if (_roteado || _done) return;
     _roteado = true;
-    try {
-      const perfil = await getPerfil(user.uid);
-      // Usuário existente com onboarding feito
-      if ((perfil && perfil.onboardingDone) || (perfil && perfil.email)) {
-        localStorage.setItem('monvy_onboarding_done', '1');
-        try { sessionStorage.removeItem('monvay_novo_usuario'); } catch(_) {}
-        // Verificar se tem modo empresa ativo
-        try {
-          const empresa = await getEmpresa(user.uid);
-          if (empresa && empresa.onboardingEmpresaDone) {
-            localStorage.setItem('monvy_modo_empresa', '1');
-            localStorage.setItem('monvy_nome_negocio', empresa.nomeNegocio || 'Meu negócio');
-            // Tem os dois — mostrar seleção
-            // Atualizar nome do negócio no card
-            const nomeEl = document.getElementById('selecao-nome-negocio');
-            if (nomeEl && empresa.nomeNegocio) nomeEl.textContent = empresa.nomeNegocio;
-            mostrarSelecaoModo();
-            return;
-          }
-        } catch(e) {}
-        // Só pessoal
-        mostrarOverlayRedirecionando(); window.location.replace('index.html');
-        return;
-      }
-      // Perfil vazio ou inexistente → novo usuário → onboarding
-      try { sessionStorage.setItem('monvay_novo_usuario', '1'); } catch(_) {}
-      mostrarOverlayRedirecionando(); window.location.replace('onboarding.html');
-    } catch(e) {
-      console.warn('Erro ao verificar perfil:', e);
-      // Fallback seguro: cache local diz que já fez onboarding → index
-      if (localStorage.getItem('monvy_onboarding_done') === '1') {
-        mostrarOverlayRedirecionando(); window.location.replace('index.html');
-      } else {
-        mostrarOverlayRedirecionando(); window.location.replace('onboarding.html');
-      }
-    }
+    localStorage.setItem('monvy_onboarding_done', '1');
+    try { sessionStorage.removeItem('monvay_novo_usuario'); } catch(_) {}
+    const temEmpresaCache = localStorage.getItem('monvy_modo_empresa') === '1';
+    if (temEmpresaCache) { mostrarSelecaoModo(); return; }
+    _ir('index.html');
   }
 
   // ── Seleção de modo ───────────────────────────────────────────
@@ -838,31 +821,16 @@
     }
   };
 
-  // ── 1. Capturar resultado de redirect Google (mobile/popup-blocked) ──
-  // Isso precisa rodar ANTES do onAuth para evitar duplicação
+  // ── Redirect Google (mobile) ──
   verificarRedirectGoogle().then(async user => {
-    if (user) {
+    if (user && !authCheckDone) {
+      authCheckDone = true;
+      localStorage.setItem('monvy_onboarding_done','1');
       try { sessionStorage.removeItem('monvy_google_redirect'); } catch(_) {}
-      await rotearUsuario(user);
+      mostrarOverlayRedirecionando();
+      window.location.replace('index.html');
     }
   }).catch(() => {});
-
-  // ── 2. Ouvir estado de auth APÓS persistência estar pronta ──
-  waitAuthReady().then(() => {
-    authCheckDone = false;
-    onAuth(async user => {
-      if (authCheckDone) return;
-      authCheckDone = true;
-      if (user) {
-        await rotearUsuario(user);
-      } else {
-        // Nenhum usuário logado — mostrar formulário de login
-        mostrarFormulario();
-      }
-    });
-    // Safety timeout: se Firebase demorar >3s, mostrar formulário mesmo assim
-    setTimeout(() => { if (!authCheckDone) { authCheckDone = true; mostrarFormulario(); }}, 3000);
-  });
 
   // ── Params da URL ──
   window.addEventListener('DOMContentLoaded', () => {
