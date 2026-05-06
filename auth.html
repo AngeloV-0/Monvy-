@@ -730,15 +730,36 @@
   <script type="module">
   import { loginComGoogle, loginComEmail, cadastrarComEmail, enviarResetSenha, onAuth, verificarRedirectGoogle, waitAuthReady, getPerfil, getEmpresa } from './firebase.js';
 
-  // ── Loading overlay: esconde imediatamente, mostra só se redirecionar ──
   const overlay = document.getElementById('auth-loading-overlay');
   let authCheckDone = false;
 
-  // Overlay visível por padrão — esconde e mostra formulário só se sem sessão
+  // ── Redirecionamento instantâneo via cache local ──────────────────
+  // Se já sabemos que o usuário está logado, redireciona ANTES do Firebase inicializar
+  (function redirecionarSeLogado() {
+    const onboardingDone  = localStorage.getItem('monvy_onboarding_done');
+    const modoEmpresa     = localStorage.getItem('monvy_modo_empresa');
+    const respostaBanner  = localStorage.getItem('monvy_banner_empresa_resp');
+
+    if (onboardingDone === '1') {
+      // Usuário logado — redirecionar imediatamente sem esperar Firebase
+      if (modoEmpresa === '1') {
+        // Tem empresa — mostrar seleção de modo (Firebase confirma depois)
+        // Por ora redireciona para index, a seleção fica para quando Firebase carregar
+        window.location.replace('index.html');
+      } else {
+        window.location.replace('index.html');
+      }
+      return; // não executa mais nada
+    }
+
+    // Sem cache → mostrar formulário imediatamente
+    mostrarFormulario();
+  })();
+
   function mostrarFormulario() {
     if (overlay) {
       overlay.style.opacity = '0';
-      setTimeout(() => { overlay.style.display = 'none'; }, 200);
+      setTimeout(() => { overlay.style.display = 'none'; }, 150);
     }
     const panels = document.querySelector('.auth-panels');
     if (panels) panels.classList.add('visivel');
@@ -747,7 +768,7 @@
   function esconderOverlay() {
     if (overlay) {
       overlay.style.opacity = '0';
-      setTimeout(() => { overlay.style.display = 'none'; }, 300);
+      setTimeout(() => { overlay.style.display = 'none'; }, 150);
     }
   }
 
