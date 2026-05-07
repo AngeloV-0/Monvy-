@@ -2198,6 +2198,14 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   cursor: pointer;
   transition: all .2s;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+@media (max-width: 420px) {
+  .perfil-tab { font-size: .68rem; padding: 7px 4px; flex-direction: column; gap: 3px; white-space: normal; text-align: center; }
+  .perfil-tab img { margin-right: 0 !important; }
 }
 .perfil-tab.active {
   background: var(--card-bg, #1a1f2e);
@@ -2229,7 +2237,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   background: rgba(0,200,83,0.1);
   color: var(--primary, #00c853);
 }
-.vida-opt span { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 34px; }
+.vida-opt span { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 34px; margin-bottom: 6px; }
 .vida-opt span img { display: block; }
 
 /* KPIs de Dívidas */
@@ -3501,4 +3509,57 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   height: 220px;
   color: #64748b;
   font-size: .85rem;
+}
+
+/* ==============================
+   FIX: Modal Perfil — abas não sobrepõem título no mobile
+   ============================== */
+
+/* Garante que o h2 do modal de perfil nunca fique sob o botão × */
+#modal-perfil .modal-box > h2 {
+  padding-right: 40px;
+  line-height: 1.3;
+}
+
+/* Container das abas: nunca vazar, sempre visível inteiro */
+#modal-perfil .perfil-tabs-wrap {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 4px;
+  flex-shrink: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+/* Em telas muito pequenas (<360px): esconder label, mostrar só ícone */
+@media (max-width: 360px) {
+  .perfil-tab .tab-label { display: none; }
+  .perfil-tab img { margin-right: 0 !important; }
+  .perfil-tab { padding: 8px; }
+}
+
+/* Em telas pequenas (360–420px): abas em coluna com ícone em cima */
+@media (max-width: 420px) {
+  .perfil-tab {
+    font-size: .65rem;
+    padding: 7px 2px;
+    flex-direction: column;
+    gap: 3px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .perfil-tab img { margin-right: 0 !important; }
+  #modal-perfil .modal-box {
+    padding: 20px 16px 16px;
+  }
+}
+
+/* Botão fechar do modal de perfil: posicionado corretamente sem sobrepor título */
+#modal-perfil .modal-fechar {
+  top: 20px;
+  right: 16px;
+  z-index: 10;
 }
