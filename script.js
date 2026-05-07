@@ -1722,13 +1722,19 @@ window.salvarPerfilVida=async function(){
   if(!uidAtual) return;
   const perfil=window._perfilVidaTemp||perfilUsuario?.perfilVida||{};
   try{
-    await fbSalvarPerfilVida(uidAtual,perfil);perfilUsuario.perfilVida=perfil;window._perfilVidaTemp=null;
+    await fbSalvarPerfilVida(uidAtual,perfil);
+    // Atualizar cache local com os dados novos
+    perfilUsuario.perfilVida=perfil;
+    // Reiniciar rascunho com os dados recém salvos (não null — para manter seleções)
+    window._perfilVidaTemp=JSON.parse(JSON.stringify(perfil));
     const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
-    if(window.mostrarToastPerfil) window.mostrarToastPerfil('Salvo com sucesso!');
-    // Atualizar aba de gastos imediatamente com novo perfil
+    showToast('✓ Perfil salvo!','success');
+    // Atualizar TUDO que depende do perfil
     atualizarTelaCategorias();
     renderizarTabela();
     popularSelectCategorias('gasto');
+    gerarInsights();
+    atualizarBanner();
   }catch(e){alert('Erro ao salvar.');console.error(e);}
 };
 window.setMetaEco=function(el,pct){

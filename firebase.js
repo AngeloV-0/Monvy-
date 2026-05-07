@@ -133,15 +133,15 @@ export async function getPerfil(uid) {
 }
 
 export async function salvarPerfil(uid, dados) {
-  await updateDoc(doc(db, 'usuarios', uid), dados);
+  await setDoc(doc(db, 'usuarios', uid), dados, { merge: true });
 }
 
 export async function salvarPerfilVida(uid, perfil) {
-  await updateDoc(doc(db, 'usuarios', uid), { perfilVida: perfil });
+  await setDoc(doc(db, 'usuarios', uid), { perfilVida: perfil }, { merge: true });
 }
 
 export async function marcarOnboardingFeito(uid) {
-  await updateDoc(doc(db, 'usuarios', uid), { onboardingDone: true });
+  await setDoc(doc(db, 'usuarios', uid), { onboardingDone: true }, { merge: true });
 }
 
 // ── Movimentações ─────────────────────────────────────────────

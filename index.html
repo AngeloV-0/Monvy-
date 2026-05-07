@@ -2109,11 +2109,11 @@ bvRender();
         imgEl.style.display = 'none'; letraEl.style.display = 'block'; btnRemover.style.display = 'none';
       }
       document.getElementById('perfil-sucesso').style.display = 'none';
-      // Resetar rascunho para iniciar com os dados atualmente salvos
-      window._perfilVidaTemp = null;
+      // Inicializar rascunho com cópia do perfil atual — assim mudanças parciais são preservadas
+      window._perfilVidaTemp = JSON.parse(JSON.stringify(window.perfilUsuario?.perfilVida || {}));
 
       // ── Marcar opções salvas no perfil de vida ──────────────────
-      const vida = window.perfilUsuario?.perfilVida || {};
+      const vida = window._perfilVidaTemp;
 
       // Carregar tags customizadas (esportes, streaming, ferramentas)
       const CUSTOM_CONHECIDOS = ['academia','luta','futebol','internet','celular',
@@ -2161,13 +2161,26 @@ bvRender();
         if (el) el.classList.add('selected');
       });
 
+      // Carregar campos de texto (Conta e Finanças)
+      try {
+        const nomeEl = document.getElementById('perfil-nome-edit');
+        if (nomeEl && window.perfilUsuario?.nome) nomeEl.value = window.perfilUsuario.nome;
+        const rendaEl = document.getElementById('perfil-renda');
+        if (rendaEl && window.perfilUsuario?.renda) rendaEl.value = window.perfilUsuario.renda;
+        const metaEco = window.perfilUsuario?.metaEconomia;
+        if (metaEco) {
+          document.querySelectorAll('#meta-eco-opts .vida-opt').forEach(o => {
+            o.classList.toggle('selected', o.getAttribute('onclick')?.includes(String(metaEco)));
+          });
+        }
+      } catch(e) {}
+
       document.getElementById('modal-perfil').classList.remove('hidden');
     }
     function fecharModalPerfil() {
       document.getElementById('modal-perfil').classList.add('hidden');
       fecharEditarCampo();
-      // Limpar rascunho ao fechar sem salvar
-      window._perfilVidaTemp = null;
+      // NÃO zerar rascunho — mantém as seleções para próxima abertura
     }
 
     let _campoAtual = null;
