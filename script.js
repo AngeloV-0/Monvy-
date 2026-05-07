@@ -27,17 +27,19 @@ const ICONE_CAT={
   'Família':'icone-familia.png',
   // Educação
   'Educação':'icone-cerebro.png',
-  // Streamings
-  'Netflix':'logo-netflix.png',
-  'Spotify':'logo-spotify.png',
-  'YouTube Premium':'logo-youtube.png',
-  'Max (HBO)':'logo-hbo.png',
-  'Prime Video':'logo-prime.png',
-  'Disney+':'logo-disney.png',
-  'ChatGPT Plus':'logo-chatgpt.png',
-  'Notion':'logo-notion.png',
-  'Canva':'logo-canva.png',
-  'CapCut':'logo-capcut.png',
+  // Streamings — usa ícone genérico de streaming nas categorias de gasto
+  'Netflix':'icone-streaming.png',
+  'Spotify':'icone-streaming.png',
+  'YouTube Premium':'icone-streaming.png',
+  'Max (HBO)':'icone-streaming.png',
+  'Prime Video':'icone-streaming.png',
+  'Disney+':'icone-streaming.png',
+  'ChatGPT Plus':'icone-ferramenta-cognitiva.png',
+  'Notion':'icone-ferramenta-cognitiva.png',
+  'Canva':'icone-ferramenta-cognitiva.png',
+  'CapCut':'icone-ferramenta-cognitiva.png',
+  'Assinatura':'icone-streaming.png',
+  'Streaming':'icone-streaming.png',
   // Tech
   'Celular':'icone-celular.png',
   'Internet':'icone-internet.png',
@@ -206,6 +208,7 @@ const pageTitles = {
   investimentos:'Investimentos',aprender:'Aprender',relatorio:'Relatório Mensal',
   contas:'Contas a Pagar',score:'Score Financeiro'
 };
+let _telaAnterior = null;
 function irPara(tela) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.tela').forEach(t=>t.classList.remove('active'));
@@ -221,6 +224,15 @@ function irPara(tela) {
   if(tela==='contas'){renderizarContas();popularSelectContas();}
   if(tela==='metas') renderizarMetas();
   if(tela==='dividas') renderizarDividas();
+  // Mostrar insights ao VOLTAR para inicio (não na primeira vez)
+  if(tela==='inicio' && _telaAnterior && _telaAnterior!=='inicio'){
+    gerarInsights();
+  } else if(tela==='inicio'){
+    // Esconder na primeira vez
+    const panel=document.getElementById('insights-panel');
+    if(panel) panel.style.display='none';
+  }
+  _telaAnterior = tela;
   // bolsa integrada diretamente no HTML
 }
 document.querySelectorAll('.nav-item[data-tela]').forEach(item=>{
@@ -261,7 +273,7 @@ waitAuthReady().then(()=>{
     if(unsubMovs) unsubMovs();
     unsubMovs=ouvirMovimentacoes(user.uid,movs=>{
       movimentacoes=movs;
-      atualizarKPIs();atualizarChart();renderizarListaInicio();renderizarTabela();calcularScore();gerarInsights();mostrarBannerEmpresa();
+      atualizarKPIs();atualizarChart();renderizarListaInicio();renderizarTabela();calcularScore();mostrarBannerEmpresa();
     });
   });
 });
@@ -444,45 +456,42 @@ function getCategoriasPorPerfil(){
   const moradia=vida.moradia||null;
   const filhos=vida.filhos||null;
 
-  // Categorias base sempre presentes
-  const base=['Alimentação','Saúde','Lazer','Educação','Roupas','Beleza','Outros'];
+  // Apenas categorias essenciais sempre presentes
+  const base=['Alimentação','Saúde','Lazer','Outros'];
   const extra=[];
 
-  // ── Moradia ──────────────────────────────────
+  // ── Moradia — só adiciona se perfil tem moradia configurada ──
   if(moradia==='aluguel') extra.push('Aluguel');
   else if(moradia==='financiada') extra.push('Financiamento');
-  else extra.push('Moradia');
+  else if(moradia==='propria') extra.push('Moradia');
+  // sem moradia selecionada = não adiciona
 
-  // ── Transporte por veículo ────────────────────
+  // ── Transporte — só do perfil ─────────────────
   if(transporte.includes('carro')) extra.push('Carro');
   if(transporte.includes('moto')) extra.push('Moto');
   if(transporte.includes('publico')||transporte.includes('app')) extra.push('Transporte');
   if(transporte.includes('bike')) extra.push('Bike');
-  // fallback se nenhum selecionado
-  if(!transporte.length||transporte.includes('nenhum')) {
-    if(!extra.includes('Transporte')) extra.push('Transporte');
-  }
 
-  // ── Filhos / família ──────────────────────────
+  // ── Filhos / família — só do perfil ──────────
   if(filhos==='sim') extra.push('Bebê / Criança');
   if(familia.includes('dependentes')) extra.push('Dependentes');
   if(familia.includes('pets')) extra.push('Pets');
 
-  // ── Atividade física ──────────────────────────
+  // ── Atividade física — só do perfil ──────────
   ['academia','luta','futebol'].forEach(r=>{
     if(rotina.includes(r)) extra.push(ROTINA_NOMES[r]);
   });
 
-  // ── Streamings e ferramentas ──────────────────
+  // ── Streamings e ferramentas — só do perfil ──
   ['netflix','spotify','youtube','hbo','prime','disney','chatgpt','notion','canva','capcut'].forEach(r=>{
     if(rotina.includes(r)) extra.push(ROTINA_NOMES[r]);
   });
 
-  // ── Internet / Celular ────────────────────────
+  // ── Internet / Celular — só do perfil ────────
   if(rotina.includes('internet')) extra.push('Internet');
   if(rotina.includes('celular'))  extra.push('Celular');
 
-  // ── Itens customizados (strings livres) ───────
+  // ── Itens customizados ────────────────────────
   rotina.filter(r=>!ROTINA_NOMES[r]&&typeof r==='string'&&r.trim()).forEach(r=>{
     const nome=r.trim();
     if(!extra.includes(nome)) extra.push(nome);
@@ -1368,8 +1377,8 @@ function gerarInsights(){
     chatgpt:{png:'logo-chatgpt.png',bg:'rgba(16,163,127,0.1)',titulo:'ChatGPT Plus',desc:'Sua assinatura do ChatGPT Plus é um gasto digital — não esqueça de registrar.'},
     canva:{png:'logo-canva.png',bg:'rgba(0,196,204,0.1)',titulo:'Canva',desc:'Se você paga pelo Canva Pro, registre como gasto recorrente.'},
     capcut:{png:'logo-capcut.png',bg:'rgba(0,0,0,0.15)',titulo:'CapCut',desc:'Registre sua assinatura do CapCut se for paga.'},
-    internet:{png:'icone-internet.png',bg:'rgba(59,130,246,0.1)',titulo:'Internet / Celular',desc:'Registre sua conta de internet ou celular para melhorar a precisão do score.'},
-    celular:{png:'icone-celular.png',bg:'rgba(100,116,139,0.1)',titulo:'Celular',desc:'Registre o plano do seu celular como gasto recorrente.'},
+    internet:{png:'icone-internet.png',bg:'rgba(59,130,246,0.1)',titulo:'Internet / Celular',desc:'Registre sua conta de internet ou celular para melhorar a precisão do score.',btnLabel:'Registrar gasto →'},
+    celular:{png:'icone-celular.png',bg:'rgba(100,116,139,0.1)',titulo:'Celular',desc:'Registre o plano do seu celular como gasto recorrente.',btnLabel:'Registrar gasto →'},
   };
 
   // Mostrar no máximo 3 cards de perfil para não poluir
@@ -1378,7 +1387,8 @@ function gerarInsights(){
     if(perfilCount>=3) break;
     const info=ROTINA_INSIGHTS[r];
     if(info && !insights.some(i=>i.titulo===info.titulo)){
-      insights.push({...info,acao:null});
+      const cat=ROTINA_NOMES[r]||info.titulo;
+      insights.push({...info,acao:()=>abrirModalGastoCategoria(cat),btnLabel:'Registrar gasto →'});
       perfilCount++;
     }
   }
@@ -1386,16 +1396,16 @@ function gerarInsights(){
   // ── Insight de transporte ────────────────────────────────
   const transporte=vida.transporte||[];
   if(transporte.includes('moto')&&!insights.some(i=>i.titulo==='Moto no perfil'))
-    insights.push({png:'icone-moto.png',bg:'rgba(245,158,11,0.1)',titulo:'Moto no perfil',desc:'Registre gastos com gasolina, manutenção e seguro da moto.',acao:null});
+    insights.push({png:'icone-moto.png',bg:'rgba(245,158,11,0.1)',titulo:'Moto no perfil',desc:'Registre gastos com gasolina, manutenção e seguro da moto.',acao:()=>abrirModalGastoCategoria('Moto'),btnLabel:'Registrar gasto →'});
   if(transporte.includes('carro')&&!insights.some(i=>i.titulo==='Carro no perfil'))
-    insights.push({png:'icone-carro.png',bg:'rgba(100,116,139,0.1)',titulo:'Carro no perfil',desc:'Não esqueça de registrar combustível, manutenção e IPVA.',acao:null});
+    insights.push({png:'icone-carro.png',bg:'rgba(100,116,139,0.1)',titulo:'Carro no perfil',desc:'Não esqueça de registrar combustível, manutenção e IPVA.',acao:()=>abrirModalGastoCategoria('Carro'),btnLabel:'Registrar gasto →'});
 
   // ── Insight de família ───────────────────────────────────
   if(vida.filhos==='sim')
-    insights.push({png:'icone-bebe.png',bg:'rgba(236,72,153,0.1)',titulo:'Bebê / Criança',desc:'Registre os gastos com bebê para acompanhar o impacto no orçamento.',acao:null});
+    insights.push({png:'icone-bebe.png',bg:'rgba(236,72,153,0.1)',titulo:'Bebê / Criança',desc:'Registre os gastos com bebê para acompanhar o impacto no orçamento.',acao:()=>abrirModalGastoCategoria('Bebê / Criança'),btnLabel:'Registrar gasto →'});
   const familia=vida.familia||[];
   if(familia.includes('pets'))
-    insights.push({png:'icone-pets.png',bg:'rgba(245,158,11,0.1)',titulo:'Pets no perfil',desc:'Registre gastos com pets — ração, veterinário, banho e tosa.',acao:null});
+    insights.push({png:'icone-pets.png',bg:'rgba(245,158,11,0.1)',titulo:'Pets no perfil',desc:'Registre gastos com pets — ração, veterinário, banho e tosa.',acao:()=>abrirModalGastoCategoria('Pets'),btnLabel:'Registrar gasto →'});
 
   // Insight reserva emergência se saldo baixo
   const saldoAtual=ent-sai;
@@ -1426,6 +1436,40 @@ function gerarInsights(){
     </div>`;
   }).join('');
 }
+
+// ── Abrir modal de gasto com categoria pré-selecionada ──────────────
+window.abrirModalGastoCategoria = function(categoria) {
+  // Abrir modal de novo gasto
+  const btnGasto = document.getElementById('btn-novo-gasto') || document.querySelector('[onclick*="abrirModal"]');
+  // Simular clique no botão Novo Gasto
+  if(typeof abrirModal === 'function') abrirModal('gasto');
+  else if(typeof window.abrirModalGasto === 'function') window.abrirModalGasto();
+  // Aguardar modal abrir e pré-selecionar categoria
+  setTimeout(() => {
+    const selCat = document.getElementById('modal-categoria');
+    if(selCat) {
+      selCat.value = categoria;
+      // Disparar evento para picker atualizar
+      selCat.dispatchEvent(new Event('change'));
+    }
+    // Picker visual
+    const picker = document.getElementById('modal-categoria-picker');
+    if(picker) {
+      picker.querySelectorAll('.cat-picker-item').forEach(item => {
+        item.classList.toggle('selected', item.dataset.val === categoria);
+      });
+    }
+  }, 150);
+};
+
+// ── Ocultar Insights ─────────────────────────────────────────────
+window.ocultarInsights = function() {
+  const panel = document.getElementById('insights-panel');
+  if (panel) {
+    panel.style.animation = 'fadeOutUp .25s ease';
+    setTimeout(() => { panel.style.display = 'none'; panel.style.animation = ''; }, 240);
+  }
+};
 
 // ── Banner Empresa ───────────────────────────────────────────────
 function mostrarBannerEmpresa(){
