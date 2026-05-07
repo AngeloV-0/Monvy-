@@ -247,7 +247,7 @@ function irPara(tela) {
   const t=pageTitles[tela]||'Monvay';
   const pt=document.getElementById('page-title'); if(pt) pt.textContent=t;
   const mt=document.getElementById('topbar-mobile-tela'); if(mt) mt.textContent=t;
-  if(tela==='gastos'){atualizarTelaCategorias();renderizarTabela();renderizarSugestaoOrcamento();}
+  if(tela==='gastos'){atualizarTelaCategorias();renderizarTabela();}
   if(tela==='score') calcularScore();
   if(tela==='relatorio') renderizarRelatorio();
   if(tela==='contas'){renderizarContas();popularSelectContas();}
@@ -653,60 +653,9 @@ function renderizarTabela(){
       <td><button class="btn-icon" onclick="abrirModalEditar('${m.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
     </tr>`).join('');
 }
-function renderSugestaoOrcamento(){
-  const el=document.getElementById('sugestao-orcamento');
-  if(!el) return;
-  const renda=perfilUsuario?.renda||0;
-  if(renda<=0){el.style.display='none';return;}
-  const necessidades=Math.round(renda*0.50);
-  const desejos=Math.round(renda*0.30);
-  const futuro=Math.round(renda*0.20);
-  const agora=new Date();
-  const gastosMes=movimentacoes
-    .filter(m=>m.tipo==='gasto'&&m.data&&new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
-    .reduce((s,m)=>s+m.valor,0);
-  const pctGasto=Math.min(100,Math.round((gastosMes/(renda*0.80))*100));
-  const corGasto=pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'var(--primary)';
-  const fillColor=pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'#22c55e';
-  el.style.display='block';
-  el.innerHTML=`<div class="orcamento-sugestao">
-    <div class="orcamento-sugestao-titulo">
-      <span><img src="icone-grafico-01.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle"></span>
-      Sugestão 50·30·20 — baseada na sua renda de ${fmt(renda)}/mês
-      <div style="margin-left:auto;font-size:.72rem;color:var(--gray);font-weight:400">Gastos este mês: <strong style="color:${corGasto}">${fmt(gastosMes)}</strong></div>
-    </div>
-    <div class="orcamento-regras">
-      <div class="orcamento-regra">
-        <div class="orcamento-regra-pct or-verde">50%</div>
-        <div class="orcamento-regra-label">Necessidades<br>moradia, alimentação...</div>
-        <div class="orcamento-regra-val or-verde">${fmt(necessidades)}</div>
-      </div>
-      <div class="orcamento-regra">
-        <div class="orcamento-regra-pct or-azul">30%</div>
-        <div class="orcamento-regra-label">Desejos<br>lazer, roupas...</div>
-        <div class="orcamento-regra-val or-azul">${fmt(desejos)}</div>
-      </div>
-      <div class="orcamento-regra">
-        <div class="orcamento-regra-pct or-amarelo">20%</div>
-        <div class="orcamento-regra-label">Futuro<br>reserva, investimento</div>
-        <div class="orcamento-regra-val or-amarelo">${fmt(futuro)}</div>
-      </div>
-    </div>
-    <div style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--gray);margin-bottom:4px">
-        <span>Progresso de gastos este mês</span>
-        <span>${pctGasto}% do orçamento</span>
-      </div>
-      <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
-        <div style="height:100%;width:${pctGasto}%;background:${fillColor};border-radius:3px;transition:width .5s"></div>
-      </div>
-    </div>
-  </div>`;
-}
-
 function atualizarTelaCategorias(){
-  const grid=document.getElementById('categorias-grid-dinamico'); if(!grid) return;
   renderSugestaoOrcamento();
+  const grid=document.getElementById('categorias-grid-dinamico'); if(!grid) return;
   const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
 
   // Incluir todas as categorias do perfil (mesmo com R$0)
@@ -1629,10 +1578,19 @@ window.ocultarInsights = function() {
 };
 
 // ── Sugestão 50-30-20 ────────────────────────────────────────────
-function renderizarSugestaoOrcamento(){
+function renderSugestaoOrcamento(){
   const el=document.getElementById('sugestao-orcamento');
   if(!el) return;
-  const renda=perfilUsuario?.renda||0;
+  // Usar renda do perfil ou estimar pelas entradas do mês atual
+  let renda=perfilUsuario?.renda||0;
+  if(renda<=0){
+    const agora=new Date();
+    renda=movimentacoes
+      .filter(m=>m.tipo==='ganho'&&m.data&&
+        new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&
+        new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
+      .reduce((s,m)=>s+(m.valor||0),0);
+  }
   if(renda<=0){el.style.display='none';return;}
   const necessidades=Math.round(renda*0.50);
   const desejos=Math.round(renda*0.30);
