@@ -912,8 +912,8 @@
       setBusy(false);
       const msg = traduzirErro(e.code);
       erro('err-login-senha', true);
-      document.getElementById('err-login-senha').innerHTML =
-        msg + ' &nbsp;·&nbsp; <a href="#" onclick="mudarAba('esqueci')" style="color:var(--primary)">Esqueci a senha</a>';
+      const errEl = document.getElementById('err-login-senha');
+      errEl.textContent = msg;
       document.getElementById('login-senha').classList.add('error');
       showToast('❌ ' + msg, 'error');
     }
@@ -950,8 +950,7 @@
       setBusy(false);
       if (e.code === 'auth/email-already-in-use') {
         erro('err-cad-email', true);
-        document.getElementById('err-cad-email').innerHTML =
-          'E-mail já cadastrado &nbsp;·&nbsp; <a href="#" onclick="mudarAba('login')" style="color:var(--primary)">Fazer login →</a>';
+        document.getElementById('err-cad-email').textContent = 'E-mail já cadastrado. Faça login na aba Entrar.';
       } else {
         showToast('❌ ' + traduzirErro(e.code), 'error');
       }
