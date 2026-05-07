@@ -905,6 +905,9 @@
       setBusy(true, 'Entrando...');
       await loginComEmail(email, senha);
       showToast('✓ Bem-vindo de volta!', 'success');
+      localStorage.setItem('monvy_onboarding_done','1');
+      setTimeout(() => window.location.replace('index.html'), 800);
+      return;
     } catch(e) {
       setBusy(false);
       const msg = traduzirErro(e.code);
@@ -932,6 +935,9 @@
       setBusy(true, 'Criando conta...');
       await cadastrarComEmail(nome, email, senha);
       showToast(`✓ Conta criada! Bem-vindo, ${nome.split(' ')[0]}!`, 'success');
+      localStorage.removeItem('monvy_onboarding_done');
+      setTimeout(() => window.location.replace('onboarding.html'), 800);
+      return;
       localStorage.removeItem('monvy_onboarding_done');
       // Sinaliza para o onboarding.html que é um novo usuário (aguardar mais tempo)
       try { sessionStorage.setItem('monvay_novo_usuario', '1'); } catch(_) {}
