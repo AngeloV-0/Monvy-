@@ -527,19 +527,20 @@ nav {
 }
 
 .kpi-icon {
-  width: 48px; height: 48px;
-  border-radius: 12px;
+  width: 52px; height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
   background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
 }
-
+.kpi-icon img { width: 28px; height: 28px; object-fit: contain; }
 .kpi-icon svg { width: 26px; height: 26px; }
-.kpi-icon.green { background: var(--primary-dim); color: var(--primary); }
-.kpi-icon.red   { background: var(--red-dim); color: var(--red); }
-.kpi-icon.yellow{ background: var(--yellow-dim); color: var(--yellow); }
+.kpi-icon.green  { background: var(--primary-dim); color: var(--primary); }
+.kpi-icon.red    { background: var(--red-dim);     color: var(--red); }
+.kpi-icon.yellow { background: var(--yellow-dim);  color: var(--yellow); }
 
 .kpi-label {
   font-size: 0.78rem;
@@ -629,7 +630,7 @@ nav {
 .see-all:hover { opacity: 0.8; }
 
 /* Canvas Chart */
-#chart-fluxo { display: block; width: 100% !important; }
+#chart-fluxo { display: block !important; width: 100% !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; }
 
 .chart-empty {
   display: flex;
@@ -1433,7 +1434,7 @@ select option { background: var(--surface-2); }
   select { font-size: 0.95rem; }
 
   /* Card de gráfico: altura reduzida */
-  #chart-fluxo { max-height: 160px; }
+  #chart-fluxo { width: 100% !important; height: 160px !important; min-height: 160px !important; max-height: 160px !important; }
 
   /* Dropdown de busca: largura total no mobile */
   #search-dropdown {
@@ -3562,4 +3563,23 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   top: 20px;
   right: 16px;
   z-index: 10;
+}
+
+/* Chart relatorio fix */
+#chart-relatorio {
+  display: block !important;
+  width: 100% !important;
+  height: 200px !important;
+  min-height: 200px !important;
+  max-height: 200px !important;
+}
+
+/* Chart pizza fix */
+#chart-pizza {
+  display: block !important;
+  width: 100% !important;
+  max-width: 260px !important;
+  height: 220px !important;
+  min-height: 220px !important;
+  margin: 0 auto;
 }

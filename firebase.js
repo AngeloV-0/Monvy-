@@ -314,3 +314,101 @@ export async function getHistorico(uid) {
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a, b) => b.mes.localeCompare(a.mes));
 }
+
+// ── Modo Empresa ───────────────────────────────────────────────
+
+export async function getEmpresa(uid) {
+  const snap = await getDoc(doc(db, 'usuarios', uid, 'empresa', 'perfil'));
+  return snap.exists() ? snap.data() : null;
+}
+
+export async function salvarEmpresa(uid, dados) {
+  await setDoc(doc(db, 'usuarios', uid, 'empresa', 'perfil'), {
+    ...dados,
+    atualizadoEm: serverTimestamp()
+  }, { merge: true });
+}
+
+// Movimentações da empresa (separadas das pessoais)
+export async function getMovimentacoesEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_movs'));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+      const ta = a.criadoEm?.toMillis?.() || 0;
+      const tb = b.criadoEm?.toMillis?.() || 0;
+      return tb - ta;
+    });
+}
+
+export async function adicionarMovimentacaoEmpresa(uid, mov) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_movs'), {
+    ...mov, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarMovimentacaoEmpresa(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_movs', id), dados);
+}
+
+export async function deletarMovimentacaoEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_movs', id));
+}
+
+export function ouvirMovimentacoesEmpresa(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'empresa_movs'), snap => {
+    const movs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+        const ta = a.criadoEm?.toMillis?.() || 0;
+        const tb = b.criadoEm?.toMillis?.() || 0;
+        return tb - ta;
+      });
+    callback(movs);
+  });
+}
+
+// Produtos da empresa
+export async function getProdutos(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_produtos'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function adicionarProduto(uid, produto) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_produtos'), {
+    ...produto, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarProduto(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_produtos', id), dados);
+}
+
+export async function deletarProduto(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_produtos', id));
+}
+
+// Contas empresa (a pagar/receber)
+export async function getContasEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_contas'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function adicionarContaEmpresa(uid, conta) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_contas'), {
+    ...conta, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarContaEmpresa(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_contas', id), dados);
+}
+
+export async function deletarContaEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_contas', id));
+}

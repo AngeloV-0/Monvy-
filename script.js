@@ -1,3 +1,78 @@
+
+// ── Mapa de ícones por categoria ──────────────────────────────────
+const ICONE_CAT={
+  // Alimentação
+  'Alimentação':'icone-alimentacao.png',
+  // Lazer / esporte
+  'Lazer':'icone-lazer.png',
+  'Academia':'icone-academia.png',
+  'Luta / Artes Marciais':'icone-luta.png',
+  'Futebol':'icone-futebol.png',
+  'Bike':'icone-bicicleta.png',
+  // Saúde
+  'Saúde':'icone-saude.png',
+  // Moradia
+  'Moradia':'icone-casa-propria.png',
+  'Casa':'icone-casa-propria.png',
+  'Aluguel':'icone-casa-aluguel.png',
+  'Financiamento':'icone-financiamento.png',
+  // Transporte
+  'Transporte':'icone-onibus.png',
+  'Carro':'icone-carro.png',
+  'Moto':'icone-moto.png',
+  // Família
+  'Bebê / Criança':'icone-bebe.png',
+  'Dependentes':'icone-dependentes.png',
+  'Pets':'icone-pets.png',
+  'Família':'icone-familia.png',
+  // Educação
+  'Educação':'icone-cerebro.png',
+  // Streamings
+  'Netflix':'logo-netflix.png',
+  'Spotify':'logo-spotify.png',
+  'YouTube Premium':'logo-youtube.png',
+  'Max (HBO)':'logo-hbo.png',
+  'Prime Video':'logo-prime.png',
+  'Disney+':'logo-disney.png',
+  'ChatGPT Plus':'logo-chatgpt.png',
+  'Notion':'logo-notion.png',
+  'Canva':'logo-canva.png',
+  'CapCut':'logo-capcut.png',
+  // Tech
+  'Celular':'icone-celular.png',
+  'Internet':'icone-internet.png',
+  // Finanças
+  'Investimento':'icone-investimento.png',
+  'Cartão':'icone-cartao-01.png',
+  'Dívida':'icone-cadeado.png',
+  'Empréstimo':'icone-emprestimo.png',
+  // Outros
+  'Roupas':'icone-app.png',
+  'Beleza':'icone-usuario.png',
+  'Outros':'icone-outros.png',
+};
+function getIconeCat(cat){
+  if(!cat) return null;
+  // busca exata
+  if(ICONE_CAT[cat]) return ICONE_CAT[cat];
+  // busca parcial case-insensitive
+  const lower=cat.toLowerCase();
+  for(const [k,v] of Object.entries(ICONE_CAT)){
+    if(lower.includes(k.toLowerCase())) return v;
+  }
+  return null;
+}
+function iconeHtml(cat, tipo, size=28){
+  const png=getIconeCat(cat);
+  if(png) return `<img src="${png}" alt="${cat}" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0">`;
+  // fallback: círculo colorido com seta
+  const isGanho=tipo==='ganho';
+  const bg=isGanho?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)';
+  const color=isGanho?'#22c55e':'#ef4444';
+  const arrow=isGanho?'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>':'<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>';
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" style="width:${Math.round(size*0.5)}px;height:${Math.round(size*0.5)}px">${arrow}</svg></div>`;
+}
+
 // ==============================
 // MONVAY — LÓGICA PRINCIPAL
 // v4.0 | ES Module + Firebase
@@ -93,7 +168,7 @@ applyTheme(localStorage.getItem('monvy_theme')||'dark');
     .btn-icon{background:none;border:none;cursor:pointer;color:var(--gray);padding:4px;display:flex;align-items:center}
     .btn-icon:hover{color:var(--primary)}
     .green{color:#22c55e}.red{color:#ef4444}.gray{color:var(--gray)}
-    .categoria-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .categoria-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px}.categoria-card .cat-info{display:flex;align-items:center;gap:8px;margin-bottom:8px}.cat-picker-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all .15s;text-align:center;user-select:none}.cat-picker-item:hover{border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.04)}.cat-picker-item.selected{border-color:var(--primary);background:rgba(34,197,94,0.12)}.cat-picker-item img{width:26px;height:26px;object-fit:contain}.cat-picker-item .cat-pk-nome{font-size:.68rem;font-weight:600;color:var(--gray-2);line-height:1.2;word-break:break-word}.cat-picker-item.selected .cat-pk-nome{color:var(--primary)}
     .cat-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .cat-nome{font-weight:600;font-size:.88rem}.cat-val{font-weight:700;font-size:.9rem}
     .cat-bar-wrap{background:rgba(255,255,255,.06);border-radius:4px;height:6px;margin-bottom:4px;overflow:hidden}
@@ -102,7 +177,7 @@ applyTheme(localStorage.getItem('monvy_theme')||'dark');
     .pizza-leg-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.78rem}
     .pizza-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
     .pizza-leg-val{margin-left:auto;font-weight:700}
-    .insight-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+    .insight-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:var(--card-bg);border:1px solid var(--border);margin-bottom:8px;transition:opacity .15s}.insight-item:last-child{margin-bottom:0}@keyframes fadeInDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOutUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
     .meta-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
     .meta-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .meta-nome{font-weight:700}.meta-pct{font-size:.85rem;color:var(--primary);font-weight:700}
@@ -159,14 +234,20 @@ window.logout = async function() {
   localStorage.removeItem('monvy_logado');
   localStorage.removeItem('monvy_logged');
   await fazerLogout();
-  window.location.href='auth.html';
+  window.location.href='landing.html';
 };
 waitAuthReady().then(()=>{
   onAuth(async user=>{
     // Esconder overlay de loading
     const appOverlay=document.getElementById('app-loading-overlay');
     if(appOverlay) appOverlay.style.display='none';
-    if(!user){window.location.href='auth.html';return;}
+    if(!user){
+      localStorage.removeItem('monvy_onboarding_done');
+      localStorage.removeItem('monvy_modo_empresa');
+      window.location.href='landing.html';
+      return;
+    }
+    localStorage.setItem('monvy_onboarding_done','1');
     uidAtual=user.uid;
     window._firebaseExports={auth:{currentUser:user}};
     const nome=user.displayName||'Usuário';
@@ -180,7 +261,7 @@ waitAuthReady().then(()=>{
     if(unsubMovs) unsubMovs();
     unsubMovs=ouvirMovimentacoes(user.uid,movs=>{
       movimentacoes=movs;
-      atualizarKPIs();atualizarChart();renderizarListaInicio();renderizarTabela();calcularScore();gerarInsights();
+      atualizarKPIs();atualizarChart();renderizarListaInicio();renderizarTabela();calcularScore();gerarInsights();mostrarBannerEmpresa();
     });
   });
 });
@@ -239,21 +320,60 @@ function atualizarChart(){
   if(!canvas) return;
   if(movimentacoes.length===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';return;}
   canvas.style.display='block';if(emptyEl)emptyEl.style.display='none';
+  // Garante que o canvas tem dimensões antes de renderizar
+  if(!canvas.offsetWidth){setTimeout(atualizarChart,100);return;}
+  // Define tamanho explícito do canvas para o Chart.js não extrapolar
+  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
+  canvas.width=w;
+  canvas.height=180;
   const lista=fluxoModo==='recentes'?movimentacoes.slice(0,10):movimentacoes;
-  const labels=lista.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`).reverse();
-  const entradas=lista.map(m=>m.tipo==='ganho'?m.valor:0).reverse();
-  const saidas=lista.map(m=>m.tipo==='gasto'?m.valor:0).reverse();
-  if(chartFluxo) chartFluxo.destroy();
+  const listaRev=[...lista].reverse();
+  const labels=listaRev.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`);
+  const nomes=listaRev.map(m=>m.descricao||m.categoria||'Movimentação');
+  const entradas=listaRev.map(m=>m.tipo==='ganho'?m.valor:0);
+  const saidas=listaRev.map(m=>m.tipo==='gasto'?m.valor:0);
+  if(chartFluxo){chartFluxo.destroy();chartFluxo=null;}
   const ctx=canvas.getContext('2d');
   const gG=ctx.createLinearGradient(0,0,0,180);gG.addColorStop(0,'rgba(34,197,94,0.3)');gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR=ctx.createLinearGradient(0,0,0,180);gR.addColorStop(0,'rgba(239,68,68,0.25)');gR.addColorStop(1,'rgba(239,68,68,0)');
   chartFluxo=new Chart(ctx,{type:'line',data:{labels,datasets:[
-    {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#22C55E'},
-    {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#EF4444'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-    x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
-    y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}}
-  }}});
+    {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#22C55E',pointHoverBackgroundColor:'#22C55E'},
+    {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#EF4444',pointHoverBackgroundColor:'#EF4444'}
+  ]},options:{
+    responsive:false,
+    maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        enabled:true,
+        backgroundColor:'rgba(15,23,42,0.95)',
+        borderColor:'rgba(255,255,255,0.1)',
+        borderWidth:1,
+        titleColor:'#94a3b8',
+        bodyColor:'#f1f5f9',
+        titleFont:{size:11},
+        bodyFont:{size:13,weight:'bold'},
+        padding:10,
+        cornerRadius:10,
+        callbacks:{
+          title:function(items){
+            const i=items[0].dataIndex;
+            return nomes[i]||labels[i];
+          },
+          label:function(item){
+            if(item.raw===0) return null;
+            const prefix=item.datasetIndex===0?'+R$':'-R$';
+            return prefix+item.raw.toLocaleString('pt-BR',{minimumFractionDigits:2});
+          }
+        }
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
+      y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}}
+    }
+  }});
 }
 
 // ── Lista início ──────────────────────────────────────────────────
@@ -292,9 +412,21 @@ window.abrirModal=function(tipo){
 };
 window.fecharModal=function(){document.getElementById('modal').classList.add('hidden');};
 function atualizarCategoriasModal(tipo){
-  const sel=document.getElementById('modal-categoria'); if(!sel) return;
+  const hidden=document.getElementById('modal-categoria'); if(!hidden) return;
   const cats=tipo==='ganho'?['Salário','Freelance','Investimento','Presente','Outros']:getCategoriasPorPerfil();
-  sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const picker=document.getElementById('modal-categoria-picker');
+  if(picker){
+    const current=hidden.value||cats[0];
+    picker.innerHTML=cats.map(c=>{
+      const png=getIconeCat(c);
+      const ico=png?`<img src="${png}" alt="${c}">`:`<div style="width:26px;height:26px;border-radius:50%;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem">💰</div>`;
+      return `<div class="cat-picker-item${c===current?' selected':''}" onclick="selecionarCategoriaPicker(this,'modal-categoria','modal-categoria-picker')" data-val="${c}">${ico}<span class="cat-pk-nome">${c}</span></div>`;
+    }).join('');
+    if(!cats.includes(hidden.value)) hidden.value=cats[0];
+  } else {
+    // fallback select
+    hidden.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
 }
 // Mapa de chaves fixas → nome de exibição
 const ROTINA_NOMES={
@@ -305,25 +437,67 @@ const ROTINA_NOMES={
   internet:'Internet',celular:'Celular',
 };
 function getCategoriasPorPerfil(){
-  const base=['Alimentação','Transporte','Saúde','Lazer','Educação','Moradia','Roupas','Beleza','Outros'];
+  const vida=perfilUsuario?.perfilVida||{};
+  const rotina=vida.rotina||[];
+  const transporte=vida.transporte||[];
+  const familia=vida.familia||[];
+  const moradia=vida.moradia||null;
+  const filhos=vida.filhos||null;
+
+  // Categorias base sempre presentes
+  const base=['Alimentação','Saúde','Lazer','Educação','Roupas','Beleza','Outros'];
   const extra=[];
-  const rotina=perfilUsuario?.perfilVida?.rotina||[];
-  // Atividade física individual
-  ['academia','luta','futebol'].forEach(r=>{ if(rotina.includes(r)) extra.push(ROTINA_NOMES[r]); });
-  // Streamings e ferramentas individuais
+
+  // ── Moradia ──────────────────────────────────
+  if(moradia==='aluguel') extra.push('Aluguel');
+  else if(moradia==='financiada') extra.push('Financiamento');
+  else extra.push('Moradia');
+
+  // ── Transporte por veículo ────────────────────
+  if(transporte.includes('carro')) extra.push('Carro');
+  if(transporte.includes('moto')) extra.push('Moto');
+  if(transporte.includes('publico')||transporte.includes('app')) extra.push('Transporte');
+  if(transporte.includes('bike')) extra.push('Bike');
+  // fallback se nenhum selecionado
+  if(!transporte.length||transporte.includes('nenhum')) {
+    if(!extra.includes('Transporte')) extra.push('Transporte');
+  }
+
+  // ── Filhos / família ──────────────────────────
+  if(filhos==='sim') extra.push('Bebê / Criança');
+  if(familia.includes('dependentes')) extra.push('Dependentes');
+  if(familia.includes('pets')) extra.push('Pets');
+
+  // ── Atividade física ──────────────────────────
+  ['academia','luta','futebol'].forEach(r=>{
+    if(rotina.includes(r)) extra.push(ROTINA_NOMES[r]);
+  });
+
+  // ── Streamings e ferramentas ──────────────────
   ['netflix','spotify','youtube','hbo','prime','disney','chatgpt','notion','canva','capcut'].forEach(r=>{
     if(rotina.includes(r)) extra.push(ROTINA_NOMES[r]);
   });
-  // Internet / Celular
-  if(rotina.includes('internet') && !extra.includes('Internet')) extra.push('Internet');
-  if(rotina.includes('celular')  && !extra.includes('Celular'))  extra.push('Celular');
-  // Itens customizados (strings livres, ex: "Deezer", "Crunchyroll")
-  rotina.filter(r=>!ROTINA_NOMES[r] && typeof r==='string' && r.trim()).forEach(r=>{
+
+  // ── Internet / Celular ────────────────────────
+  if(rotina.includes('internet')) extra.push('Internet');
+  if(rotina.includes('celular'))  extra.push('Celular');
+
+  // ── Itens customizados (strings livres) ───────
+  rotina.filter(r=>!ROTINA_NOMES[r]&&typeof r==='string'&&r.trim()).forEach(r=>{
     const nome=r.trim();
     if(!extra.includes(nome)) extra.push(nome);
   });
-  return [...base,...extra];
+
+  // Remover duplicatas e retornar
+  const todas=[...base,...extra];
+  return todas.filter((v,i,a)=>a.indexOf(v)===i);
 }
+window.selecionarCategoriaPicker=function(el,hiddenId,pickerId){
+  const hidden=document.getElementById(hiddenId);
+  const picker=document.getElementById(pickerId);
+  if(hidden) hidden.value=el.dataset.val;
+  if(picker) picker.querySelectorAll('.cat-picker-item').forEach(i=>i.classList.toggle('selected',i===el));
+};
 window.responderPergunta=function(resp){
   respostaPergunta=resp;
   document.getElementById('modal-pergunta').classList.add('hidden');
@@ -359,7 +533,15 @@ window.abrirModalEditar=function(id){
   const ed=document.getElementById('edit-data'); if(ed) ed.value=m.data||dataHoje();
   const sel=document.getElementById('edit-categoria');
   const cats=m.tipo==='ganho'?['Salário','Freelance','Investimento','Presente','Outros']:getCategoriasPorPerfil();
-  if(sel) sel.innerHTML=cats.map(c=>`<option value="${c}" ${c===m.categoria?'selected':''}>${c}</option>`).join('');
+  const picker=document.getElementById('edit-categoria-picker');
+  if(sel) sel.value=m.categoria||cats[0];
+  if(picker){
+    picker.innerHTML=cats.map(c=>{
+      const png=getIconeCat(c);
+      const ico=png?`<img src="${png}" alt="${c}">`:`<div style="width:26px;height:26px;border-radius:50%;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem">💰</div>`;
+      return `<div class="cat-picker-item${c===(m.categoria||cats[0])?' selected':''}" onclick="selecionarCategoriaPicker(this,'edit-categoria','edit-categoria-picker')" data-val="${c}">${ico}<span class="cat-pk-nome">${c}</span></div>`;
+    }).join('');
+  }
   document.getElementById('modal-editar').classList.remove('hidden');
 };
 window.fecharModalEditar=function(){document.getElementById('modal-editar').classList.add('hidden');movEditandoId=null;};
@@ -418,14 +600,36 @@ function renderizarTabela(){
 function atualizarTelaCategorias(){
   const grid=document.getElementById('categorias-grid-dinamico'); if(!grid) return;
   const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
+
+  // Incluir todas as categorias do perfil (mesmo com R$0)
+  const cats=getCategoriasPorPerfil();
   const porCat={};
+  cats.forEach(c=>{porCat[c]=0;});
   filtradas.forEach(m=>{const c=m.categoria||'Outros';porCat[c]=(porCat[c]||0)+m.valor;});
   const total=Object.values(porCat).reduce((s,v)=>s+v,0);
-  if(Object.keys(porCat).length===0){grid.innerHTML='<div class="vazio" style="grid-column:1/-1">Sem gastos no período.</div>';atualizarGraficoPizza({});return;}
+
+  if(cats.length===0&&total===0){grid.innerHTML='<div class="vazio" style="grid-column:1/-1">Sem gastos no período.</div>';atualizarGraficoPizza({});return;}
+
+  // Ordenar: com gasto primeiro, depois sem gasto
   const sorted=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+
   grid.innerHTML=sorted.map(([cat,val])=>{
-    const pct=total>0?((val/total)*100).toFixed(0):0;
-    return `<div class="categoria-card"><div class="cat-info"><span class="cat-nome">${cat}</span><span class="cat-val red">${fmt(val)}</span></div><div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%"></div></div><span class="cat-pct">${pct}%</span></div>`;
+    const pct=total>0?Math.round(val/total*100):0;
+    const png=getIconeCat(cat);
+    const iconeEl=png
+      ? `<img src="${png}" alt="${cat}" style="width:56px;height:56px;object-fit:contain;margin-bottom:8px">`
+      : `<div style="width:56px;height:56px;border-radius:50%;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="width:28px;height:28px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>`;
+    // Barra de progresso baseada no % do total
+    const barColor=pct>60?'#ef4444':pct>30?'#f59e0b':'#22c55e';
+    return `<div class="categoria-card" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 12px;cursor:pointer" onclick="filtrarPorCategoria('${cat}')">
+      ${iconeEl}
+      <div style="font-size:.8rem;font-weight:600;color:var(--gray-2);margin-bottom:6px">${cat}</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--red);margin-bottom:8px">${fmt(val)}</div>
+      <div style="width:100%;background:rgba(255,255,255,.06);border-radius:4px;height:5px;overflow:hidden;margin-bottom:4px">
+        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width .5s"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--gray)">${pct}% do limite</div>
+    </div>`;
   }).join('');
   atualizarGraficoPizza(porCat);
 }
@@ -438,9 +642,13 @@ function atualizarGraficoPizza(porCat){
   const entries=Object.entries(porCat);
   if(entries.length===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';if(legendaEl)legendaEl.innerHTML='';return;}
   canvas.style.display='block';if(emptyEl)emptyEl.style.display='none';
-  if(chartPizza) chartPizza.destroy();
+  if(!canvas.offsetWidth){setTimeout(()=>atualizarGraficoPizza(porCat),100);return;}
+  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||300;
+  const h=Math.min(w,220);
+  canvas.width=w; canvas.height=h;
+  if(chartPizza){chartPizza.destroy();chartPizza=null;}
   const ctx=canvas.getContext('2d');
-  chartPizza=new Chart(ctx,{type:tipoPizza,data:{labels:entries.map(([k])=>k),datasets:[{data:entries.map(([,v])=>v),backgroundColor:COLORS.slice(0,entries.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:tipoPizza==='doughnut'?'65%':0}});
+  chartPizza=new Chart(ctx,{type:tipoPizza,data:{labels:entries.map(([k])=>k),datasets:[{data:entries.map(([,v])=>v),backgroundColor:COLORS.slice(0,entries.length),borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(item){return ' '+item.label+': '+fmt(item.raw);}}}},cutout:tipoPizza==='doughnut'?'65%':0}});
   if(legendaEl) legendaEl.innerHTML=entries.map(([cat,val],i)=>`<div class="pizza-leg-item"><span class="pizza-leg-dot" style="background:${COLORS[i%COLORS.length]}"></span><span>${cat}</span><span class="pizza-leg-val">${fmt(val)}</span></div>`).join('');
 }
 window.setTipoGrafico=function(tipo){
@@ -856,20 +1064,12 @@ window.renderizarContas=renderizarContas;
 // Popular select de categoria de contas com categorias do perfil
 function popularSelectContas(){
   const sel=document.getElementById('conta-categoria'); if(!sel) return;
-  const cats=['Moradia','Assinatura','Educação','Saúde','Transporte','Alimentação','Outros'];
-  const rotina=perfilUsuario?.perfilVida?.rotina||[];
-  const extraNomes={
-    academia:'Academia',luta:'Luta / Artes Marciais',futebol:'Futebol',
-    netflix:'Netflix',spotify:'Spotify',youtube:'YouTube Premium',
-    hbo:'Max (HBO)',prime:'Prime Video',disney:'Disney+',
-    chatgpt:'ChatGPT Plus',notion:'Notion',canva:'Canva',capcut:'CapCut',
-    internet:'Internet',celular:'Celular',
-  };
+  // Reusar a mesma lógica do getCategoriasPorPerfil para consistência
+  const cats=getCategoriasPorPerfil();
   const extras=[];
-  ['academia','luta','futebol','netflix','spotify','youtube','hbo','prime','disney','chatgpt','notion','canva','capcut','internet','celular'].forEach(r=>{
-    if(rotina.includes(r)) extras.push(extraNomes[r]);
-  });
-  rotina.filter(r=>!extraNomes[r]&&typeof r==='string'&&r.trim()).forEach(r=>{
+  // Bloco vazio para manter estrutura do código abaixo
+  [].forEach(r=>{});
+  [].filter(r=>false).forEach(r=>{
     const n=r.trim(); if(!extras.includes(n)) extras.push(n);
   });
   const todas=[...cats,...extras.filter(e=>!cats.includes(e))];
@@ -1027,6 +1227,7 @@ function renderizarRelatorio(){
 }
 function renderizarChartRelatorio(){
   const canvas=document.getElementById('chart-relatorio'); if(!canvas) return;
+  if(!canvas.offsetWidth){setTimeout(renderizarChartRelatorio,100);return;}
   const agora=new Date();const labels=[];const dEnt=[];const dSai=[];
   const mShort=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   for(let i=5;i>=0;i--){
@@ -1039,8 +1240,10 @@ function renderizarChartRelatorio(){
   const emp=document.getElementById('relatorio-chart-empty');
   if(dEnt.every(v=>v===0)&&dSai.every(v=>v===0)){canvas.style.display='none';if(emp)emp.style.display='flex';return;}
   canvas.style.display='block';if(emp)emp.style.display='none';
-  if(chartRelatorio)chartRelatorio.destroy();
-  chartRelatorio=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Entradas',data:dEnt,backgroundColor:'rgba(34,197,94,0.7)',borderRadius:6},{label:'Saídas',data:dSai,backgroundColor:'rgba(239,68,68,0.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:12}}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>'R$'+v.toLocaleString('pt-BR')}}}}});
+  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
+  canvas.width=w; canvas.height=200;
+  if(chartRelatorio){chartRelatorio.destroy();chartRelatorio=null;}
+  chartRelatorio=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Entradas',data:dEnt,backgroundColor:'rgba(34,197,94,0.7)',borderRadius:6},{label:'Saídas',data:dSai,backgroundColor:'rgba(239,68,68,0.7)',borderRadius:6}]},options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:12}}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b'}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',callback:v=>'R$'+v.toLocaleString('pt-BR')}}}}});
 }
 window.carregarHistorico=async function(){
   const el=document.getElementById('historico-lista'); if(!el||!uidAtual) return;
@@ -1084,11 +1287,28 @@ function calcularScore(){
   else if(score>=200){cls='Atenção';cor='#f97316';emoji='⚠️';}
   else{cls='Crítico';cor='#ef4444';emoji='🚨';}
   const sn=document.getElementById('score-numero');if(sn)sn.textContent=score;
-  const sb=document.getElementById('score-badge');if(sb){sb.textContent=`${emoji} ${cls}`;sb.style.color=cor;}
+  const sb=document.getElementById('score-badge');
+  if(sb){
+    const iconeScore=score>=800?'icone-score-excelente.png':score>=600?'icone-score-bom.png':score>=400?'icone-score-estavel.png':score>=200?'icone-score-atencao.png':'icone-score-critico.png';
+    sb.innerHTML=`<img src="${iconeScore}" alt="${cls}" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:6px;margin-bottom:2px"><span style="color:${cor};font-weight:800">${cls}</span>`;
+    sb.style.color=cor;
+  }
   const st=document.getElementById('score-tip');
   if(st){if(score>=800)st.textContent='Excelente! Você tem um controle financeiro muito sólido.';else if(score>=600)st.textContent='Bom trabalho! Continue registrando e economizando.';else if(score>=400)st.textContent='Você está no caminho certo. Reduza gastos para avançar.';else st.textContent='Situação crítica. Priorize quitar dívidas e cortar gastos.';}
   const arc=document.getElementById('score-gauge-arc');if(arc){const pct=score/1000;arc.style.strokeDashoffset=251.3-(251.3*pct);arc.style.stroke=cor;}
   const mini=document.getElementById('kpi-score-mini');if(mini)mini.textContent=score;
+  const iconeScore2=score>=800?'icone-score-excelente.png':score>=600?'icone-score-bom.png':score>=400?'icone-score-estavel.png':score>=200?'icone-score-atencao.png':'icone-score-critico.png';
+  const miniImg=document.getElementById('kpi-score-mini-img');
+  const miniIcon=document.getElementById('kpi-score-mini-icon');
+  if(miniImg){
+    miniImg.src=iconeScore2;
+    if(miniIcon){
+      miniIcon.className='kpi-icon';
+      if(score>=600) miniIcon.classList.add('green');
+      else if(score>=400) miniIcon.classList.add('yellow');
+      else miniIcon.classList.add('red');
+    }
+  }
   const mL=document.getElementById('kpi-score-mini-label');if(mL)mL.textContent=`${cls} →`;
   function aCrit(id,pts,max,lbl){
     const pE=document.getElementById(`${id}-pts`);const bE=document.getElementById(`${id}-bar`);const lE=document.getElementById(`${id}-label`);
@@ -1119,16 +1339,122 @@ function gerarInsights(){
   const insights=[];
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
   const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
-  if(sai>ent*0.9&&ent>0) insights.push({icon:'🚨',titulo:'Gastos altos',desc:`Seus gastos representam ${((sai/ent)*100).toFixed(0)}% das entradas.`});
-  if(dividas.length>0) insights.push({icon:'💳',titulo:'Dívidas ativas',desc:`Você tem ${dividas.length} dívida(s). Veja a aba Dívidas.`});
-  const mPerto=metas.filter(m=>m.valor>0&&(m.atual/m.valor)>=0.8);
-  if(mPerto.length>0) insights.push({icon:'🎯',titulo:'Meta quase atingida!',desc:`${mPerto[0].nome} está em ${((mPerto[0].atual/mPerto[0].valor)*100).toFixed(0)}%.`});
+  const vida=perfilUsuario?.perfilVida||{};
+  const rotina=vida.rotina||[];
+
+  // ── Alertas financeiros ──────────────────────────────────
+  if(sai>ent*0.9&&ent>0)
+    insights.push({png:'icone-urgente.png',bg:'rgba(239,68,68,0.15)',titulo:'Gastos altos',desc:`Seus gastos representam ${((sai/ent)*100).toFixed(0)}% das entradas. Considere reduzir.`,acao:()=>irPara('gastos'),btnLabel:'Ver gastos →'});
+  if(dividas.length>0)
+    insights.push({png:'icone-cartao-02.png',bg:'rgba(239,68,68,0.12)',titulo:'Dívidas ativas',desc:`Você tem ${dividas.length} dívida(s). Veja a aba Dívidas.`,acao:()=>irPara('dividas'),btnLabel:'Ver dívidas →'});
   const cVenc=contas.filter(c=>!c.paga&&c.vencimento<dataHoje());
-  if(cVenc.length>0) insights.push({icon:'⚠️',titulo:'Contas vencidas',desc:`${cVenc.length} conta(s) passaram do vencimento.`});
+  if(cVenc.length>0)
+    insights.push({png:'icone-urgente.png',bg:'rgba(239,68,68,0.15)',titulo:`${cVenc.length} contas vencidas!`,desc:`Total em atraso: ${fmt(cVenc.reduce((s,c)=>s+(c.valor||0),0))}. Juros e multas aumentam a cada dia.`,acao:()=>irPara('contas'),btnLabel:'Resolver agora →'});
+  const mPerto=metas.filter(m=>m.valor>0&&(m.atual/m.valor)>=0.8);
+  if(mPerto.length>0)
+    insights.push({png:'icone-trofeu.png',bg:'rgba(34,197,94,0.12)',titulo:'Meta quase atingida!',desc:`${mPerto[0].nome} está em ${((mPerto[0].atual/mPerto[0].valor)*100).toFixed(0)}%. Você está perto!`,acao:()=>irPara('metas'),btnLabel:'Ver meta →'});
+
+  // ── Insights baseados no perfil ──────────────────────────
+  const ROTINA_INSIGHTS={
+    academia:{png:'icone-academia.png',bg:'rgba(34,197,94,0.1)',titulo:'Academia no perfil',desc:'Você cadastrou academia na rotina. Lembre de registrar esse gasto mensalmente.'},
+    luta:{png:'icone-luta.png',bg:'rgba(139,92,246,0.1)',titulo:'Luta / Artes marciais',desc:'Registre sua mensalidade de artes marciais para manter o controle.'},
+    futebol:{png:'icone-futebol.png',bg:'rgba(34,197,94,0.1)',titulo:'Futebol no perfil',desc:'Não esqueça de registrar os gastos com futebol e esportes.'},
+    netflix:{png:'logo-netflix.png',bg:'rgba(229,9,20,0.1)',titulo:'Netflix',desc:'Você assina Netflix. Registre como gasto recorrente para não perder o controle.'},
+    spotify:{png:'logo-spotify.png',bg:'rgba(30,215,96,0.1)',titulo:'Spotify',desc:'Registre sua assinatura do Spotify mensalmente.'},
+    youtube:{png:'logo-youtube.png',bg:'rgba(255,0,0,0.1)',titulo:'YouTube Premium',desc:'Sua assinatura do YouTube Premium deve ser registrada como gasto fixo.'},
+    hbo:{png:'logo-hbo.png',bg:'rgba(139,92,246,0.1)',titulo:'Max (HBO)',desc:'Registre sua assinatura do Max como gasto recorrente.'},
+    prime:{png:'logo-prime.png',bg:'rgba(0,168,225,0.1)',titulo:'Prime Video',desc:'Sua assinatura Amazon Prime deve ser registrada mensalmente.'},
+    disney:{png:'logo-disney.png',bg:'rgba(17,60,207,0.1)',titulo:'Disney+',desc:'Registre sua assinatura do Disney+ como gasto fixo.'},
+    chatgpt:{png:'logo-chatgpt.png',bg:'rgba(16,163,127,0.1)',titulo:'ChatGPT Plus',desc:'Sua assinatura do ChatGPT Plus é um gasto digital — não esqueça de registrar.'},
+    canva:{png:'logo-canva.png',bg:'rgba(0,196,204,0.1)',titulo:'Canva',desc:'Se você paga pelo Canva Pro, registre como gasto recorrente.'},
+    capcut:{png:'logo-capcut.png',bg:'rgba(0,0,0,0.15)',titulo:'CapCut',desc:'Registre sua assinatura do CapCut se for paga.'},
+    internet:{png:'icone-internet.png',bg:'rgba(59,130,246,0.1)',titulo:'Internet / Celular',desc:'Registre sua conta de internet ou celular para melhorar a precisão do score.'},
+    celular:{png:'icone-celular.png',bg:'rgba(100,116,139,0.1)',titulo:'Celular',desc:'Registre o plano do seu celular como gasto recorrente.'},
+  };
+
+  // Mostrar no máximo 3 cards de perfil para não poluir
+  let perfilCount=0;
+  for(const r of rotina){
+    if(perfilCount>=3) break;
+    const info=ROTINA_INSIGHTS[r];
+    if(info && !insights.some(i=>i.titulo===info.titulo)){
+      insights.push({...info,acao:null});
+      perfilCount++;
+    }
+  }
+
+  // ── Insight de transporte ────────────────────────────────
+  const transporte=vida.transporte||[];
+  if(transporte.includes('moto')&&!insights.some(i=>i.titulo==='Moto no perfil'))
+    insights.push({png:'icone-moto.png',bg:'rgba(245,158,11,0.1)',titulo:'Moto no perfil',desc:'Registre gastos com gasolina, manutenção e seguro da moto.',acao:null});
+  if(transporte.includes('carro')&&!insights.some(i=>i.titulo==='Carro no perfil'))
+    insights.push({png:'icone-carro.png',bg:'rgba(100,116,139,0.1)',titulo:'Carro no perfil',desc:'Não esqueça de registrar combustível, manutenção e IPVA.',acao:null});
+
+  // ── Insight de família ───────────────────────────────────
+  if(vida.filhos==='sim')
+    insights.push({png:'icone-bebe.png',bg:'rgba(236,72,153,0.1)',titulo:'Bebê / Criança',desc:'Registre os gastos com bebê para acompanhar o impacto no orçamento.',acao:null});
+  const familia=vida.familia||[];
+  if(familia.includes('pets'))
+    insights.push({png:'icone-pets.png',bg:'rgba(245,158,11,0.1)',titulo:'Pets no perfil',desc:'Registre gastos com pets — ração, veterinário, banho e tosa.',acao:null});
+
+  // Insight reserva emergência se saldo baixo
+  const saldoAtual=ent-sai;
+  const gastosMes=sai;
+  if(saldoAtual<gastosMes*3&&saldoAtual>=0)
+    insights.push({png:'icone-cofre.png',bg:'rgba(16,185,129,0.1)',titulo:'Construa sua reserva de emergência',desc:'O ideal é ter 3–6 meses de despesas guardados. Sua reserva atual é muito baixa.',acao:()=>irPara('metas'),btnLabel:'Criar meta de reserva →'});
+
   if(insights.length===0){panel.style.display='none';return;}
-  panel.style.display='block';if(cEl)cEl.textContent=`${insights.length} insight(s)`;
-  list.innerHTML=insights.map(i=>`<div class="insight-item"><span style="font-size:1.4rem">${i.icon}</span><div><div style="font-weight:700;font-size:.88rem">${i.titulo}</div><div style="font-size:.8rem;color:var(--gray)">${i.desc}</div></div></div>`).join('');
+  panel.style.display='block';
+  if(cEl)cEl.textContent=`${insights.length} insights`;
+  list.innerHTML=insights.map(i=>{
+    const isUrgente=i.bg.includes('239,68,68')||i.bg.includes('245,158,11');
+    const badge=isUrgente
+      ? `<span style="font-size:.65rem;font-weight:800;color:#ef4444;background:rgba(239,68,68,0.12);padding:2px 8px;border-radius:99px;letter-spacing:.05em;margin-bottom:6px;display:inline-block">⚠ URGENTE</span>`
+      : `<span style="font-size:.65rem;font-weight:800;color:#3b82f6;background:rgba(59,130,246,0.12);padding:2px 8px;border-radius:99px;letter-spacing:.05em;margin-bottom:6px;display:inline-block">💡 SAIBA MAIS</span>`;
+    const btnLabel=i.btnLabel||null;
+    const borderColor=isUrgente?'rgba(239,68,68,0.25)':'rgba(59,130,246,0.15)';
+    return `<div class="insight-item" style="background:${i.bg};border:1px solid ${borderColor};border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:${i.acao?'pointer':'default'}" onclick="${i.acao?'('+i.acao.toString()+')()':'void 0'}">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <img src="${i.png}" alt="${i.titulo}" style="width:28px;height:28px;object-fit:contain">
+      </div>
+      <div style="flex:1;min-width:0">
+        ${badge}
+        <div style="font-weight:700;font-size:.9rem;color:var(--white);line-height:1.3">${i.titulo}</div>
+        <div style="font-size:.78rem;color:var(--gray-2);line-height:1.5;margin-top:3px">${i.desc}</div>
+      </div>
+      ${i.acao&&i.btnLabel?`<button onclick="event.stopPropagation();(${i.acao.toString()})()" style="flex-shrink:0;padding:7px 14px;border-radius:10px;border:1px solid ${isUrgente?'rgba(239,68,68,0.4)':'rgba(59,130,246,0.4)'};background:${isUrgente?'rgba(239,68,68,0.1)':'rgba(59,130,246,0.1)'};color:${isUrgente?'#ef4444':'#60a5fa'};font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">${i.btnLabel}</button>`:''}
+    </div>`;
+  }).join('');
 }
+
+// ── Banner Empresa ───────────────────────────────────────────────
+function mostrarBannerEmpresa(){
+  const resposta=localStorage.getItem('monvy_banner_empresa_resp');
+  const modoEmpresa=localStorage.getItem('monvy_modo_empresa');
+  // Não mostra só se já respondeu SIM ou NÃO, ou já usa modo empresa
+  if(resposta==='nao'||resposta==='sim'||modoEmpresa) return;
+  // X apenas fecha — volta a aparecer toda vez que abrir o app
+  setTimeout(()=>{
+    const el=document.getElementById('banner-empresa');
+    if(el){el.style.display='block';el.style.animation='fadeInDown .4s ease';}
+  },2500);
+}
+window.fecharBannerEmpresa=function(resposta){
+  const el=document.getElementById('banner-empresa');
+  if(el){
+    el.style.animation='fadeOutUp .3s ease';
+    setTimeout(()=>{ el.style.display='none'; },280);
+  }
+  if(resposta==='sim'){
+    // Sim → vai para onboarding e nunca mais aparece
+    localStorage.setItem('monvy_banner_empresa_resp','sim');
+    setTimeout(()=>{ window.location.href='onboarding_empresa.html'; },300);
+  } else if(resposta==='nao'){
+    // Não → nunca mais aparece
+    localStorage.setItem('monvy_banner_empresa_resp','nao');
+  }
+  // X → não salva nada, banner volta na próxima abertura do app
+};
 
 // ── Banner perfil ─────────────────────────────────────────────────
 function atualizarBanner(){
