@@ -676,3 +676,59 @@ nav {
 .mov-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mov-desc { font-size: 0.85rem; font-weight: 500; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mov-cat  { font-size: 0.72rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Modais ───────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay:not(.hidden) { display: flex; }
+.modal-overlay.hidden { display: none !important; }
+
+.modal-box {
+  background: var(--surface, #1a2235);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-fechar {
+  position: absolute;
+  top: 12px; right: 14px;
+  background: none;
+  border: none;
+  color: var(--gray);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.modal-fechar:hover { color: var(--white); }
+
+.modal-body { display: flex; flex-direction: column; gap: 12px; }
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body select {
+  width: 100%;
+  background: var(--input-bg, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--white);
+  font-size: .9rem;
+  outline: none;
+  font-family: inherit;
+}
+.modal-body input:focus { border-color: var(--primary); }
