@@ -1885,3 +1885,11 @@ window.abrirTabPerfil=function(tab){
 
 // Inicializar
 renderizarRelatorio();
+
+
+// ── Registrar implementações para wrappers inline ──────────────
+window._salvarPerfilVida_impl = window.salvarPerfilVida;
+window._adicionarCustomVida_impl = window.adicionarCustomVida;
+window._removerCustomVida_impl = window.removerCustomVida;
+window._selecionarVida_impl = window.selecionarVida;
+window._selecionarVidaMulti_impl = window.selecionarVidaMulti;

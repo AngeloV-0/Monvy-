@@ -1925,6 +1925,37 @@ bvRender();
     </div>
   </div>
 
+  <!-- Funções críticas disponíveis imediatamente, antes do módulo carregar -->
+  <script>
+    // Wrapper síncrono — chama a versão do módulo quando disponível
+    function _callWhenReady(fn, args) {
+      var check = setInterval(function() {
+        if (window['_moduleReady_' + fn]) {
+          clearInterval(check);
+          window['_moduleReady_' + fn].apply(window, args||[]);
+        }
+      }, 50);
+      setTimeout(function(){ clearInterval(check); }, 5000);
+    }
+
+    window.salvarPerfilVida = function() {
+      if (window._salvarPerfilVida_impl) return window._salvarPerfilVida_impl();
+      _callWhenReady('salvarPerfilVida', []);
+    };
+    window.adicionarCustomVida = function(tipo, inputEl) {
+      if (window._adicionarCustomVida_impl) return window._adicionarCustomVida_impl(tipo, inputEl);
+    };
+    window.removerCustomVida = function(val, tagEl, tipo) {
+      if (window._removerCustomVida_impl) return window._removerCustomVida_impl(val, tagEl, tipo);
+    };
+    window.selecionarVida = function(el, cat, val) {
+      if (window._selecionarVida_impl) return window._selecionarVida_impl(el, cat, val);
+    };
+    window.selecionarVidaMulti = function(el, cat, val) {
+      if (window._selecionarVidaMulti_impl) return window._selecionarVidaMulti_impl(el, cat, val);
+    };
+  </script>
+
   <script type="module" src="script.js?v=24"></script>
 
   <!-- Script de compatibilidade: garante que funções onclick funcionam mesmo antes do módulo ES6 terminar -->
