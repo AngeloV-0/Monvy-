@@ -30,12 +30,15 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Persistência configurada em paralelo — não bloqueia a inicialização
+// Garante que a sessão persiste mesmo fechando o navegador
+// authReady resolve ANTES de qualquer operação de auth para evitar race conditions
+let _authReadyResolve;
+const authReady = new Promise(resolve => { _authReadyResolve = resolve; });
 setPersistence(auth, browserLocalPersistence)
-  .catch(e => console.warn('Persistence error:', e));
+  .catch(e => console.warn('Persistence error:', e))
+  .finally(() => _authReadyResolve());
 
-// waitAuthReady agora é instantâneo — auth já está pronto após initializeApp
-export async function waitAuthReady() { return Promise.resolve(); }
+export async function waitAuthReady() { return authReady; }
 
 // ── Auth ──────────────────────────────────────────────────────
 
