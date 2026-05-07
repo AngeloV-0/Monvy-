@@ -1232,7 +1232,53 @@ function renderizarRelatorio(){
   if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto').sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
   const rEl=document.getElementById('lista-recorrentes');
   if(rEl){const recs=movimentacoes.filter(m=>m.recorrente);if(recs.length===0)rEl.innerHTML='<div class="vazio">Nenhum lançamento recorrente cadastrado.</div>';else rEl.innerHTML=recs.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.tipo==='ganho'?'Entrada':'Saída'} recorrente</div></div><div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div></div>`).join('');}
+  // ── Todas as movimentações ──────────────────────────────────────
+  renderizarTodasMovsRelatorio(movs, window._filtroRelatorio||'todos');
   renderizarChartRelatorio();
+}
+
+let _filtroRelatorioTipo = 'todos';
+window.setFiltroRelatorio = function(tipo, btn) {
+  _filtroRelatorioTipo = tipo;
+  // Estilo dos botões
+  ['todos','ganho','gasto'].forEach(t => {
+    const id = t==='todos'?'rel-filtro-todos':t==='ganho'?'rel-filtro-entradas':'rel-filtro-saidas';
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(t===tipo){ el.style.borderColor='var(--primary)';el.style.background='var(--primary-dim)';el.style.color='var(--primary)'; }
+    else { el.style.borderColor='var(--border)';el.style.background='transparent';el.style.color='var(--gray)'; }
+  });
+  renderizarTodasMovsRelatorio(getMovsRelatorio(), tipo);
+};
+
+function renderizarTodasMovsRelatorio(movs, tipo) {
+  const el = document.getElementById('relatorio-todas-movs'); if(!el) return;
+  const filtradas = tipo==='todos' ? movs : movs.filter(m=>m.tipo===tipo);
+  if(filtradas.length===0){
+    el.innerHTML='<div class="vazio">Nenhuma movimentação no período.</div>';
+    return;
+  }
+  // Ordenar por data decrescente
+  const sorted = [...filtradas].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  el.innerHTML = sorted.map(m => {
+    const isGanho = m.tipo==='ganho';
+    const png = getIconeCat(m.categoria||'Outros');
+    const icone = png
+      ? `<img src="${png}" style="width:28px;height:28px;object-fit:contain">`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="${isGanho?'#22c55e':'#ef4444'}" stroke-width="2" style="width:16px;height:16px"><polyline points="${isGanho?'23 6 13.5 15.5 8.5 10.5 1 18':'23 18 13.5 8.5 8.5 13.5 1 6'}"/></svg>`;
+    return `<div class="mov-item" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="mov-icon ${isGanho?'green':'red'}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${isGanho?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.12)'}">
+        ${icone}
+      </div>
+      <div class="mov-info" style="flex:1;min-width:0">
+        <div class="mov-desc" style="font-weight:600;font-size:.88rem">${m.descricao||'—'}</div>
+        <div class="mov-cat" style="font-size:.75rem;color:var(--gray);margin-top:2px">${m.categoria||''} · ${fmtData(m.data)}</div>
+      </div>
+      <div class="mov-valor ${isGanho?'green':'red'}" style="font-weight:700;font-size:.92rem;white-space:nowrap">
+        ${isGanho?'+':'-'}${fmt(m.valor)}
+      </div>
+    </div>`;
+  }).join('');
 }
 function renderizarChartRelatorio(){
   const canvas=document.getElementById('chart-relatorio'); if(!canvas) return;
@@ -1659,6 +1705,10 @@ window.salvarPerfilVida=async function(){
     await fbSalvarPerfilVida(uidAtual,perfil);perfilUsuario.perfilVida=perfil;window._perfilVidaTemp=null;
     const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
     if(window.mostrarToastPerfil) window.mostrarToastPerfil('Salvo com sucesso!');
+    // Atualizar aba de gastos imediatamente com novo perfil
+    atualizarTelaCategorias();
+    renderizarTabela();
+    popularSelectCategorias('gasto');
   }catch(e){alert('Erro ao salvar.');console.error(e);}
 };
 window.setMetaEco=function(el,pct){
