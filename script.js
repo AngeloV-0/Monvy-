@@ -111,6 +111,27 @@ let periodoCustomFim = null;
 let perfilUsuario = {};
 let chartFluxo = null;
 let chartPizza = null;
+let tipoGraficoPizza = 'doughnut';
+
+window.setTipoGrafico = function(tipo) {
+  tipoGraficoPizza = tipo;
+  const btnPizza = document.getElementById('btn-tipo-pizza');
+  const btnColuna = document.getElementById('btn-tipo-coluna');
+  if(btnPizza && btnColuna) {
+    if(tipo === 'doughnut') {
+      btnPizza.style.background='var(--primary)'; btnPizza.style.color='#000';
+      btnColuna.style.background='transparent'; btnColuna.style.color='var(--gray)';
+    } else {
+      btnColuna.style.background='var(--primary)'; btnColuna.style.color='#000';
+      btnPizza.style.background='transparent'; btnPizza.style.color='var(--gray)';
+    }
+  }
+  // Re-renderizar com dados atuais
+  const filtradas = filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
+  const porCat={};
+  filtradas.forEach(m=>{ const c=m.categoria||'Outros'; porCat[c]=(porCat[c]||0)+m.valor; });
+  atualizarGraficoPizza(porCat);
+};
 let chartRelatorio = null;
 let taxasLive = {};
 let fluxoModo = 'recentes';
@@ -179,7 +200,7 @@ applyTheme(localStorage.getItem('monvy_theme')||'dark');
     .pizza-leg-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.78rem}
     .pizza-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
     .pizza-leg-val{margin-left:auto;font-weight:700}
-    .insight-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:var(--card-bg);border:1px solid var(--border);margin-bottom:8px;transition:opacity .15s}.insight-item:last-child{margin-bottom:0}@keyframes fadeInDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOutUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+    .insights-list{display:flex;flex-direction:column;gap:10px}.insight-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;cursor:pointer;transition:transform .15s,opacity .15s;flex-wrap:wrap}.insight-card:hover{transform:translateY(-1px);opacity:.92}.insight-icon{width:42px;height:42px;object-fit:contain;flex-shrink:0}.insight-body{flex:1;min-width:180px}.insight-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}.insight-titulo{font-size:.88rem;font-weight:700;color:var(--white);margin-bottom:3px;line-height:1.3}.insight-desc{font-size:.78rem;color:var(--gray-2);line-height:1.45}.insight-acao{flex-shrink:0;padding:7px 14px;border-radius:8px;border:1.5px solid;background:transparent;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-title);white-space:nowrap}@keyframes fadeInDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}@keyframes fadeOutUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
     .meta-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
     .meta-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .meta-nome{font-weight:700}.meta-pct{font-size:.85rem;color:var(--primary);font-weight:700}
@@ -209,6 +230,14 @@ const pageTitles = {
   contas:'Contas a Pagar',score:'Score Financeiro'
 };
 let _telaAnterior = null;
+// Inicializar rascunho do perfil — usa localStorage como v1
+function _inicializarRascunho() {
+  if (!window._perfilVidaTemp) {
+    const cached = localStorage.getItem('monvy_perfil_vida');
+    window._perfilVidaTemp = cached ? JSON.parse(cached) : JSON.parse(JSON.stringify(perfilUsuario?.perfilVida || {}));
+  }
+}
+
 function irPara(tela) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.tela').forEach(t=>t.classList.remove('active'));
@@ -218,7 +247,7 @@ function irPara(tela) {
   const t=pageTitles[tela]||'Monvay';
   const pt=document.getElementById('page-title'); if(pt) pt.textContent=t;
   const mt=document.getElementById('topbar-mobile-tela'); if(mt) mt.textContent=t;
-  if(tela==='gastos'){atualizarTelaCategorias();renderizarTabela();}
+  if(tela==='gastos'){atualizarTelaCategorias();renderizarTabela();renderizarSugestaoOrcamento();}
   if(tela==='score') calcularScore();
   if(tela==='relatorio') renderizarRelatorio();
   if(tela==='contas'){renderizarContas();popularSelectContas();}
@@ -267,6 +296,14 @@ waitAuthReady().then(()=>{
     atualizarUIUsuario(nome,foto);
     localStorage.setItem('monvy_logado',JSON.stringify({nome,uid:user.uid}));
     try{perfilUsuario=await getPerfil(user.uid)||{};}catch(e){perfilUsuario={};}
+    // Carregar perfilVida do localStorage como fallback imediato
+    if(!perfilUsuario.perfilVida){
+      const cached=localStorage.getItem('monvy_perfil_vida');
+      if(cached) try{perfilUsuario.perfilVida=JSON.parse(cached);}catch(e){}
+    } else {
+      // Sincronizar localStorage com o que veio do Firebase
+      localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfilUsuario.perfilVida));
+    }
     try{await verificarEResetarMes(user.uid);}catch(e){}
     // app pronto
     await carregarTodosDados();
@@ -407,16 +444,14 @@ function renderizarListaInicio(){
   if(recentes.length===0){el.innerHTML='<div class="vazio">Nenhuma movimentação ainda.</div>';return;}
   el.innerHTML=recentes.map(m=>`
     <div class="mov-item" onclick="abrirModalEditar('${m.id}')">
-      <div class="mov-icon ${m.tipo==='ganho'?'green':'red'}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
-          ${m.tipo==='ganho'?'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>':'<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>'}
-        </svg>
+      <div class="mov-left">
+        <div class="mov-dot ${m.tipo==='ganho'?'g':'r'}"></div>
+        <div class="mov-info">
+          <span class="mov-desc">${m.descricao||(m.tipo==='ganho'?'Entrada':'Saída')}</span>
+          <span class="mov-cat">${m.data?fmtData(m.data)+' · ':''}${m.tipo==='ganho'?'Entrada':m.categoria||'—'}</span>
+        </div>
       </div>
-      <div class="mov-info">
-        <div class="mov-desc">${m.descricao||'—'}</div>
-        <div class="mov-cat">${m.categoria||''} ${m.data?'· '+fmtData(m.data):''}</div>
-      </div>
-      <div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div>
+      <span class="mov-valor ${m.tipo==='ganho'?'positivo':'negativo'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</span>
     </div>`).join('');
 }
 
@@ -618,8 +653,60 @@ function renderizarTabela(){
       <td><button class="btn-icon" onclick="abrirModalEditar('${m.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
     </tr>`).join('');
 }
+function renderSugestaoOrcamento(){
+  const el=document.getElementById('sugestao-orcamento');
+  if(!el) return;
+  const renda=perfilUsuario?.renda||0;
+  if(renda<=0){el.style.display='none';return;}
+  const necessidades=Math.round(renda*0.50);
+  const desejos=Math.round(renda*0.30);
+  const futuro=Math.round(renda*0.20);
+  const agora=new Date();
+  const gastosMes=movimentacoes
+    .filter(m=>m.tipo==='gasto'&&m.data&&new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
+    .reduce((s,m)=>s+m.valor,0);
+  const pctGasto=Math.min(100,Math.round((gastosMes/(renda*0.80))*100));
+  const corGasto=pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'var(--primary)';
+  const fillColor=pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'#22c55e';
+  el.style.display='block';
+  el.innerHTML=`<div class="orcamento-sugestao">
+    <div class="orcamento-sugestao-titulo">
+      <span><img src="icone-grafico-01.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle"></span>
+      Sugestão 50·30·20 — baseada na sua renda de ${fmt(renda)}/mês
+      <div style="margin-left:auto;font-size:.72rem;color:var(--gray);font-weight:400">Gastos este mês: <strong style="color:${corGasto}">${fmt(gastosMes)}</strong></div>
+    </div>
+    <div class="orcamento-regras">
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-verde">50%</div>
+        <div class="orcamento-regra-label">Necessidades<br>moradia, alimentação...</div>
+        <div class="orcamento-regra-val or-verde">${fmt(necessidades)}</div>
+      </div>
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-azul">30%</div>
+        <div class="orcamento-regra-label">Desejos<br>lazer, roupas...</div>
+        <div class="orcamento-regra-val or-azul">${fmt(desejos)}</div>
+      </div>
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-amarelo">20%</div>
+        <div class="orcamento-regra-label">Futuro<br>reserva, investimento</div>
+        <div class="orcamento-regra-val or-amarelo">${fmt(futuro)}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--gray);margin-bottom:4px">
+        <span>Progresso de gastos este mês</span>
+        <span>${pctGasto}% do orçamento</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pctGasto}%;background:${fillColor};border-radius:3px;transition:width .5s"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function atualizarTelaCategorias(){
   const grid=document.getElementById('categorias-grid-dinamico'); if(!grid) return;
+  renderSugestaoOrcamento();
   const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
 
   // Incluir todas as categorias do perfil (mesmo com R$0)
@@ -657,31 +744,49 @@ function atualizarGraficoPizza(porCat){
   const emptyEl=document.getElementById('pizza-empty');
   const legendaEl=document.getElementById('pizza-legenda');
   if(!canvas) return;
-  const entries=Object.entries(porCat);
-  if(entries.length===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';if(legendaEl)legendaEl.innerHTML='';return;}
+  const labels=Object.keys(porCat).filter(k=>porCat[k]>0);
+  const data=labels.map(k=>porCat[k]);
+  const total=data.reduce((a,b)=>a+b,0);
+  if(total===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';if(legendaEl)legendaEl.innerHTML='';return;}
   canvas.style.display='block';if(emptyEl)emptyEl.style.display='none';
-  if(!canvas.offsetWidth){setTimeout(()=>atualizarGraficoPizza(porCat),100);return;}
-  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||300;
-  const h=Math.min(w,220);
-  canvas.width=w; canvas.height=h;
+  const cores=['#22C55E','#3B82F6','#F59E0B','#EF4444','#A855F7','#64748B','#EC4899','#14B8A6'];
   if(chartPizza){chartPizza.destroy();chartPizza=null;}
   const ctx=canvas.getContext('2d');
-  chartPizza=new Chart(ctx,{type:tipoPizza,data:{labels:entries.map(([k])=>k),datasets:[{data:entries.map(([,v])=>v),backgroundColor:COLORS.slice(0,entries.length),borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(item){return ' '+item.label+': '+fmt(item.raw);}}}},cutout:tipoPizza==='doughnut'?'65%':0}});
-  if(legendaEl) legendaEl.innerHTML=entries.map(([cat,val],i)=>`<div class="pizza-leg-item"><span class="pizza-leg-dot" style="background:${COLORS[i%COLORS.length]}"></span><span>${cat}</span><span class="pizza-leg-val">${fmt(val)}</span></div>`).join('');
-}
-window.setTipoGrafico=function(tipo){
-  tipoPizza=tipo;
-  const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
-  const porCat={};filtradas.forEach(m=>{const c=m.categoria||'Outros';porCat[c]=(porCat[c]||0)+m.valor;});
-  atualizarGraficoPizza(porCat);
-  const bp=document.getElementById('btn-tipo-pizza');
-  const bb=document.getElementById('btn-tipo-coluna');
-  if(bp){bp.style.background=tipo==='doughnut'?'var(--primary)':'transparent';bp.style.color=tipo==='doughnut'?'#000':'var(--gray)';}
-  if(bb){bb.style.background=tipo==='bar'?'var(--primary)':'transparent';bb.style.color=tipo==='bar'?'#000':'var(--gray)';}
-};
+  const tipo=tipoGraficoPizza||'doughnut';
 
-// ── Busca ─────────────────────────────────────────────────────────
-// ── BUSCA GLOBAL ──────────────────────────────────────────────────
+  if(tipo==='bar'){
+    chartPizza=new Chart(ctx,{type:'bar',
+      data:{labels,datasets:[{data,backgroundColor:cores.slice(0,labels.length),borderWidth:0,borderRadius:6}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)+' ('+((c.raw/total)*100).toFixed(0)+'%)'}}},
+        scales:{
+          x:{grid:{display:false},ticks:{color:'rgba(255,255,255,0.5)',font:{size:10}}},
+          y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'rgba(255,255,255,0.5)',font:{size:10},callback:v=>'R$'+v}}
+        }
+      }
+    });
+    if(legendaEl) legendaEl.innerHTML='';
+  } else {
+    chartPizza=new Chart(ctx,{type:'doughnut',
+      data:{labels,datasets:[{data,backgroundColor:cores.slice(0,labels.length),borderWidth:0,hoverOffset:6}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{
+          title:items=>items[0].label,
+          label:c=>' '+c.label+': '+fmt(c.raw)+' ('+((c.raw/total)*100).toFixed(0)+'%)'
+        }}},
+        cutout:'60%'
+      }
+    });
+    if(legendaEl){
+      legendaEl.innerHTML=labels.map((l,i)=>`
+        <div class="pizza-leg-item">
+          <span style="width:10px;height:10px;border-radius:50%;background:${cores[i]};flex-shrink:0;display:inline-block"></span>
+          <span style="font-size:.78rem;color:var(--gray)">${l}</span>
+          <span style="font-size:.78rem;font-weight:600;color:var(--white);margin-left:auto">${((data[i]/total)*100).toFixed(0)}%</span>
+        </div>`).join('');
+    }
+  }
+}
 
 function _matchQ(str, q) {
   return (str||'').toLowerCase().includes(q.toLowerCase());
@@ -1473,21 +1578,18 @@ function gerarInsights(){
   if(cEl)cEl.textContent=`${insights.length} insights`;
   list.innerHTML=insights.map(i=>{
     const isUrgente=i.bg.includes('239,68,68')||i.bg.includes('245,158,11');
-    const badge=isUrgente
-      ? `<span style="font-size:.65rem;font-weight:800;color:#ef4444;background:rgba(239,68,68,0.12);padding:2px 8px;border-radius:99px;letter-spacing:.05em;margin-bottom:6px;display:inline-block">⚠ URGENTE</span>`
-      : `<span style="font-size:.65rem;font-weight:800;color:#3b82f6;background:rgba(59,130,246,0.12);padding:2px 8px;border-radius:99px;letter-spacing:.05em;margin-bottom:6px;display:inline-block">💡 SAIBA MAIS</span>`;
-    const btnLabel=i.btnLabel||null;
-    const borderColor=isUrgente?'rgba(239,68,68,0.25)':'rgba(59,130,246,0.15)';
-    return `<div class="insight-item" style="background:${i.bg};border:1px solid ${borderColor};border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:${i.acao?'pointer':'default'}" onclick="${i.acao?'('+i.acao.toString()+')()':'void 0'}">
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <img src="${i.png}" alt="${i.titulo}" style="width:28px;height:28px;object-fit:contain">
+    const tagCor=isUrgente?'#ef4444':'#3b82f6';
+    const tagTxt=isUrgente?'⚠ URGENTE':'💡 SAIBA MAIS';
+    const borderColor=isUrgente?'rgba(239,68,68,0.2)':'rgba(59,130,246,0.12)';
+    const acaoFn=i.acao?i.acao.toString():'null';
+    return `<div class="insight-card" style="background:${i.bg};border:1px solid ${borderColor}" onclick="${i.acao?'('+acaoFn+')()':'void 0'}">
+      <img src="${i.png}" alt="" class="insight-icon" onerror="this.style.display='none'">
+      <div class="insight-body">
+        <div class="insight-tag" style="color:${tagCor}">${tagTxt}</div>
+        <div class="insight-titulo">${i.titulo}</div>
+        <div class="insight-desc">${i.desc}</div>
       </div>
-      <div style="flex:1;min-width:0">
-        ${badge}
-        <div style="font-weight:700;font-size:.9rem;color:var(--white);line-height:1.3">${i.titulo}</div>
-        <div style="font-size:.78rem;color:var(--gray-2);line-height:1.5;margin-top:3px">${i.desc}</div>
-      </div>
-      ${i.acao&&i.btnLabel?`<button onclick="event.stopPropagation();(${i.acao.toString()})()" style="flex-shrink:0;padding:7px 14px;border-radius:10px;border:1px solid ${isUrgente?'rgba(239,68,68,0.4)':'rgba(59,130,246,0.4)'};background:${isUrgente?'rgba(239,68,68,0.1)':'rgba(59,130,246,0.1)'};color:${isUrgente?'#ef4444':'#60a5fa'};font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">${i.btnLabel}</button>`:''}
+      ${i.btnLabel?`<button class="insight-acao" style="border-color:${borderColor};color:${tagCor}" onclick="event.stopPropagation();${i.acao?'('+acaoFn+')()':'void 0'}">${i.btnLabel}</button>`:''}
     </div>`;
   }).join('');
 }
@@ -1525,6 +1627,56 @@ window.ocultarInsights = function() {
     setTimeout(() => { panel.style.display = 'none'; panel.style.animation = ''; }, 240);
   }
 };
+
+// ── Sugestão 50-30-20 ────────────────────────────────────────────
+function renderizarSugestaoOrcamento(){
+  const el=document.getElementById('sugestao-orcamento');
+  if(!el) return;
+  const renda=perfilUsuario?.renda||0;
+  if(renda<=0){el.style.display='none';return;}
+  const necessidades=Math.round(renda*0.50);
+  const desejos=Math.round(renda*0.30);
+  const futuro=Math.round(renda*0.20);
+  const agora=new Date();
+  const gastosMes=movimentacoes
+    .filter(m=>m.tipo==='gasto'&&m.data&&new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
+    .reduce((s,m)=>s+m.valor,0);
+  const pctGasto=Math.min(100,Math.round((gastosMes/(renda*0.80))*100));
+  el.style.display='block';
+  el.innerHTML=`<div class="orcamento-sugestao">
+    <div class="orcamento-sugestao-titulo">
+      <span><img src="icone-grafico-01.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle"></span>
+      Sugestão 50·30·20 — baseada na sua renda de ${fmt(renda)}/mês
+      <div style="margin-left:auto;font-size:.72rem;color:var(--gray);font-weight:400">Gastos este mês: <strong style="color:${pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'var(--primary)'}">${fmt(gastosMes)}</strong></div>
+    </div>
+    <div class="orcamento-regras">
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-verde">50%</div>
+        <div class="orcamento-regra-label">Necessidades<br>moradia, alimentação...</div>
+        <div class="orcamento-regra-val or-verde">${fmt(necessidades)}</div>
+      </div>
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-azul">30%</div>
+        <div class="orcamento-regra-label">Desejos<br>lazer, roupas...</div>
+        <div class="orcamento-regra-val or-azul">${fmt(desejos)}</div>
+      </div>
+      <div class="orcamento-regra">
+        <div class="orcamento-regra-pct or-amarelo">20%</div>
+        <div class="orcamento-regra-label">Futuro<br>reserva, investimento</div>
+        <div class="orcamento-regra-val or-amarelo">${fmt(futuro)}</div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--gray);margin-bottom:4px">
+        <span>Progresso de gastos este mês</span>
+        <span>${pctGasto}% do orçamento</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${pctGasto}%;border-radius:6px;background:${pctGasto>=100?'#ef4444':pctGasto>=75?'#f59e0b':'#22c55e'};transition:width .5s ease"></div>
+      </div>
+    </div>
+  </div>`;
+}
 
 // ── Banner Empresa ───────────────────────────────────────────────
 function mostrarBannerEmpresa(){
@@ -1688,19 +1840,19 @@ window.selecionarVida=function(el,categoria,valor){
   const c=el.closest('[id]')||el.parentElement;
   c.querySelectorAll('.vida-opt:not(.multi)').forEach(o=>o.classList.remove('selected'));
   el.classList.toggle('selected');
-  if(!window._perfilVidaTemp) window._perfilVidaTemp=JSON.parse(JSON.stringify(perfilUsuario?.perfilVida||{}));
+  _inicializarRascunho();
   window._perfilVidaTemp[categoria]=valor;
 };
 window.selecionarVidaMulti=function(el,categoria,valor){
   el.classList.toggle('selected');
-  if(!window._perfilVidaTemp) window._perfilVidaTemp=JSON.parse(JSON.stringify(perfilUsuario?.perfilVida||{}));
+  _inicializarRascunho();
   if(!window._perfilVidaTemp[categoria]) window._perfilVidaTemp[categoria]=[];
   const arr=window._perfilVidaTemp[categoria];const idx=arr.indexOf(valor);
   if(idx>=0)arr.splice(idx,1);else arr.push(valor);
 };
 window.adicionarCustomVida=function(tipo,inputEl){
   const val=inputEl.value.trim(); if(!val) return;
-  if(!window._perfilVidaTemp) window._perfilVidaTemp=JSON.parse(JSON.stringify(perfilUsuario?.perfilVida||{}));
+  _inicializarRascunho();
   if(!window._perfilVidaTemp.rotina) window._perfilVidaTemp.rotina=[];
   // Evitar duplicatas
   if(window._perfilVidaTemp.rotina.includes(val)) { inputEl.value=''; return; }
@@ -1711,7 +1863,7 @@ window.adicionarCustomVida=function(tipo,inputEl){
 };
 
 window.removerCustomVida=function(val,tagEl,tipo){
-  if(!window._perfilVidaTemp) window._perfilVidaTemp=JSON.parse(JSON.stringify(perfilUsuario?.perfilVida||{}));
+  _inicializarRascunho();
   if(window._perfilVidaTemp.rotina){
     const idx=window._perfilVidaTemp.rotina.indexOf(val);
     if(idx>=0) window._perfilVidaTemp.rotina.splice(idx,1);
@@ -1719,23 +1871,32 @@ window.removerCustomVida=function(val,tagEl,tipo){
   tagEl.remove();
 };
 window.salvarPerfilVida=async function(){
-  if(!uidAtual) return;
-  const perfil=window._perfilVidaTemp||perfilUsuario?.perfilVida||{};
-  try{
-    await fbSalvarPerfilVida(uidAtual,perfil);
-    // Atualizar cache local com os dados novos
-    perfilUsuario.perfilVida=perfil;
-    // Reiniciar rascunho com os dados recém salvos (não null — para manter seleções)
-    window._perfilVidaTemp=JSON.parse(JSON.stringify(perfil));
-    const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
-    showToast('✓ Perfil salvo!','success');
-    // Atualizar TUDO que depende do perfil
-    atualizarTelaCategorias();
-    renderizarTabela();
-    popularSelectCategorias('gasto');
-    gerarInsights();
-    atualizarBanner();
-  }catch(e){alert('Erro ao salvar.');console.error(e);}
+  // Garantir que o rascunho existe
+  const perfil = JSON.parse(JSON.stringify(window._perfilVidaTemp || perfilUsuario?.perfilVida || {}));
+
+  // 1. Salvar no localStorage imediatamente (nunca falha)
+  try { localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil)); } catch(e){}
+
+  // 2. Atualizar cache em memória
+  if(!perfilUsuario) perfilUsuario = {};
+  perfilUsuario.perfilVida = perfil;
+  window._perfilVidaTemp = JSON.parse(JSON.stringify(perfil));
+
+  // 3. Atualizar UI imediatamente (não espera Firebase)
+  const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
+  showToast('✓ Perfil salvo!','success');
+  atualizarTelaCategorias();
+  renderizarTabela();
+  popularSelectCategorias('gasto');
+  gerarInsights();
+  atualizarBanner();
+
+  // 4. Salvar no Firebase em background (não bloqueia UI)
+  if(uidAtual){
+    fbSalvarPerfilVida(uidAtual, perfil).catch(e => {
+      console.warn('Firebase sync falhou (dados salvos localmente):', e);
+    });
+  }
 };
 window.setMetaEco=function(el,pct){
   document.querySelectorAll('#meta-eco-opts .vida-opt').forEach(o=>o.classList.remove('selected'));
@@ -1751,7 +1912,10 @@ window.salvarPerfilFinancas=async function(){
     await fbSalvarPerfil(uidAtual,{renda,...extras});perfilUsuario.renda=renda;window._perfilFinTemp=null;
     const sE=document.getElementById('financas-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
     if(window.mostrarToastPerfil) window.mostrarToastPerfil('Salvo com sucesso!');
-  }catch(e){alert('Erro ao salvar.');console.error(e);}
+  }catch(e){
+    console.error('Erro ao salvar perfil vida:', e);
+    showToast('❌ Erro: ' + (e.message||e.code||'Tente novamente'), 'error');
+  }
 };
 window.abrirTabPerfil=function(tab){
   ['conta','vida','financas'].forEach(t=>{

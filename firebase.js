@@ -137,7 +137,9 @@ export async function salvarPerfil(uid, dados) {
 }
 
 export async function salvarPerfilVida(uid, perfil) {
-  await setDoc(doc(db, 'usuarios', uid), { perfilVida: perfil }, { merge: true });
+  // Sanitizar — remover undefined, funções e valores inválidos para o Firestore
+  const clean = JSON.parse(JSON.stringify(perfil || {}));
+  await setDoc(doc(db, 'usuarios', uid), { perfilVida: clean }, { merge: true });
 }
 
 export async function marcarOnboardingFeito(uid) {
