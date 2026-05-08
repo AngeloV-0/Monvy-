@@ -1289,7 +1289,7 @@ select option { background: var(--surface-2); }
     flex-shrink: 0;
   }
 
-  .main { padding: 14px 16px 24px; overflow-x: hidden; }
+  .main { padding: 14px 0px 24px; overflow-x: hidden; }
 
   .topbar-logo-mobile {
     display: flex !important;
@@ -1361,17 +1361,36 @@ select option { background: var(--surface-2); }
   .notif-btn { width: 36px; height: 36px; }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
-  .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .kpi-card { padding: 14px 14px; }
+  .kpi-row {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 6px;
+    margin: 0 0 10px 0;
+    align-items: stretch;
+  }
+  .kpi-card {
+    padding: 16px 14px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .kpi-card.primary-card {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    justify-content: flex-start;
+    gap: 8px;
+  }
   .kpi-value { font-size: 1.05rem; }
   .kpi-bg-icon { font-size: 2.2rem; }
   .kpi-label { font-size: 0.7rem; }
   .kpi-sub { font-size: 0.7rem; }
 
   /* Grids */
-  .content-grid { grid-template-columns: 1fr; gap: 12px; }
-  .chart-card, .table-card, .form-card, .resultado-card { padding: 20px 24px; }
-  .recent-card { padding: 20px 24px; border-radius: 20px; }
+  .content-grid { grid-template-columns: 1fr; gap: 10px; padding: 0 8px; }
+  .chart-card, .table-card, .form-card, .resultado-card { padding: 18px 16px; }
+  .recent-card { padding: 18px 16px; border-radius: 16px; }
   .two-col { grid-template-columns: 1fr; gap: 12px; }
 
   /* Categorias: 3 colunas cabe bem no mobile */
