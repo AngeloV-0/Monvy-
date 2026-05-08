@@ -911,7 +911,8 @@
     }
 
     @media (max-width: 480px) {
-      .nav-actions .btn-ghost { display: none; }
+      /* btn-ghost (Entrar) visível no mobile */
+      .nav-actions .btn-ghost { display: inline-flex; padding: 8px 12px; font-size: 0.8rem; }
       .hero h1 { font-size: 1.9rem; line-height: 1.2; }
       .hero p { font-size: 0.95rem; }
       .steps-grid { grid-template-columns: 1fr; }
