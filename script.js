@@ -422,22 +422,35 @@ function atualizarChart(){
     return {x:src.clientX-rect.left, y:src.clientY-rect.top};
   }
 
-  // Ativa tooltip pelo índice mais próximo do ponto x no eixo
+  // Ativa tooltip no ponto mais próximo (entrada OU saída separadamente)
   function ativarTooltip(x,y){
     if(!chartFluxo) return;
     const ca=chartFluxo.chartArea;
     if(!ca) return;
-    // Calcula índice mais próximo pela posição X
     const numPts=labels.length;
     const step=(ca.right-ca.left)/(numPts-1||1);
     const idx=Math.max(0,Math.min(numPts-1,Math.round((x-ca.left)/step)));
-    // Monta os elementos ativos (ambos os datasets no índice)
-    const activeEls=[];
-    for(let ds=0;ds<2;ds++){
-      activeEls.push({datasetIndex:ds,index:idx});
+    // Descobre qual dataset tem valor nesse índice (entrada ou saída)
+    const temEntrada=entradas[idx]>0;
+    const temSaida=saidas[idx]>0;
+    // Calcula distância Y para cada dataset que tem valor
+    let melhorDs=0;
+    if(temEntrada&&temSaida){
+      // Ambos têm valor — escolhe o mais próximo do toque em Y
+      const scaleY=chartFluxo.scales.y;
+      const yEnt=scaleY.getPixelForValue(entradas[idx]);
+      const ySai=scaleY.getPixelForValue(saidas[idx]);
+      melhorDs=Math.abs(y-yEnt)<Math.abs(y-ySai)?0:1;
+    } else if(temSaida){
+      melhorDs=1;
+    } else {
+      melhorDs=0;
     }
     chartFluxo._crosshairX=ca.left+idx*step;
-    chartFluxo.tooltip.setActiveElements(activeEls,{x:chartFluxo._crosshairX,y});
+    chartFluxo.tooltip.setActiveElements(
+      [{datasetIndex:melhorDs,index:idx}],
+      {x:chartFluxo._crosshairX,y}
+    );
     chartFluxo.update('none');
   }
 
@@ -447,7 +460,7 @@ function atualizarChart(){
   ]},options:{
     responsive:false,
     maintainAspectRatio:false,
-    interaction:{mode:'index',intersect:false},
+    interaction:{mode:'nearest',intersect:true},
     onHover:(event,elements,chart)=>{
       if(event.native&&event.native.type!=='touchstart'){
         const pos=getPosCanvas(event.native);
@@ -458,8 +471,8 @@ function atualizarChart(){
       legend:{display:false},
       tooltip:{
         enabled:true,
-        mode:'index',
-        intersect:false,
+        mode:'nearest',
+        intersect:true,
         position:'nearest',
         xAlign:'center',
         yAlign:'bottom',
