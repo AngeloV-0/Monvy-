@@ -574,11 +574,18 @@ nav {
   gap: 16px;
 }
 
-.chart-card, .recent-card {
+.chart-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px 24px;
+}
+
+.recent-card {
+  background: #0D1420;
+  border: none;
+  border-radius: 20px;
+  padding: 22px 20px;
 }
 
 .card-header {
@@ -652,20 +659,20 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 16px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  border: 1px solid transparent;
-  transition: border-color 0.15s;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #131C2E;
+  border: none;
+  transition: background 0.15s;
   animation: fadeUp 0.25s ease;
 }
 
-.mov-item:hover { border-color: var(--border-hover); }
+.mov-item:hover { background: #1a2540; }
 
 .mov-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; overflow: hidden; }
 
 .mov-dot {
-  width: 8px; height: 8px;
+  width: 9px; height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1282,7 +1289,7 @@ select option { background: var(--surface-2); }
     flex-shrink: 0;
   }
 
-  .main { padding: 14px 20px 24px; overflow-x: hidden; }
+  .main { padding: 14px 28px 24px; overflow-x: hidden; }
 
   .topbar-logo-mobile {
     display: flex !important;
@@ -1355,7 +1362,7 @@ select option { background: var(--surface-2); }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .kpi-card { padding: 14px 12px; }
+  .kpi-card { padding: 16px 16px; }
   .kpi-value { font-size: 1.05rem; }
   .kpi-bg-icon { font-size: 2.2rem; }
   .kpi-label { font-size: 0.7rem; }
@@ -1363,7 +1370,8 @@ select option { background: var(--surface-2); }
 
   /* Grids */
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
-  .chart-card, .recent-card, .table-card, .form-card, .resultado-card { padding: 16px 20px; }
+  .chart-card, .table-card, .form-card, .resultado-card { padding: 20px 24px; }
+  .recent-card { padding: 20px 24px; border-radius: 20px; }
   .two-col { grid-template-columns: 1fr; gap: 12px; }
 
   /* Categorias: 3 colunas cabe bem no mobile */
