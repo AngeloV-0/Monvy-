@@ -652,7 +652,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 13px 16px;
   border-radius: 12px;
   background: var(--surface-2);
   border: 1px solid transparent;
@@ -1282,7 +1282,7 @@ select option { background: var(--surface-2); }
     flex-shrink: 0;
   }
 
-  .main { padding: 14px 12px 24px; overflow-x: hidden; }
+  .main { padding: 14px 20px 24px; overflow-x: hidden; }
 
   .topbar-logo-mobile {
     display: flex !important;
@@ -1363,7 +1363,7 @@ select option { background: var(--surface-2); }
 
   /* Grids */
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
-  .chart-card, .recent-card, .table-card, .form-card, .resultado-card { padding: 16px; }
+  .chart-card, .recent-card, .table-card, .form-card, .resultado-card { padding: 16px 20px; }
   .two-col { grid-template-columns: 1fr; gap: 12px; }
 
   /* Categorias: 3 colunas cabe bem no mobile */
