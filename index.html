@@ -2160,8 +2160,13 @@ bvRender();
         imgEl.style.display = 'none'; letraEl.style.display = 'block'; btnRemover.style.display = 'none';
       }
       document.getElementById('perfil-sucesso').style.display = 'none';
-      // Inicializar rascunho com cópia do perfil atual — assim mudanças parciais são preservadas
-      window._perfilVidaTemp = JSON.parse(JSON.stringify(window.perfilUsuario?.perfilVida || {}));
+      // Inicializar rascunho — tenta window.perfilUsuario, depois localStorage
+      let _vidaSalva = window.perfilUsuario?.perfilVida || null;
+      if (!_vidaSalva || Object.keys(_vidaSalva).length === 0) {
+        const _cached = localStorage.getItem('monvy_perfil_vida');
+        if (_cached) { try { _vidaSalva = JSON.parse(_cached); } catch(e) {} }
+      }
+      window._perfilVidaTemp = JSON.parse(JSON.stringify(_vidaSalva || {}));
 
       // ── Marcar opções salvas no perfil de vida ──────────────────
       const vida = window._perfilVidaTemp;

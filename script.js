@@ -109,6 +109,7 @@ let periodoModo = 'mes';
 let periodoCustomInicio = null;
 let periodoCustomFim = null;
 let perfilUsuario = {};
+window.perfilUsuario = perfilUsuario; // expor para scripts inline do HTML
 let chartFluxo = null;
 let chartPizza = null;
 let tipoGraficoPizza = 'doughnut';
@@ -304,6 +305,8 @@ waitAuthReady().then(()=>{
       // Sincronizar localStorage com o que veio do Firebase
       localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfilUsuario.perfilVida));
     }
+    // Manter window.perfilUsuario sempre sincronizado
+    window.perfilUsuario = perfilUsuario;
     try{await verificarEResetarMes(user.uid);}catch(e){}
     // app pronto
     await carregarTodosDados();
@@ -1838,6 +1841,7 @@ window.salvarPerfilVida=async function(){
   // 2. Atualizar cache em memória
   if(!perfilUsuario) perfilUsuario = {};
   perfilUsuario.perfilVida = perfil;
+  window.perfilUsuario = perfilUsuario; // manter window em sincronia
   window._perfilVidaTemp = JSON.parse(JSON.stringify(perfil));
 
   // 3. Atualizar UI imediatamente — cada chamada isolada para não bloquear caso uma falhe
