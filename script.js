@@ -367,15 +367,21 @@ function setFluxoModo(modo){
   atualizarChart();
 }
 function atualizarChart(){
+  const container=document.getElementById('chart-fluxo-container');
   const canvas=document.getElementById('chart-fluxo');
   const emptyEl=document.getElementById('chart-empty');
   if(!canvas) return;
-  if(movimentacoes.length===0){canvas.style.display='none';if(emptyEl)emptyEl.style.display='flex';return;}
-  canvas.style.display='block';if(emptyEl)emptyEl.style.display='none';
-  // Garante que o canvas tem dimensões antes de renderizar
+  if(movimentacoes.length===0){
+    if(container)container.style.display='none';
+    canvas.style.display='none';
+    if(emptyEl)emptyEl.style.display='flex';
+    return;
+  }
+  if(container)container.style.display='block';
+  canvas.style.display='block';
+  if(emptyEl)emptyEl.style.display='none';
   if(!canvas.offsetWidth){setTimeout(atualizarChart,100);return;}
-  // Define tamanho explícito do canvas para o Chart.js não extrapolar
-  const w=canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
+  const w=(container?container.offsetWidth:null)||canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
   canvas.width=w;
   canvas.height=180;
   const lista=fluxoModo==='recentes'?movimentacoes.slice(0,10):movimentacoes;
@@ -390,29 +396,86 @@ function atualizarChart(){
   const ctx=canvas.getContext('2d');
   const gG=ctx.createLinearGradient(0,0,0,180);gG.addColorStop(0,'rgba(34,197,94,0.3)');gG.addColorStop(1,'rgba(34,197,94,0)');
   const gR=ctx.createLinearGradient(0,0,0,180);gR.addColorStop(0,'rgba(239,68,68,0.25)');gR.addColorStop(1,'rgba(239,68,68,0)');
+
+  // Plugin crosshair: linha vertical ao hover/touch
+  const crosshairPlugin={
+    id:'crosshair',
+    afterDraw(chart){
+      if(chart._crosshairX==null) return;
+      const {ctx,chartArea:{top,bottom}}=chart;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart._crosshairX,top);
+      ctx.lineTo(chart._crosshairX,bottom);
+      ctx.strokeStyle='rgba(255,255,255,0.18)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([4,4]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  // Função utilitária para obter posição relativa ao canvas (mouse ou toque)
+  function getPosCanvas(e){
+    const rect=canvas.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return {x:src.clientX-rect.left, y:src.clientY-rect.top};
+  }
+
+  // Ativa tooltip pelo índice mais próximo do ponto x no eixo
+  function ativarTooltip(x,y){
+    if(!chartFluxo) return;
+    const ca=chartFluxo.chartArea;
+    if(!ca) return;
+    // Calcula índice mais próximo pela posição X
+    const numPts=labels.length;
+    const step=(ca.right-ca.left)/(numPts-1||1);
+    const idx=Math.max(0,Math.min(numPts-1,Math.round((x-ca.left)/step)));
+    // Monta os elementos ativos (ambos os datasets no índice)
+    const activeEls=[];
+    for(let ds=0;ds<2;ds++){
+      activeEls.push({datasetIndex:ds,index:idx});
+    }
+    chartFluxo._crosshairX=ca.left+idx*step;
+    chartFluxo.tooltip.setActiveElements(activeEls,{x:chartFluxo._crosshairX,y});
+    chartFluxo.update('none');
+  }
+
   chartFluxo=new Chart(ctx,{type:'line',data:{labels,datasets:[
-    {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#22C55E',pointHoverBackgroundColor:'#22C55E'},
-    {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:4,pointHoverRadius:7,pointBackgroundColor:'#EF4444',pointHoverBackgroundColor:'#EF4444'}
+    {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:5,pointHoverRadius:9,pointBackgroundColor:'#22C55E',pointHoverBackgroundColor:'#22C55E',pointBorderColor:'#0f172a',pointBorderWidth:2,pointHitRadius:24},
+    {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:5,pointHoverRadius:9,pointBackgroundColor:'#EF4444',pointHoverBackgroundColor:'#EF4444',pointBorderColor:'#0f172a',pointBorderWidth:2,pointHitRadius:24}
   ]},options:{
     responsive:false,
     maintainAspectRatio:false,
-    interaction:{mode:'nearest',intersect:true},
+    interaction:{mode:'index',intersect:false},
+    onHover:(event,elements,chart)=>{
+      if(event.native&&event.native.type!=='touchstart'){
+        const pos=getPosCanvas(event.native);
+        chart._crosshairX=pos.x;
+      }
+    },
     plugins:{
       legend:{display:false},
       tooltip:{
         enabled:true,
+        mode:'index',
+        intersect:false,
         position:'nearest',
         xAlign:'center',
         yAlign:'bottom',
-        backgroundColor:'rgba(15,23,42,0.95)',
-        borderColor:'rgba(255,255,255,0.1)',
+        backgroundColor:'rgba(15,23,42,0.96)',
+        borderColor:'rgba(255,255,255,0.12)',
         borderWidth:1,
         titleColor:'#94a3b8',
         bodyColor:'#f1f5f9',
-        titleFont:{size:11},
+        titleFont:{size:12,weight:'600'},
         bodyFont:{size:13,weight:'bold'},
-        padding:10,
+        padding:12,
         cornerRadius:10,
+        caretSize:6,
+        displayColors:true,
+        boxWidth:10,
+        boxHeight:10,
         callbacks:{
           title:function(items){
             const i=items[0].dataIndex;
@@ -421,8 +484,8 @@ function atualizarChart(){
           label:function(item){
             if(item.raw===0) return null;
             const i=item.dataIndex;
-            const desc=nomes[i]||'';
-            const isEnt=item.datasetIndex===0; // dataset 0 = entradas, 1 = saídas
+            const desc=nomes[i]||'Movimentação';
+            const isEnt=item.datasetIndex===0;
             const val=item.raw.toLocaleString('pt-BR',{minimumFractionDigits:2});
             return ` ${desc} : ${isEnt?'+':'-'}R$ ${val}`;
           },
@@ -430,7 +493,7 @@ function atualizarChart(){
             return {
               borderColor:'transparent',
               backgroundColor:item.datasetIndex===0?'#22c55e':'#ef4444',
-              borderRadius:4
+              borderRadius:3
             };
           }
         }
@@ -440,7 +503,40 @@ function atualizarChart(){
       x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
       y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}}
     }
-  }});
+  },plugins:[crosshairPlugin]});
+
+  // ── Touch mobile e clique desktop ──────────────────────────────
+  // Remove listeners antigos via flag
+  if(canvas._tooltipListeners){
+    canvas.removeEventListener('touchstart',canvas._tooltipListeners.ts);
+    canvas.removeEventListener('touchmove',canvas._tooltipListeners.tm);
+    canvas.removeEventListener('touchend',canvas._tooltipListeners.te);
+    canvas.removeEventListener('click',canvas._tooltipListeners.cl);
+  }
+  function handleTouch(e){
+    e.preventDefault();
+    e.stopPropagation();
+    const pos=getPosCanvas(e);
+    ativarTooltip(pos.x,pos.y);
+  }
+  function handleTouchEnd(){
+    setTimeout(()=>{
+      if(chartFluxo){
+        chartFluxo._crosshairX=null;
+        chartFluxo.tooltip.setActiveElements([],{});
+        chartFluxo.update('none');
+      }
+    },2500);
+  }
+  function handleClick(e){
+    const pos=getPosCanvas(e);
+    ativarTooltip(pos.x,pos.y);
+  }
+  canvas._tooltipListeners={ts:handleTouch,tm:handleTouch,te:handleTouchEnd,cl:handleClick};
+  canvas.addEventListener('touchstart',handleTouch,{passive:false});
+  canvas.addEventListener('touchmove',handleTouch,{passive:false});
+  canvas.addEventListener('touchend',handleTouchEnd,{passive:false});
+  canvas.addEventListener('click',handleClick);
 }
 
 // ── Lista início ──────────────────────────────────────────────────
