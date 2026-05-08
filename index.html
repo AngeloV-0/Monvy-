@@ -2916,6 +2916,43 @@ bvRender();
     </nav>
   </div>
 
+
+  <!-- Toast global para notificações -->
+  <div id="toast-global" style="
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--surface,#1a2235);border:1px solid rgba(34,197,94,0.4);
+    border-radius:30px;padding:12px 24px;display:flex;align-items:center;gap:10px;
+    font-size:.88rem;font-weight:600;color:var(--white,#fff);
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:99999;
+    opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+    white-space:nowrap;max-width:90vw;
+  ">
+    <span id="toast-global-icon" style="font-size:1rem">✓</span>
+    <span id="toast-global-msg"></span>
+  </div>
+  <script>
+    var _toastGlobalTimer = null;
+    window.showToast = function(msg, tipo) {
+      var t = document.getElementById('toast-global');
+      var icon = document.getElementById('toast-global-icon');
+      var msgEl = document.getElementById('toast-global-msg');
+      if (!t) return;
+      var icons = { success: '✓', error: '✕', warn: '⚠' };
+      var borders = { success: 'rgba(34,197,94,0.4)', error: 'rgba(239,68,68,0.4)', warn: 'rgba(245,158,11,0.4)' };
+      tipo = tipo || 'success';
+      t.style.borderColor = borders[tipo] || borders.success;
+      if (icon) icon.textContent = icons[tipo] || icons.success;
+      if (msgEl) msgEl.textContent = msg || '';
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+      clearTimeout(_toastGlobalTimer);
+      _toastGlobalTimer = setTimeout(function() {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(-50%) translateY(20px)';
+      }, 3000);
+    };
+  </script>
+
 </body>
 </html>
 

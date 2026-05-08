@@ -1840,14 +1840,15 @@ window.salvarPerfilVida=async function(){
   perfilUsuario.perfilVida = perfil;
   window._perfilVidaTemp = JSON.parse(JSON.stringify(perfil));
 
-  // 3. Atualizar UI imediatamente (não espera Firebase)
-  const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);}
-  showToast('✓ Perfil salvo!','success');
-  atualizarTelaCategorias();
-  renderizarTabela();
-  popularSelectCategorias('gasto');
-  gerarInsights();
-  atualizarBanner();
+  // 3. Atualizar UI imediatamente — cada chamada isolada para não bloquear caso uma falhe
+  try { const sE=document.getElementById('vida-sucesso');if(sE){sE.style.display='block';setTimeout(()=>sE.style.display='none',2000);} } catch(e){}
+  try { if(typeof window.showToast==='function') window.showToast('✓ Perfil salvo!','success');
+        else if(typeof window.mostrarToastPerfil==='function') window.mostrarToastPerfil('Perfil salvo!'); } catch(e){}
+  try { atualizarTelaCategorias(); } catch(e){}
+  try { renderizarTabela(); } catch(e){}
+  try { if(typeof popularSelectCategorias==='function') popularSelectCategorias('gasto'); } catch(e){}
+  try { gerarInsights(); } catch(e){}
+  try { atualizarBanner(); } catch(e){}
 
   // 4. Salvar no Firebase em background (não bloqueia UI)
   if(uidAtual){
@@ -1872,7 +1873,7 @@ window.salvarPerfilFinancas=async function(){
     if(window.mostrarToastPerfil) window.mostrarToastPerfil('Salvo com sucesso!');
   }catch(e){
     console.error('Erro ao salvar perfil vida:', e);
-    showToast('❌ Erro: ' + (e.message||e.code||'Tente novamente'), 'error');
+    if(typeof window.showToast==='function') window.showToast('❌ Erro: ' + (e.message||e.code||'Tente novamente'), 'error');
   }
 };
 window.abrirTabPerfil=function(tab){

@@ -662,7 +662,7 @@ nav {
 
 .mov-item:hover { border-color: var(--border-hover); }
 
-.mov-left { display: flex; align-items: center; gap: 10px; }
+.mov-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; overflow: hidden; }
 
 .mov-dot {
   width: 8px; height: 8px;
@@ -673,14 +673,17 @@ nav {
 .mov-dot.g { background: var(--primary); box-shadow: 0 0 6px var(--primary-glow); }
 .mov-dot.r { background: var(--red); }
 
-.mov-info { display: flex; flex-direction: column; gap: 2px; }
-.mov-desc { font-size: 0.85rem; font-weight: 500; color: var(--white); }
-.mov-cat  { font-size: 0.72rem; color: var(--gray); }
+.mov-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
+.mov-desc { font-size: 0.85rem; font-weight: 500; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mov-cat  { font-size: 0.72rem; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .mov-valor {
   font-family: var(--font-title);
   font-size: 0.9rem;
   font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 8px;
 }
 
 .mov-valor.positivo { color: var(--primary); }
