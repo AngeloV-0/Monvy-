@@ -1954,6 +1954,17 @@ bvRender();
     window.selecionarVidaMulti = function(el, cat, val) {
       if (window._selecionarVidaMulti_impl) return window._selecionarVidaMulti_impl(el, cat, val);
     };
+    // Wrapper para abrirTabPerfil — chama a implementação do módulo quando disponível
+    window.abrirTabPerfil = function(tab) {
+      if (window._abrirTabPerfil_impl) return window._abrirTabPerfil_impl(tab);
+      // Fallback simples caso o módulo ainda não tenha carregado
+      ['conta','vida','financas'].forEach(function(t) {
+        var tb = document.getElementById('tab-' + t);
+        var te = document.getElementById('perfil-tab-' + t);
+        if (tb) tb.classList.toggle('active', t === tab);
+        if (te) te.style.display = (t === tab) ? 'block' : 'none';
+      });
+    };
   </script>
 
   <script type="module" src="script.js?v=24"></script>
@@ -1991,12 +2002,12 @@ bvRender();
         'mudarMesRelatorio','setPeriodoModo','aplicarPeriodoCustom','atalhoUltimos',
         'buscarMovimentacoes','limparBusca','abrirBuscaMobile','fecharBuscaMobile',
         'fecharDropdownBusca','mostrarDropdownBusca','atualizarFormDivida',
-        'cadastrarDivida','excluirDivida','abrirTabPerfil','selecionarVida',
-        'selecionarVidaMulti','setMetaEco','salvarPerfilVida','salvarPerfilFinancas',
+        'cadastrarDivida','excluirDivida',
+        'selecionarVidaMulti','setMetaEco','salvarPerfilFinancas',
         'salvarConta','editarConta','cancelarEdicaoConta','pagarConta','excluirConta',
         'filtrarContas','mudarMesContas','renderizarContas','carregarHistorico',
         'processarRecorrentes','setFluxoModo','quitarDivida',
-        'adicionarCustomVida','removerCustomVida','ocultarInsights','fecharBannerEmpresa',
+        'ocultarInsights','fecharBannerEmpresa',
         'irParaModo','voltarParaPessoal','abrirModalGastoCategoria','setTipoGrafico',
         'selecionarCategoriaPicker','filtrarPorCategoria'
       ];

@@ -1893,3 +1893,4 @@ window._adicionarCustomVida_impl = window.adicionarCustomVida;
 window._removerCustomVida_impl = window.removerCustomVida;
 window._selecionarVida_impl = window.selecionarVida;
 window._selecionarVidaMulti_impl = window.selecionarVidaMulti;
+window._abrirTabPerfil_impl = window.abrirTabPerfil;
