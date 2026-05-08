@@ -396,11 +396,14 @@ function atualizarChart(){
   ]},options:{
     responsive:false,
     maintainAspectRatio:false,
-    interaction:{mode:'index',intersect:false},
+    interaction:{mode:'nearest',intersect:true},
     plugins:{
       legend:{display:false},
       tooltip:{
         enabled:true,
+        position:'nearest',
+        xAlign:'center',
+        yAlign:'bottom',
         backgroundColor:'rgba(15,23,42,0.95)',
         borderColor:'rgba(255,255,255,0.1)',
         borderWidth:1,
@@ -419,7 +422,7 @@ function atualizarChart(){
             if(item.raw===0) return null;
             const i=item.dataIndex;
             const desc=nomes[i]||'';
-            const isEnt=tipos[i]==='ganho';
+            const isEnt=item.datasetIndex===0; // dataset 0 = entradas, 1 = saídas
             const val=item.raw.toLocaleString('pt-BR',{minimumFractionDigits:2});
             return ` ${desc} : ${isEnt?'+':'-'}R$ ${val}`;
           },
