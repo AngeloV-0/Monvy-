@@ -585,7 +585,7 @@ nav {
   background: #0D1420;
   border: none;
   border-radius: 20px;
-  padding: 22px 20px;
+  padding: 24px 28px;
 }
 
 .card-header {
@@ -653,13 +653,13 @@ nav {
    LISTA MOVIMENTAÇÕES
    ============================== */
 
-.lista-movs { display: flex; flex-direction: column; gap: 8px; }
+.lista-movs { display: flex; flex-direction: column; gap: 10px; }
 
 .mov-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 14px 20px;
   border-radius: 14px;
   background: #131C2E;
   border: none;
@@ -1289,7 +1289,7 @@ select option { background: var(--surface-2); }
     flex-shrink: 0;
   }
 
-  .main { padding: 14px 28px 24px; overflow-x: hidden; }
+  .main { padding: 14px 16px 24px; overflow-x: hidden; }
 
   .topbar-logo-mobile {
     display: flex !important;
@@ -1361,8 +1361,8 @@ select option { background: var(--surface-2); }
   .notif-btn { width: 36px; height: 36px; }
 
   /* KPI: tela cheia em 1 coluna no mobile pequeno, 2 em telas maiores */
-  .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .kpi-card { padding: 16px 16px; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .kpi-card { padding: 14px 14px; }
   .kpi-value { font-size: 1.05rem; }
   .kpi-bg-icon { font-size: 2.2rem; }
   .kpi-label { font-size: 0.7rem; }
