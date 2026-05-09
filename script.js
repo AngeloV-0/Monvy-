@@ -178,7 +178,7 @@ function applyTheme(theme) {
   }
 }
 window.toggleTheme = function() {
-  const cur = document.documentElement.getAttribute('data-theme')||'dark';
+  const cur = localStorage.getItem('monvy_theme')||'dark';
   const nxt = cur==='dark'?'light':'dark';
   localStorage.setItem('monvy_theme', nxt);
   applyTheme(nxt);

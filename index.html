@@ -2514,38 +2514,13 @@ bvRender();
       if (fotoSalva) aplicarPerfilUI(nome, fotoSalva);
     })();
 
-    // Sincronizar ícone de tema no drawer
-    function syncDrawerThemeIcon() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const moon = document.getElementById('drawer-theme-icon-moon');
-      const sun = document.getElementById('drawer-theme-icon-sun');
-      const label = document.getElementById('drawer-theme-label');
-      if (current === 'light') {
-        if (moon) moon.style.display = 'none';
-        if (sun) sun.style.display = 'block';
-        if (label) label.textContent = 'Tema escuro';
-      } else {
-        if (moon) moon.style.display = 'block';
-        if (sun) sun.style.display = 'none';
-        if (label) label.textContent = 'Tema claro';
-      }
-    }
-    // Sobrescrever toggleTheme para também atualizar o drawer
-    // Usa setTimeout para garantir que o módulo já carregou e definiu window.toggleTheme
-    window._syncDrawerThemeIcon = syncDrawerThemeIcon;
-    window._toggleThemeWithDrawer = function() {
-      const current = document.documentElement.getAttribute('data-theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
+    // toggleTheme unificado — usa localStorage como fonte da verdade
+    window.toggleTheme = function() {
+      const cur = localStorage.getItem('monvy_theme') || 'dark';
+      const next = cur === 'dark' ? 'light' : 'dark';
       localStorage.setItem('monvy_theme', next);
       if (typeof applyTheme === 'function') applyTheme(next);
-      syncDrawerThemeIcon();
     };
-    // Substituir após o módulo carregar
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        window.toggleTheme = window._toggleThemeWithDrawer;
-      }, 200);
-    });
     // Sincronizar ao abrir drawer
     const _originalAbrirDrawer = abrirDrawer;
     window.abrirDrawer = function() {
