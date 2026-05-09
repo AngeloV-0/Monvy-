@@ -85,7 +85,7 @@ import {
   getPerfil, salvarPerfil as fbSalvarPerfil, salvarPerfilVida as fbSalvarPerfilVida,
   getMovimentacoes, adicionarMovimentacao, atualizarMovimentacao, deletarMovimentacao, ouvirMovimentacoes,
   getMetas, adicionarMeta, atualizarMeta, deletarMeta,
-  getDividas, adicionarDivida, deletarDivida,
+  getDividas, adicionarDivida, atualizarDivida, deletarDivida,
   getContas, adicionarConta, atualizarConta, deletarConta,
   verificarEResetarMes, getHistorico
 } from './firebase.js';
@@ -128,7 +128,7 @@ window.setTipoGrafico = function(tipo) {
     }
   }
   // Re-renderizar com dados atuais
-  const filtradas = filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
+  const filtradas = filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto'&&naoEQuitacao(m));
   const porCat={};
   filtradas.forEach(m=>{ const c=m.categoria||'Outros'; porCat[c]=(porCat[c]||0)+m.valor; });
   atualizarGraficoPizza(porCat);
@@ -356,7 +356,7 @@ function atualizarUIUsuario(nome,foto){
 // ── KPIs ─────────────────────────────────────────────────────────
 function atualizarKPIs(){
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
-  const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
   const sal=ent-sai;
   const sd=document.getElementById('saldo-display'); if(sd){sd.textContent=fmtSaldo(sal);sd.style.color=sal<0?'#ef4444':'';}
   const sm=document.getElementById('saldo-mes'); if(sm) sm.textContent=`Este mês: +${fmt(ent)} entrou`;
@@ -781,7 +781,7 @@ function renderizarTabela(){
 function atualizarTelaCategorias(){
   renderSugestaoOrcamento();
   const grid=document.getElementById('categorias-grid-dinamico'); if(!grid) return;
-  const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto');
+  const filtradas=filtrarPorPeriodo(movimentacoes).filter(m=>m.tipo==='gasto'&&naoEQuitacao(m));
 
   // Incluir todas as categorias do perfil (mesmo com R$0)
   const cats=getCategoriasPorPerfil();
@@ -1150,40 +1150,94 @@ window.cadastrarDivida=async function(){
 };
 function renderizarDividas(){
   const el=document.getElementById('lista-dividas-cadastradas'); if(!el) return;
-  const tot=dividas.reduce((s,d)=>s+(d.valor||0),0);
-  const cart=dividas.filter(d=>d.tipo==='cartao').reduce((s,d)=>s+(d.valor||0),0);
-  const emp=dividas.filter(d=>d.tipo==='emprestimo'||d.tipo==='financiamento').reduce((s,d)=>s+(d.valor||0),0);
-  const terc=dividas.filter(d=>d.tipo==='terceiros').reduce((s,d)=>s+(d.valor||0),0);
+  const lbl={cartao:'Cartão de crédito',emprestimo:'Empréstimo',financiamento:'Financiamento',terceiros:'Terceiros',outros:'Outros'};
+
+  // Separar ativas e quitadas
+  const ativas  = dividas.filter(d=>d.status!=='quitada');
+  const quitadas= dividas.filter(d=>d.status==='quitada');
+
+  // KPIs — só dívidas ativas
+  const tot =ativas.reduce((s,d)=>s+(d.valor||0),0);
+  const cart=ativas.filter(d=>d.tipo==='cartao').reduce((s,d)=>s+(d.valor||0),0);
+  const emp =ativas.filter(d=>d.tipo==='emprestimo'||d.tipo==='financiamento').reduce((s,d)=>s+(d.valor||0),0);
+  const terc=ativas.filter(d=>d.tipo==='terceiros').reduce((s,d)=>s+(d.valor||0),0);
   const kT=document.getElementById('div-kpi-total');const kQ=document.getElementById('div-kpi-qtd');
   const kC=document.getElementById('div-kpi-cartao');const kE=document.getElementById('div-kpi-emprest');const kTe=document.getElementById('div-kpi-terceiros');
-  if(kT)kT.textContent=fmt(tot);if(kQ)kQ.textContent=dividas.length>0?`${dividas.length} dívida(s) ativa(s)`:'Nenhuma dívida cadastrada';
+  if(kT)kT.textContent=fmt(tot);
+  if(kQ)kQ.textContent=ativas.length>0?`${ativas.length} dívida(s) ativa(s)`:'Nenhuma dívida ativa';
   if(kC)kC.textContent=fmt(cart);if(kE)kE.textContent=fmt(emp);if(kTe)kTe.textContent=fmt(terc);
-  if(dividas.length===0){el.innerHTML='<div class="vazio">Nenhuma dívida cadastrada ainda.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>';return;}
-  const lbl={cartao:'Cartão de crédito',emprestimo:'Empréstimo',financiamento:'Financiamento',terceiros:'Terceiros',outros:'Outros'};
-  el.innerHTML = dividas.map(d => `
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div><div style="font-weight:700">${d.descricao}</div><div style="font-size:.75rem;color:var(--gray)">${lbl[d.tipo]||d.tipo}${d.credor?' · '+d.credor:''}</div></div>
-        <div style="text-align:right"><div style="font-weight:800;color:#ef4444">${fmt(d.valor)}</div>${d.juros>0?`<div style="font-size:.72rem;color:var(--gray)">${d.juros}% a.m.</div>`:''}</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-sm-green" data-acao="quitar" data-id="${d.id}">✓ Quitar</button>
-        <button class="btn-sm-red"   data-acao="excluir" data-id="${d.id}">Excluir</button>
-      </div>
-    </div>`).join('');
 
-  // Event delegation — um único listener no container
-  el.onclick = function(e) {
-    const btn = e.target.closest('button[data-acao]');
-    if (!btn) return;
+  // Lista de dívidas ativas
+  if(ativas.length===0){
+    el.innerHTML='<div class="vazio">Nenhuma dívida ativa.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>';
+  } else {
+    el.innerHTML=ativas.map(d=>`
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div><div style="font-weight:700">${d.descricao}</div><div style="font-size:.75rem;color:var(--gray)">${lbl[d.tipo]||d.tipo}${d.credor?' · '+d.credor:''}</div></div>
+          <div style="text-align:right"><div style="font-weight:800;color:#ef4444">${fmt(d.valor)}</div>${d.juros>0?`<div style="font-size:.72rem;color:var(--gray)">${d.juros}% a.m.</div>`:''}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm-green" data-acao="quitar" data-id="${d.id}">✓ Quitar</button>
+          <button class="btn-sm-red"   data-acao="excluir" data-id="${d.id}">Excluir</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Event delegation
+  el.onclick=function(e){
+    const btn=e.target.closest('button[data-acao]');
+    if(!btn) return;
     e.stopPropagation();
-    const id  = btn.getAttribute('data-id');
-    const acao = btn.getAttribute('data-acao');
-    if (acao === 'quitar')  window.quitarDivida(id);
-    if (acao === 'excluir') window.excluirDivida(id);
+    const id=btn.getAttribute('data-id');
+    const acao=btn.getAttribute('data-acao');
+    if(acao==='quitar')  window.quitarDivida(id);
+    if(acao==='excluir') window.excluirDivida(id);
   };
+
+  // Histórico de dívidas quitadas
+  let hist=document.getElementById('historico-dividas-section');
+  if(!hist){
+    hist=document.createElement('div');
+    hist.id='historico-dividas-section';
+    hist.style.marginTop='24px';
+    el.parentNode.appendChild(hist);
+  }
+  if(quitadas.length===0){
+    hist.innerHTML='';
+  } else {
+    hist.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <img src="icone-trofeu.png" style="width:20px;height:20px;object-fit:contain">
+        <span style="font-weight:700;font-size:.9rem;color:var(--white)">Dívidas quitadas</span>
+        <span style="font-size:.78rem;color:var(--gray)">${quitadas.length} liquidada(s)</span>
+      </div>
+      ${quitadas.map(d=>`
+        <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:600;color:var(--white)">${d.descricao}</div>
+            <div style="font-size:.75rem;color:var(--gray)">${lbl[d.tipo]||d.tipo} · Quitada em ${d.quitadaEm?fmtData(d.quitadaEm):'—'}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700;color:#22c55e">${fmt(d.valor)}</div>
+            <button class="btn-sm-red" style="margin-top:6px;font-size:.72rem" data-acao="excluir" data-id="${d.id}">Excluir</button>
+          </div>
+        </div>`).join('')}`;
+    // Event delegation no histórico também
+    hist.onclick=function(e){
+      const btn=e.target.closest('button[data-acao]');
+      if(!btn) return;
+      e.stopPropagation();
+      window.excluirDivida(btn.getAttribute('data-id'));
+    };
+  }
+
+  // Estratégia — só para dívidas ativas
   const eCard=document.getElementById('estrategia-card');const eTex=document.getElementById('estrategia-texto');
-  if(eCard&&eTex){eCard.style.display='block';const mj=[...dividas].sort((a,b)=>(b.juros||0)-(a.juros||0))[0];eTex.innerHTML=mj&&mj.juros>0?`Priorize quitar <strong>${mj.descricao}</strong> — tem os maiores juros (${mj.juros}% a.m.). Método avalanche economiza mais a longo prazo.`:'Use o método bola de neve: quite as menores dívidas primeiro.';}
+  if(eCard&&eTex){
+    if(ativas.length===0){eCard.style.display='none';}
+    else{eCard.style.display='block';const mj=[...ativas].sort((a,b)=>(b.juros||0)-(a.juros||0))[0];eTex.innerHTML=mj&&mj.juros>0?`Priorize quitar <strong>${mj.descricao}</strong> — tem os maiores juros (${mj.juros}% a.m.). Método avalanche economiza mais a longo prazo.`:'Use o método bola de neve: quite as menores dívidas primeiro.';}
+  }
 }
 // Modal de confirmação customizado (evita bloqueio do confirm() nativo no mobile)
 function confirmarAcao(msg, onConfirm) {
@@ -1229,44 +1283,26 @@ function confirmarAcao(msg, onConfirm) {
 
 window.quitarDivida=function(id){
   const sid=String(id);
-  // Encontra os dados da dívida antes de deletar
-  const divida = dividas.find(d=>String(d.id)===sid);
+  const divida=dividas.find(d=>String(d.id)===sid);
   if(!divida){alert('Dívida não encontrada.');return;}
   confirmarAcao(`Quitar "${divida.descricao}" (${fmt(divida.valor)})?`, async ()=>{
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
     try{
-      // 1. Calcula score ANTES
-      const scoreAntes = calcularScoreValor();
-      // 2. Remove dívida do array local IMEDIATAMENTE (atualiza UI antes do Firebase)
-      dividas = dividas.filter(d => String(d.id) !== sid);
+      const scoreAntes=calcularScoreValor();
+      const hoje=new Date().toISOString().split('T')[0];
+      // Marca como quitada no Firestore (não deleta — mantém histórico)
+      await atualizarDivida(uidAtual, sid, {
+        status: 'quitada',
+        quitadaEm: hoje
+      });
+      // Atualiza array local imediatamente
+      dividas=await getDividas(uidAtual);
       renderizarDividas();
-      // 3. Salva no Firebase em paralelo
-      const hoje = new Date().toISOString().split('T')[0];
-      await Promise.all([
-        deletarDivida(uidAtual, sid),
-        adicionarMovimentacao(uidAtual, {
-          descricao: `Quitação: ${divida.descricao}`,
-          valor: divida.valor,
-          tipo: 'gasto',
-          categoria: 'Dívidas',
-          data: hoje,
-          recorrente: false,
-          classificacao: 'quitacao_divida'
-        })
-      ]);
-      // 4. Recarrega do Firebase para garantir consistência
-      [dividas, movimentacoes] = await Promise.all([
-        getDividas(uidAtual),
-        getMovimentacoes(uidAtual)
-      ]);
-      renderizarDividas();
-      renderizarListaInicio();
       atualizarKPIs();
       calcularScore();
-      // 5. Feedback de pontos
-      const scoreDepois = calcularScoreValor();
-      const ganho = scoreDepois - scoreAntes;
-      mostrarToastScore(ganho, divida.descricao);
+      // Feedback de pontos
+      const scoreDepois=calcularScoreValor();
+      mostrarToastScore(scoreDepois-scoreAntes, divida.descricao);
     }catch(e){
       console.error('[quitarDivida]',e);
       alert('Erro ao quitar: '+e.message);
@@ -1522,7 +1558,7 @@ function renderizarRelatorio(){
   if(rSa){rSa.textContent=fmtSaldo(sal);rSa.style.color=sal<0?'#ef4444':'#22c55e';}
   if(rT)rT.textContent=movs.length;
   const topEl=document.getElementById('relatorio-top-gastos');
-  if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto').sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
+  if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
   const rEl=document.getElementById('lista-recorrentes');
   if(rEl){const recs=movimentacoes.filter(m=>m.recorrente);if(recs.length===0)rEl.innerHTML='<div class="vazio">Nenhum lançamento recorrente cadastrado.</div>';else rEl.innerHTML=recs.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.tipo==='ganho'?'Entrada':'Saída'} recorrente</div></div><div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div></div>`).join('');}
   // ── Todas as movimentações ──────────────────────────────────────
@@ -1583,7 +1619,7 @@ function renderizarChartRelatorio(){
     labels.push(mShort[d.getMonth()]);
     const mm=movimentacoes.filter(m=>{if(!m.data)return false;const md=new Date(m.data+'T00:00:00');return md.getMonth()===d.getMonth()&&md.getFullYear()===d.getFullYear();});
     dEnt.push(mm.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0));
-    dSai.push(mm.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0));
+    dSai.push(mm.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0));
   }
   const emp=document.getElementById('relatorio-chart-empty');
   if(dEnt.every(v=>v===0)&&dSai.every(v=>v===0)){canvas.style.display='none';if(emp)emp.style.display='flex';return;}
@@ -1618,12 +1654,12 @@ window.processarRecorrentes=async function(){
 // Retorna o valor numérico do score sem atualizar o DOM
 function calcularScoreValor(){
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
-  const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
   const sal=ent-sai; const renda=perfilUsuario?.renda||ent||1;
   const pctGasto=ent>0?(sai/ent)*100:100;
   const pG=pctGasto<=50?300:pctGasto<=70?200:pctGasto<=90?100:30;
   const totDiv=dividas.reduce((s,d)=>s+(d.valor||0),0); const relDiv=renda>0?totDiv/renda:0;
-  const pD=dividas.length===0?200:relDiv<1?150:relDiv<3?80:20;
+  const pD=(dividas.filter(d=>d.status!=='quitada')).length===0?200:relDiv<1?150:relDiv<3?80:20;
   const pM=metas.length===0?50:Math.round((metas.reduce((s,m)=>s+(m.valor>0?(m.atual||0)/m.valor:0),0)/metas.length)*200);
   const pR=sal>renda*6?200:sal>renda*3?150:sal>renda?80:sal>0?40:0;
   const hoje=new Date(); const mMes=movimentacoes.filter(m=>{if(!m.data)return false;const d=new Date(m.data+'T00:00:00');return d.getMonth()===hoje.getMonth()&&d.getFullYear()===hoje.getFullYear();});
@@ -1638,15 +1674,15 @@ function mostrarToastScore(ganho, nomeDivida){
   const toast = document.createElement('div');
   toast.id = 'toast-score';
   const cor = ganho > 0 ? '#22c55e' : '#f59e0b';
-  const emoji = ganho > 0 ? '🏆' : '✅';
+  const icone = ganho > 0 ? 'icone-trofeu.png' : 'icone-score-bom.png';
   toast.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#0f172a;border:1px solid ${cor};border-radius:16px;padding:16px 24px;z-index:99999;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);min-width:260px;animation:fadeUp .3s ease`;
   toast.innerHTML = `
-    <div style="font-size:1.8rem;margin-bottom:4px">${emoji}</div>
+    <img src="${icone}" style="width:40px;height:40px;object-fit:contain;margin-bottom:6px">
     <div style="color:#fff;font-weight:700;font-size:.95rem">Dívida quitada!</div>
     <div style="color:#94a3b8;font-size:.82rem;margin:4px 0">${nomeDivida}</div>
     ${ganho > 0
-      ? `<div style="color:${cor};font-weight:800;font-size:1.1rem;margin-top:6px">+${ganho} pts no Score 🎯</div>`
-      : `<div style="color:${cor};font-weight:700;font-size:.9rem;margin-top:6px">Score atualizado ✓</div>`
+      ? `<div style="color:${cor};font-weight:800;font-size:1.1rem;margin-top:6px">+${ganho} pts no Score</div>`
+      : `<div style="color:${cor};font-weight:700;font-size:.9rem;margin-top:6px">Score atualizado</div>`
     }`;
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 3000);
@@ -1654,7 +1690,7 @@ function mostrarToastScore(ganho, nomeDivida){
 
 function calcularScore(){
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
-  const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
   const sal=ent-sai;const renda=perfilUsuario?.renda||ent||1;
   const pctGasto=ent>0?(sai/ent)*100:100;
   let pG=pctGasto<=50?300:pctGasto<=70?200:pctGasto<=90?100:30;
@@ -1708,7 +1744,7 @@ function calcularScore(){
   if(dEl){
     const d=[];
     if(pctGasto>80)d.push('💸 Seus gastos estão acima de 80% da renda. Identifique os maiores e corte.');
-    if(dividas.length>0)d.push('💳 Você tem dívidas ativas. Priorize as de maior juros.');
+    if(dividas.filter(d=>d.status!=='quitada').length>0)d.push('💳 Você tem dívidas ativas. Priorize as de maior juros.');
     if(metas.length===0)d.push('🎯 Crie metas financeiras para ter objetivos claros.');
     if(sal<=0)d.push('🛡️ Construa uma reserva de emergência de pelo menos 3 meses de gastos.');
     if(mMes.length<5)d.push('📊 Registre mais lançamentos para ter um diagnóstico mais preciso.');
@@ -1723,7 +1759,7 @@ function gerarInsights(){
   if(!panel||!list) return;
   const insights=[];
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
-  const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
   const vida=perfilUsuario?.perfilVida||{};
   const rotina=vida.rotina||[];
 
@@ -1787,7 +1823,7 @@ function gerarInsights(){
   const saldoAtual=ent-sai;
   const gastosMes=sai;
   if(saldoAtual<gastosMes*3&&saldoAtual>=0)
-    insights.push({png:'icone-cofre.png',bg:'rgba(16,185,129,0.1)',titulo:'Construa sua reserva de emergência',desc:'O ideal é ter 3–6 meses de despesas guardados. Sua reserva atual é muito baixa.',acao:()=>irPara('metas'),btnLabel:'Criar meta de reserva →'});
+    insights.push({png:'icone-score-bom.png',bg:'rgba(16,185,129,0.1)',titulo:'Construa sua reserva de emergência',desc:'O ideal é ter 3–6 meses de despesas guardados. Sua reserva atual é muito baixa.',acao:()=>irPara('metas'),btnLabel:'Criar meta de reserva →'});
 
   if(insights.length===0){panel.style.display='none';return;}
   panel.style.display='block';
@@ -1867,7 +1903,7 @@ function renderSugestaoOrcamento(){
   const futuro=Math.round(renda*0.20);
   const agora=new Date();
   const gastosMes=movimentacoes
-    .filter(m=>m.tipo==='gasto'&&m.data&&new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
+    .filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)&&m.data&&new Date(m.data+'T00:00:00').getMonth()===agora.getMonth()&&new Date(m.data+'T00:00:00').getFullYear()===agora.getFullYear())
     .reduce((s,m)=>s+m.valor,0);
   const pctGasto=Math.min(100,Math.round((gastosMes/(renda*0.80))*100));
   el.style.display='block';
