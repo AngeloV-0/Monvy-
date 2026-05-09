@@ -1186,8 +1186,8 @@ function renderizarDividas(){
 // Modal de confirmação customizado (evita bloqueio do confirm() nativo no mobile)
 function confirmarAcao(msg, onConfirm) {
   // Remove overlay anterior se existir
-  const old = document.getElementById('confirm-overlay');
-  if (old) old.remove();
+  const existing = document.getElementById('confirm-overlay');
+  if (existing) existing.remove();
 
   const overlay = document.createElement('div');
   overlay.id = 'confirm-overlay';
@@ -1195,32 +1195,34 @@ function confirmarAcao(msg, onConfirm) {
 
   const box = document.createElement('div');
   box.style.cssText = 'background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center';
-  box.innerHTML = `
-    <p style="color:var(--white,#fff);font-size:.95rem;margin-bottom:20px;line-height:1.5">${msg}</p>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button id="confirm-no" style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border,#1e293b);background:transparent;color:var(--gray,#94a3b8);font-size:.9rem;cursor:pointer;font-family:inherit">Cancelar</button>
-      <button id="confirm-yes" style="flex:1;padding:12px;border-radius:10px;border:none;background:#22c55e;color:#000;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit">Confirmar</button>
-    </div>`;
 
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
+  const txtEl = document.createElement('p');
+  txtEl.style.cssText = 'color:var(--white,#fff);font-size:.95rem;margin-bottom:20px;line-height:1.5';
+  txtEl.textContent = msg;
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:10px;justify-content:center';
+
+  const btnNo = document.createElement('button');
+  btnNo.textContent = 'Cancelar';
+  btnNo.style.cssText = 'flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#94a3b8;font-size:.9rem;cursor:pointer;font-family:inherit';
+
+  const btnYes = document.createElement('button');
+  btnYes.textContent = 'Confirmar';
+  btnYes.style.cssText = 'flex:1;padding:12px;border-radius:10px;border:none;background:#22c55e;color:#000;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit';
 
   const close = () => overlay.remove();
 
-  // stopPropagation garante que o clique no botão não sobe para o overlay
-  document.getElementById('confirm-yes').addEventListener('click', (e) => {
-    e.stopPropagation();
-    close();
-    onConfirm();
-  });
-  document.getElementById('confirm-no').addEventListener('click', (e) => {
-    e.stopPropagation();
-    close();
-  });
-  // Fechar ao clicar fora da caixa
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) close();
-  });
+  btnYes.addEventListener('click', (e) => { e.stopPropagation(); close(); onConfirm(); });
+  btnNo.addEventListener('click',  (e) => { e.stopPropagation(); close(); });
+  overlay.addEventListener('click', (e) => { if(e.target===overlay) close(); });
+
+  row.appendChild(btnNo);
+  row.appendChild(btnYes);
+  box.appendChild(txtEl);
+  box.appendChild(row);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
 }
 
 window.quitarDivida=function(id){
