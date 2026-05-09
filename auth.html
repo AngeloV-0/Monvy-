@@ -656,7 +656,7 @@
         <!-- Estado: e-mail enviado -->
         <div id="esqueci-resultado" style="display:none;margin-top:24px">
           <div style="text-align:center;padding:28px 16px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:16px">
-            <div style="font-size:2.4rem;margin-bottom:12px">📬</div>
+            <div style="font-size:2.4rem;margin-bottom:12px"><img src="icone-conta.png" style="width:48px;height:48px;object-fit:contain"></div>
             <div style="font-family:var(--font-title);font-size:1rem;font-weight:700;color:var(--white);margin-bottom:8px">E-mail enviado!</div>
             <div id="esqueci-email-destino" style="font-size:.82rem;color:var(--gray);margin-bottom:16px"></div>
             <div style="font-size:.8rem;color:var(--gray-2);line-height:1.6;margin-bottom:16px">
@@ -884,7 +884,7 @@
       // Se redirect: página vai recarregar; se popup: onAuth vai redirecionar
     } catch(e) {
       setBusy(false);
-      showToast('❌ ' + traduzirErro(e.code), 'error');
+      showToast('Erro: ' + traduzirErro(e.code), 'error');
     }
   };
 
@@ -904,7 +904,7 @@
     try {
       setBusy(true, 'Entrando...');
       await loginComEmail(email, senha);
-      showToast('✓ Bem-vindo de volta!', 'success');
+      showToast('Bem-vindo de volta!', 'success');
       localStorage.setItem('monvy_onboarding_done','1');
       setTimeout(() => window.location.replace('index.html'), 800);
       return;
@@ -915,7 +915,7 @@
       const errEl = document.getElementById('err-login-senha');
       errEl.textContent = msg;
       document.getElementById('login-senha').classList.add('error');
-      showToast('❌ ' + msg, 'error');
+      showToast('Erro: ' + msg, 'error');
     }
   };
 
@@ -929,12 +929,12 @@
     if (!nome)                       { erro('err-cad-nome', true);  ok = false; } else erro('err-cad-nome', false);
     if (!email || !email.includes('@')) { erro('err-cad-email', true); ok = false; } else erro('err-cad-email', false);
     if (senha.length < 6)            { erro('err-cad-senha', true); ok = false; } else erro('err-cad-senha', false);
-    if (!termos) { showToast('⚠️ Aceite os Termos para continuar', 'warn'); ok = false; }
+    if (!termos) { showToast('Aceite os Termos para continuar', 'warn'); ok = false; }
     if (!ok) return;
     try {
       setBusy(true, 'Criando conta...');
       await cadastrarComEmail(nome, email, senha);
-      showToast(`✓ Conta criada! Bem-vindo, ${nome.split(' ')[0]}!`, 'success');
+      showToast(`Conta criada! Bem-vindo, ${nome.split(' ')[0]}!`, 'success');
       localStorage.removeItem('monvy_onboarding_done');
       setTimeout(() => window.location.replace('onboarding.html'), 800);
       return;
@@ -952,7 +952,7 @@
         erro('err-cad-email', true);
         document.getElementById('err-cad-email').textContent = 'E-mail já cadastrado. Faça login na aba Entrar.';
       } else {
-        showToast('❌ ' + traduzirErro(e.code), 'error');
+        showToast('Erro: ' + traduzirErro(e.code), 'error');
       }
     }
   };
@@ -980,7 +980,7 @@
       const dest = document.getElementById('esqueci-email-destino');
       if (dest) dest.textContent = `Link enviado para: ${email}`;
       if (res) res.style.display = 'block';
-      showToast('✓ Link de recuperação enviado!', 'success');
+      showToast('Link de recuperação enviado!', 'success');
     } catch(e) {
       erro('err-esqueci-email', true);
       document.getElementById('err-esqueci-email').textContent =
@@ -998,9 +998,9 @@
     if (btn) { btn.disabled = true; btn.textContent = 'Reenviando...'; }
     try {
       await enviarResetSenha(_ultimoEmailReset);
-      showToast('✓ E-mail reenviado!', 'success');
+      showToast('E-mail reenviado!', 'success');
     } catch(e) {
-      showToast('❌ ' + traduzirErro(e.code), 'error');
+      showToast('Erro: ' + traduzirErro(e.code), 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Reenviar e-mail'; }
     }

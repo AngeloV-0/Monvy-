@@ -1,3 +1,5 @@
+const naoEQuitacao = m => m.classificacao !== 'quitacao_divida';
+
 
 // ── Mapa de ícones por categoria ──────────────────────────────────
 const ICONE_CAT={
@@ -601,7 +603,7 @@ function atualizarCategoriasModal(tipo){
     const current=hidden.value||cats[0];
     picker.innerHTML=cats.map(c=>{
       const png=getIconeCat(c);
-      const ico=png?`<img src="${png}" alt="${c}">`:`<div style="width:26px;height:26px;border-radius:50%;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem">💰</div>`;
+      const ico=png?`<img src="${png}" alt="${c}">`:`<img src="icone-dinheiro-01.png" style="width:26px;height:26px;object-fit:contain;border-radius:50%">`;
       return `<div class="cat-picker-item${c===current?' selected':''}" onclick="selecionarCategoriaPicker(this,'modal-categoria','modal-categoria-picker')" data-val="${c}">${ico}<span class="cat-pk-nome">${c}</span></div>`;
     }).join('');
     if(!cats.includes(hidden.value)) hidden.value=cats[0];
@@ -717,7 +719,7 @@ window.abrirModalEditar=function(id){
   if(picker){
     picker.innerHTML=cats.map(c=>{
       const png=getIconeCat(c);
-      const ico=png?`<img src="${png}" alt="${c}">`:`<div style="width:26px;height:26px;border-radius:50%;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem">💰</div>`;
+      const ico=png?`<img src="${png}" alt="${c}">`:`<img src="icone-dinheiro-01.png" style="width:26px;height:26px;object-fit:contain;border-radius:50%">`;
       return `<div class="cat-picker-item${c===(m.categoria||cats[0])?' selected':''}" onclick="selecionarCategoriaPicker(this,'edit-categoria','edit-categoria-picker')" data-val="${c}">${ico}<span class="cat-pk-nome">${c}</span></div>`;
     }).join('');
   }
@@ -895,7 +897,7 @@ function _buscarTudo(q) {
     const pct = m.valor > 0 ? Math.min(100, Math.round((m.atual||0)/m.valor*100)) : 0;
     resultados.push({
       tipo: 'meta',
-      icone: '🎯',
+      icone: 'icone-meta.png',
       iconeBg: 'rgba(139,92,246,0.15)',
       iconeColor: '#8b5cf6',
       titulo: m.nome || '—',
@@ -913,7 +915,7 @@ function _buscarTudo(q) {
   ).slice(0, 3).forEach(d => {
     resultados.push({
       tipo: 'divida',
-      icone: '💳',
+      icone: 'icone-cartao-01.png',
       iconeBg: 'rgba(239,68,68,0.15)',
       iconeColor: '#ef4444',
       titulo: d.descricao || '—',
@@ -1743,13 +1745,13 @@ function calcularScore(){
   const dEl=document.getElementById('score-dicas-lista');
   if(dEl){
     const d=[];
-    if(pctGasto>80)d.push('💸 Seus gastos estão acima de 80% da renda. Identifique os maiores e corte.');
-    if(dividas.filter(d=>d.status!=='quitada').length>0)d.push('💳 Você tem dívidas ativas. Priorize as de maior juros.');
-    if(metas.length===0)d.push('🎯 Crie metas financeiras para ter objetivos claros.');
-    if(sal<=0)d.push('🛡️ Construa uma reserva de emergência de pelo menos 3 meses de gastos.');
-    if(mMes.length<5)d.push('📊 Registre mais lançamentos para ter um diagnóstico mais preciso.');
-    if(d.length===0)d.push('✅ Continue assim! Seu controle financeiro está ótimo.');
-    dEl.innerHTML=d.map(x=>`<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:.88rem;line-height:1.5">${x}</div>`).join('');
+    if(pctGasto>80)d.push({ico:'icone-grafico-02.png',txt:'Seus gastos estão acima de 80% da renda. Identifique os maiores e corte.'});
+    if(dividas.filter(d=>d.status!=='quitada').length>0)d.push({ico:'icone-cartao-02.png',txt:'Você tem dívidas ativas. Priorize as de maior juros.'});
+    if(metas.length===0)d.push({ico:'icone-meta.png',txt:'Crie metas financeiras para ter objetivos claros.'});
+    if(sal<=0)d.push({ico:'icone-cofre.png',txt:'Construa uma reserva de emergência de pelo menos 3 meses de gastos.'});
+    if(mMes.length<5)d.push({ico:'icone-dre.png',txt:'Registre mais lançamentos para ter um diagnóstico mais preciso.'});
+    if(d.length===0)d.push({ico:'icone-score-bom.png',txt:'Continue assim! Seu controle financeiro está ótimo.'});
+    dEl.innerHTML=d.map(x=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.88rem;line-height:1.5"><img src="${x.ico}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0"><span>${x.txt}</span></div>`).join('');
   }
 }
 
@@ -2089,12 +2091,12 @@ window.trocarPeriodoAtivo=function(){};
 
 // ── Artigos ───────────────────────────────────────────────────────
 const artigos=[
-  {titulo:'Reserva de emergência',conteudo:'<h2>🛡️ Reserva de emergência</h2><p>Dinheiro guardado para imprevistos. O ideal é ter de 3 a 6 meses dos seus gastos mensais.</p><p><strong>Onde guardar?</strong> Tesouro Selic, CDB com liquidez diária ou conta remunerada.</p><p>Sem reserva, qualquer imprevisto vira dívida.</p>'},
-  {titulo:'Cartão de crédito',conteudo:'<h2>💳 Cartão de crédito</h2><p>O rotativo cobra mais de 400% ao ano. Sempre pague a fatura total. O limite não é dinheiro seu.</p>'},
-  {titulo:'Sair das dívidas',conteudo:'<h2>🔓 Sair das dívidas</h2><p><strong>Avalanche:</strong> Quite as dívidas de maior juros primeiro. <strong>Bola de neve:</strong> Quite as menores primeiro para ganhar motivação. Negocie — credores aceitam descontos de até 70%.</p>'},
-  {titulo:'Necessidade vs Desejo',conteudo:'<h2>🧠 Necessidade vs Desejo</h2><p>Necessidade: o que você precisa para viver. Desejo: o que quer, mas pode viver sem. Antes de comprar, espere 24 horas.</p>'},
-  {titulo:'Regra dos 50-30-20',conteudo:'<h2>📊 Regra dos 50-30-20</h2><ul><li><strong>50%</strong> — Necessidades</li><li><strong>30%</strong> — Desejos</li><li><strong>20%</strong> — Poupança e investimentos</li></ul>'},
-  {titulo:'Como começar a investir',conteudo:'<h2>📈 Como começar a investir</h2><p>1. Construa reserva de emergência. 2. Quite dívidas caras. 3. Comece pelo Tesouro Direto ou CDB. 4. Invista todo mês, mesmo que pouco.</p>'}
+  {titulo:'Reserva de emergência',conteudo:'<h2><img src="icone-cofre.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Reserva de emergência</h2><p>Dinheiro guardado para imprevistos. O ideal é ter de 3 a 6 meses dos seus gastos mensais.</p><p><strong>Onde guardar?</strong> Tesouro Selic, CDB com liquidez diária ou conta remunerada.</p><p>Sem reserva, qualquer imprevisto vira dívida.</p>'},
+  {titulo:'Cartão de crédito',conteudo:'<h2><img src="icone-cartao-01.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Cartão de crédito</h2><p>O rotativo cobra mais de 400% ao ano. Sempre pague a fatura total. O limite não é dinheiro seu.</p>'},
+  {titulo:'Sair das dívidas',conteudo:'<h2><img src="icone-emprestimo.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Sair das dívidas</h2><p><strong>Avalanche:</strong> Quite as dívidas de maior juros primeiro. <strong>Bola de neve:</strong> Quite as menores primeiro para ganhar motivação. Negocie — credores aceitam descontos de até 70%.</p>'},
+  {titulo:'Necessidade vs Desejo',conteudo:'<h2><img src="icone-cerebro.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Necessidade vs Desejo</h2><p>Necessidade: o que você precisa para viver. Desejo: o que quer, mas pode viver sem. Antes de comprar, espere 24 horas.</p>'},
+  {titulo:'Regra dos 50-30-20',conteudo:'<h2><img src="icone-grafico-02.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Regra dos 50-30-20</h2><ul><li><strong>50%</strong> — Necessidades</li><li><strong>30%</strong> — Desejos</li><li><strong>20%</strong> — Poupança e investimentos</li></ul>'},
+  {titulo:'Como começar a investir',conteudo:'<h2><img src="icone-investimento.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px">Como começar a investir</h2><p>1. Construa reserva de emergência. 2. Quite dívidas caras. 3. Comece pelo Tesouro Direto ou CDB. 4. Invista todo mês, mesmo que pouco.</p>'}
 ];
 window.abrirArtigo=function(idx){const a=artigos[idx];if(!a)return;document.getElementById('artigo-conteudo').innerHTML=a.conteudo;document.getElementById('modal-artigo').classList.remove('hidden');};
 window.fecharArtigo=function(){document.getElementById('modal-artigo').classList.add('hidden');};
