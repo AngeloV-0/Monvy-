@@ -735,10 +735,12 @@ window.salvarEdicao=async function(){
   try{await atualizarMovimentacao(uidAtual,movEditandoId,{valor,descricao,data,categoria});fecharModalEditar();}
   catch(e){alert('Erro ao salvar.');console.error(e);}
 };
-window.excluirMovimentacao=async function(){
-  if(!movEditandoId||!confirm('Excluir esta movimentação?')) return;
-  try{await deletarMovimentacao(uidAtual,movEditandoId);fecharModalEditar();}
-  catch(e){alert('Erro ao excluir.');console.error(e);}
+window.excluirMovimentacao=function(){
+  if(!movEditandoId) return;
+  confirmarAcao('Excluir esta movimentação?', async ()=>{
+    try{await deletarMovimentacao(uidAtual,movEditandoId);fecharModalEditar();}
+    catch(e){alert('Erro ao excluir.');console.error(e);}
+  });
 };
 
 // ── Tabela ────────────────────────────────────────────────────────
@@ -1118,7 +1120,8 @@ window.adicionarValorMeta=async function(){
   catch(e){alert('Erro ao atualizar meta.');console.error(e);}
 };
 window.excluirMeta=async function(id){
-  if(!confirm('Excluir esta meta?')) return;
+  // confirm substituído por modal customizado
+  confirmarAcao('Excluir esta meta?', async ()=>{
   try{await deletarMeta(uidAtual,id);metas=await getMetas(uidAtual);renderizarMetas();}
   catch(e){alert('Erro ao excluir.');console.error(e);}
 };
@@ -1171,15 +1174,42 @@ function renderizarDividas(){
   const eCard=document.getElementById('estrategia-card');const eTex=document.getElementById('estrategia-texto');
   if(eCard&&eTex){eCard.style.display='block';const mj=[...dividas].sort((a,b)=>(b.juros||0)-(a.juros||0))[0];eTex.innerHTML=mj&&mj.juros>0?`Priorize quitar <strong>${mj.descricao}</strong> — tem os maiores juros (${mj.juros}% a.m.). Método avalanche economiza mais a longo prazo.`:'Use o método bola de neve: quite as menores dívidas primeiro.';}
 }
-window.quitarDivida=async function(id){
-  if(!confirm('Marcar como quitada e remover?')) return;
-  try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
-  catch(e){alert('Erro.');console.error(e);}
+// Modal de confirmação customizado (evita bloqueio do confirm() nativo no mobile)
+function confirmarAcao(msg, onConfirm) {
+  // Reutiliza modal existente ou cria um temporário
+  let overlay = document.getElementById('confirm-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'confirm-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = `<div style="background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center">
+      <p id="confirm-msg" style="color:var(--white,#fff);font-size:.95rem;margin-bottom:20px;line-height:1.5"></p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button id="confirm-no" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border,#1e293b);background:transparent;color:var(--gray,#94a3b8);font-size:.9rem;cursor:pointer">Cancelar</button>
+        <button id="confirm-yes" style="flex:1;padding:10px;border-radius:10px;border:none;background:#22c55e;color:#000;font-weight:700;font-size:.9rem;cursor:pointer">Confirmar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+  }
+  document.getElementById('confirm-msg').textContent = msg;
+  overlay.style.display = 'flex';
+  const close = () => { overlay.style.display = 'none'; };
+  document.getElementById('confirm-yes').onclick = () => { close(); onConfirm(); };
+  document.getElementById('confirm-no').onclick = close;
+  overlay.onclick = (e) => { if(e.target===overlay) close(); };
+}
+
+window.quitarDivida=function(id){
+  confirmarAcao('Marcar dívida como quitada e remover?', async ()=>{
+    try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
+    catch(e){alert('Erro ao quitar dívida.');console.error(e);}
+  });
 };
-window.excluirDivida=async function(id){
-  if(!confirm('Excluir esta dívida?')) return;
-  try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
-  catch(e){alert('Erro.');console.error(e);}
+window.excluirDivida=function(id){
+  confirmarAcao('Excluir esta dívida permanentemente?', async ()=>{
+    try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
+    catch(e){alert('Erro ao excluir dívida.');console.error(e);}
+  });
 };
 window.calcularDivida=function(){
   const valor=parseFloat(document.getElementById('sim-valor').value);
@@ -1243,7 +1273,7 @@ window.pagarConta=async function(id){
   catch(e){alert('Erro.');console.error(e);}
 };
 window.excluirConta=async function(id){
-  if(!confirm('Excluir esta conta?')) return;
+  confirmarAcao('Excluir esta conta?', async ()=>{
   try{await deletarConta(uidAtual,id);contas=await getContas(uidAtual);renderizarContas();}
   catch(e){alert('Erro.');console.error(e);}
 };
