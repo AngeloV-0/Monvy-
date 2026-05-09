@@ -1160,11 +1160,14 @@ function renderizarDividas(){
   if(kC)kC.textContent=fmt(cart);if(kE)kE.textContent=fmt(emp);if(kTe)kTe.textContent=fmt(terc);
   if(dividas.length===0){el.innerHTML='<div class="vazio">Nenhuma dívida cadastrada ainda.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>';return;}
   const lbl={cartao:'Cartão de crédito',emprestimo:'Empréstimo',financiamento:'Financiamento',terceiros:'Terceiros',outros:'Outros'};
-  // Armazena referências diretas para evitar problema com IDs especiais no onclick
-  window._dividasAcoes = dividas.map(d => ({
-    quitar: () => window.quitarDivida(d.id),
-    excluir: () => window.excluirDivida(d.id)
-  }));
+  // Armazena referências diretas — força id como string
+  window._dividasAcoes = dividas.map(d => {
+    const sid = String(d.id);
+    return {
+      quitar:  () => window.quitarDivida(sid),
+      excluir: () => window.excluirDivida(sid)
+    };
+  });
 
   el.innerHTML=dividas.map((d,idx)=>`
     <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
@@ -1221,33 +1224,29 @@ function confirmarAcao(msg, onConfirm) {
 }
 
 window.quitarDivida=function(id){
+  const sid=String(id);
   confirmarAcao('Marcar dívida como quitada e remover?', async ()=>{
-    console.log('[quitarDivida] id=',id,'uid=',uidAtual);
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
-    if(!id){alert('ID da dívida inválido.');return;}
     try{
-      await deletarDivida(uidAtual,id);
-      console.log('[quitarDivida] deletado OK');
+      await deletarDivida(uidAtual,sid);
       dividas=await getDividas(uidAtual);
       renderizarDividas();
     }catch(e){
-      console.error('[quitarDivida] erro:',e);
+      console.error('[quitarDivida]',e);
       alert('Erro ao quitar: '+e.message);
     }
   });
 };
 window.excluirDivida=function(id){
+  const sid=String(id);
   confirmarAcao('Excluir esta dívida permanentemente?', async ()=>{
-    console.log('[excluirDivida] id=',id,'uid=',uidAtual);
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
-    if(!id){alert('ID da dívida inválido.');return;}
     try{
-      await deletarDivida(uidAtual,id);
-      console.log('[excluirDivida] deletado OK');
+      await deletarDivida(uidAtual,sid);
       dividas=await getDividas(uidAtual);
       renderizarDividas();
     }catch(e){
-      console.error('[excluirDivida] erro:',e);
+      console.error('[excluirDivida]',e);
       alert('Erro ao excluir: '+e.message);
     }
   });

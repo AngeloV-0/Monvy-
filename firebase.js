@@ -215,7 +215,9 @@ export async function deletarMeta(uid, id) {
 
 export async function getDividas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'dividas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs
+    .filter(d => d.id && typeof d.id === 'string')
+    .map(d => ({ id: d.id, ...d.data() }));
 }
 
 export async function adicionarDivida(uid, divida) {
