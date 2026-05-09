@@ -151,7 +151,7 @@ export async function marcarOnboardingFeito(uid) {
 export async function getMovimentacoes(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'movimentacoes'));
   return snap.docs
-    .map(d => ({ id: d.id, ...d.data() }))
+    .map(d => ({ ...d.data(), id: d.id }))
     .sort((a, b) => {
       if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
       const ta = a.criadoEm?.toMillis?.() || 0;
@@ -193,7 +193,7 @@ export function ouvirMovimentacoes(uid, callback) {
 
 export async function getMetas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'metas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
 }
 
 export async function adicionarMeta(uid, meta) {
@@ -217,7 +217,10 @@ export async function getDividas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'dividas'));
   return snap.docs
     .filter(d => d.id && typeof d.id === 'string')
-    .map(d => ({ id: d.id, ...d.data() }));
+    .map(d => {
+      const data = d.data();
+      return { ...data, id: d.id, firestoreId: d.id }; // id do Firestore sempre prevalece
+    });
 }
 
 export async function adicionarDivida(uid, divida) {
@@ -245,7 +248,7 @@ export { auth, db };
 
 export async function getContas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'contas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
 }
 
 export async function adicionarConta(uid, conta) {

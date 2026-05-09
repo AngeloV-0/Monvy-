@@ -1235,8 +1235,6 @@ window.quitarDivida=function(id){
   confirmarAcao(`Quitar "${divida.descricao}" (${fmt(divida.valor)})?`, async ()=>{
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
     try{
-      // DIAGNÓSTICO — confirma o ID antes de deletar
-      alert(`DEBUG: uid=${uidAtual}\nid="${sid}"\ntipo=${typeof sid}\nlen=${sid.length}`);
       // 1. Calcula score ANTES
       const scoreAntes = calcularScoreValor();
       // 2. Remove dívida do array local IMEDIATAMENTE (atualiza UI antes do Firebase)
