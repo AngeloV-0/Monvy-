@@ -1116,7 +1116,7 @@ function renderizarMetas(){
   el.innerHTML=metas.map(m=>{
     const pct=m.valor>0?Math.min(100,((m.atual||0)/m.valor)*100):0;
     const faltam=Math.max(0,m.valor-(m.atual||0));
-    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(m.atual||0)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${m.dataAlvo?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px">🎯 Prazo: ${fmtData(m.dataAlvo)}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
+    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(m.atual||0)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${m.dataAlvo?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${m.dataAlvo?fmtData(m.dataAlvo):"—"}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
   }).join('');
 }
 window.abrirModalMeta=function(id){
@@ -2034,21 +2034,51 @@ window.calcularInvestimentos=function(){
     {nome:'Poupança',taxaAnual:taxasLive.poupanca||6.17,ir:false,liquidez:'Diária',risco:'Baixo'},
     {nome:'CDB 120% CDI',taxaAnual:selic*1.2,ir:true,liquidez:'No vencimento',risco:'Baixo'},
   ];
-  function calc(taxaAnual,ir,meses){
-    const tm=Math.pow(1+taxaAnual/100,1/12)-1;let tot=ini;
-    for(let i=0;i<meses;i++) tot=tot*(1+tm)+apt;
-    const totInv=ini+apt*meses;const lucro=tot-totInv;
-    if(ir&&lucro>0){let aliq=meses<=6?.225:meses<=12?.20:meses<=24?.175:.15;return tot-lucro*aliq;}
-    return tot;
+  // Cálculo de juros compostos com aporte mensal
+  // Fórmula: M = PV*(1+i)^n + PMT*[((1+i)^n - 1)/i]
+  // onde PV=valor inicial, PMT=aporte mensal, i=taxa mensal, n=meses
+  function calc(taxaAnual, ir, meses){
+    const i = Math.pow(1 + taxaAnual/100, 1/12) - 1; // taxa mensal efetiva
+    const fatorPV = Math.pow(1+i, meses);
+    const montantePV = ini * fatorPV;
+    const montantePMT = apt > 0 ? apt * ((fatorPV - 1) / i) : 0;
+    const bruto = montantePV + montantePMT;
+    const totInvest = ini + apt * meses;
+    const lucro = bruto - totInvest;
+    if(ir && lucro > 0){
+      // Tabela regressiva IR renda fixa
+      const aliq = meses <= 6 ? 0.225 : meses <= 12 ? 0.20 : meses <= 24 ? 0.175 : 0.15;
+      return bruto - lucro * aliq;
+    }
+    return bruto;
   }
-  const totInv=ini+apt*mes;
-  const res=opcoes.map(o=>({...o,final:calc(o.taxaAnual,o.ir,mes)})).sort((a,b)=>b.final-a.final);
-  const melhor=res[0];
+  // Retorna bruto e líquido separados para exibição
+  function calcDetalhado(taxaAnual, ir, meses){
+    const i = Math.pow(1 + taxaAnual/100, 1/12) - 1;
+    const fatorPV = Math.pow(1+i, meses);
+    const bruto = ini * fatorPV + (apt > 0 ? apt * ((fatorPV-1)/i) : 0);
+    const totInvest = ini + apt * meses;
+    const lucro = bruto - totInvest;
+    let liquido = bruto;
+    let irValor = 0;
+    if(ir && lucro > 0){
+      const aliq = meses <= 6 ? 0.225 : meses <= 12 ? 0.20 : meses <= 24 ? 0.175 : 0.15;
+      irValor = lucro * aliq;
+      liquido = bruto - irValor;
+    }
+    return {bruto, liquido, lucro, irValor, totInvest};
+  }
+  const totInv = ini + apt * mes;
+  const res = opcoes.map(o => {
+    const d = calcDetalhado(o.taxaAnual, o.ir, mes);
+    return {...o, final: d.liquido, bruto: d.bruto, lucro: d.lucro, irValor: d.irValor};
+  }).sort((a,b) => b.final - a.final);
+  const melhor = res[0];
   const sEl=document.getElementById('sim-summary');const tiEl=document.getElementById('sim-total-inv');const mnEl=document.getElementById('sim-melhor-nome');const mgEl=document.getElementById('sim-melhor-ganho');
   if(sEl)sEl.style.display='flex';if(tiEl)tiEl.textContent=fmt(totInv);if(mnEl)mnEl.textContent=melhor.nome;if(mgEl)mgEl.textContent='+'+fmt(melhor.final-totInv);
   const wEl=document.getElementById('sim-ranking-wrap');const lEl=document.getElementById('sim-ranking-list');
   if(wEl)wEl.style.display='block';
-  if(lEl) lEl.innerHTML=res.map((o,i)=>`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border);background:${i===0?'rgba(34,197,94,0.06)':''}"><div style="width:32px;height:32px;border-radius:50%;background:${i===0?'var(--primary)':'rgba(255,255,255,0.08)'};display:flex;align-items:center;justify-content:center;font-weight:800;color:${i===0?'#000':'var(--text)'};font-size:.9rem;flex-shrink:0">${i+1}</div><div style="flex:1"><div style="font-weight:700">${o.nome}</div><div style="font-size:.75rem;color:var(--gray)">${o.taxaAnual.toFixed(2)}% a.a. · ${o.liquidez} · ${o.ir?'c/ IR':'Isento de IR'}</div></div><div style="text-align:right"><div style="font-weight:800;color:${i===0?'#22c55e':'var(--text)'}">${fmt(o.final)}</div><div style="font-size:.75rem;color:#22c55e">+${fmt(o.final-totInv)}</div></div></div>`).join('');
+  if(lEl) lEl.innerHTML=res.map((o,idx2)=>`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border);background:${idx2===0?'rgba(34,197,94,0.06)':''}"><div style="width:32px;height:32px;border-radius:50%;background:${idx2===0?'var(--primary)':'rgba(255,255,255,0.08)'};display:flex;align-items:center;justify-content:center;font-weight:800;color:${idx2===0?'#000':'var(--text)'};font-size:.9rem;flex-shrink:0">${idx2+1}</div><div style="flex:1"><div style="font-weight:700">${o.nome}</div><div style="font-size:.75rem;color:var(--gray)">${o.taxaAnual.toFixed(2)}% a.a. · ${o.liquidez} · ${o.ir?'c/ IR':'Isento IR'}</div>${o.ir&&o.irValor>0?`<div style="font-size:.72rem;color:#f59e0b">IR: -${fmt(o.irValor)}</div>`:''}</div><div style="text-align:right"><div style="font-weight:800;color:${idx2===0?'#22c55e':'var(--text)'}">${fmt(o.final)}</div><div style="font-size:.75rem;color:#22c55e">+${fmt(o.final-totInv)}</div>${o.ir?`<div style="font-size:.7rem;color:var(--gray)">bruto: ${fmt(o.bruto)}</div>`:''}</div></div>`).join('');
 };
 window.abrirModalSimulacao=function(){document.getElementById('modal-simulacao')?.classList.remove('hidden');};
 window.fecharModalSimulacao=function(){document.getElementById('modal-simulacao')?.classList.add('hidden');};
