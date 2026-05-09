@@ -1160,26 +1160,28 @@ function renderizarDividas(){
   if(kC)kC.textContent=fmt(cart);if(kE)kE.textContent=fmt(emp);if(kTe)kTe.textContent=fmt(terc);
   if(dividas.length===0){el.innerHTML='<div class="vazio">Nenhuma dívida cadastrada ainda.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>';return;}
   const lbl={cartao:'Cartão de crédito',emprestimo:'Empréstimo',financiamento:'Financiamento',terceiros:'Terceiros',outros:'Outros'};
-  // Armazena referências diretas — força id como string
-  window._dividasAcoes = dividas.map(d => {
-    const sid = String(d.id);
-    return {
-      quitar:  () => window.quitarDivida(sid),
-      excluir: () => window.excluirDivida(sid)
-    };
-  });
-
-  el.innerHTML=dividas.map((d,idx)=>`
-    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
+  el.innerHTML = dividas.map(d => `
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div><div style="font-weight:700">${d.descricao}</div><div style="font-size:.75rem;color:var(--gray)">${lbl[d.tipo]||d.tipo}${d.credor?' · '+d.credor:''}</div></div>
         <div style="text-align:right"><div style="font-weight:800;color:#ef4444">${fmt(d.valor)}</div>${d.juros>0?`<div style="font-size:.72rem;color:var(--gray)">${d.juros}% a.m.</div>`:''}</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn-sm-green" onclick="window._dividasAcoes[${idx}].quitar()">✓ Quitar</button>
-        <button class="btn-sm-red" onclick="window._dividasAcoes[${idx}].excluir()">Excluir</button>
+        <button class="btn-sm-green" data-acao="quitar" data-id="${d.id}">✓ Quitar</button>
+        <button class="btn-sm-red"   data-acao="excluir" data-id="${d.id}">Excluir</button>
       </div>
     </div>`).join('');
+
+  // Event delegation — um único listener no container
+  el.onclick = function(e) {
+    const btn = e.target.closest('button[data-acao]');
+    if (!btn) return;
+    e.stopPropagation();
+    const id  = btn.getAttribute('data-id');
+    const acao = btn.getAttribute('data-acao');
+    if (acao === 'quitar')  window.quitarDivida(id);
+    if (acao === 'excluir') window.excluirDivida(id);
+  };
   const eCard=document.getElementById('estrategia-card');const eTex=document.getElementById('estrategia-texto');
   if(eCard&&eTex){eCard.style.display='block';const mj=[...dividas].sort((a,b)=>(b.juros||0)-(a.juros||0))[0];eTex.innerHTML=mj&&mj.juros>0?`Priorize quitar <strong>${mj.descricao}</strong> — tem os maiores juros (${mj.juros}% a.m.). Método avalanche economiza mais a longo prazo.`:'Use o método bola de neve: quite as menores dívidas primeiro.';}
 }
