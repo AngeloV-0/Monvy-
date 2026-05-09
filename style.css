@@ -581,8 +581,8 @@ nav {
   padding: 22px 24px;
 }
 .recent-card {
-  background: #0D1420;
-  border: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 24px 28px;
 }
@@ -660,13 +660,13 @@ nav {
   justify-content: space-between;
   padding: 14px 20px;
   border-radius: 14px;
-  background: #131C2E;
+  background: var(--surface-2);
   border: none;
   transition: background 0.15s;
   animation: fadeUp 0.25s ease;
 }
 
-.mov-item:hover { background: #1a2540; }
+.mov-item:hover { background: var(--surface-3); }
 
 .mov-left { display: flex; align-items: center; gap: 10px; }
 

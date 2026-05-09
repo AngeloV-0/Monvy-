@@ -2743,7 +2743,7 @@ bvRender();
     const container = document.getElementById('ios-picker-drums');
     Array.from(container.children).forEach(c=>{if(!c.classList.contains('ios-picker-highlight'))c.remove();});
     const baseYear=new Date().getFullYear(), years=[];
-    for (let y=1926; y<=baseYear; y++) years.push(String(y));
+    for (let y=1926; y<=baseYear+30; y++) years.push(String(y));
     if (mode==='month') {
       monthDrum=buildDrum(MONTHS_PT, selMonth, '2');
       yearDrum =buildDrum(years, years.indexOf(String(selYear)), '1.2');
@@ -2762,7 +2762,7 @@ bvRender();
 
   function getSelected() {
     const baseYear=new Date().getFullYear(), years=[];
-    for (let y=1926; y<=baseYear; y++) years.push(y);
+    for (let y=1926; y<=baseYear+30; y++) years.push(y);
     const year=years[parseInt(yearDrum.dataset.index||0)]||new Date().getFullYear();
     const month=parseInt(monthDrum.dataset.index||0);
     const day=pickerMode==='month'?1:parseInt(dayDrum.dataset.index||0)+1;

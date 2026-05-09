@@ -163,17 +163,25 @@ function fmtData(str) {
 // ── Tema ────────────────────────────────────────────────────────
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  const moon = document.getElementById('theme-icon-moon');
-  const sun  = document.getElementById('theme-icon-sun');
-  if (theme==='light') { if(moon)moon.style.display='none'; if(sun)sun.style.display='block'; }
-  else { if(moon)moon.style.display='block'; if(sun)sun.style.display='none'; }
+  // Atualiza todos os ícones de lua/sol na página (topbar + drawer)
+  document.querySelectorAll('[id$="theme-icon-moon"]').forEach(el => {
+    el.style.display = theme==='light' ? 'none' : 'block';
+  });
+  document.querySelectorAll('[id$="theme-icon-sun"]').forEach(el => {
+    el.style.display = theme==='light' ? 'block' : 'none';
+  });
+  // Atualiza texto do botão no drawer se existir
+  const drawerBtn = document.getElementById('drawer-theme-btn');
+  if(drawerBtn) {
+    const span = drawerBtn.querySelector('span');
+    if(span) span.textContent = theme==='light' ? 'Modo escuro' : 'Modo claro';
+  }
 }
 window.toggleTheme = function() {
   const cur = document.documentElement.getAttribute('data-theme')||'dark';
   const nxt = cur==='dark'?'light':'dark';
   localStorage.setItem('monvy_theme', nxt);
   applyTheme(nxt);
-  if(window._syncDrawerThemeIcon) window._syncDrawerThemeIcon();
 };
 applyTheme(localStorage.getItem('monvy_theme')||'dark');
 
