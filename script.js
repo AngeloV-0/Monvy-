@@ -1578,6 +1578,62 @@ function renderizarRelatorio(){
   if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
   const rEl=document.getElementById('lista-recorrentes');
   if(rEl){const recs=movimentacoes.filter(m=>m.recorrente);if(recs.length===0)rEl.innerHTML='<div class="vazio">Nenhum lançamento recorrente cadastrado.</div>';else rEl.innerHTML=recs.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.tipo==='ganho'?'Entrada':'Saída'} recorrente</div></div><div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div></div>`).join('');}
+  // ── Necessidade vs Desejo ────────────────────────────────────────
+  const ndEl = document.getElementById('rel-nd-content');
+  if(ndEl){
+    const gastos = movs.filter(m => m.tipo==='gasto' && naoEQuitacao(m));
+    const nec = gastos.filter(m => m.classificacao==='necessidade');
+    const des = gastos.filter(m => m.classificacao==='desejo');
+    const semClass = gastos.filter(m => !m.classificacao || m.classificacao==='quitacao_divida');
+    const totNec = nec.reduce((s,m)=>s+(m.valor||0),0);
+    const totDes = des.reduce((s,m)=>s+(m.valor||0),0);
+    const totSem = semClass.reduce((s,m)=>s+(m.valor||0),0);
+    const totGasto = totNec + totDes + totSem;
+
+    if(totGasto===0){
+      ndEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';
+    } else {
+      const pNec = totGasto>0?Math.round(totNec/totGasto*100):0;
+      const pDes = totGasto>0?Math.round(totDes/totGasto*100):0;
+      const pSem = 100-pNec-pDes;
+      ndEl.innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:16px;text-align:center">
+            <img src="icone-cerebro.png" style="width:32px;height:32px;object-fit:contain;margin-bottom:8px">
+            <div style="font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Necessidade</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#22c55e;margin:4px 0">${fmt(totNec)}</div>
+            <div style="font-size:.8rem;color:var(--gray)">${pNec}% dos gastos · ${nec.length} item(ns)</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:16px;text-align:center">
+            <img src="icone-lazer.png" style="width:32px;height:32px;object-fit:contain;margin-bottom:8px">
+            <div style="font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:.05em">Desejo</div>
+            <div style="font-size:1.3rem;font-weight:800;color:#f59e0b;margin:4px 0">${fmt(totDes)}</div>
+            <div style="font-size:.8rem;color:var(--gray)">${pDes}% dos gastos · ${des.length} item(ns)</div>
+          </div>
+        </div>
+        <!-- Barra de distribuição -->
+        <div style="margin-bottom:12px">
+          <div style="font-size:.8rem;color:var(--gray);margin-bottom:6px">Distribuição visual</div>
+          <div style="display:flex;border-radius:8px;overflow:hidden;height:20px;gap:2px">
+            ${pNec>0?`<div style="width:${pNec}%;background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#000">${pNec}%</div>`:''}
+            ${pDes>0?`<div style="width:${pDes}%;background:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#000">${pDes}%</div>`:''}
+            ${pSem>0?`<div style="flex:1;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--gray)">${pSem}% sem classif.</div>`:''}
+          </div>
+        </div>
+        ${totSem>0?`<div style="font-size:.78rem;color:var(--gray);padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid var(--border)">
+          <strong style="color:var(--white)">${fmt(totSem)}</strong> (${semClass.length} gasto(s)) ainda sem classificação. Ao registrar gastos, responda se é necessidade ou desejo para ver o relatório completo.
+        </div>`:''}
+        <!-- Insight automático -->
+        ${totDes>0&&totNec>0?`<div style="margin-top:12px;padding:12px;background:${pDes>50?'rgba(239,68,68,0.08)':'rgba(34,197,94,0.06)'};border:1px solid ${pDes>50?'rgba(239,68,68,0.2)':'rgba(34,197,94,0.2)'};border-radius:12px;font-size:.82rem;color:var(--white)">
+          ${pDes>50
+            ? `<strong>Atenção:</strong> ${pDes}% dos seus gastos foram por desejo. A regra 50-30-20 sugere no máximo 30%.`
+            : `<strong>Ótimo controle!</strong> Apenas ${pDes}% dos seus gastos foram por desejo — dentro da meta de 30%.`
+          }
+        </div>`:``}
+      `;
+    }
+  }
+
   // ── Todas as movimentações ──────────────────────────────────────
   renderizarTodasMovsRelatorio(movs, window._filtroRelatorio||'todos');
   renderizarChartRelatorio();
