@@ -1,5 +1,20 @@
 const naoEQuitacao = m => m.classificacao !== 'quitacao_divida';
 
+// Limpa movimentações de quitação de dívida geradas por versões antigas
+window.limparQuitacoesDuplicadas = async function() {
+  if(!uidAtual){ alert('Faça login primeiro.'); return; }
+  const todas = await getMovimentacoes(uidAtual);
+  const quitacoes = todas.filter(m => m.classificacao === 'quitacao_divida');
+  if(quitacoes.length === 0){ alert('Nenhuma quitação para limpar.'); return; }
+  if(!confirm(`Remover ${quitacoes.length} movimentação(ões) de quitação de dívida?`)) return;
+  for(const m of quitacoes) await deletarMovimentacao(uidAtual, m.id);
+  movimentacoes = await getMovimentacoes(uidAtual);
+  renderizarListaInicio();
+  atualizarKPIs();
+  atualizarChart();
+  alert(`${quitacoes.length} movimentação(ões) removida(s) com sucesso!`);
+};
+
 
 // ── Mapa de ícones por categoria ──────────────────────────────────
 const ICONE_CAT={
