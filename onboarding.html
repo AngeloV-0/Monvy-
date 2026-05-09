@@ -862,7 +862,11 @@
       }
     }
 
-    window.irParaApp = function() {
+    window.irParaApp = async function() {
+      if (currentUser) {
+        try { await marcarOnboardingFeito(currentUser.uid); } catch(e) {}
+      }
+      localStorage.setItem('monvy_onboarding_done', '1');
       window.location.replace('index.html');
     };
 

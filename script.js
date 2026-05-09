@@ -1176,27 +1176,42 @@ function renderizarDividas(){
 }
 // Modal de confirmação customizado (evita bloqueio do confirm() nativo no mobile)
 function confirmarAcao(msg, onConfirm) {
-  // Reutiliza modal existente ou cria um temporário
-  let overlay = document.getElementById('confirm-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'confirm-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
-    overlay.innerHTML = `<div style="background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center">
-      <p id="confirm-msg" style="color:var(--white,#fff);font-size:.95rem;margin-bottom:20px;line-height:1.5"></p>
-      <div style="display:flex;gap:10px;justify-content:center">
-        <button id="confirm-no" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border,#1e293b);background:transparent;color:var(--gray,#94a3b8);font-size:.9rem;cursor:pointer">Cancelar</button>
-        <button id="confirm-yes" style="flex:1;padding:10px;border-radius:10px;border:none;background:#22c55e;color:#000;font-weight:700;font-size:.9rem;cursor:pointer">Confirmar</button>
-      </div>
+  // Remove overlay anterior se existir
+  const old = document.getElementById('confirm-overlay');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'confirm-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;padding:24px;max-width:320px;width:100%;text-align:center';
+  box.innerHTML = `
+    <p style="color:var(--white,#fff);font-size:.95rem;margin-bottom:20px;line-height:1.5">${msg}</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button id="confirm-no" style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border,#1e293b);background:transparent;color:var(--gray,#94a3b8);font-size:.9rem;cursor:pointer;font-family:inherit">Cancelar</button>
+      <button id="confirm-yes" style="flex:1;padding:12px;border-radius:10px;border:none;background:#22c55e;color:#000;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit">Confirmar</button>
     </div>`;
-    document.body.appendChild(overlay);
-  }
-  document.getElementById('confirm-msg').textContent = msg;
-  overlay.style.display = 'flex';
-  const close = () => { overlay.style.display = 'none'; };
-  document.getElementById('confirm-yes').onclick = () => { close(); onConfirm(); };
-  document.getElementById('confirm-no').onclick = close;
-  overlay.onclick = (e) => { if(e.target===overlay) close(); };
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+
+  // stopPropagation garante que o clique no botão não sobe para o overlay
+  document.getElementById('confirm-yes').addEventListener('click', (e) => {
+    e.stopPropagation();
+    close();
+    onConfirm();
+  });
+  document.getElementById('confirm-no').addEventListener('click', (e) => {
+    e.stopPropagation();
+    close();
+  });
+  // Fechar ao clicar fora da caixa
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
 }
 
 window.quitarDivida=function(id){

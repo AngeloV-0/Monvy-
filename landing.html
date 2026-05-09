@@ -951,6 +951,24 @@
   </style>
   <!-- Prefetch auth.html para carregamento instantâneo -->
   <link rel="prefetch" href="auth.html">
+  <!-- Redirecionar usuário já logado direto para o app -->
+  <script type="module">
+    import { waitAuthReady, onAuth } from './firebase.js';
+    waitAuthReady().then(() => {
+      onAuth(user => {
+        if (user) {
+          // Usuário já autenticado — vai direto para o app
+          const onboardingDone = localStorage.getItem('monvy_onboarding_done');
+          if (onboardingDone === '1') {
+            window.location.replace('index.html');
+          } else {
+            window.location.replace('onboarding.html');
+          }
+        }
+        // Não logado — fica na landing normalmente
+      });
+    });
+  </script>
   <link rel="prefetch" href="firebase.js">
 </head>
 <body>
