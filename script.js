@@ -1648,20 +1648,23 @@ function gerarInsights(){
   if(insights.length===0){panel.style.display='none';return;}
   panel.style.display='block';
   if(cEl)cEl.textContent=`${insights.length} insights`;
-  list.innerHTML=insights.map(i=>{
+  // Armazena as funções acao num array global para acesso via onclick
+  window._insightAcoes = insights.map(i => i.acao || null);
+
+  list.innerHTML=insights.map((i, idx)=>{
     const isUrgente=i.bg.includes('239,68,68')||i.bg.includes('245,158,11');
     const tagCor=isUrgente?'#ef4444':'#3b82f6';
     const tagTxt=isUrgente?'⚠ URGENTE':'💡 SAIBA MAIS';
     const borderColor=isUrgente?'rgba(239,68,68,0.2)':'rgba(59,130,246,0.12)';
-    const acaoFn=i.acao?i.acao.toString():'null';
-    return `<div class="insight-card" style="background:${i.bg};border:1px solid ${borderColor}" onclick="${i.acao?'('+acaoFn+')()':'void 0'}">
+    const callAcao = `if(window._insightAcoes&&window._insightAcoes[${idx}])window._insightAcoes[${idx}]()`;
+    return `<div class="insight-card" style="background:${i.bg};border:1px solid ${borderColor}" onclick="${callAcao}">
       <img src="${i.png}" alt="" class="insight-icon" onerror="this.style.display='none'">
       <div class="insight-body">
         <div class="insight-tag" style="color:${tagCor}">${tagTxt}</div>
         <div class="insight-titulo">${i.titulo}</div>
         <div class="insight-desc">${i.desc}</div>
       </div>
-      ${i.btnLabel?`<button class="insight-acao" style="border-color:${borderColor};color:${tagCor}" onclick="event.stopPropagation();${i.acao?'('+acaoFn+')()':'void 0'}">${i.btnLabel}</button>`:''}
+      ${i.btnLabel?`<button class="insight-acao" style="border-color:${borderColor};color:${tagCor}" onclick="event.stopPropagation();${callAcao}">${i.btnLabel}</button>`:''}
     </div>`;
   }).join('');
 }
