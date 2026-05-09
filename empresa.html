@@ -839,44 +839,61 @@
     };
 
     // ── Auth + Init ───────────────────────────────────
+    // Timeout de segurança — remove o loading após 5s mesmo se algo falhar
+    setTimeout(() => {
+      const ov = document.getElementById('app-loading-overlay');
+      if (ov) ov.style.display = 'none';
+    }, 5000);
+
     onAuth(async user => {
       if (!user) { window.location.replace('landing.html'); return; }
       uid = user.uid;
+      try {
+        // Avatar
+        if (user.photoURL) {
+          const avatarMobile = document.getElementById('topbar-avatar-mobile');
+          if (avatarMobile) { avatarMobile.src = user.photoURL; avatarMobile.style.display = 'block'; }
+        }
+        const avatarSidebar = document.getElementById('user-avatar-sidebar');
+        if (avatarSidebar) avatarSidebar.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
 
-      // Avatar
-      if (user.photoURL) {
-        const avatarMobile = document.getElementById('topbar-avatar-mobile');
-        if (avatarMobile) { avatarMobile.src = user.photoURL; avatarMobile.style.display = 'block'; }
+        // Carregar dados empresa
+        empresa = await getEmpresa(uid) || {};
+        const nomeNegocio = empresa.nomeNegocio || localStorage.getItem('monvy_nome_negocio') || 'Meu negócio';
+        const dnn = document.getElementById('desktop-negocio-nome');
+        const mnn = document.getElementById('mobile-negocio-nome');
+        if (dnn) dnn.textContent = nomeNegocio;
+        if (mnn) mnn.textContent = nomeNegocio;
+
+        // Período
+        const agora = new Date();
+        const periodoLabel = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const elP = document.getElementById('topbar-periodo');
+        const elD = document.getElementById('dre-periodo-label');
+        const elC = document.getElementById('caixa-periodo-label');
+        if (elP) elP.textContent = periodoLabel;
+        if (elD) elD.textContent = 'Mês de ' + periodoLabel;
+        if (elC) elC.textContent = 'Entradas e saídas — ' + periodoLabel;
+
+        // Carregar contas e produtos
+        [contas, produtos] = await Promise.all([getContasEmpresa(uid), getProdutos(uid)]);
+
+        // Ouvir movimentações em tempo real
+        unsubMovs = ouvirMovimentacoesEmpresa(uid, movs => {
+          movimentacoes = movs;
+          atualizarTudo();
+        });
+
+        // Data padrão
+        const ldEl = document.getElementById('lanc-data');
+        if (ldEl) ldEl.value = new Date().toISOString().slice(0, 10);
+
+      } catch(e) {
+        console.error('[empresa] Erro ao carregar:', e);
+      } finally {
+        const ov = document.getElementById('app-loading-overlay');
+        if (ov) ov.style.display = 'none';
       }
-      const avatarSidebar = document.getElementById('user-avatar-sidebar');
-      if (avatarSidebar) avatarSidebar.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
-
-      // Carregar dados empresa
-      empresa = await getEmpresa(uid) || {};
-      const nomeNegocio = empresa.nomeNegocio || localStorage.getItem('monvy_nome_negocio') || 'Meu negócio';
-      document.getElementById('desktop-negocio-nome').textContent = nomeNegocio;
-      document.getElementById('mobile-negocio-nome').textContent = nomeNegocio;
-
-      // Período
-      const agora = new Date();
-      const periodoLabel = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-      document.getElementById('topbar-periodo').textContent = periodoLabel;
-      document.getElementById('dre-periodo-label').textContent = 'Mês de ' + periodoLabel;
-      document.getElementById('caixa-periodo-label').textContent = 'Entradas e saídas — ' + periodoLabel;
-
-      // Carregar contas e produtos
-      [contas, produtos] = await Promise.all([getContasEmpresa(uid), getProdutos(uid)]);
-
-      // Ouvir movimentações em tempo real
-      unsubMovs = ouvirMovimentacoesEmpresa(uid, movs => {
-        movimentacoes = movs;
-        atualizarTudo();
-      });
-
-      // Data padrão para novos lançamentos
-      document.getElementById('lanc-data').value = new Date().toISOString().slice(0, 10);
-
-      document.getElementById('app-loading-overlay').style.display = 'none';
     });
 
     // ── Cálculos ──────────────────────────────────────
