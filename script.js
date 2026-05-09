@@ -1119,11 +1119,11 @@ window.adicionarValorMeta=async function(){
   try{await atualizarMeta(uidAtual,metaEditandoId,{atual:(m.atual||0)+val});metas=await getMetas(uidAtual);renderizarMetas();fecharModalMeta();}
   catch(e){alert('Erro ao atualizar meta.');console.error(e);}
 };
-window.excluirMeta=async function(id){
-  // confirm substituído por modal customizado
+window.excluirMeta=function(id){
   confirmarAcao('Excluir esta meta?', async ()=>{
-  try{await deletarMeta(uidAtual,id);metas=await getMetas(uidAtual);renderizarMetas();}
-  catch(e){alert('Erro ao excluir.');console.error(e);}
+    try{await deletarMeta(uidAtual,id);metas=await getMetas(uidAtual);renderizarMetas();}
+    catch(e){alert('Erro ao excluir.');console.error(e);}
+  });
 };
 
 // ── Dívidas ───────────────────────────────────────────────────────
@@ -1272,10 +1272,11 @@ window.pagarConta=async function(id){
   try{await atualizarConta(uidAtual,id,{paga:true});contas=await getContas(uidAtual);renderizarContas();}
   catch(e){alert('Erro.');console.error(e);}
 };
-window.excluirConta=async function(id){
+window.excluirConta=function(id){
   confirmarAcao('Excluir esta conta?', async ()=>{
-  try{await deletarConta(uidAtual,id);contas=await getContas(uidAtual);renderizarContas();}
-  catch(e){alert('Erro.');console.error(e);}
+    try{await deletarConta(uidAtual,id);contas=await getContas(uidAtual);renderizarContas();}
+    catch(e){alert('Erro.');console.error(e);}
+  });
 };
 window.filtrarContas=function(filtro,btn){
   filtroContasAtual=filtro;
