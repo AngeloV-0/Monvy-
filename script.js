@@ -1760,12 +1760,18 @@ function calcularScore(){
   const dEl=document.getElementById('score-dicas-lista');
   if(dEl){
     const d=[];
+    // Dicas de alerta — problemas detectados
     if(pctGasto>80)d.push({ico:'icone-grafico-02.png',txt:'Seus gastos estão acima de 80% da renda. Identifique os maiores e corte.'});
     if(dividas.filter(d=>d.status!=='quitada').length>0)d.push({ico:'icone-cartao-02.png',txt:'Você tem dívidas ativas. Priorize as de maior juros.'});
     if(metas.length===0)d.push({ico:'icone-meta.png',txt:'Crie metas financeiras para ter objetivos claros.'});
     if(sal<=0)d.push({ico:'icone-cofre.png',txt:'Construa uma reserva de emergência de pelo menos 3 meses de gastos.'});
     if(mMes.length<5)d.push({ico:'icone-dre.png',txt:'Registre mais lançamentos para ter um diagnóstico mais preciso.'});
-    if(d.length===0)d.push({ico:'icone-score-bom.png',txt:'Continue assim! Seu controle financeiro está ótimo.'});
+    // Dicas educativas — sempre aparecem
+    if(pctGasto<=80&&pctGasto>0)d.push({ico:'icone-grafico-01.png',txt:`Seus gastos estão em ${pctGasto.toFixed(0)}% da renda. Meta ideal: abaixo de 70%.`});
+    if(sal>0)d.push({ico:'icone-cofre.png',txt:`Saldo positivo de ${fmt(sal)}. Considere investir o excedente em Tesouro Selic ou CDB.`});
+    if(metas.length>0){const pctMeta=metas.reduce((s,m)=>s+(m.valor>0?(m.atual||0)/m.valor:0),0)/metas.length*100;d.push({ico:'icone-meta.png',txt:`Suas metas estão ${pctMeta.toFixed(0)}% concluídas em média. Continue contribuindo regularmente.`});}
+    if(dividas.filter(d=>d.status!=='quitada').length===0)d.push({ico:'icone-score-bom.png',txt:'Sem dívidas ativas! Mantenha esse controle e evite parcelamentos desnecessários.'});
+    d.push({ico:'icone-investimento.png',txt:'Regra 50-30-20: 50% necessidades, 30% desejos, 20% poupança e investimentos.'});
     dEl.innerHTML=d.map(x=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.88rem;line-height:1.5"><img src="${x.ico}" style="width:22px;height:22px;object-fit:contain;flex-shrink:0"><span>${x.txt}</span></div>`).join('');
   }
 }
