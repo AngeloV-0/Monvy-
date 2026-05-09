@@ -2525,15 +2525,14 @@ bvRender();
     const _originalAbrirDrawer = abrirDrawer;
     window.abrirDrawer = function() {
       _originalAbrirDrawer();
-      syncDrawerThemeIcon();
-      // Reseta scroll ao topo — rAF garante que ocorre após render
+      if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('monvy_theme') || 'dark');
       requestAnimationFrame(function() {
         const drawer = document.getElementById('drawer');
         if (drawer) drawer.scrollTop = 0;
       });
     };
     // Sincronizar no carregamento
-    syncDrawerThemeIcon();
+    if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('monvy_theme') || 'dark');
 
     // Preencher nome no mobile topbar e no drawer
     (function() {
