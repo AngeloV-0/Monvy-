@@ -1160,15 +1160,21 @@ function renderizarDividas(){
   if(kC)kC.textContent=fmt(cart);if(kE)kE.textContent=fmt(emp);if(kTe)kTe.textContent=fmt(terc);
   if(dividas.length===0){el.innerHTML='<div class="vazio">Nenhuma dívida cadastrada ainda.<br><span style="font-size:.8rem">Use o formulário ao lado para registrar.</span></div>';return;}
   const lbl={cartao:'Cartão de crédito',emprestimo:'Empréstimo',financiamento:'Financiamento',terceiros:'Terceiros',outros:'Outros'};
-  el.innerHTML=dividas.map(d=>`
+  // Armazena referências diretas para evitar problema com IDs especiais no onclick
+  window._dividasAcoes = dividas.map(d => ({
+    quitar: () => window.quitarDivida(d.id),
+    excluir: () => window.excluirDivida(d.id)
+  }));
+
+  el.innerHTML=dividas.map((d,idx)=>`
     <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div><div style="font-weight:700">${d.descricao}</div><div style="font-size:.75rem;color:var(--gray)">${lbl[d.tipo]||d.tipo}${d.credor?' · '+d.credor:''}</div></div>
         <div style="text-align:right"><div style="font-weight:800;color:#ef4444">${fmt(d.valor)}</div>${d.juros>0?`<div style="font-size:.72rem;color:var(--gray)">${d.juros}% a.m.</div>`:''}</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn-sm-green" onclick="quitarDivida('${d.id}')">✓ Quitar</button>
-        <button class="btn-sm-red" onclick="excluirDivida('${d.id}')">Excluir</button>
+        <button class="btn-sm-green" onclick="window._dividasAcoes[${idx}].quitar()">✓ Quitar</button>
+        <button class="btn-sm-red" onclick="window._dividasAcoes[${idx}].excluir()">Excluir</button>
       </div>
     </div>`).join('');
   const eCard=document.getElementById('estrategia-card');const eTex=document.getElementById('estrategia-texto');
@@ -1216,14 +1222,34 @@ function confirmarAcao(msg, onConfirm) {
 
 window.quitarDivida=function(id){
   confirmarAcao('Marcar dívida como quitada e remover?', async ()=>{
-    try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
-    catch(e){alert('Erro ao quitar dívida.');console.error(e);}
+    console.log('[quitarDivida] id=',id,'uid=',uidAtual);
+    if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
+    if(!id){alert('ID da dívida inválido.');return;}
+    try{
+      await deletarDivida(uidAtual,id);
+      console.log('[quitarDivida] deletado OK');
+      dividas=await getDividas(uidAtual);
+      renderizarDividas();
+    }catch(e){
+      console.error('[quitarDivida] erro:',e);
+      alert('Erro ao quitar: '+e.message);
+    }
   });
 };
 window.excluirDivida=function(id){
   confirmarAcao('Excluir esta dívida permanentemente?', async ()=>{
-    try{await deletarDivida(uidAtual,id);dividas=await getDividas(uidAtual);renderizarDividas();}
-    catch(e){alert('Erro ao excluir dívida.');console.error(e);}
+    console.log('[excluirDivida] id=',id,'uid=',uidAtual);
+    if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
+    if(!id){alert('ID da dívida inválido.');return;}
+    try{
+      await deletarDivida(uidAtual,id);
+      console.log('[excluirDivida] deletado OK');
+      dividas=await getDividas(uidAtual);
+      renderizarDividas();
+    }catch(e){
+      console.error('[excluirDivida] erro:',e);
+      alert('Erro ao excluir: '+e.message);
+    }
   });
 };
 window.calcularDivida=function(){
