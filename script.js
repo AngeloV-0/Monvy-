@@ -1229,12 +1229,38 @@ function confirmarAcao(msg, onConfirm) {
 
 window.quitarDivida=function(id){
   const sid=String(id);
-  confirmarAcao('Marcar dívida como quitada e remover?', async ()=>{
+  // Encontra os dados da dívida antes de deletar
+  const divida = dividas.find(d=>String(d.id)===sid);
+  if(!divida){alert('Dívida não encontrada.');return;}
+  confirmarAcao(`Quitar "${divida.descricao}" (${fmt(divida.valor)})?`, async ()=>{
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
     try{
-      await deletarDivida(uidAtual,sid);
-      dividas=await getDividas(uidAtual);
+      // 1. Calcula score ANTES para comparar depois
+      const scoreAntes = calcularScoreValor();
+      // 2. Salva como movimentação de gasto (quitação)
+      const hoje = new Date().toISOString().split('T')[0];
+      await adicionarMovimentacao(uidAtual, {
+        descricao: `Quitação: ${divida.descricao}`,
+        valor: divida.valor,
+        tipo: 'gasto',
+        categoria: 'Dívidas',
+        data: hoje,
+        recorrente: false,
+        classificacao: 'quitacao_divida'
+      });
+      // 3. Remove a dívida
+      await deletarDivida(uidAtual, sid);
+      // 4. Recarrega tudo
+      dividas = await getDividas(uidAtual);
+      movimentacoes = await getMovimentacoes(uidAtual);
       renderizarDividas();
+      renderizarListaInicio();
+      atualizarKPIs();
+      calcularScore();
+      // 5. Mostra feedback de pontos ganhos
+      const scoreDepois = calcularScoreValor();
+      const ganho = scoreDepois - scoreAntes;
+      mostrarToastScore(ganho, divida.descricao);
     }catch(e){
       console.error('[quitarDivida]',e);
       alert('Erro ao quitar: '+e.message);
@@ -1583,6 +1609,43 @@ window.processarRecorrentes=async function(){
 };
 
 // ── Score ─────────────────────────────────────────────────────────
+// Retorna o valor numérico do score sem atualizar o DOM
+function calcularScoreValor(){
+  const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
+  const sal=ent-sai; const renda=perfilUsuario?.renda||ent||1;
+  const pctGasto=ent>0?(sai/ent)*100:100;
+  const pG=pctGasto<=50?300:pctGasto<=70?200:pctGasto<=90?100:30;
+  const totDiv=dividas.reduce((s,d)=>s+(d.valor||0),0); const relDiv=renda>0?totDiv/renda:0;
+  const pD=dividas.length===0?200:relDiv<1?150:relDiv<3?80:20;
+  const pM=metas.length===0?50:Math.round((metas.reduce((s,m)=>s+(m.valor>0?(m.atual||0)/m.valor:0),0)/metas.length)*200);
+  const pR=sal>renda*6?200:sal>renda*3?150:sal>renda?80:sal>0?40:0;
+  const hoje=new Date(); const mMes=movimentacoes.filter(m=>{if(!m.data)return false;const d=new Date(m.data+'T00:00:00');return d.getMonth()===hoje.getMonth()&&d.getFullYear()===hoje.getFullYear();});
+  const pC=Math.min(100,mMes.length*10);
+  return pG+pD+Math.min(200,pM)+pR+pC;
+}
+
+// Toast de parabéns ao quitar dívida
+function mostrarToastScore(ganho, nomeDivida){
+  const existing = document.getElementById('toast-score');
+  if(existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'toast-score';
+  const cor = ganho > 0 ? '#22c55e' : '#f59e0b';
+  const emoji = ganho > 0 ? '🏆' : '✅';
+  toast.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#0f172a;border:1px solid ${cor};border-radius:16px;padding:16px 24px;z-index:99999;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);min-width:260px;animation:fadeUp .3s ease`;
+  toast.innerHTML = `
+    <div style="font-size:1.8rem;margin-bottom:4px">${emoji}</div>
+    <div style="color:#fff;font-weight:700;font-size:.95rem">Dívida quitada!</div>
+    <div style="color:#94a3b8;font-size:.82rem;margin:4px 0">${nomeDivida}</div>
+    ${ganho > 0
+      ? `<div style="color:${cor};font-weight:800;font-size:1.1rem;margin-top:6px">+${ganho} pts no Score 🎯</div>`
+      : `<div style="color:${cor};font-weight:700;font-size:.9rem;margin-top:6px">Score atualizado ✓</div>`
+    }`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 3000);
+}
+
 function calcularScore(){
   const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
   const sai=movimentacoes.filter(m=>m.tipo==='gasto').reduce((s,m)=>s+(m.valor||0),0);
