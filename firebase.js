@@ -232,7 +232,11 @@ export async function atualizarDivida(uid, id, dados) {
 }
 
 export async function deletarDivida(uid, id) {
-  await deleteDoc(doc(db, 'usuarios', uid, 'dividas', id));
+  if (!uid || !id) throw new Error(`uid ou id inválido: uid=${uid} id=${id}`);
+  const ref = doc(db, 'usuarios', uid, 'dividas', String(id));
+  console.log('[deletarDivida] path:', ref.path);
+  await deleteDoc(ref);
+  console.log('[deletarDivida] sucesso');
 }
 
 export { auth, db };

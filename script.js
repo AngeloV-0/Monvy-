@@ -1235,29 +1235,35 @@ window.quitarDivida=function(id){
   confirmarAcao(`Quitar "${divida.descricao}" (${fmt(divida.valor)})?`, async ()=>{
     if(!uidAtual){alert('Sessão expirada. Recarregue a página.');return;}
     try{
-      // 1. Calcula score ANTES para comparar depois
+      // 1. Calcula score ANTES
       const scoreAntes = calcularScoreValor();
-      // 2. Salva como movimentação de gasto (quitação)
+      // 2. Remove dívida do array local IMEDIATAMENTE (atualiza UI antes do Firebase)
+      dividas = dividas.filter(d => String(d.id) !== sid);
+      renderizarDividas();
+      // 3. Salva no Firebase em paralelo
       const hoje = new Date().toISOString().split('T')[0];
-      await adicionarMovimentacao(uidAtual, {
-        descricao: `Quitação: ${divida.descricao}`,
-        valor: divida.valor,
-        tipo: 'gasto',
-        categoria: 'Dívidas',
-        data: hoje,
-        recorrente: false,
-        classificacao: 'quitacao_divida'
-      });
-      // 3. Remove a dívida
-      await deletarDivida(uidAtual, sid);
-      // 4. Recarrega tudo
-      dividas = await getDividas(uidAtual);
-      movimentacoes = await getMovimentacoes(uidAtual);
+      await Promise.all([
+        deletarDivida(uidAtual, sid),
+        adicionarMovimentacao(uidAtual, {
+          descricao: `Quitação: ${divida.descricao}`,
+          valor: divida.valor,
+          tipo: 'gasto',
+          categoria: 'Dívidas',
+          data: hoje,
+          recorrente: false,
+          classificacao: 'quitacao_divida'
+        })
+      ]);
+      // 4. Recarrega do Firebase para garantir consistência
+      [dividas, movimentacoes] = await Promise.all([
+        getDividas(uidAtual),
+        getMovimentacoes(uidAtual)
+      ]);
       renderizarDividas();
       renderizarListaInicio();
       atualizarKPIs();
       calcularScore();
-      // 5. Mostra feedback de pontos ganhos
+      // 5. Feedback de pontos
       const scoreDepois = calcularScoreValor();
       const ganho = scoreDepois - scoreAntes;
       mostrarToastScore(ganho, divida.descricao);
