@@ -149,8 +149,8 @@
     .emp-drawer-item { display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--gray);border:none;background:transparent;font-family:inherit;width:100%;text-align:left;transition:all .15s; }
     .emp-drawer-item:hover { background:var(--surface-2);color:var(--white); }
     .emp-drawer-item.active { background:rgba(34,197,94,0.12);color:var(--primary); }
-    .emp-drawer-item img, .emp-drawer-item svg { width:20px;height:20px;object-fit:contain;opacity:.6;flex-shrink:0; }
-    .emp-drawer-item.active img, .emp-drawer-item.active svg { opacity:1; }
+    .emp-drawer-item img { width:20px;height:20px;object-fit:contain;opacity:.6; }
+    .emp-drawer-item.active img { opacity:1; }
     .emp-drawer-divider { height:1px;background:var(--border);margin:12px 0; }
 
     /* ── Sidebar empresa ── */
@@ -241,32 +241,32 @@
     </div>
     <div class="emp-drawer-nav">
       <button class="emp-drawer-item active" id="di-painel" onclick="irParaTela('painel');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Painel
+        <img src="icone-grafico-01.png"> Painel
       </button>
       <button class="emp-drawer-item" id="di-caixa" onclick="irParaTela('caixa');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg> Caixa
+        <img src="icone-dinheiro-01.png"> Caixa
       </button>
       <button class="emp-drawer-item" id="di-contas" onclick="irParaTela('contas');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/></svg> Contas
+        <img src="icone-conta.png"> Contas
       </button>
       <button class="emp-drawer-item" id="di-produtos" onclick="irParaTela('produtos');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Produtos
+        <img src="icone-produto.png"> Produtos
       </button>
       <button class="emp-drawer-item" id="di-metas" onclick="irParaTela('metas');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Metas
+        <img src="icone-meta.png"> Metas
       </button>
       <button class="emp-drawer-item" id="di-relatorio" onclick="irParaTela('relatorio');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Relatório
+        <img src="icone-dre.png"> Relatório
       </button>
       <button class="emp-drawer-item" id="di-dre" onclick="irParaTela('dre');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg> DRE
+        <img src="icone-grafico-02.png"> DRE
       </button>
       <button class="emp-drawer-item" id="di-calculadora" onclick="irParaTela('calculadora');fecharDrawerEmp()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Calculadora
+        <img src="icone-investimento.png"> Calculadora
       </button>
       <div class="emp-drawer-divider"></div>
       <button class="emp-drawer-item" onclick="window.location.href='index.html'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> Modo pessoal
+        <img src="icone-casa-propria.png"> Modo pessoal
       </button>
     </div>
   </div>
@@ -278,28 +278,28 @@
     </div>
     <nav>
       <a class="nav-item active" id="si-painel" onclick="irParaTela('painel')" title="Painel" data-label="Painel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <img src="icone-grafico-01.png">
       </a>
       <a class="nav-item" id="si-caixa" onclick="irParaTela('caixa')" title="Caixa" data-label="Caixa">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+        <img src="icone-dinheiro-01.png">
       </a>
       <a class="nav-item" id="si-contas" onclick="irParaTela('contas')" title="Contas" data-label="Contas">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        <img src="icone-conta.png">
       </a>
       <a class="nav-item" id="si-produtos" onclick="irParaTela('produtos')" title="Produtos" data-label="Produtos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <img src="icone-produto.png">
       </a>
       <a class="nav-item" id="si-metas" onclick="irParaTela('metas')" title="Metas" data-label="Metas">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <img src="icone-meta.png">
       </a>
       <a class="nav-item" id="si-relatorio" onclick="irParaTela('relatorio')" title="Relatório" data-label="Relatório">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <img src="icone-dre.png">
       </a>
       <a class="nav-item" id="si-dre" onclick="irParaTela('dre')" title="DRE" data-label="DRE">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>
+        <img src="icone-grafico-02.png">
       </a>
       <a class="nav-item" id="si-calculadora" onclick="irParaTela('calculadora')" title="Calculadora" data-label="Calculadora">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <img src="icone-investimento.png">
       </a>
     </nav>
     <div class="sidebar-emp-bottom">
