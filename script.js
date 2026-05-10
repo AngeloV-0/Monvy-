@@ -2065,14 +2065,17 @@ async function carregarTaxasBCB(){
   try{
     const res=await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados/ultimos/1?formato=json');
     const data=await res.json();
-    const selic=parseFloat(data[0]?.valor);
-    taxasLive={selic,cdi:selic/12,poupanca:selic<=8.5?selic*0.7:6.17,lci:selic*0.9};
+    const selicDiaria=parseFloat(data[0]?.valor); // taxa diária em %
+    // Converter taxa diária para anual: (1 + d/100)^252 - 1) * 100
+    const selicAnual = (Math.pow(1 + selicDiaria/100, 252) - 1) * 100;
+    const selic = Math.round(selicAnual * 100) / 100;
+    taxasLive={selic,cdi:selic,poupanca:selic<=8.5?selic*0.7:6.17,lci:selic*0.9};
     const sE=document.getElementById('bcb-selic');const cE=document.getElementById('bcb-cdi');const pE=document.getElementById('bcb-poup');const lE=document.getElementById('bcb-lci');
     if(sE)sE.textContent=selic.toFixed(2)+'% a.a.';if(cE)cE.textContent=taxasLive.cdi.toFixed(3)+'% a.m.';
     if(pE)pE.textContent=taxasLive.poupanca.toFixed(2)+'% a.a.';if(lE)lE.textContent=taxasLive.lci.toFixed(2)+'% a.a.';
     if(dEl)dEl.style.background='#22c55e';if(sEl)sEl.textContent='Taxas atualizadas';if(rEl)rEl.style.display='flex';
     const tE=document.getElementById('bcb-update-time');if(tE)tE.textContent=`Atualizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
-  }catch(e){if(dEl)dEl.style.background='#ef4444';if(sEl)sEl.textContent='Não foi possível buscar as taxas.';taxasLive={selic:13.75,cdi:13.75/12,poupanca:6.17,lci:12.0};}
+  }catch(e){if(dEl)dEl.style.background='#ef4444';if(sEl)sEl.textContent='Não foi possível buscar as taxas.';taxasLive={selic:14.75,cdi:14.75,poupanca:7.16,lci:14.75*0.9};}
 }
 
 // ── Investimentos ─────────────────────────────────────────────────
@@ -2136,7 +2139,62 @@ window.calcularInvestimentos=function(){
   if(wEl)wEl.style.display='block';
   if(lEl) lEl.innerHTML=res.map((o,idx2)=>`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border);background:${idx2===0?'rgba(34,197,94,0.06)':''}"><div style="width:32px;height:32px;border-radius:50%;background:${idx2===0?'var(--primary)':'rgba(255,255,255,0.08)'};display:flex;align-items:center;justify-content:center;font-weight:800;color:${idx2===0?'#000':'var(--text)'};font-size:.9rem;flex-shrink:0">${idx2+1}</div><div style="flex:1"><div style="font-weight:700">${o.nome}</div><div style="font-size:.75rem;color:var(--gray)">${o.taxaAnual.toFixed(2)}% a.a. · ${o.liquidez} · ${o.ir?'c/ IR':'Isento IR'}</div>${o.ir&&o.irValor>0?`<div style="font-size:.72rem;color:#f59e0b">IR: -${fmt(o.irValor)}</div>`:''}</div><div style="text-align:right"><div style="font-weight:800;color:${idx2===0?'#22c55e':'var(--text)'}">${fmt(o.final)}</div><div style="font-size:.75rem;color:#22c55e">+${fmt(o.final-totInv)}</div>${o.ir?`<div style="font-size:.7rem;color:var(--gray)">bruto: ${fmt(o.bruto)}</div>`:''}</div></div>`).join('');
 };
-window.abrirModalSimulacao=function(){document.getElementById('modal-simulacao')?.classList.remove('hidden');};
+window.abrirModalSimulacao=function(){
+  const modal=document.getElementById('modal-simulacao');
+  if(!modal) return;
+  modal.classList.remove('hidden');
+  // Renderizar tabela e gráfico de crescimento mês a mês
+  const ini=parseFloat(document.getElementById('inv-inicial').value)||0;
+  const apt=parseFloat(document.getElementById('inv-aporte').value)||0;
+  const mes=parseInt(document.getElementById('inv-periodo').value)||12;
+  const selic=taxasLive.selic||14.75;
+  const melhorTaxa=selic*1.2; // CDB 120% CDI como referência
+  const ir=true;
+  // Gerar tabela mês a mês
+  const i=Math.pow(1+melhorTaxa/100,1/12)-1;
+  const rows=[];let saldo=ini;
+  for(let m=1;m<=mes;m++){
+    const rendimento=saldo*i;
+    saldo=saldo*(1+i)+(apt);
+    const totInv=ini+apt*m;
+    const lucro=Math.max(0,saldo-totInv);
+    const aliq=m<=6?.225:m<=12?.20:m<=24?.175:.15;
+    const liquido=saldo-lucro*aliq;
+    rows.push({m,saldo:liquido,rendimento,totInv});
+  }
+  const tEl=document.getElementById('sim-tabela');
+  if(tEl) tEl.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="color:var(--gray);font-size:.72rem;text-transform:uppercase">
+        <th style="text-align:left;padding:8px 4px">Mês</th>
+        <th style="text-align:right;padding:8px 4px">Total investido</th>
+        <th style="text-align:right;padding:8px 4px">Rendimento</th>
+        <th style="text-align:right;padding:8px 4px">Saldo líquido</th>
+      </tr></thead>
+      <tbody>${rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/12))===0||idx===mes-1).map(r=>`
+        <tr style="border-top:1px solid var(--border)">
+          <td style="padding:8px 4px;color:var(--gray)">Mês ${r.m}</td>
+          <td style="padding:8px 4px;text-align:right;color:var(--white)">${fmt(r.totInv)}</td>
+          <td style="padding:8px 4px;text-align:right;color:#22c55e">+${fmt(r.rendimento)}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:700;color:#22c55e">${fmt(r.saldo)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  // Gráfico de crescimento
+  const canvas=document.getElementById('sim-chart');
+  if(canvas){
+    if(window._simChart) window._simChart.destroy();
+    const labels=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>'M'+r.m);
+    const dataSaldo=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.saldo);
+    const dataTotInv=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.totInv);
+    const ctx=canvas.getContext('2d');
+    const g=ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(34,197,94,0.3)');g.addColorStop(1,'rgba(34,197,94,0)');
+    window._simChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+      {label:'Saldo líquido',data:dataSaldo,borderColor:'#22c55e',backgroundColor:g,fill:true,tension:0.4,borderWidth:2,pointRadius:3},
+      {label:'Total investido',data:dataTotInv,borderColor:'rgba(255,255,255,0.2)',fill:false,tension:0.4,borderWidth:1,borderDash:[4,4],pointRadius:0}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:8}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}}}}});
+  }
+};
 window.fecharModalSimulacao=function(){document.getElementById('modal-simulacao')?.classList.add('hidden');};
 
 // ── Bolsa ─────────────────────────────────────────────────────────
