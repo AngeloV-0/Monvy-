@@ -409,28 +409,37 @@ function atualizarChart(){
   const w=(container?container.offsetWidth:null)||canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
   canvas.width=w;
   canvas.height=180;
-  // Recentes: últimas 10 movimentações (últimos 8 dias ou mais recentes se fora do range)
-  // Todas: mês atual completo
+  // Recentes: últimos 8 dias EXATOS | Todas: mês atual EXATO
   let lista;
   if(fluxoModo==='recentes'){
-    // Tenta pegar últimos 8 dias
     const corte=new Date(); corte.setDate(corte.getDate()-7); corte.setHours(0,0,0,0);
     lista=movimentacoes.filter(m=>m.data&&new Date(m.data+'T00:00:00')>=corte);
-    // Fallback: pega as 10 mais recentes se não houver dados nos últimos 8 dias
-    if(lista.length===0) lista=[...movimentacoes].slice(0,10);
   } else {
-    // Mês atual
     const hoje=new Date();
     const anoMes=`${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}`;
     lista=movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
-    if(lista.length===0) lista=[...movimentacoes];
   }
+  // Sem movimentações no período → mostrar vazio
+  if(lista.length===0){
+    if(container)container.style.display='none';
+    canvas.style.display='none';
+    if(emptyEl){
+      emptyEl.style.display='flex';
+      emptyEl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>${fluxoModo==='recentes'?'Nenhuma movimentação nos últimos 8 dias':'Nenhuma movimentação este mês'}</span>`;
+    }
+    const subEl2=document.getElementById('fluxo-sub');
+    if(subEl2) subEl2.textContent=fluxoModo==='recentes'?'Últimos 8 dias (0 movimentações)':'Este mês (0 movimentações)';
+    return;
+  }
+  if(container)container.style.display='block';
+  canvas.style.display='block';
+  if(emptyEl)emptyEl.style.display='none';
   // Ordenar do mais antigo para o mais recente
   const listaRev=[...lista].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   // Atualizar subtítulo
   const subEl=document.getElementById('fluxo-sub');
   if(subEl){
-    const diasLabel = fluxoModo==='recentes' ? `Últimos 8 dias` : `Este mês`;
+    const diasLabel=fluxoModo==='recentes'?'Últimos 8 dias':'Este mês';
     subEl.textContent=`${diasLabel} (${listaRev.length} ${listaRev.length===1?'movimentação':'movimentações'})`;
   }
   const labels=listaRev.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`);
