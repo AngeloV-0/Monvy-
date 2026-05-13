@@ -129,17 +129,6 @@ let perfilUsuario = {};
 window.perfilUsuario = perfilUsuario; // expor para scripts inline do HTML
 let chartFluxo = null;
 let chartPizza = null;
-
-// Helpers de ordenação (padrão v1)
-function cmpTs(a, b) {
-  const da = a.criadoEm?.seconds ?? (a.data ? new Date(a.data+'T00:00:00').getTime()/1000 : 0);
-  const db = b.criadoEm?.seconds ?? (b.data ? new Date(b.data+'T00:00:00').getTime()/1000 : 0);
-  const diff = da - db;
-  if (diff !== 0) return diff;
-  if (a.id && b.id) return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-  return 0;
-}
-function sortMaisAntigo(arr) { return [...arr].sort((a, b) => cmpTs(a, b)); }
 let tipoGraficoPizza = 'doughnut';
 
 window.setTipoGrafico = function(tipo) {
@@ -402,161 +391,193 @@ function setFluxoModo(modo){
   if(bt){bt.style.background=modo==='todas'?'#22c55e':'transparent';bt.style.color=modo==='todas'?'#000':'#64748b';}
   atualizarChart();
 }
-function atualizarChart() {
-  const canvas  = document.getElementById('chart-fluxo');
-  const emptyEl = document.getElementById('chart-empty');
-  const subEl   = document.getElementById('fluxo-sub');
-  if (!canvas) return;
-  if (movimentacoes.length === 0) {
-    canvas.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = 'flex';
+function atualizarChart(){
+  const container=document.getElementById('chart-fluxo-container');
+  const canvas=document.getElementById('chart-fluxo');
+  const emptyEl=document.getElementById('chart-empty');
+  if(!canvas) return;
+  if(movimentacoes.length===0){
+    if(container)container.style.display='none';
+    canvas.style.display='none';
+    if(emptyEl)emptyEl.style.display='flex';
     return;
   }
-  canvas.style.display = 'block';
-  if (emptyEl) emptyEl.style.display = 'none';
-  if (chartFluxo) { chartFluxo.destroy(); chartFluxo = null; }
+  if(container)container.style.display='block';
+  canvas.style.display='block';
+  if(emptyEl)emptyEl.style.display='none';
+  if(!canvas.offsetWidth){setTimeout(atualizarChart,100);return;}
+  const w=(container?container.offsetWidth:null)||canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
+  canvas.width=w;
+  canvas.height=180;
+  const lista=fluxoModo==='recentes'?movimentacoes.slice(0,10):movimentacoes;
+  const listaRev=[...lista].reverse();
+  const labels=listaRev.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`);
+  const datas=listaRev.map(m=>m.data?fmtData(m.data):'');
+  const nomes=listaRev.map(m=>m.descricao||m.categoria||'Movimentação');
+  const tipos=listaRev.map(m=>m.tipo);
+  const entradas=listaRev.map(m=>m.tipo==='ganho'?m.valor:0);
+  const saidas=listaRev.map(m=>m.tipo==='gasto'?m.valor:0);
+  if(chartFluxo){chartFluxo.destroy();chartFluxo=null;}
+  const ctx=canvas.getContext('2d');
+  const gG=ctx.createLinearGradient(0,0,0,180);gG.addColorStop(0,'rgba(34,197,94,0.3)');gG.addColorStop(1,'rgba(34,197,94,0)');
+  const gR=ctx.createLinearGradient(0,0,0,180);gR.addColorStop(0,'rgba(239,68,68,0.25)');gR.addColorStop(1,'rgba(239,68,68,0)');
 
-  // 1. Filtrar por período (padrão v1)
-  let pool;
-  if (fluxoModo === 'recentes') {
-    const corte = new Date(); corte.setDate(corte.getDate() - 7); corte.setHours(0,0,0,0);
-    pool = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
-  } else {
-    const corte = new Date(); corte.setDate(corte.getDate() - 29); corte.setHours(0,0,0,0);
-    pool = movimentacoes.filter(m => m.data && new Date(m.data + 'T00:00:00') >= corte);
-    if (pool.length === 0) pool = [...movimentacoes];
-  }
-  if (pool.length === 0) { canvas.style.display = 'none'; if (emptyEl) emptyEl.style.display = 'flex'; return; }
-
-  // 2. Ordenar mais antigo primeiro
-  const movements = sortMaisAntigo(pool);
-
-  if (subEl) {
-    const lbl = fluxoModo === 'recentes' ? 'Últimos 8 dias' : 'Últimos 30 dias';
-    subEl.textContent = `${lbl} (${movements.length} ${movements.length === 1 ? 'movimentação' : 'movimentações'})`;
-  }
-
-  // 3. Montar labels e dados (com ponto âncora em zero)
-  const labels      = [''];
-  const valEntradas = [0];
-  const valSaidas   = [0];
-
-  movements.forEach((mov) => {
-    const parts = (mov.data || '2000-01-01').split('-');
-    const label = parts[2] + '/' + parts[1];
-    labels.push(label);
-    if (mov.tipo === 'ganho') {
-      valEntradas.push(mov.valor);
-      valSaidas.push(null);
-    } else {
-      valSaidas.push(mov.valor);
-      valEntradas.push(null);
+  // Plugin crosshair: linha vertical ao hover/touch
+  const crosshairPlugin={
+    id:'crosshair',
+    afterDraw(chart){
+      if(chart._crosshairX==null) return;
+      const {ctx,chartArea:{top,bottom}}=chart;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart._crosshairX,top);
+      ctx.lineTo(chart._crosshairX,bottom);
+      ctx.strokeStyle='rgba(255,255,255,0.18)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([4,4]);
+      ctx.stroke();
+      ctx.restore();
     }
-  });
+  };
 
-  // 4. Renderizar
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Função utilitária para obter posição relativa ao canvas (mouse ou toque)
+  function getPosCanvas(e){
+    const rect=canvas.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return {x:src.clientX-rect.left, y:src.clientY-rect.top};
+  }
 
-  const gradE = ctx.createLinearGradient(0, 0, 0, 220);
-  gradE.addColorStop(0, 'rgba(34,197,94,0.22)');
-  gradE.addColorStop(1, 'rgba(34,197,94,0)');
+  // Ativa tooltip no ponto mais próximo (entrada OU saída separadamente)
+  function ativarTooltip(x,y){
+    if(!chartFluxo) return;
+    const ca=chartFluxo.chartArea;
+    if(!ca) return;
+    const numPts=labels.length;
+    const step=(ca.right-ca.left)/(numPts-1||1);
+    const idx=Math.max(0,Math.min(numPts-1,Math.round((x-ca.left)/step)));
+    // Descobre qual dataset tem valor nesse índice (entrada ou saída)
+    const temEntrada=entradas[idx]>0;
+    const temSaida=saidas[idx]>0;
+    // Calcula distância Y para cada dataset que tem valor
+    let melhorDs=0;
+    if(temEntrada&&temSaida){
+      // Ambos têm valor — escolhe o mais próximo do toque em Y
+      const scaleY=chartFluxo.scales.y;
+      const yEnt=scaleY.getPixelForValue(entradas[idx]);
+      const ySai=scaleY.getPixelForValue(saidas[idx]);
+      melhorDs=Math.abs(y-yEnt)<Math.abs(y-ySai)?0:1;
+    } else if(temSaida){
+      melhorDs=1;
+    } else {
+      melhorDs=0;
+    }
+    chartFluxo._crosshairX=ca.left+idx*step;
+    chartFluxo.tooltip.setActiveElements(
+      [{datasetIndex:melhorDs,index:idx}],
+      {x:chartFluxo._crosshairX,y}
+    );
+    chartFluxo.update('none');
+  }
 
-  const gradS = ctx.createLinearGradient(0, 0, 0, 220);
-  gradS.addColorStop(0, 'rgba(239,68,68,0.18)');
-  gradS.addColorStop(1, 'rgba(239,68,68,0)');
-
-  chartFluxo = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Entradas',
-          data: valEntradas,
-          borderColor: '#22C55E',
-          backgroundColor: gradE,
-          borderWidth: 2.5,
-          tension: 0,
-          fill: true,
-          spanGaps: true,
-          pointBackgroundColor: valEntradas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#22C55E' : 'transparent'),
-          pointBorderColor:     valEntradas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#22C55E' : 'transparent'),
-          pointRadius:          valEntradas.map((v, i) => i === 0 ? 0 : v !== null ? 5 : 0),
-          pointHoverRadius:     valEntradas.map((v, i) => i === 0 ? 0 : v !== null ? 8 : 0)
-        },
-        {
-          label: 'Saídas',
-          data: valSaidas,
-          borderColor: '#EF4444',
-          backgroundColor: gradS,
-          borderWidth: 2.5,
-          tension: 0,
-          fill: true,
-          spanGaps: true,
-          pointBackgroundColor: valSaidas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#EF4444' : 'transparent'),
-          pointBorderColor:     valSaidas.map((v, i) => i === 0 ? 'transparent' : v !== null ? '#EF4444' : 'transparent'),
-          pointRadius:          valSaidas.map((v, i) => i === 0 ? 0 : v !== null ? 5 : 0),
-          pointHoverRadius:     valSaidas.map((v, i) => i === 0 ? 0 : v !== null ? 8 : 0)
-        }
-      ]
+  chartFluxo=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'Entradas',data:entradas,borderColor:'#22C55E',backgroundColor:gG,borderWidth:2,tension:0.4,fill:true,pointRadius:5,pointHoverRadius:9,pointBackgroundColor:'#22C55E',pointHoverBackgroundColor:'#22C55E',pointBorderColor:'#0f172a',pointBorderWidth:2,pointHitRadius:24},
+    {label:'Saídas',data:saidas,borderColor:'#EF4444',backgroundColor:gR,borderWidth:2,tension:0.4,fill:true,pointRadius:5,pointHoverRadius:9,pointBackgroundColor:'#EF4444',pointHoverBackgroundColor:'#EF4444',pointBorderColor:'#0f172a',pointBorderWidth:2,pointHitRadius:24}
+  ]},options:{
+    responsive:false,
+    maintainAspectRatio:false,
+    interaction:{mode:'nearest',intersect:true},
+    onHover:(event,elements,chart)=>{
+      if(event.native&&event.native.type!=='touchstart'){
+        const pos=getPosCanvas(event.native);
+        chart._crosshairX=pos.x;
+      }
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      interaction: { intersect: false, mode: 'index' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1A2235',
-          borderColor: 'rgba(255,255,255,0.08)',
-          borderWidth: 1,
-          titleColor: '#94A3B8',
-          bodyColor: '#fff',
-          padding: 12,
-          filter: item => item.dataIndex > 0 && item.raw !== null,
-          callbacks: {
-            title: items => {
-              const idx = items[0].dataIndex - 1;
-              const mov = movements[idx];
-              if (!mov) return '';
-              const [ano, mes, dia] = (mov.data || '').split('-');
-              return `${dia}/${mes}/${ano}`;
-            },
-            label: c => {
-              if (c.raw === null || c.dataIndex === 0) return '';
-              const mov = movements[c.dataIndex - 1];
-              if (!mov) return '';
-              const isEntrada = mov.tipo === 'ganho';
-              const nome  = mov.descricao || mov.categoria || (isEntrada ? 'Entrada' : 'Saída');
-              const sinal = isEntrada ? '+' : '-';
-              return ` ${nome}: ${sinal}R$ ${mov.valor.toFixed(2).replace('.', ',')}`;
-            }
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        enabled:true,
+        mode:'nearest',
+        intersect:true,
+        position:'nearest',
+        xAlign:'center',
+        yAlign:'bottom',
+        backgroundColor:'rgba(15,23,42,0.96)',
+        borderColor:'rgba(255,255,255,0.12)',
+        borderWidth:1,
+        titleColor:'#94a3b8',
+        bodyColor:'#f1f5f9',
+        titleFont:{size:12,weight:'600'},
+        bodyFont:{size:13,weight:'bold'},
+        padding:12,
+        cornerRadius:10,
+        caretSize:6,
+        displayColors:true,
+        boxWidth:10,
+        boxHeight:10,
+        callbacks:{
+          title:function(items){
+            const i=items[0].dataIndex;
+            return datas[i]||labels[i]||'';
+          },
+          label:function(item){
+            if(item.raw===0) return null;
+            const i=item.dataIndex;
+            const desc=nomes[i]||'Movimentação';
+            const isEnt=item.datasetIndex===0;
+            const val=item.raw.toLocaleString('pt-BR',{minimumFractionDigits:2});
+            return ` ${desc} : ${isEnt?'+':'-'}R$ ${val}`;
+          },
+          labelColor:function(item){
+            return {
+              borderColor:'transparent',
+              backgroundColor:item.datasetIndex===0?'#22c55e':'#ef4444',
+              borderRadius:3
+            };
           }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: {
-            color: '#64748B',
-            font: { size: 10 },
-            maxRotation: 45,
-            autoSkip: true,
-            maxTicksLimit: 16,
-            callback: (val, i) => i === 0 ? '' : val
-          }
-        },
-        y: {
-          grace: '15%',
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: '#64748B', font: { size: 11 }, callback: v => 'R$' + v.toFixed(0) }
         }
       }
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11}}},
+      y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:11},callback:v=>'R$'+v.toLocaleString('pt-BR')}}
     }
-  });
+  },plugins:[crosshairPlugin]});
+
+  // ── Touch mobile e clique desktop ──────────────────────────────
+  // Remove listeners antigos via flag
+  if(canvas._tooltipListeners){
+    canvas.removeEventListener('touchstart',canvas._tooltipListeners.ts);
+    canvas.removeEventListener('touchmove',canvas._tooltipListeners.tm);
+    canvas.removeEventListener('touchend',canvas._tooltipListeners.te);
+    canvas.removeEventListener('click',canvas._tooltipListeners.cl);
+  }
+  function handleTouch(e){
+    e.preventDefault();
+    e.stopPropagation();
+    const pos=getPosCanvas(e);
+    ativarTooltip(pos.x,pos.y);
+  }
+  function handleTouchEnd(){
+    setTimeout(()=>{
+      if(chartFluxo){
+        chartFluxo._crosshairX=null;
+        chartFluxo.tooltip.setActiveElements([],{});
+        chartFluxo.update('none');
+      }
+    },2500);
+  }
+  function handleClick(e){
+    const pos=getPosCanvas(e);
+    ativarTooltip(pos.x,pos.y);
+  }
+  canvas._tooltipListeners={ts:handleTouch,tm:handleTouch,te:handleTouchEnd,cl:handleClick};
+  canvas.addEventListener('touchstart',handleTouch,{passive:false});
+  canvas.addEventListener('touchmove',handleTouch,{passive:false});
+  canvas.addEventListener('touchend',handleTouchEnd,{passive:false});
+  canvas.addEventListener('click',handleClick);
 }
 
+// ── Lista início ──────────────────────────────────────────────────
 function renderizarListaInicio(){
   const el=document.getElementById('lista-inicio'); if(!el) return;
   const recentes=[...movimentacoes].slice(0,8);
