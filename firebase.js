@@ -13,7 +13,7 @@ import {
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc,
   collection, addDoc, getDocs, deleteDoc,
-  query, orderBy, onSnapshot, serverTimestamp
+  onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -133,23 +133,31 @@ export async function getPerfil(uid) {
 }
 
 export async function salvarPerfil(uid, dados) {
-  await updateDoc(doc(db, 'usuarios', uid), dados);
+  await setDoc(doc(db, 'usuarios', uid), dados, { merge: true });
 }
 
 export async function salvarPerfilVida(uid, perfil) {
-  await updateDoc(doc(db, 'usuarios', uid), { perfilVida: perfil });
+  // Sanitizar — remover undefined, funções e valores inválidos para o Firestore
+  const clean = JSON.parse(JSON.stringify(perfil || {}));
+  await setDoc(doc(db, 'usuarios', uid), { perfilVida: clean }, { merge: true });
 }
 
 export async function marcarOnboardingFeito(uid) {
-  await updateDoc(doc(db, 'usuarios', uid), { onboardingDone: true });
+  await setDoc(doc(db, 'usuarios', uid), { onboardingDone: true }, { merge: true });
 }
 
 // ── Movimentações ─────────────────────────────────────────────
 
 export async function getMovimentacoes(uid) {
-  const q    = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'movimentacoes'));
+  return snap.docs
+    .map(d => ({ ...d.data(), id: d.id }))
+    .sort((a, b) => {
+      if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+      const ta = a.criadoEm?.toMillis?.() || 0;
+      const tb = b.criadoEm?.toMillis?.() || 0;
+      return tb - ta;
+    });
 }
 
 export async function adicionarMovimentacao(uid, mov) {
@@ -168,15 +176,24 @@ export async function deletarMovimentacao(uid, id) {
 }
 
 export function ouvirMovimentacoes(uid, callback) {
-  const q = query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'));
-  return onSnapshot(q, snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+  return onSnapshot(collection(db, 'usuarios', uid, 'movimentacoes'), snap => {
+    const movs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+        const ta = a.criadoEm?.toMillis?.() || 0;
+        const tb = b.criadoEm?.toMillis?.() || 0;
+        return tb - ta;
+      });
+    callback(movs);
+  });
 }
 
 // ── Metas ─────────────────────────────────────────────────────
 
 export async function getMetas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'metas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
 }
 
 export async function adicionarMeta(uid, meta) {
@@ -198,7 +215,12 @@ export async function deletarMeta(uid, id) {
 
 export async function getDividas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'dividas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs
+    .filter(d => d.id && typeof d.id === 'string')
+    .map(d => {
+      const data = d.data();
+      return { ...data, id: d.id, firestoreId: d.id }; // id do Firestore sempre prevalece
+    });
 }
 
 export async function adicionarDivida(uid, divida) {
@@ -213,7 +235,11 @@ export async function atualizarDivida(uid, id, dados) {
 }
 
 export async function deletarDivida(uid, id) {
-  await deleteDoc(doc(db, 'usuarios', uid, 'dividas', id));
+  if (!uid || !id) throw new Error(`uid ou id inválido: uid=${uid} id=${id}`);
+  const ref = doc(db, 'usuarios', uid, 'dividas', String(id));
+  console.log('[deletarDivida] path:', ref.path);
+  await deleteDoc(ref);
+  console.log('[deletarDivida] sucesso');
 }
 
 export { auth, db };
@@ -222,7 +248,7 @@ export { auth, db };
 
 export async function getContas(uid) {
   const snap = await getDocs(collection(db, 'usuarios', uid, 'contas'));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
 }
 
 export async function adicionarConta(uid, conta) {
@@ -256,9 +282,7 @@ export async function verificarEResetarMes(uid) {
 
   // É um mês novo — arquivar movimentações do mês anterior
   if (ultimoMes) {
-    const movsSnap = await getDocs(
-      query(collection(db, 'usuarios', uid, 'movimentacoes'), orderBy('data', 'desc'), orderBy('criadoEm', 'desc'))
-    );
+    const movsSnap = await getDocs(collection(db, 'usuarios', uid, 'movimentacoes'));
     const movs = movsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     if (movs.length > 0) {
@@ -300,4 +324,102 @@ export async function getHistorico(uid) {
   return snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a, b) => b.mes.localeCompare(a.mes));
+}
+
+// ── Modo Empresa ───────────────────────────────────────────────
+
+export async function getEmpresa(uid) {
+  const snap = await getDoc(doc(db, 'usuarios', uid, 'empresa', 'perfil'));
+  return snap.exists() ? snap.data() : null;
+}
+
+export async function salvarEmpresa(uid, dados) {
+  await setDoc(doc(db, 'usuarios', uid, 'empresa', 'perfil'), {
+    ...dados,
+    atualizadoEm: serverTimestamp()
+  }, { merge: true });
+}
+
+// Movimentações da empresa (separadas das pessoais)
+export async function getMovimentacoesEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_movs'));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+      const ta = a.criadoEm?.toMillis?.() || 0;
+      const tb = b.criadoEm?.toMillis?.() || 0;
+      return tb - ta;
+    });
+}
+
+export async function adicionarMovimentacaoEmpresa(uid, mov) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_movs'), {
+    ...mov, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarMovimentacaoEmpresa(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_movs', id), dados);
+}
+
+export async function deletarMovimentacaoEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_movs', id));
+}
+
+export function ouvirMovimentacoesEmpresa(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'empresa_movs'), snap => {
+    const movs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        if (a.data !== b.data) return (b.data || '').localeCompare(a.data || '');
+        const ta = a.criadoEm?.toMillis?.() || 0;
+        const tb = b.criadoEm?.toMillis?.() || 0;
+        return tb - ta;
+      });
+    callback(movs);
+  });
+}
+
+// Produtos da empresa
+export async function getProdutos(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_produtos'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function adicionarProduto(uid, produto) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_produtos'), {
+    ...produto, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarProduto(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_produtos', id), dados);
+}
+
+export async function deletarProduto(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_produtos', id));
+}
+
+// Contas empresa (a pagar/receber)
+export async function getContasEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_contas'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function adicionarContaEmpresa(uid, conta) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_contas'), {
+    ...conta, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarContaEmpresa(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_contas', id), dados);
+}
+
+export async function deletarContaEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_contas', id));
 }
