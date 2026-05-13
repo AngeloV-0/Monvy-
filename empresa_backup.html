@@ -490,32 +490,6 @@
             <div style="font-size:.78rem;font-weight:700;color:var(--white);margin-bottom:8px">Classificação dos gastos</div>
             <div style="display:flex;gap:12px;flex-wrap:wrap" id="caixa-class-items"></div>
           </div>
-          <!-- Filtros -->
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-            <select id="filtro-tipo" onchange="aplicarFiltros()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--gray);font-size:.78rem;font-family:inherit">
-              <option value="">Todos os tipos</option>
-              <option value="entrada">Entradas</option>
-              <option value="saida">Saídas</option>
-            </select>
-            <select id="filtro-categoria" onchange="aplicarFiltros()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--gray);font-size:.78rem;font-family:inherit">
-              <option value="">Todas as categorias</option>
-              <option value="Vendas">Vendas</option>
-              <option value="Serviços">Serviços</option>
-              <option value="Aluguel">Aluguel</option>
-              <option value="Fornecedores">Fornecedores</option>
-              <option value="Marketing">Marketing</option>
-              <option value="Salários">Salários</option>
-              <option value="Impostos">Impostos</option>
-              <option value="Outros">Outros</option>
-            </select>
-            <select id="filtro-classificacao" onchange="aplicarFiltros()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--gray);font-size:.78rem;font-family:inherit">
-              <option value="">Todas as classificações</option>
-              <option value="necessidade">Necessidade</option>
-              <option value="investimento">Investimento</option>
-              <option value="desperdicio">Desperdício</option>
-            </select>
-            <button onclick="limparFiltros()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">Limpar filtros</button>
-          </div>
           <div id="caixa-lista"><div class="vazio">Nenhuma movimentação ainda.</div></div>
         </div>
         <!-- Recorrentes -->
@@ -544,10 +518,7 @@
               <button onclick="abrirModalConta('receber')" style="padding:6px 12px;border-radius:8px;border:1px solid var(--primary);background:transparent;color:var(--primary);font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit">+ Nova</button>
             </div>
             <div id="contas-receber-lista"></div>
-            <div id="risco-inadimplencia" style="display:none;margin-top:12px;padding:12px;border-radius:12px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.06)">
-              <div style="font-size:.78rem;font-weight:700;color:var(--red);margin-bottom:4px">Risco de inadimplência</div>
-              <div id="risco-inadimplencia-conteudo" style="font-size:.78rem;color:var(--gray)"></div>
-            </div>
+            <div id="risco-inadimplencia" style="display:none"></div>
           </div>
         </div>
       </div>
@@ -1064,7 +1035,6 @@
       const d = calcularDados();
       renderKPIs(d);
       renderScore(d);
-      renderScoreDetalhado(d);
       renderDiagnostico(d);
       renderGraficoCaixa(d);
       renderInsightsEmpresa(d);
@@ -1072,7 +1042,6 @@
       renderPontoEquilibrio(d);
       renderCaixa(d);
       renderContas();
-      renderRiscoInadimplencia();
       renderProdutos();
       renderDRE(d);
       renderMetas();
@@ -1800,136 +1769,18 @@ Pergunta do empresário: ${pergunta}`
     };
 
     // ── Exportar ──────────────────────────────────────────────
-    // ── Filtros do Caixa ──────────────────────────────
-    window.aplicarFiltros = function() {
-      const tipo = document.getElementById('filtro-tipo')?.value || '';
-      const cat  = document.getElementById('filtro-categoria')?.value || '';
-      const clas = document.getElementById('filtro-classificacao')?.value || '';
-      const movs = movsDoMes().filter(m =>
-        (!tipo || m.tipo === tipo) &&
-        (!cat  || m.categoria === cat) &&
-        (!clas || m.classificacao === clas)
-      );
-      const lista = document.getElementById('caixa-lista');
-      if (!lista) return;
-      if (!movs.length) { lista.innerHTML='<div class="vazio">Nenhuma movimentação com esses filtros.</div>'; return; }
-      lista.innerHTML=`<table style="width:100%;border-collapse:collapse"><thead><tr style="font-size:.72rem;color:var(--gray);text-transform:uppercase;letter-spacing:.05em"><th style="text-align:left;padding:8px 0;font-weight:600">Descrição</th><th style="text-align:left;padding:8px 0;font-weight:600">Data</th><th style="text-align:left;padding:8px 0;font-weight:600">Categoria</th><th style="text-align:right;padding:8px 0;font-weight:600">Valor</th><th style="width:32px"></th></tr></thead><tbody>${movs.map(m=>`<tr style="border-top:1px solid var(--border)"><td style="padding:10px 0;font-size:.85rem;color:var(--white)">${m.descricao||'–'}</td><td style="padding:10px 0;font-size:.78rem;color:var(--gray)">${formatData(m.data)}</td><td style="padding:10px 0;font-size:.78rem;color:var(--gray)">${m.categoria||'–'}</td><td style="padding:10px 0;font-size:.88rem;font-weight:700;text-align:right;color:${m.tipo==='entrada'?'var(--primary)':'var(--red)'}">　${m.tipo==='entrada'?'+':'−'}${fmt(m.valor)}</td><td style="padding:10px 0;text-align:right"><button onclick="deletarMov('${m.id}')" style="background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:1rem;padding:0 4px">×</button></td></tr>`).join('')}</tbody></table>`;
-    };
-
-    window.limparFiltros = function() {
-      ['filtro-tipo','filtro-categoria','filtro-classificacao'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      const d = calcularDados();
-      renderCaixa(d);
-    };
-
-    // ── Risco inadimplência ───────────────────────────
-    function renderRiscoInadimplencia() {
-      const el  = document.getElementById('risco-inadimplencia');
-      const txt = document.getElementById('risco-inadimplencia-conteudo');
-      if (!el || !txt) return;
-      const hoje = new Date().toISOString().slice(0,10);
-      const pendentes = contas.filter(c=>!c.paga&&c.tipo==='receber');
-      const vencidas  = pendentes.filter(c=>c.vencimento<hoje);
-      if (!pendentes.length) { el.style.display='none'; return; }
-      const totPend = pendentes.reduce((s,c)=>s+(c.valor||0),0);
-      const totVenc = vencidas.reduce((s,c)=>s+(c.valor||0),0);
-      const pct = totPend>0?Math.round(totVenc/totPend*100):0;
-      if (pct === 0) { el.style.display='none'; return; }
-      el.style.display='block';
-      const diasMedio = vencidas.length > 0
-        ? Math.round(vencidas.reduce((s,c)=>{const d=new Date(hoje)-new Date(c.vencimento);return s+(d/(1000*60*60*24));},0)/vencidas.length)
-        : 0;
-      txt.innerHTML = `
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px">
-          <div><div style="font-size:.72rem;color:var(--gray)">Total pendente</div><div style="font-weight:700;color:var(--white)">${fmt(totPend)}</div></div>
-          <div><div style="font-size:.72rem;color:var(--gray)">Vencido</div><div style="font-weight:700;color:var(--red)">${pct}% (${fmt(totVenc)})</div></div>
-          ${diasMedio>0?`<div><div style="font-size:.72rem;color:var(--gray)">Tempo médio atraso</div><div style="font-weight:700;color:var(--yellow)">${diasMedio} dias</div></div>`:''}
-        </div>`;
-    }
-
-    // ── Score detalhado ───────────────────────────────
-    function renderScoreDetalhado(d) {
-      const score = calcularScore(d);
-      const criterios = [
-        {nome:'Margem de lucro', val: d.margem>=30?'Boa':d.margem>=15?'Regular':'Baixa', ok: d.margem>=30, warn: d.margem>=15},
-        {nome:'Caixa saudável', val: d.saldo>0?'Positivo':'Negativo', ok: d.saldo>0, warn: false},
-        {nome:'Contas em dia', val: contas.filter(c=>!c.paga&&c.tipo==='pagar'&&new Date(c.vencimento)<new Date()).length===0?'Em dia':'Com atraso', ok: contas.filter(c=>!c.paga&&c.tipo==='pagar'&&new Date(c.vencimento)<new Date()).length===0, warn: false},
-        {nome:'Ponto de equilíbrio', val: d.totalFixos>0&&d.entradas>=d.totalFixos?'Atingido':'Não atingido', ok: d.totalFixos>0&&d.entradas>=d.totalFixos, warn: d.totalFixos===0},
-        {nome:'Metas ativas', val: metas.length>0?metas.length+' meta(s)':'Sem metas', ok: metas.length>0, warn: false},
-      ];
-      const desc = document.getElementById('score-desc');
-      if (desc) {
-        desc.innerHTML = criterios.map(c=>`<span style="font-size:.72rem;padding:2px 8px;border-radius:99px;margin-right:4px;margin-top:4px;display:inline-block;background:${c.ok?'rgba(34,197,94,0.1)':c.warn?'rgba(255,255,255,0.06)':'rgba(239,68,68,0.1)'};color:${c.ok?'var(--primary)':c.warn?'var(--gray)':'var(--red)'}">${c.nome}: ${c.val}</span>`).join('');
-      }
-    }
-
     window.exportarCSV = function() {
-      const movs = movsDoMes();
+      const movs=movsDoMes();
       if(!movs.length){alert('Nenhuma movimentação para exportar.');return;}
-      const d = calcularDados();
-      const bom = '\uFEFF'; // BOM para Excel reconhecer UTF-8
-      const linhas = [
-        `# Relatório de Caixa — ${getMesAtual()}`,
-        `# Negócio: ${empresa.nomeNegocio||'Meu negócio'}`,
-        `# Faturamento: ${d.entradas.toFixed(2)} | Custos: ${d.saidas.toFixed(2)} | Lucro: ${d.lucro.toFixed(2)} | Margem: ${d.margem.toFixed(1)}%`,
-        '',
-        'Descrição,Tipo,Valor,Data,Categoria,Classificação,Forma de Pagamento',
-        ...movs.map(m=>`"${m.descricao||''}","${m.tipo==='entrada'?'Entrada':'Saída'}","${(m.valor||0).toFixed(2)}","${m.data||''}","${m.categoria||''}","${m.classificacao||''}","${m.forma||''}"`)
-      ];
-      const blob = new Blob([bom+linhas.join('\n')], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `monvay-caixa-${getMesAtual()}.csv`; a.click();
+      const lines=['Descrição,Tipo,Valor,Data,Categoria,Classificação,Forma',...movs.map(m=>`"${m.descricao||''}","${m.tipo}","${(m.valor||0).toFixed(2)}","${m.data||''}","${m.categoria||''}","${m.classificacao||''}","${m.forma||''}"`)];
+      const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=`caixa-${getMesAtual()}.csv`; a.click();
       URL.revokeObjectURL(url);
     };
 
     window.exportarRelatorio = function() {
-      const d = calcularDados(getMesStr(mesRelatorio));
-      const mN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const mesLabel = `${mN[mesRelatorio.getMonth()]} ${mesRelatorio.getFullYear()}`;
-      const movs = movimentacoes.filter(m=>(m.data||'').startsWith(getMesStr(mesRelatorio)));
-      const topG = [...movs].filter(m=>m.tipo==='saida').sort((a,b)=>b.valor-a.valor).slice(0,5);
-      const topE = [...movs].filter(m=>m.tipo==='entrada').sort((a,b)=>b.valor-a.valor).slice(0,5);
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório ${mesLabel}</title>
-      <style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a;max-width:800px;margin:0 auto}
-      h1{color:#22c55e;font-size:1.4rem;margin-bottom:4px}
-      .sub{color:#64748b;font-size:.85rem;margin-bottom:24px}
-      .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-      .kpi{border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center}
-      .kpi-label{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-      .kpi-val{font-size:1.2rem;font-weight:800}
-      .verde{color:#22c55e}.vermelho{color:#ef4444}
-      table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:20px}
-      th{text-align:left;padding:8px;border-bottom:2px solid #e2e8f0;font-size:.72rem;text-transform:uppercase;color:#64748b}
-      td{padding:8px;border-bottom:1px solid #f1f5f9}
-      h3{font-size:.9rem;margin:20px 0 10px;color:#0f172a}
-      .footer{margin-top:32px;font-size:.72rem;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:16px}
-      </style></head><body>
-      <h1>Relatório Financeiro — ${empresa.nomeNegocio||'Meu negócio'}</h1>
-      <div class="sub">${mesLabel} · Gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
-      <div class="kpi-row">
-        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-val verde">R$ ${d.entradas.toFixed(2)}</div></div>
-        <div class="kpi"><div class="kpi-label">Custos</div><div class="kpi-val vermelho">R$ ${d.saidas.toFixed(2)}</div></div>
-        <div class="kpi"><div class="kpi-label">Lucro líquido</div><div class="kpi-val ${d.lucro>=0?'verde':'vermelho'}">R$ ${d.lucro.toFixed(2)}</div></div>
-        <div class="kpi"><div class="kpi-label">Margem</div><div class="kpi-val ${d.margem>=30?'verde':'vermelho'}">${d.margem.toFixed(1)}%</div></div>
-      </div>
-      <h3>Top 5 maiores gastos</h3>
-      <table><tr><th>Descrição</th><th>Data</th><th>Categoria</th><th style="text-align:right">Valor</th></tr>
-      ${topG.map(m=>`<tr><td>${m.descricao||'–'}</td><td>${m.data||'–'}</td><td>${m.categoria||'–'}</td><td style="text-align:right;color:#ef4444;font-weight:700">R$ ${(m.valor||0).toFixed(2)}</td></tr>`).join('')}
-      </table>
-      <h3>Top 5 maiores entradas</h3>
-      <table><tr><th>Descrição</th><th>Data</th><th>Categoria</th><th style="text-align:right">Valor</th></tr>
-      ${topE.map(m=>`<tr><td>${m.descricao||'–'}</td><td>${m.data||'–'}</td><td>${m.categoria||'–'}</td><td style="text-align:right;color:#22c55e;font-weight:700">R$ ${(m.valor||0).toFixed(2)}</td></tr>`).join('')}
-      </table>
-      <div class="footer">Relatório gerado pelo Monvay · monvay.com.br</div>
-      </body></html>`;
-      const w = window.open('','_blank');
-      w.document.write(html);
-      w.document.close();
-      setTimeout(()=>w.print(), 500);
+      window.print();
     };
 
     window.exportarDRE = function() {

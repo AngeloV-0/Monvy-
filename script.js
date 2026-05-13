@@ -409,8 +409,30 @@ function atualizarChart(){
   const w=(container?container.offsetWidth:null)||canvas.parentElement?.offsetWidth||canvas.offsetWidth||600;
   canvas.width=w;
   canvas.height=180;
-  const lista=fluxoModo==='recentes'?movimentacoes.slice(0,10):movimentacoes;
-  const listaRev=[...lista].reverse();
+  // Recentes: últimas 10 movimentações (últimos 8 dias ou mais recentes se fora do range)
+  // Todas: mês atual completo
+  let lista;
+  if(fluxoModo==='recentes'){
+    // Tenta pegar últimos 8 dias
+    const corte=new Date(); corte.setDate(corte.getDate()-7); corte.setHours(0,0,0,0);
+    lista=movimentacoes.filter(m=>m.data&&new Date(m.data+'T00:00:00')>=corte);
+    // Fallback: pega as 10 mais recentes se não houver dados nos últimos 8 dias
+    if(lista.length===0) lista=[...movimentacoes].slice(0,10);
+  } else {
+    // Mês atual
+    const hoje=new Date();
+    const anoMes=`${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}`;
+    lista=movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+    if(lista.length===0) lista=[...movimentacoes];
+  }
+  // Ordenar do mais antigo para o mais recente
+  const listaRev=[...lista].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  // Atualizar subtítulo
+  const subEl=document.getElementById('fluxo-sub');
+  if(subEl){
+    const diasLabel = fluxoModo==='recentes' ? `Últimos 8 dias` : `Este mês`;
+    subEl.textContent=`${diasLabel} (${listaRev.length} ${listaRev.length===1?'movimentação':'movimentações'})`;
+  }
   const labels=listaRev.map((m,i)=>m.data?fmtData(m.data).slice(0,5):`#${i+1}`);
   const datas=listaRev.map(m=>m.data?fmtData(m.data):'');
   const nomes=listaRev.map(m=>m.descricao||m.categoria||'Movimentação');

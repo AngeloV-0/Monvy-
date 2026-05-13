@@ -242,6 +242,35 @@ export async function deletarDivida(uid, id) {
   console.log('[deletarDivida] sucesso');
 }
 
+// ── Recorrentes Empresa (Firestore) ───────────────────────────────
+export async function getRecorrentesEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_recorrentes'));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+}
+
+export async function adicionarRecorrenteEmpresa(uid, rec) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_recorrentes'), {
+    ...rec, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function deletarRecorrenteEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_recorrentes', String(id)));
+}
+
+// ── Notificações Empresa ───────────────────────────────────────────
+export async function salvarNotificacaoEmpresa(uid, notif) {
+  await addDoc(collection(db, 'usuarios', uid, 'empresa_notificacoes'), {
+    ...notif, criadoEm: serverTimestamp(), lida: false
+  });
+}
+
+export async function getNotificacoesEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_notificacoes'));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+}
+
 export { auth, db };
 
 // ── Contas a Pagar ────────────────────────────────────────────

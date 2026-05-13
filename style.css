@@ -658,15 +658,15 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  border-radius: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: var(--surface-2);
-  border: none;
-  transition: background 0.15s;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
   animation: fadeUp 0.25s ease;
 }
 
-.mov-item:hover { background: var(--surface-3); }
+.mov-item:hover { border-color: var(--border-hover); }
 
 .mov-left { display: flex; align-items: center; gap: 10px; }
 
