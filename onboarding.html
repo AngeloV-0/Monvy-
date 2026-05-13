@@ -136,35 +136,6 @@
       position: absolute;
       top: 8px; right: 8px;
     }
-    .ob-opt.ob-opt-logo {
-      padding: 10px 8px 10px;
-      gap: 6px;
-    }
-    .ob-logo-wrap {
-      width: 100%;
-      height: 60px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: #000;
-    }
-    .ob-logo-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .ob-opt.ob-opt-logo .ob-opt-label {
-      font-size: .72rem;
-      color: var(--gray, #94a3b8);
-      font-weight: 500;
-    }
-    .ob-opt.selected.ob-opt-logo .ob-opt-label { color: var(--primary, #00c853); }
-    .ob-opt.selected.ob-opt-logo .ob-logo-wrap {
-      box-shadow: 0 0 0 2px var(--primary, #00c853);
-    }
     .ob-opt { position: relative; }
     .ob-opt.selected .ob-check { display: flex; }
     /* Dívidas step */
@@ -324,13 +295,11 @@
         <div class="ob-step-dot" id="dot-2"></div>
         <div class="ob-step-dot" id="dot-3"></div>
         <div class="ob-step-dot" id="dot-4"></div>
-        <div class="ob-step-dot" id="dot-5"></div>
-        <div class="ob-step-dot" id="dot-6"></div>
       </div>
 
       <!-- STEP 0: Moradia -->
       <div class="ob-step active" id="step-0">
-        <div class="ob-step-label">Passo 1 de 7 · Moradia</div>
+        <div class="ob-step-label">Passo 1 de 5 · Moradia</div>
         <div class="ob-title">Onde você mora?</div>
         <div class="ob-subtitle">Isso ajuda a adaptar suas categorias de gastos automaticamente.</div>
         <div class="ob-options cols-2">
@@ -363,7 +332,7 @@
 
       <!-- STEP 1: Transporte -->
       <div class="ob-step" id="step-1">
-        <div class="ob-step-label">Passo 2 de 7 · Transporte</div>
+        <div class="ob-step-label">Passo 2 de 5 · Transporte</div>
         <div class="ob-title">Como você se locomove?</div>
         <div class="ob-subtitle">Pode marcar mais de uma opção.</div>
         <div class="ob-options cols-3" id="transporte-opts">
@@ -402,7 +371,7 @@
 
       <!-- STEP 2: Família -->
       <div class="ob-step" id="step-2">
-        <div class="ob-step-label">Passo 3 de 7 · Família</div>
+        <div class="ob-step-label">Passo 3 de 5 · Família</div>
         <div class="ob-title">Sua situação familiar</div>
         <div class="ob-subtitle">Ajuda a sugerir categorias como educação e saúde infantil.</div>
         <div class="ob-options cols-2" style="margin-bottom:16px">
@@ -435,7 +404,7 @@
 
       <!-- STEP 3: Dívidas -->
       <div class="ob-step" id="step-3">
-        <div class="ob-step-label">Passo 4 de 7 · Dívidas</div>
+        <div class="ob-step-label">Passo 4 de 5 · Dívidas</div>
         <div class="ob-title">Você tem dívidas ativas?</div>
         <div class="ob-subtitle">Informe os valores aproximados. Isso é só para o Monvay te ajudar melhor.</div>
         <div class="ob-divida-form">
@@ -489,7 +458,7 @@
 
       <!-- STEP 4: Renda -->
       <div class="ob-step" id="step-4">
-        <div class="ob-step-label">Passo 5 de 7 · Renda</div>
+        <div class="ob-step-label">Passo 5 de 5 · Renda</div>
         <div class="ob-title">Qual sua renda mensal?</div>
         <div class="ob-subtitle">Usamos isso para sugerir metas e limites por categoria. Você pode mudar depois.</div>
         <div class="ob-renda-input-wrap" style="margin-bottom:16px">
@@ -502,158 +471,6 @@
           <div class="ob-opt" onclick="setRenda(4000)"><div class="ob-opt-label">R$ 2.500–5.000</div></div>
           <div class="ob-opt" onclick="setRenda(7000)"><div class="ob-opt-label">acima de R$ 5.000</div></div>
         </div>
-      </div>
-
-      <!-- STEP 5: Rotina / Atividade Física e Conectividade -->
-      <div class="ob-step" id="step-5">
-        <div class="ob-step-label">Passo 6 de 7 · Rotina</div>
-        <div class="ob-title">O que faz parte da sua rotina?</div>
-        <div class="ob-subtitle">Isso permite detectar seus gastos fixos automaticamente.</div>
-        <div style="font-size:.8rem;color:var(--gray,#64748b);margin-bottom:8px;font-weight:600"><img src="icone-academia.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"> ️ Atividade física</div>
-        <div class="ob-options cols-3" style="margin-bottom:14px">
-          <div class="ob-opt" onclick="selecionarMulti(this,'rotina','academia')">
-            <div class="ob-opt-label"><img src="icone-academia.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px">Academia</div><div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt" onclick="selecionarMulti(this,'rotina','luta')">
-            <div class="ob-opt-label"><img src="icone-luta.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px">Luta/Arte marcial</div><div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt" onclick="selecionarMulti(this,'rotina','futebol')">
-            <div class="ob-opt-label"><img src="icone-futebol.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px">Futebol/Esporte</div><div class="ob-check">✓</div>
-          </div>
-        </div>
-        <div style="font-size:.8rem;color:var(--gray,#64748b);margin-bottom:8px;font-weight:600"><img src="icone-internet.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle">  Conectividade</div>
-        <div class="ob-options cols-3">
-          <div class="ob-opt" onclick="selecionarMulti(this,'rotina','internet')">
-            <div class="ob-opt-label"><img src="icone-internet.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px">Internet em casa</div><div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt" onclick="selecionarMulti(this,'rotina','celular')">
-            <div class="ob-opt-label"><img src="icone-celular.png" style="width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:4px">Plano de celular</div><div class="ob-check">✓</div>
-          </div>
-        </div>
-        <div style="margin-top:10px;font-size:.78rem;color:var(--gray,#64748b);text-align:center">Pode pular se não tiver nenhum.</div>
-      </div>
-
-      <!-- STEP 6: Assinaturas -->
-      <div class="ob-step" id="step-6">
-        <div class="ob-step-label">Passo 7 de 7 · Assinaturas</div>
-        <div class="ob-title">Quais serviços você assina?</div>
-        <div class="ob-subtitle">Marque tudo que paga mensalmente.</div>
-        <div style="font-size:.8rem;color:var(--gray,#64748b);margin-bottom:8px;font-weight:600"><img src="icone-streaming.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle">  Streaming e entretenimento</div>
-        <div class="ob-options cols-3" style="margin-bottom:14px">
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','netflix')">
-            <div class="ob-logo-wrap">
-              <img src="logo-netflix.png" alt="Netflix">
-            </div>
-            <div class="ob-opt-label">Netflix</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','disney')">
-            <div class="ob-logo-wrap">
-              <img src="logo-disney.png" alt="Disney+">
-            </div>
-            <div class="ob-opt-label">Disney+</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','hbo')">
-            <div class="ob-logo-wrap">
-              <img src="logo-hbo.png" alt="HBO Max">
-            </div>
-            <div class="ob-opt-label">Max (HBO)</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','prime')">
-            <div class="ob-logo-wrap" style="background:#1a2535">
-              <svg viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="width:85%;height:65%">
-                <text x="10" y="42" font-family="Arial,sans-serif" font-weight="700" font-size="34" fill="#fff">prime</text>
-                <text x="10" y="58" font-family="Arial,sans-serif" font-weight="400" font-size="14" fill="#00A8E1" letter-spacing="3">VIDEO</text>
-                <path d="M134 52 Q158 68 182 52" stroke="#00A8E1" stroke-width="4" fill="none" stroke-linecap="round"/>
-                <polygon points="182,52 178,44 186,48" fill="#00A8E1"/>
-              </svg>
-            </div>
-            <div class="ob-opt-label">Prime Video</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','spotify')">
-            <div class="ob-logo-wrap">
-              <img src="logo-spotify.png" alt="Spotify">
-            </div>
-            <div class="ob-opt-label">Spotify</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','youtube')">
-            <div class="ob-logo-wrap">
-              <img src="logo-youtube.png" alt="YouTube Premium">
-            </div>
-            <div class="ob-opt-label">YouTube Premium</div>
-            <div class="ob-check">✓</div>
-          </div>
-        </div>
-        <!-- Adicionar streaming customizado -->
-        <div id="ob-custom-streaming-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
-        <div style="display:flex;gap:6px;margin-bottom:14px">
-          <input id="ob-custom-streaming-input" type="text" placeholder="+ Outro streaming..." maxlength="30"
-            style="flex:1;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.15);border-radius:10px;padding:9px 12px;color:var(--white,#f1f5f9);font-size:.8rem;outline:none;font-family:inherit"
-            onkeydown="if(event.key==='Enter'){adicionarCustom('streaming',this)}"
-            onfocus="this.style.borderColor='rgba(0,200,83,0.5)'"
-            onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
-          <button onclick="adicionarCustom('streaming',document.getElementById('ob-custom-streaming-input'))"
-            style="background:rgba(0,200,83,0.15);border:1.5px solid rgba(0,200,83,0.3);border-radius:10px;padding:9px 14px;color:var(--primary,#00c853);font-size:.85rem;cursor:pointer;font-weight:700">+</button>
-        </div>
-
-        <div style="font-size:.8rem;color:var(--gray,#64748b);margin-bottom:8px;font-weight:600"><img src="icone-outros.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle"> ️ Ferramentas</div>
-        <div class="ob-options cols-3" style="margin-bottom:14px">
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','chatgpt')">
-            <div class="ob-logo-wrap">
-              <img src="logo-chatgpt.png" alt="ChatGPT Plus">
-            </div>
-            <div class="ob-opt-label">ChatGPT Plus</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','notion')">
-            <div class="ob-logo-wrap">
-              <img src="logo-notion.png" alt="Notion">
-            </div>
-            <div class="ob-opt-label">Notion</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','canva')">
-            <div class="ob-logo-wrap">
-              <img src="logo-canva.png" alt="Canva">
-            </div>
-            <div class="ob-opt-label">Canva</div>
-            <div class="ob-check">✓</div>
-          </div>
-          <div class="ob-opt ob-opt-logo" onclick="selecionarMulti(this,'rotina','capcut')">
-            <div class="ob-logo-wrap">
-              <img src="logo-capcut.png" alt="CapCut">
-            </div>
-            <div class="ob-opt-label">CapCut</div>
-            <div class="ob-check">✓</div>
-          </div>
-        </div>
-        <!-- Adicionar ferramenta customizada -->
-        <div id="ob-custom-ferramenta-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;margin-bottom:6px"></div>
-        <div style="display:flex;gap:6px;margin-bottom:4px">
-          <input id="ob-custom-ferramenta-input" type="text" placeholder="+ Outra ferramenta..." maxlength="30"
-            style="flex:1;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.15);border-radius:10px;padding:9px 12px;color:var(--white,#f1f5f9);font-size:.8rem;outline:none;font-family:inherit"
-            onkeydown="if(event.key==='Enter'){adicionarCustom('ferramenta',this)}"
-            onfocus="this.style.borderColor='rgba(0,200,83,0.5)'"
-            onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
-          <button onclick="adicionarCustom('ferramenta',document.getElementById('ob-custom-ferramenta-input'))"
-            style="background:rgba(0,200,83,0.15);border:1.5px solid rgba(0,200,83,0.3);border-radius:10px;padding:9px 14px;color:var(--primary,#00c853);font-size:.85rem;cursor:pointer;font-weight:700">+</button>
-        </div>
-        <div style="margin-top:10px;font-size:.78rem;color:var(--gray,#64748b);text-align:center">Pode pular se não assinar nenhum.</div>
-      </div>
-
-      <!-- STEP 7: Resumo Final -->
-      <div id="step-resumo" style="display:none">
-        <div style="text-align:center;padding:8px 0 16px">
-          <div style="font-size:2rem;margin-bottom:8px"><img src="icone-trofeu.png" style="width:40px;height:40px;object-fit:contain"></div>
-          <div class="ob-title" style="margin-bottom:6px">Tudo pronto!</div>
-          <div class="ob-subtitle" id="ob-resumo-subtitulo">Seu perfil foi configurado com sucesso.</div>
-        </div>
-        <div id="ob-resumo-lista" style="margin-bottom:20px"></div>
-        <button class="ob-btn-next" style="width:100%" onclick="irParaApp()">Entrar no Monvay →</button>
       </div>
 
       <!-- Botões de navegação -->
@@ -674,21 +491,8 @@
     let currentUser = null;
     // Guardar a Promise para que salvarESair() possa aguardar o auth estar pronto
     const authPronto = new Promise(resolve => {
-      let _authTimer = null;
-      // Novo usuário recém-cadastrado: aguardar mais tempo para Firebase propagar sessão
-      const isNovoUsuario = sessionStorage.getItem('monvay_novo_usuario') === '1';
-      const tempoEspera = isNovoUsuario ? 10000 : 5000;
-
       onAuth(user => {
-        if (_authTimer) { clearTimeout(_authTimer); _authTimer = null; }
-        if (!user) {
-          _authTimer = setTimeout(() => {
-            window.location.replace('auth.html');
-          }, tempoEspera);
-          return;
-        }
-        // Limpar flag de novo usuário
-        try { sessionStorage.removeItem('monvay_novo_usuario'); } catch(_) {}
+        if (!user) { window.location.href = 'auth.html'; return; }
         currentUser = user;
         resolve(user);
       });
@@ -699,28 +503,8 @@
     document.documentElement.setAttribute('data-theme', tema);
 
     let stepAtual = 0;
-    const totalSteps = 7;
-    const perfil = { moradia: null, transporte: [], filhos: null, familia: [], dividas: {}, renda: null, rotina: [] };
-
-    // Adicionar streaming/ferramenta customizado
-    window.adicionarCustom = function(tipo, input) {
-      const nome = input.value.trim();
-      if (!nome) return;
-      const chave = 'custom_' + nome.toLowerCase().replace(/\s+/g,'_');
-      if (perfil.rotina.includes(chave)) { input.value=''; return; }
-      perfil.rotina.push(chave);
-      const tagsEl = document.getElementById('ob-custom-' + tipo + '-tags');
-      const tag = document.createElement('div');
-      tag.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:rgba(0,200,83,0.15);border:1px solid rgba(0,200,83,0.4);border-radius:20px;padding:4px 10px;font-size:.78rem;color:var(--primary,#00c853);cursor:pointer';
-      tag.innerHTML = `<span>${nome}</span><span onclick="removerCustom('${chave}','${tipo}',this.parentElement)" style="font-size:.9rem;line-height:1;opacity:.7">×</span>`;
-      tagsEl.appendChild(tag);
-      input.value = '';
-    };
-
-    window.removerCustom = function(chave, tipo, tagEl) {
-      perfil.rotina = perfil.rotina.filter(r => r !== chave);
-      tagEl.remove();
-    };
+    const totalSteps = 5;
+    const perfil = { moradia: null, transporte: [], filhos: null, familia: [], dividas: {}, renda: null };
 
     window.selecionar = function(el, campo, valor) {
       const parent = el.closest('.ob-options');
@@ -771,7 +555,7 @@
         else if (i < stepAtual) dot.classList.add('done');
       }
       document.getElementById('ob-back').style.display = stepAtual > 0 ? 'block' : 'none';
-      document.getElementById('ob-next').textContent = stepAtual === totalSteps - 1 ? 'Concluir →' : 'Continuar →';
+      document.getElementById('ob-next').textContent = stepAtual === totalSteps - 1 ? 'Concluir e entrar →' : 'Continuar →';
     }
 
     window.avancarStep = function() {
@@ -804,9 +588,11 @@
       coletarDividas();
       perfil.renda = parseFloat(document.getElementById('ob-renda').value) || perfil.renda;
 
+      // Salvar localmente imediatamente como garantia
       localStorage.setItem('monvy_perfil_vida', JSON.stringify(perfil));
       localStorage.setItem('monvy_onboarding_done', '1');
 
+      // Aguardar auth estar pronto (resolve na maioria dos casos em < 1s)
       const user = currentUser || await Promise.race([
         authPronto,
         new Promise(r => setTimeout(() => r(null), 3000))
@@ -817,65 +603,19 @@
           await salvarPerfilVida(user.uid, perfil);
           await marcarOnboardingFeito(user.uid);
         } catch(e) {
+          // Já salvou no localStorage acima — apenas loga o erro
           console.warn('Erro ao salvar no Firestore, dados mantidos localmente:', e);
         }
       }
-
-      // Mostrar tela de resumo antes de entrar no app
-      mostrarResumoOnboarding(perfil);
+      window.location.href = 'index.html';
     }
-
-    function mostrarResumoOnboarding(p) {
-      // Esconder step atual e botões de navegação
-      document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
-      const resumoEl = document.getElementById('step-resumo');
-      if (resumoEl) resumoEl.style.display = 'block';
-      const footer = document.getElementById('ob-footer');
-      if (footer) footer.style.display = 'none';
-      const skip = document.getElementById('ob-skip');
-      if (skip) skip.style.display = 'none';
-
-      // Montar lista de gastos detectados
-      const rotina = p.rotina || [];
-      const nomes = {
-        academia: 'Academia', luta: 'Aula de luta/arte marcial', futebol: 'Esporte/futebol',
-        internet: 'Internet em casa', celular: 'Plano de celular',
-        netflix: 'Netflix', disney: 'Disney+', hbo: 'Max (HBO)', prime: 'Prime Video',
-        spotify: 'Spotify', youtube: 'YouTube Premium',
-        chatgpt: 'ChatGPT Plus', notion: 'Notion', adobe: 'Adobe CC', office: 'Office 365',
-      };
-      const lista = document.getElementById('ob-resumo-lista');
-      const subtitulo = document.getElementById('ob-resumo-subtitulo');
-
-      if (rotina.length === 0) {
-        if (subtitulo) subtitulo.textContent = 'Seu perfil foi configurado. Você pode ajustar suas categorias a qualquer momento.';
-        if (lista) lista.innerHTML = '';
-      } else {
-        if (subtitulo) subtitulo.textContent = `Detectamos ${rotina.length} item(ns) de rotina no seu perfil. O Monvay vai sugerir categorias e lembretes automaticamente.`;
-        if (lista) {
-          lista.innerHTML = rotina.map(r => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:10px;margin-bottom:8px;font-size:.88rem">
-              <span style="color:#22c55e;font-size:1rem">✓</span>
-              <span>${nomes[r] || r}</span>
-            </div>`).join('');
-        }
-      }
-    }
-
-    window.irParaApp = async function() {
-      if (currentUser) {
-        try { await marcarOnboardingFeito(currentUser.uid); } catch(e) {}
-      }
-      localStorage.setItem('monvy_onboarding_done', '1');
-      window.location.replace('index.html');
-    };
 
     window.pularOnboarding = async function() {
       if (currentUser) {
         try { await marcarOnboardingFeito(currentUser.uid); } catch(e) {}
       }
       localStorage.setItem('monvy_onboarding_done', '1');
-      window.location.replace('index.html');
+      window.location.href = 'index.html';
     };
   </script>
 </body>

@@ -20,17 +20,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=31">
 
-  <script src="chart.min.js"></script>
-
 </head>
 <body>
-
-  <!-- App loading overlay - shown while Firebase checks session -->
-  <div id="app-loading-overlay" style="display:none;position:fixed;inset:0;background:var(--bg,#0A0F1A);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:14px">
-    <img src="logo.png" alt="Monvay" style="height:40px;width:auto;opacity:.8">
-    <div style="width:36px;height:36px;border:3px solid rgba(34,197,94,0.15);border-top-color:#22C55E;border-radius:50%;animation:appSpin .8s linear infinite"></div>
-    <style>@keyframes appSpin{to{transform:rotate(360deg)}}</style>
-  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -67,10 +58,6 @@
       </a>
     </nav>
     <div class="sidebar-bottom">
-      <a href="onboarding_empresa.html" class="nav-item" title="Modo Empresa" data-tooltip="Modo Empresa" id="nav-empresa-btn" style="position:relative">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        <span style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#22C55E;border:2px solid var(--sidebar-bg)"></span>
-      </a>
       <a href="#" class="nav-item" title="Sair" onclick="logout()" style="color:var(--gray);margin-bottom:8px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </a>
@@ -102,12 +89,12 @@
       <div class="topbar-center" style="position:relative">
         <div class="search-bar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="search-input" placeholder="Buscar em tudo..." oninput="buscarMovimentacoes(this.value)" autocomplete="off" onfocus="if(this.value.trim()) mostrarDropdownBusca(this.value)" style="background:transparent!important;border:none!important;outline:none!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important;width:100%;color:inherit;font-family:inherit;font-size:0.88rem;">
+          <input type="text" id="search-input" placeholder="Buscar movimentações..." oninput="buscarMovimentacoes(this.value)" autocomplete="off" onfocus="if(this.value.trim()) mostrarDropdownBusca(this.value)" style="background:transparent!important;border:none!important;outline:none!important;box-shadow:none!important;padding:0!important;margin:0!important;border-radius:0!important;width:100%;color:inherit;font-family:inherit;font-size:0.88rem;">
           <button id="search-clear" onclick="limparBusca()" style="display:none;background:none;border:none;cursor:pointer;color:var(--gray);padding:0 4px;font-size:1.05rem;line-height:1;opacity:.7">✕</button>
         </div>
         <div id="search-dropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:440px;max-width:min(440px,90vw);background:var(--card-bg,#1a1a2e);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;overflow:hidden">
           <div id="search-results-header" style="padding:10px 16px 8px;font-size:.75rem;color:var(--gray);border-bottom:1px solid var(--border)"></div>
-          <div id="search-results-list" style="max-height:480px;overflow-y:auto"></div>
+          <div id="search-results-list" style="max-height:360px;overflow-y:auto"></div>
         </div>
       </div>
       <div class="topbar-right">
@@ -137,7 +124,7 @@
     <div class="search-mobile-overlay" id="search-mobile-overlay" style="display:none">
       <div class="search-bar" style="flex:1;max-width:100%">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="search-input-mobile" placeholder="Buscar em tudo..." oninput="buscarMovimentacoes(this.value)" autocomplete="off">
+        <input type="text" id="search-input-mobile" placeholder="Buscar movimentações..." oninput="buscarMovimentacoes(this.value)" autocomplete="off">
         <button id="search-clear-mobile" onclick="limparBusca()" style="display:none;background:none;border:none;cursor:pointer;color:var(--gray);padding:0 4px;font-size:1.05rem;line-height:1;opacity:.7">✕</button>
       </div>
       <button class="search-mobile-close" onclick="fecharBuscaMobile()">✕</button>
@@ -157,35 +144,6 @@
           <button class="dica-dia-close" onclick="this.closest('.dica-dia-card').style.display='none'" title="Fechar">×</button>
         </div>
 
-        <!-- Banner Modo Empresa -->
-        <div id="banner-empresa" style="display:none;margin-bottom:16px">
-          <div style="position:relative;padding:18px 20px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.25);border-radius:16px">
-            <!-- Botão X — fecha mas pode voltar depois -->
-            <button onclick="fecharBannerEmpresa('talvez')" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px" title="Fechar">×</button>
-            <!-- Conteúdo -->
-            <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-              <img src="icone-marketing.png" alt="Empresa" style="width:46px;height:46px;object-fit:contain;border-radius:10px;flex-shrink:0">
-              <div>
-                <div style="font-size:.92rem;font-weight:700;color:var(--white);margin-bottom:4px">Você tem um negócio ou empresa?</div>
-                <div style="font-size:.78rem;color:var(--gray);line-height:1.5">O Monvay tem um modo especial para ajudar você a controlar as finanças do seu negócio. Você teria interesse?</div>
-              </div>
-            </div>
-            <!-- Botões de resposta -->
-            <div style="display:flex;gap:10px">
-              <button onclick="fecharBannerEmpresa('sim')"
-                style="flex:1;padding:10px;background:var(--primary);color:#000;border:none;border-radius:11px;font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer;transition:filter .2s"
-                onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'">
-                Sim, quero conhecer →
-              </button>
-              <button onclick="fecharBannerEmpresa('nao')"
-                style="flex:1;padding:10px;background:rgba(255,255,255,0.06);color:var(--gray);border:1px solid var(--border);border-radius:11px;font-size:.88rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s"
-                onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">
-                Não, obrigado
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- KPI Row -->
         <div class="kpi-row">
           <div class="kpi-card primary-card">
@@ -195,25 +153,25 @@
 
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon green" style="background:rgba(34,197,94,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" style="width:26px;height:26px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+            <div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
             <div class="kpi-label">Entradas</div>
             <div class="kpi-value green" id="kpi-entradas">R$ 0,00</div>
             <div class="kpi-sub">no período</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon red" style="background:rgba(239,68,68,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="width:26px;height:26px"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
+            <div class="kpi-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg></div>
             <div class="kpi-label">Saídas</div>
             <div class="kpi-value red" id="kpi-saidas">R$ 0,00</div>
             <div class="kpi-sub">no período</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon yellow" style="background:rgba(245,158,11,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" style="width:26px;height:26px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="kpi-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <div class="kpi-label">Movimentações</div>
             <div class="kpi-value yellow" id="kpi-movs">0</div>
             <div class="kpi-sub">registradas</div>
           </div>
           <div class="kpi-card score-mini-card" onclick="(window.irPara||irPara)('score')" style="cursor:pointer;position:relative;overflow:hidden">
-            <div class="kpi-icon yellow" id="kpi-score-mini-icon"><img src="icone-score-estavel.png" id="kpi-score-mini-img" alt="Score" style="width:40px;height:40px;object-fit:contain"></div>
+            <div id="kpi-score-mini-badge" style="margin-bottom:10px;"><div class="kpi-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div></div>
             <div class="kpi-label">Score Financeiro</div>
             <div class="kpi-value" id="kpi-score-mini" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">–</div>
             <div class="kpi-sub" id="kpi-score-mini-label">Ver detalhes →</div>
@@ -228,10 +186,7 @@
               <div class="card-title"><img src="icone-urgente.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:8px;margin-top:-2px"> O que fazer agora</div>
               <div class="card-sub">Insights personalizados para você</div>
             </div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
-              <button onclick="ocultarInsights()" title="Ocultar" style="background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;line-height:1;padding:0 4px;display:flex;align-items:center" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--gray)'">×</button>
-            </div>
+            <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
           </div>
           <div id="insights-list" class="insights-list"></div>
         </div>
@@ -261,9 +216,7 @@
                 </div>
               </div>
             </div>
-            <div id="chart-fluxo-container" style="position:relative;width:100%;height:180px;">
-              <canvas id="chart-fluxo" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
-            </div>
+            <canvas id="chart-fluxo" height="180" style="max-width:100%;width:100%"></canvas>
             <div class="chart-empty" id="chart-empty">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span>Registre movimentações para ver o gráfico</span>
@@ -343,12 +296,6 @@
 
         <!-- Sugestão de orçamento baseada em perfil -->
         <div id="sugestao-orcamento" style="display:none;margin-bottom:20px"></div>
-
-        <!-- Sugestão 50-30-20 -->
-        
-
-        <!-- Sugestão 50-30-20 -->
-        
 
         <!-- Table -->
         <div class="table-card">
@@ -628,435 +575,8 @@
           <div class="sim-ranking-list" id="sim-ranking-list"></div>
         </div>
 
-        <!-- BOLSA DE VALORES (novo componente) -->
-        <div style="margin-bottom:28px">
-          <div style="font-size:1rem;font-weight:700;margin-bottom:16px">Bolsa de Valores</div>
-          <div id="bolsa-componente" style="border-radius:16px;overflow:hidden;border:1px solid var(--border);padding:20px;">
-<style>
-/* ── Bolsa de Valores — Monvay Design System ── */
-#bolsa-mv {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  color: var(--white, #fff);
-}
-
-/* Barra de busca */
-#bolsa-mv .bv-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--input-bg, rgba(255,255,255,0.06));
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 16px;
-  transition: border-color 0.2s;
-}
-#bolsa-mv .bv-search:focus-within { border-color: var(--primary, #22c55e); }
-#bolsa-mv .bv-search svg { color: var(--gray, #64748b); flex-shrink: 0; }
-#bolsa-mv .bv-search input {
-  background: none; border: none; outline: none;
-  color: var(--white, #fff);
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: .88rem; flex: 1;
-}
-#bolsa-mv .bv-search input::placeholder { color: var(--gray, #64748b); }
-
-/* Tabs de categoria */
-#bolsa-mv .bv-tabs {
-  display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap;
-}
-#bolsa-mv .bv-tab {
-  padding: 6px 16px; border-radius: 20px;
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  background: transparent;
-  color: var(--gray, #64748b);
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: .78rem; font-weight: 600;
-  cursor: pointer; transition: all .18s;
-}
-#bolsa-mv .bv-tab:hover { border-color: var(--border-hover, rgba(255,255,255,0.12)); color: var(--white, #fff); }
-#bolsa-mv .bv-tab.active {
-  background: var(--primary, #22c55e);
-  border-color: var(--primary, #22c55e);
-  color: #000;
-}
-
-/* Tela lista */
-#bolsa-mv .bv-screen { display: none; }
-#bolsa-mv .bv-screen.active { display: block; }
-
-/* Seção label */
-#bolsa-mv .bv-section-label {
-  font-size: .72rem; font-weight: 700;
-  color: var(--gray, #64748b);
-  letter-spacing: .8px; text-transform: uppercase;
-  padding: 14px 0 8px;
-}
-
-/* Linha de ativo */
-#bolsa-mv .bv-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 13px 16px;
-  background: var(--surface, #111827);
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 12px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-  animation: fadeUp .22s ease;
-}
-#bolsa-mv .bv-row:hover {
-  border-color: var(--border-hover, rgba(255,255,255,0.12));
-  background: var(--surface-2, #1a2235);
-}
-
-/* Logo do ativo */
-#bolsa-mv .bv-logo {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .75rem; font-weight: 800;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-/* Info */
-#bolsa-mv .bv-info { flex: 1; min-width: 0; }
-#bolsa-mv .bv-name {
-  font-family: var(--font-title, 'Plus Jakarta Sans', sans-serif);
-  font-size: .88rem; font-weight: 700;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-#bolsa-mv .bv-code { font-size: .75rem; color: var(--gray, #64748b); margin-top: 2px; }
-#bolsa-mv .bv-badge-tipo {
-  display: inline-block;
-  font-size: .65rem; font-weight: 700;
-  padding: 2px 7px; border-radius: 5px;
-  background: var(--surface-2, #1a2235);
-  color: var(--gray-2, #94a3b8);
-  margin-left: 7px; vertical-align: middle;
-}
-
-/* Preço / variação */
-#bolsa-mv .bv-right { text-align: right; flex-shrink: 0; }
-#bolsa-mv .bv-price {
-  font-family: var(--font-title, 'Plus Jakarta Sans', sans-serif);
-  font-size: .9rem; font-weight: 700;
-}
-#bolsa-mv .bv-var {
-  font-size: .78rem; font-weight: 600; margin-top: 3px;
-}
-#bolsa-mv .bv-pos { color: var(--primary, #22c55e); }
-#bolsa-mv .bv-neg { color: var(--red, #ef4444); }
-
-/* ── Tela de detalhe ── */
-#bolsa-mv .bv-back-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: none; border: none; cursor: pointer;
-  color: var(--white, #fff);
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: .88rem; font-weight: 600;
-  padding: 0; margin-bottom: 18px;
-  opacity: .8; transition: opacity .15s;
-}
-#bolsa-mv .bv-back-btn:hover { opacity: 1; }
-
-#bolsa-mv .bv-det-hero {
-  background: var(--surface, #111827);
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 16px;
-  padding: 20px 22px;
-  margin-bottom: 16px;
-}
-#bolsa-mv .bv-det-empresa { font-size: .78rem; color: var(--gray, #64748b); margin-bottom: 4px; }
-#bolsa-mv .bv-det-preco {
-  font-family: var(--font-title, 'Plus Jakarta Sans', sans-serif);
-  font-size: 2rem; font-weight: 800; letter-spacing: -.5px;
-}
-#bolsa-mv .bv-det-var-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-#bolsa-mv .bv-det-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 13px; border-radius: 20px;
-  font-size: .8rem; font-weight: 700;
-}
-#bolsa-mv .bv-det-badge.up { background: var(--primary-dim, rgba(34,197,94,.15)); color: var(--primary, #22c55e); }
-#bolsa-mv .bv-det-badge.dn { background: var(--red-dim, rgba(239,68,68,.15)); color: var(--red, #ef4444); }
-#bolsa-mv .bv-det-status { font-size: .85rem; font-weight: 700; }
-
-/* Period tabs */
-#bolsa-mv .bv-periods {
-  display: flex; gap: 4px; margin-bottom: 14px;
-}
-#bolsa-mv .bv-ptab {
-  flex: 1; padding: 7px 0;
-  border: none; background: var(--surface-2, #1a2235);
-  color: var(--gray, #64748b);
-  font-family: var(--font-body, 'DM Sans', sans-serif);
-  font-size: .78rem; font-weight: 600;
-  border-radius: 8px; cursor: pointer; transition: all .18s;
-}
-#bolsa-mv .bv-ptab.active { background: var(--primary, #22c55e); color: #000; }
-#bolsa-mv .bv-ptab:not(.active):hover { color: var(--white, #fff); background: var(--surface-3, #1f2d45); }
-
-/* Chart */
-#bolsa-mv .bv-chart-wrap {
-  background: var(--surface, #111827);
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 16px;
-  padding: 16px 16px 10px;
-  margin-bottom: 14px;
-}
-#bolsa-mv .bv-chart-canvas { width: 100% !important; height: 180px !important; display: block; }
-
-/* Stats grid */
-#bolsa-mv .bv-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-#bolsa-mv .bv-stat {
-  background: var(--surface, #111827);
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 12px;
-  padding: 14px 16px;
-}
-#bolsa-mv .bv-stat-label { font-size: .72rem; color: var(--gray, #64748b); margin-bottom: 5px; }
-#bolsa-mv .bv-stat-val {
-  font-family: var(--font-title, 'Plus Jakarta Sans', sans-serif);
-  font-size: .95rem; font-weight: 700;
-}
-
-/* Info card */
-#bolsa-mv .bv-info-card {
-  background: var(--surface, #111827);
-  border: 1px solid var(--border, rgba(255,255,255,0.06));
-  border-radius: 12px;
-  overflow: hidden;
-}
-#bolsa-mv .bv-info-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
-}
-#bolsa-mv .bv-info-row:last-child { border-bottom: none; }
-#bolsa-mv .bv-info-label { font-size: .8rem; color: var(--gray, #64748b); }
-#bolsa-mv .bv-info-val { font-size: .85rem; font-weight: 600; }
-
-/* Vazio */
-#bolsa-mv .bv-empty {
-  text-align: center; padding: 32px;
-  color: var(--gray, #64748b); font-size: .85rem;
-}
-</style>
-
-<div id="bolsa-mv">
-  <!-- TELA 1: LISTA -->
-  <div id="bv-s1" class="bv-screen active">
-    <div class="bv-search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="bv-srch" placeholder="Buscar ativo... ex: PETR4, BTC" oninput="bvFiltrar(this.value)">
-    </div>
-    <div class="bv-tabs">
-      <button class="bv-tab active" onclick="bvSetTab('todos',this)">Todos</button>
-      <button class="bv-tab" onclick="bvSetTab('acoes',this)">Ações</button>
-      <button class="bv-tab" onclick="bvSetTab('fundos',this)">FIIs</button>
-      <button class="bv-tab" onclick="bvSetTab('etfs',this)">ETFs</button>
-      <button class="bv-tab" onclick="bvSetTab('crypto',this)">Cripto</button>
-    </div>
-    <div id="bv-lista"></div>
-  </div>
-
-  <!-- TELA 2: DETALHE -->
-  <div id="bv-s2" class="bv-screen">
-    <button class="bv-back-btn" onclick="bvVoltar()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      Voltar à lista
-    </button>
-    <div class="bv-det-hero">
-      <div class="bv-det-empresa" id="bv-det-nome"></div>
-      <div class="bv-det-preco" id="bv-det-preco"></div>
-      <div class="bv-det-var-row">
-        <span class="bv-det-badge" id="bv-det-badge"></span>
-        <span class="bv-det-status" id="bv-det-status"></span>
-      </div>
-    </div>
-    <div class="bv-periods">
-      <button class="bv-ptab active" onclick="bvPeriod('1d',this)">Hoje</button>
-      <button class="bv-ptab" onclick="bvPeriod('5d',this)">5 dias</button>
-      <button class="bv-ptab" onclick="bvPeriod('1m',this)">1 mês</button>
-      <button class="bv-ptab" onclick="bvPeriod('6m',this)">6 meses</button>
-      <button class="bv-ptab" onclick="bvPeriod('1y',this)">1 ano</button>
-    </div>
-    <div class="bv-chart-wrap">
-      <canvas id="bv-canvas" class="bv-chart-canvas"></canvas>
-    </div>
-    <div class="bv-stats">
-      <div class="bv-stat"><div class="bv-stat-label">Mínimo (dia)</div><div class="bv-stat-val" id="bv-min">—</div></div>
-      <div class="bv-stat"><div class="bv-stat-label">Máximo (dia)</div><div class="bv-stat-val" id="bv-max">—</div></div>
-      <div class="bv-stat"><div class="bv-stat-label">Volume</div><div class="bv-stat-val" id="bv-vol">—</div></div>
-      <div class="bv-stat"><div class="bv-stat-label">Variação (dia)</div><div class="bv-stat-val" id="bv-varstat">—</div></div>
-    </div>
-    <div class="bv-info-card" id="bv-infocard"></div>
-  </div>
-</div>
-
-<script>
-(function(){
-const ATIVOS = [
-  {cat:'acoes',s:'PETR4',n:'Petrobras PN',        p:38.72, v:1.43,  min:37.90,max:39.10,vol:'142M',logo:'#1e3a5f',i:'P4',setor:'Energia',tipo:'Ação'},
-  {cat:'acoes',s:'VALE3',n:'Vale ON',              p:62.15, v:-0.82, min:61.40,max:63.20,vol:'98M', logo:'#1a3a2a',i:'V3',setor:'Mineração',tipo:'Ação'},
-  {cat:'acoes',s:'ITUB4',n:'Itaú Unibanco PN',     p:35.48, v:0.57,  min:35.10,max:35.90,vol:'61M', logo:'#3b1a00',i:'IT',setor:'Bancos',tipo:'Ação'},
-  {cat:'acoes',s:'BBDC4',n:'Bradesco PN',           p:14.22, v:-1.25, min:13.90,max:14.60,vol:'47M', logo:'#1a0030',i:'BB',setor:'Bancos',tipo:'Ação'},
-  {cat:'acoes',s:'WEGE3',n:'WEG ON',               p:51.30, v:2.14,  min:50.80,max:51.90,vol:'22M', logo:'#002a40',i:'WG',setor:'Industrial',tipo:'Ação'},
-  {cat:'acoes',s:'ABEV3',n:'Ambev ON',             p:12.08, v:0.33,  min:11.90,max:12.20,vol:'55M', logo:'#2a1a00',i:'AB',setor:'Bebidas',tipo:'Ação'},
-  {cat:'fundos',s:'MXRF11',n:'Maxi Renda FII',     p:10.42, v:0.10,  min:10.30,max:10.55,vol:'8M',  logo:'#1a1a3a',i:'MX',setor:'FII',tipo:'FII'},
-  {cat:'fundos',s:'KNRI11',n:'Kinea Renda Imobiliária',p:158.90,v:-0.31,min:157.40,max:159.80,vol:'3M',logo:'#0f2a1a',i:'KN',setor:'FII',tipo:'FII'},
-  {cat:'fundos',s:'HGLG11',n:'CSHG Logística',     p:160.45,v:0.65,  min:159.20,max:161.30,vol:'2M',logo:'#2a2a00',i:'HL',setor:'FII',tipo:'FII'},
-  {cat:'fundos',s:'XPML11',n:'XP Malls FII',       p:95.20, v:-0.52, min:94.50,max:95.90,vol:'4M',  logo:'#2a0020',i:'XP',setor:'FII',tipo:'FII'},
-  {cat:'etfs',  s:'BOVA11',n:'iShares Ibovespa',   p:118.40,v:0.88,  min:117.60,max:119.10,vol:'12M',logo:'#001a2a',i:'BO',setor:'ETF Índice',tipo:'ETF'},
-  {cat:'etfs',  s:'IVVB11',n:'iShares S&P 500',    p:412.75,v:1.20,  min:410.30,max:413.90,vol:'9M', logo:'#001f0f',i:'IV',setor:'ETF EUA',tipo:'ETF'},
-  {cat:'etfs',  s:'SMAL11',n:'iShares Small Cap',  p:105.60,v:-0.45, min:104.80,max:106.20,vol:'5M', logo:'#1a1500',i:'SM',setor:'ETF',tipo:'ETF'},
-  {cat:'crypto',s:'BTC',  n:'Bitcoin',             p:312450,v:2.85,  min:305000,max:315000,vol:'—',  logo:'#2a1500',i:'BT',setor:'Cripto',tipo:'Crypto'},
-  {cat:'crypto',s:'ETH',  n:'Ethereum',            p:15820, v:-0.93, min:15400, max:16100, vol:'—',  logo:'#10103a',i:'ET',setor:'Cripto',tipo:'Crypto'},
-  {cat:'crypto',s:'SOL',  n:'Solana',              p:820.40,v:4.12,  min:790,   max:835,   vol:'—',  logo:'#002820',i:'SO',setor:'Cripto',tipo:'Crypto'},
-];
-const CAT_LABELS = {acoes:'Ações',fundos:'Fundos Imobiliários',etfs:'ETFs',crypto:'Criptomoedas'};
-
-let curTab='todos', curFilter='', curAtivo=null, bvChart=null, curPeriod='1d';
-
-function fmtR(v){
-  if(v>=1000000) return 'R$ '+Math.round(v/1000000)+'M';
-  if(v>=1000) return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return 'R$ '+v.toFixed(2).replace('.',',');
-}
-function fmtPct(v){return (v>0?'+':'')+v.toFixed(2)+'%';}
-
-function bvRender(){
-  const cats = curTab==='todos'?['acoes','fundos','etfs','crypto']:[curTab];
-  let html='';
-  cats.forEach(cat=>{
-    const items=ATIVOS.filter(a=>a.cat===cat&&(!curFilter||a.s.includes(curFilter.toUpperCase())||a.n.toUpperCase().includes(curFilter.toUpperCase())));
-    if(!items.length) return;
-    html+=`<div class="bv-section-label">${CAT_LABELS[cat]}</div>`;
-    items.forEach(a=>{
-      const cls=a.v>=0?'bv-pos':'bv-neg';
-      html+=`<div class="bv-row" onclick="bvAbrir('${a.s}')">
-        <div class="bv-logo" style="background:${a.logo}">${a.i}</div>
-        <div class="bv-info">
-          <div class="bv-name">${a.n}<span class="bv-badge-tipo">${a.tipo}</span></div>
-          <div class="bv-code">${a.s}</div>
-        </div>
-        <div class="bv-right">
-          <div class="bv-price">${fmtR(a.p)}</div>
-          <div class="bv-var ${cls}">${fmtPct(a.v)}</div>
-        </div>
-      </div>`;
-    });
-  });
-  if(!html) html='<div class="bv-empty">Nenhum ativo encontrado.</div>';
-  document.getElementById('bv-lista').innerHTML=html;
-}
-
-window.bvSetTab=function(t,btn){
-  curTab=t;
-  document.querySelectorAll('#bolsa-mv .bv-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  bvRender();
-};
-window.bvFiltrar=function(v){ curFilter=v; bvRender(); };
-
-window.bvVoltar=function(){
-  document.getElementById('bv-s2').classList.remove('active');
-  document.getElementById('bv-s1').classList.add('active');
-  if(bvChart){bvChart.destroy();bvChart=null;}
-};
-
-window.bvAbrir=function(symbol){
-  const a=ATIVOS.find(x=>x.s===symbol); if(!a) return;
-  curAtivo=a;
-  document.getElementById('bv-s1').classList.remove('active');
-  document.getElementById('bv-s2').classList.add('active');
-  document.getElementById('bv-det-nome').textContent=a.n;
-  document.getElementById('bv-det-preco').textContent=fmtR(a.p);
-  const up=a.v>=0;
-  const badge=document.getElementById('bv-det-badge');
-  badge.textContent=(up?'↑ +':'↓ ')+Math.abs(a.v).toFixed(2)+'%';
-  badge.className='bv-det-badge '+(up?'up':'dn');
-  const st=document.getElementById('bv-det-status');
-  st.textContent=up?'Em alta':'Em baixa';
-  st.style.color=up?'var(--primary)':'var(--red)';
-  document.getElementById('bv-min').textContent=fmtR(a.min);
-  document.getElementById('bv-max').textContent=fmtR(a.max);
-  document.getElementById('bv-vol').textContent=a.vol;
-  document.getElementById('bv-varstat').innerHTML=`<span class="${up?'bv-pos':'bv-neg'}">${fmtPct(a.v)}</span>`;
-  document.getElementById('bv-infocard').innerHTML=`
-    <div class="bv-info-row"><span class="bv-info-label">Tipo</span><span class="bv-info-val">${a.tipo}</span></div>
-    <div class="bv-info-row"><span class="bv-info-label">Setor</span><span class="bv-info-val">${a.setor}</span></div>
-    <div class="bv-info-row"><span class="bv-info-label">Código</span><span class="bv-info-val">${a.s}</span></div>`;
-  document.querySelectorAll('#bolsa-mv .bv-ptab').forEach((b,i)=>b.classList.toggle('active',i===0));
-  curPeriod='1d';
-  bvChart_render();
-};
-
-window.bvPeriod=function(p,btn){
-  curPeriod=p;
-  document.querySelectorAll('#bolsa-mv .bv-ptab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  bvChart_render();
-};
-
-function gerarSerie(base,n,vol,trend){
-  const pts=[base];
-  for(let i=1;i<n;i++){
-    const r=(Math.random()-.48)*vol;
-    const t=trend*(i/n)*base*.001;
-    pts.push(Math.max(pts[i-1]+r+t,base*.7));
-  }
-  return pts;
-}
-
-function bvChart_render(){
-  const a=curAtivo; if(!a) return;
-  if(bvChart){bvChart.destroy();bvChart=null;}
-  const cfgs={
-    '1d':{n:48,vol:a.p*.004,labels:()=>{const r=[];for(let h=10;h<=17;h++){r.push(h+':00');r.push(h+':30');}return r.slice(0,48);}},
-    '5d':{n:5, vol:a.p*.012,labels:()=>['Seg','Ter','Qua','Qui','Sex']},
-    '1m':{n:22,vol:a.p*.018,labels:()=>{const r=[];for(let d=1;d<=22;d++)r.push(d+'/'+(new Date().getMonth()+1));return r;}},
-    '6m':{n:26,vol:a.p*.04, labels:()=>{const r=[];const now=new Date();for(let w=25;w>=0;w--){const d=new Date(now-w*7*864e5);r.push(d.getDate()+'/'+(d.getMonth()+1));}return r;}},
-    '1y':{n:12,vol:a.p*.08, labels:()=>['Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr']},
-  };
-  const c=cfgs[curPeriod];
-  const up=a.v>=0;
-  const cor=up?'#22c55e':'#ef4444';
-  const dados=gerarSerie(a.p*(1-Math.abs(a.v)/100*(curPeriod==='1d'?1:3)),c.n,c.vol,up?1:-1);
-  const ctx=document.getElementById('bv-canvas').getContext('2d');
-  const grad=ctx.createLinearGradient(0,0,0,180);
-  grad.addColorStop(0,up?'rgba(34,197,94,0.22)':'rgba(239,68,68,0.22)');
-  grad.addColorStop(1,'rgba(0,0,0,0)');
-  bvChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:c.labels(),datasets:[{data:dados,borderColor:cor,backgroundColor:grad,borderWidth:2,pointRadius:0,fill:true,tension:.35}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      animation:{duration:400},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'R$ '+c.parsed.y.toFixed(2).replace('.',',')},backgroundColor:'var(--surface-2,#1a2235)',titleColor:'#9ca3af',bodyColor:'#f1f5f9',borderColor:'rgba(255,255,255,.08)',borderWidth:1,padding:10,cornerRadius:10}},
-      scales:{
-        x:{grid:{display:false},ticks:{color:'var(--gray,#64748b)',font:{size:10,family:'DM Sans,sans-serif'},maxRotation:0,maxTicksLimit:6}},
-        y:{position:'right',grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'var(--gray,#64748b)',font:{size:10,family:'DM Sans,sans-serif'},callback:v=>v>=1000?'R$'+Math.round(v/1000)+'k':'R$'+v.toFixed(0)}}
-      }
-    }
-  });
-}
-
-bvRender();
-})();
-</script>
-
-</div>
-        </div>
-
-                <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.</div>
+        <!-- Dica -->
+        <div class="dica-inv"><strong>Dica:</strong> Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos. LCI/LCA são isentos de IR para pessoa física.</div>
 
       </section>
 
@@ -1176,37 +696,6 @@ bvRender();
           </div>
         </div>
 
-        <!-- Todas as movimentações do período -->
-        <div class="table-card" style="margin-top:24px">
-          <div class="card-header" style="margin-bottom:16px">
-            <div>
-              <div class="card-title">Todas as movimentações</div>
-              <div class="card-sub">Detalhes completos do período selecionado</div>
-            </div>
-            <div style="display:flex;gap:8px">
-              <button id="rel-filtro-todos" class="btn-sm" onclick="setFiltroRelatorio('todos',this)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--primary);background:var(--primary-dim);color:var(--primary);cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit">Todos</button>
-              <button id="rel-filtro-entradas" class="btn-sm" onclick="setFiltroRelatorio('ganho',this)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit">Entradas</button>
-              <button id="rel-filtro-saidas" class="btn-sm" onclick="setFiltroRelatorio('gasto',this)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gray);cursor:pointer;font-size:.75rem;font-weight:600;font-family:inherit">Saídas</button>
-            </div>
-          </div>
-          <div id="relatorio-todas-movs" class="lista-movs">
-            <div class="vazio">Nenhuma movimentação no período.</div>
-          </div>
-        </div>
-
-        <!-- Necessidade vs Desejo -->
-        <div class="chart-card" id="rel-nd-card" style="margin-top:24px">
-          <div class="card-header">
-            <div>
-              <div class="card-title">Necessidade vs Desejo</div>
-              <div class="card-sub">Distribuição dos seus gastos classificados</div>
-            </div>
-          </div>
-          <div id="rel-nd-content">
-            <div class="vazio">Nenhum gasto classificado neste período.</div>
-          </div>
-        </div>
-
         <!-- Gastos recorrentes -->
         <div class="table-card" style="margin-top:24px">
           <div class="card-header">
@@ -1271,16 +760,6 @@ bvRender();
             <div class="kpi-value green" id="contas-kpi-pagas">0</div>
             <div class="kpi-sub">concluídas</div>
           </div>
-        </div>
-
-        <!-- BANNER ROTINA → CONTAS -->
-        <div id="banner-rotina-contas" style="display:none;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:14px 18px;margin-bottom:18px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:.85rem;font-weight:700;color:var(--white)">Gastos fixos detectados no seu perfil</div>
-            <div id="banner-rotina-desc" style="font-size:.75rem;color:var(--gray);margin-top:2px"></div>
-          </div>
-          <button onclick="criarContasDeRotina()" style="background:var(--primary);color:#000;border:none;border-radius:8px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Criar automaticamente</button>
-          <button onclick="document.getElementById('banner-rotina-contas').style.display='none'" style="background:none;border:none;color:var(--gray);cursor:pointer;font-size:1.3rem;line-height:1;padding:0 4px">×</button>
         </div>
 
         <div class="two-col" style="align-items:flex-start">
@@ -1457,23 +936,6 @@ bvRender();
             </div>
           </div>
 
-          <div class="score-criteria-card">
-            <div class="score-criteria-header">
-              <div class="score-criteria-icon" style="background:rgba(6,182,212,0.15);color:#06B6D4;width:48px;height:48px;min-width:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="36" height="36"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M8 12l3 3 5-5"/></svg>
-              </div>
-              <div>
-                <div class="score-criteria-title">Consistência de Controle</div>
-                <div class="score-criteria-sub">gastos fixos registrados este mês</div>
-              </div>
-              <span class="score-pts" id="sc-consistencia-pts">0 / 100 pts</span>
-            </div>
-            <div class="score-bar-wrap">
-              <div class="score-bar-track"><div class="score-bar-fill" id="sc-consistencia-bar" style="width:0%;background:#06B6D4"></div></div>
-              <span class="score-bar-label" id="sc-consistencia-label">–</span>
-            </div>
-          </div>
-
         </div>
 
         <!-- Dicas + Histórico -->
@@ -1539,9 +1001,14 @@ bvRender();
           <input type="date" id="modal-data" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none">
         </div>
         <div id="modal-categoria-area">
-          <label style="font-size:.85rem;color:var(--gray);margin-bottom:8px;display:block">Categoria</label>
-          <input type="hidden" id="modal-categoria" value="Outros">
-          <div id="modal-categoria-picker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:220px;overflow-y:auto;padding-right:2px"></div>
+          <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
+          <select id="modal-categoria">
+            <option value="Alimentação">Alimentação</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Outros">Outros</option>
+          </select>
         </div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)">
           <input type="checkbox" id="modal-recorrente" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;flex-shrink:0">
@@ -1572,9 +1039,14 @@ bvRender();
           <input type="date" id="edit-data" style="width:100%;background:var(--input-bg,rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--white);font-size:.9rem;outline:none">
         </div>
         <div id="edit-categoria-area">
-          <label style="font-size:.85rem;color:var(--gray);margin-bottom:8px;display:block">Categoria</label>
-          <input type="hidden" id="edit-categoria" value="Outros">
-          <div id="edit-categoria-picker" style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-height:220px;overflow-y:auto;padding-right:2px"></div>
+          <label style="font-size:.85rem;color:var(--gray);margin-bottom:6px;display:block">Categoria</label>
+          <select id="edit-categoria">
+            <option value="Alimentação">Alimentação</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Outros">Outros</option>
+          </select>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px">
           <button class="btn-primary" style="flex:1" onclick="salvarEdicao()">Salvar</button>
@@ -1592,58 +1064,6 @@ bvRender();
     </div>
   </div>
 
-  <!-- MODAL: DETALHE DO ATIVO (GRÁFICO BOLSA) -->
-  <div id="modal-ativo" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalAtivo()">
-    <div class="modal-box" style="max-width:520px;width:96vw;padding:0;overflow:hidden;border-radius:18px;background:var(--card-bg)">
-      <!-- Header -->
-      <div style="padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;color:var(--gray);margin-bottom:2px" id="ma-tipo-badge"></div>
-          <div style="font-size:1.25rem;font-weight:800" id="ma-symbol">—</div>
-          <div style="font-size:.8rem;color:var(--gray);margin-top:2px" id="ma-name">—</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:1.5rem;font-weight:800" id="ma-preco">—</div>
-          <div style="font-size:.88rem;font-weight:700;margin-top:2px" id="ma-variacao">—</div>
-        </div>
-      </div>
-
-      <!-- Tabs de período -->
-      <div style="display:flex;gap:0;border-bottom:1px solid var(--border)" id="ma-tabs">
-        <button onclick="trocarPeriodoAtivo('1d','1m')"   id="ma-tab-1d"   class="ma-tab ma-tab-ativo"  style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--primary);border-bottom:2px solid var(--primary)">Hoje</button>
-        <button onclick="trocarPeriodoAtivo('5d','5m')"   id="ma-tab-5d"   class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">5 dias</button>
-        <button onclick="trocarPeriodoAtivo('1mo','1d')"  id="ma-tab-1mo"  class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">1 mês</button>
-        <button onclick="trocarPeriodoAtivo('6mo','1wk')" id="ma-tab-6mo"  class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">6 meses</button>
-        <button onclick="trocarPeriodoAtivo('1y','1wk')"  id="ma-tab-1y"   class="ma-tab"              style="flex:1;padding:10px 0;border:none;background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--gray);border-bottom:2px solid transparent">1 ano</button>
-      </div>
-
-      <!-- Área do gráfico -->
-      <div style="position:relative;padding:8px 0 0">
-        <!-- Tooltip flutuante -->
-        <div id="ma-tooltip" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:.75rem;padding:4px 10px;border-radius:8px;pointer-events:none;z-index:10;white-space:nowrap"></div>
-        <div id="ma-grafico-loading" style="text-align:center;padding:40px;font-size:.85rem;color:var(--gray)">Carregando gráfico...</div>
-        <div id="ma-grafico-erro"    style="display:none;text-align:center;padding:40px;font-size:.85rem;color:#ef4444">Não foi possível carregar o gráfico.</div>
-        <canvas id="ma-canvas" width="520" height="200" style="display:none;width:100%;height:200px;cursor:crosshair"></canvas>
-      </div>
-
-      <!-- Stats -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--border)" id="ma-stats">
-        <div style="padding:12px 14px;border-right:1px solid var(--border)"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Abertura</div><div style="font-size:.88rem;font-weight:700" id="ma-open">—</div></div>
-        <div style="padding:12px 14px;border-right:1px solid var(--border)"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Mínimo</div><div style="font-size:.88rem;font-weight:700" id="ma-low">—</div></div>
-        <div style="padding:12px 14px"><div style="font-size:.7rem;color:var(--gray);margin-bottom:3px">Máximo</div><div style="font-size:.88rem;font-weight:700" id="ma-high">—</div></div>
-      </div>
-
-      <!-- Extras (DY, P/VP, MarketCap) -->
-      <div style="display:flex;gap:0;border-top:1px solid var(--border)" id="ma-extras"></div>
-
-      <!-- Rodapé -->
-      <div style="padding:8px 14px;font-size:.68rem;color:var(--gray);text-align:right;border-top:1px solid var(--border)">Dados com delay de ~15min · BRAPI</div>
-
-      <!-- Fechar -->
-      <button onclick="fecharModalAtivo()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:var(--text);font-size:1.25rem;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
-    </div>
-  </div>
-
   <!-- MODAL: META -->
   <div id="modal-meta" class="modal-overlay hidden">
     <div class="modal-box">
@@ -1657,10 +1077,10 @@ bvRender();
 
   <!-- BOTTOM NAV (mobile only) -->
 <!-- MODAL: PERSONALIZAR PERFIL -->
-  <div id="modal-perfil" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalPerfil()">
+  <div id="modal-perfil" class="modal-overlay hidden">
     <div class="modal-box" style="max-width:480px;position:relative">
       <button class="modal-fechar" onclick="fecharModalPerfil()">×</button>
-      <h2 style="margin-bottom:16px;font-size:1.1rem;padding-right:36px;line-height:1.3">Personalizar perfil</h2>
+      <h2 style="margin-bottom:16px;font-size:1.1rem">Personalizar perfil</h2>
 
       <!-- Toast de sucesso centralizado -->
       <div id="perfil-toast" style="display:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);background:#22c55e;color:#000;font-size:.85rem;font-weight:700;padding:10px 22px;border-radius:30px;z-index:100;white-space:nowrap;box-shadow:0 4px 20px rgba(34,197,94,0.4);animation:toastIn .25s cubic-bezier(.32,1,.45,1)">
@@ -1668,10 +1088,10 @@ bvRender();
       </div>
 
       <!-- Abas -->
-      <div class="perfil-tabs-wrap">
-        <button class="perfil-tab active" id="tab-conta" onclick="abrirTabPerfil('conta')"><img src="icone-usuario.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> <span class="tab-label">Conta</span></button>
-        <button class="perfil-tab" id="tab-vida" onclick="abrirTabPerfil('vida')"><img src="icone-casa-propria.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> <span class="tab-label">Minha vida</span></button>
-        <button class="perfil-tab" id="tab-financas" onclick="abrirTabPerfil('financas')"><img src="icone-bolsa-de-dinheiro.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> <span class="tab-label">Finanças</span></button>
+      <div style="display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px">
+        <button class="perfil-tab active" id="tab-conta" onclick="abrirTabPerfil('conta')"><img src="icone-usuario.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Conta</button>
+        <button class="perfil-tab" id="tab-vida" onclick="abrirTabPerfil('vida')"><img src="icone-casa-propria.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Minha vida</button>
+        <button class="perfil-tab" id="tab-financas" onclick="abrirTabPerfil('financas')"><img src="icone-bolsa-de-dinheiro.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px"> Finanças</button>
       </div>
 
       <!-- Tab: Conta -->
@@ -1820,96 +1240,6 @@ bvRender();
           </div>
         </div>
 
-        <!-- ROTINA -->
-        <div style="margin-bottom:14px">
-          <div style="font-size:.78rem;color:var(--gray);margin-bottom:8px;font-weight:600">ROTINA <span style="font-weight:400;font-size:.7rem">(múltiplos)</span></div>
-
-          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Atividade física</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px" id="vida-rotina-atividades-opts">
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','academia')"><span><img src="icone-academia.png" style="width:28px;height:28px;object-fit:contain"></span>Academia</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','luta')"><span><img src="icone-luta.png" style="width:28px;height:28px;object-fit:contain"></span>Luta</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','futebol')"><span><img src="icone-futebol.png" style="width:28px;height:28px;object-fit:contain"></span>Futebol</div>
-          </div>
-
-          <!-- Esportes customizados -->
-          <div id="idx-custom-esporte-tags" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
-          <div style="display:flex;gap:6px;margin-bottom:12px">
-            <input id="idx-custom-esporte-input" type="text" placeholder="+ Outro esporte..." maxlength="30"
-              style="flex:1;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;color:var(--white,#f1f5f9);font-size:.78rem;outline:none;font-family:inherit"
-              onkeydown="if(event.key==='Enter'){adicionarCustomVida('esporte',this)}"
-              onfocus="this.style.borderColor='rgba(0,200,83,0.5)'"
-              onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-            <button onclick="adicionarCustomVida('esporte',document.getElementById('idx-custom-esporte-input'))"
-              style="background:rgba(0,200,83,0.15);border:1.5px solid rgba(0,200,83,0.3);border-radius:10px;padding:8px 14px;color:var(--primary,#00c853);font-size:.85rem;cursor:pointer;font-weight:700">+</button>
-          </div>
-
-          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Conectividade</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px" id="vida-rotina-servicos-opts">
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','internet')"><span><img src="icone-internet.png" style="width:28px;height:28px;object-fit:contain"></span>Internet</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','celular')"><span><img src="icone-celular.png" style="width:28px;height:28px;object-fit:contain"></span>Celular</div>
-          </div>
-
-          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Streaming</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px" id="vida-rotina-streaming-opts">
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','netflix')"><span>
-              <img src="logo-netflix.png" alt="Netflix" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>Netflix</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','disney')"><span>
-              <img src="logo-disney.png" alt="Disney+" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>Disney+</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','spotify')"><span>
-              <img src="logo-spotify.png" alt="Spotify" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>Spotify</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','youtube')"><span>
-              <img src="logo-youtube.png" alt="YouTube Premium" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>YouTube Premium</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','hbo')"><span>
-              <img src="logo-hbo.png" alt="Max (HBO)" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>Max (HBO)</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','prime')"><span>
-              <img src="logo-prime.png" alt="Prime Video" style="height:44px;width:44px;object-fit:cover;border-radius:12px;">
-            </span>Prime Video</div>
-          </div>
-          <!-- Streaming customizado -->
-          <div id="idx-custom-streaming-tags" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
-          <div style="display:flex;gap:6px;margin-bottom:12px">
-            <input id="idx-custom-streaming-input" type="text" placeholder="+ Outro streaming..." maxlength="30"
-              style="flex:1;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;color:var(--white,#f1f5f9);font-size:.78rem;outline:none;font-family:inherit"
-              onkeydown="if(event.key==='Enter'){adicionarCustomVida('streaming',this)}"
-              onfocus="this.style.borderColor='rgba(0,200,83,0.5)'"
-              onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-            <button onclick="adicionarCustomVida('streaming',document.getElementById('idx-custom-streaming-input'))"
-              style="background:rgba(0,200,83,0.15);border:1.5px solid rgba(0,200,83,0.3);border-radius:10px;padding:8px 14px;color:var(--primary,#00c853);font-size:.85rem;cursor:pointer;font-weight:700">+</button>
-          </div>
-
-          <div style="font-size:.72rem;color:var(--gray);margin-bottom:6px">Ferramentas</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px" id="vida-rotina-ferramentas-opts">
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','chatgpt')"><span>
-              <img src="logo-chatgpt.png" alt="ChatGPT Plus" style="height:44px;object-fit:contain;">
-            </span>ChatGPT Plus</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','notion')"><span>
-              <img src="logo-notion.png" alt="Notion" style="height:44px;object-fit:contain;">
-            </span>Notion</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','canva')"><span>
-              <img src="logo-canva.png" alt="Canva" style="height:44px;object-fit:contain;">
-            </span>Canva</div>
-            <div class="vida-opt multi" onclick="selecionarVidaMulti(this,'rotina','capcut')"><span>
-              <img src="logo-capcut.png" alt="CapCut" style="height:44px;object-fit:contain;">
-            </span>CapCut</div>
-          </div>
-          <!-- Ferramentas customizadas -->
-          <div id="idx-custom-ferramenta-tags" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
-          <div style="display:flex;gap:6px">
-            <input id="idx-custom-ferramenta-input" type="text" placeholder="+ Outra ferramenta..." maxlength="30"
-              style="flex:1;background:rgba(255,255,255,0.05);border:1.5px dashed rgba(255,255,255,0.12);border-radius:10px;padding:8px 12px;color:var(--white,#f1f5f9);font-size:.78rem;outline:none;font-family:inherit"
-              onkeydown="if(event.key==='Enter'){adicionarCustomVida('ferramenta',this)}"
-              onfocus="this.style.borderColor='rgba(0,200,83,0.5)'"
-              onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-            <button onclick="adicionarCustomVida('ferramenta',document.getElementById('idx-custom-ferramenta-input'))"
-              style="background:rgba(0,200,83,0.15);border:1.5px solid rgba(0,200,83,0.3);border-radius:10px;padding:8px 14px;color:var(--primary,#00c853);font-size:.85rem;cursor:pointer;font-weight:700">+</button>
-          </div>
-        </div>
-
         <button class="btn-primary" style="width:100%;margin-top:8px" onclick="salvarPerfilVida()">Salvar situação de vida</button>
         <div id="vida-sucesso" style="display:none;text-align:center;margin-top:10px;font-size:.82rem;color:var(--primary)">✓ Situação atualizada!</div>
       </div>
@@ -1939,48 +1269,6 @@ bvRender();
 
     </div>
   </div>
-
-  <!-- Funções críticas disponíveis imediatamente, antes do módulo carregar -->
-  <script>
-    // Wrapper síncrono — chama a versão do módulo quando disponível
-    function _callWhenReady(fn, args) {
-      var check = setInterval(function() {
-        if (window['_moduleReady_' + fn]) {
-          clearInterval(check);
-          window['_moduleReady_' + fn].apply(window, args||[]);
-        }
-      }, 50);
-      setTimeout(function(){ clearInterval(check); }, 5000);
-    }
-
-    window.salvarPerfilVida = function() {
-      if (window._salvarPerfilVida_impl) return window._salvarPerfilVida_impl();
-      _callWhenReady('salvarPerfilVida', []);
-    };
-    window.adicionarCustomVida = function(tipo, inputEl) {
-      if (window._adicionarCustomVida_impl) return window._adicionarCustomVida_impl(tipo, inputEl);
-    };
-    window.removerCustomVida = function(val, tagEl, tipo) {
-      if (window._removerCustomVida_impl) return window._removerCustomVida_impl(val, tagEl, tipo);
-    };
-    window.selecionarVida = function(el, cat, val) {
-      if (window._selecionarVida_impl) return window._selecionarVida_impl(el, cat, val);
-    };
-    window.selecionarVidaMulti = function(el, cat, val) {
-      if (window._selecionarVidaMulti_impl) return window._selecionarVidaMulti_impl(el, cat, val);
-    };
-    // Wrapper para abrirTabPerfil — chama a implementação do módulo quando disponível
-    window.abrirTabPerfil = function(tab) {
-      if (window._abrirTabPerfil_impl) return window._abrirTabPerfil_impl(tab);
-      // Fallback simples caso o módulo ainda não tenha carregado
-      ['conta','vida','financas'].forEach(function(t) {
-        var tb = document.getElementById('tab-' + t);
-        var te = document.getElementById('perfil-tab-' + t);
-        if (tb) tb.classList.toggle('active', t === tab);
-        if (te) te.style.display = (t === tab) ? 'block' : 'none';
-      });
-    };
-  </script>
 
   <script type="module" src="script.js?v=24"></script>
 
@@ -2017,14 +1305,11 @@ bvRender();
         'mudarMesRelatorio','setPeriodoModo','aplicarPeriodoCustom','atalhoUltimos',
         'buscarMovimentacoes','limparBusca','abrirBuscaMobile','fecharBuscaMobile',
         'fecharDropdownBusca','mostrarDropdownBusca','atualizarFormDivida',
-        'cadastrarDivida','excluirDivida',
-        'selecionarVidaMulti','setMetaEco','salvarPerfilFinancas',
+        'cadastrarDivida','excluirDivida','abrirTabPerfil','selecionarVida',
+        'selecionarVidaMulti','setMetaEco','salvarPerfilVida','salvarPerfilFinancas',
         'salvarConta','editarConta','cancelarEdicaoConta','pagarConta','excluirConta',
         'filtrarContas','mudarMesContas','renderizarContas','carregarHistorico',
-        'processarRecorrentes','setFluxoModo','quitarDivida',
-        'ocultarInsights','fecharBannerEmpresa',
-        'irParaModo','voltarParaPessoal','abrirModalGastoCategoria','setTipoGrafico',
-        'selecionarCategoriaPicker','filtrarPorCategoria'
+        'processarRecorrentes','setFluxoModo','quitarDivida'
       ];
       funcoesOnclick.forEach(function(nome) {
         if (typeof window[nome] === 'undefined') {
@@ -2175,83 +1460,15 @@ bvRender();
         imgEl.style.display = 'none'; letraEl.style.display = 'block'; btnRemover.style.display = 'none';
       }
       document.getElementById('perfil-sucesso').style.display = 'none';
-      // Inicializar rascunho — tenta window.perfilUsuario, depois localStorage
-      let _vidaSalva = window.perfilUsuario?.perfilVida || null;
-      if (!_vidaSalva || Object.keys(_vidaSalva).length === 0) {
-        const _cached = localStorage.getItem('monvy_perfil_vida');
-        if (_cached) { try { _vidaSalva = JSON.parse(_cached); } catch(e) {} }
-      }
-      window._perfilVidaTemp = JSON.parse(JSON.stringify(_vidaSalva || {}));
-
-      // ── Marcar opções salvas no perfil de vida ──────────────────
-      const vida = window._perfilVidaTemp;
-
-      // Carregar tags customizadas (esportes, streaming, ferramentas)
-      const CUSTOM_CONHECIDOS = ['academia','luta','futebol','internet','celular',
-        'netflix','spotify','youtube','hbo','prime','disney',
-        'chatgpt','notion','canva','capcut'];
-      const rotinaSalva = vida.rotina || [];
-      const customEsporte = rotinaSalva.filter(r => !CUSTOM_CONHECIDOS.includes(r) && typeof r === 'string');
-      const tagsEl = document.getElementById('idx-custom-esporte-tags');
-      if (tagsEl) {
-        tagsEl.innerHTML = customEsporte.map(v =>
-          `<span style="background:rgba(0,200,83,0.15);border:1px solid rgba(0,200,83,0.3);border-radius:20px;padding:3px 10px;font-size:.75rem;color:var(--primary);cursor:pointer" onclick="removerCustomVida('${v}',this,'esporte')">${v} ×</span>`
-        ).join('');
-      }
-
-      // Limpar todas as seleções primeiro
-      document.querySelectorAll('.vida-opt').forEach(o => o.classList.remove('selected'));
-
-      // Moradia (single)
-      if (vida.moradia) {
-        const el = document.querySelector(`[onclick*="selecionarVida"][onclick*="moradia"][onclick*="${vida.moradia}"]`);
-        if (el) el.classList.add('selected');
-      }
-
-      // Filhos (single)
-      if (vida.filhos) {
-        const el = document.querySelector(`[onclick*="selecionarVida"][onclick*="filhos"][onclick*="${vida.filhos}"]`);
-        if (el) el.classList.add('selected');
-      }
-
-      // Transporte (multi)
-      (vida.transporte || []).forEach(v => {
-        const el = document.querySelector(`[onclick*="selecionarVidaMulti"][onclick*="transporte"][onclick*="${v}"]`);
-        if (el) el.classList.add('selected');
-      });
-
-      // Família (multi) — pets, dependentes
-      (vida.familia || []).forEach(v => {
-        const el = document.querySelector(`[onclick*="selecionarVidaMulti"][onclick*="familia"][onclick*="${v}"]`);
-        if (el) el.classList.add('selected');
-      });
-
-      // Rotina (multi)
-      (vida.rotina || []).forEach(v => {
-        const el = document.querySelector(`[onclick*="selecionarVidaMulti"][onclick*="rotina"][onclick*="${v}"]`);
-        if (el) el.classList.add('selected');
-      });
-
-      // Carregar campos de texto (Conta e Finanças)
-      try {
-        const nomeEl = document.getElementById('perfil-nome-edit');
-        if (nomeEl && window.perfilUsuario?.nome) nomeEl.value = window.perfilUsuario.nome;
-        const rendaEl = document.getElementById('perfil-renda');
-        if (rendaEl && window.perfilUsuario?.renda) rendaEl.value = window.perfilUsuario.renda;
-        const metaEco = window.perfilUsuario?.metaEconomia;
-        if (metaEco) {
-          document.querySelectorAll('#meta-eco-opts .vida-opt').forEach(o => {
-            o.classList.toggle('selected', o.getAttribute('onclick')?.includes(String(metaEco)));
-          });
-        }
-      } catch(e) {}
-
+      // Resetar rascunho para iniciar com os dados atualmente salvos
+      window._perfilVidaTemp = null;
       document.getElementById('modal-perfil').classList.remove('hidden');
     }
     function fecharModalPerfil() {
       document.getElementById('modal-perfil').classList.add('hidden');
       fecharEditarCampo();
-      // NÃO zerar rascunho — mantém as seleções para próxima abertura
+      // Limpar rascunho ao fechar sem salvar
+      window._perfilVidaTemp = null;
     }
 
     let _campoAtual = null;
@@ -2527,25 +1744,51 @@ bvRender();
       if (fotoSalva) aplicarPerfilUI(nome, fotoSalva);
     })();
 
-    // toggleTheme unificado — usa localStorage como fonte da verdade
-    window.toggleTheme = function() {
-      const cur = localStorage.getItem('monvy_theme') || 'dark';
-      const next = cur === 'dark' ? 'light' : 'dark';
+    // Sincronizar ícone de tema no drawer
+    function syncDrawerThemeIcon() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const moon = document.getElementById('drawer-theme-icon-moon');
+      const sun = document.getElementById('drawer-theme-icon-sun');
+      const label = document.getElementById('drawer-theme-label');
+      if (current === 'light') {
+        if (moon) moon.style.display = 'none';
+        if (sun) sun.style.display = 'block';
+        if (label) label.textContent = 'Tema escuro';
+      } else {
+        if (moon) moon.style.display = 'block';
+        if (sun) sun.style.display = 'none';
+        if (label) label.textContent = 'Tema claro';
+      }
+    }
+    // Sobrescrever toggleTheme para também atualizar o drawer
+    // Usa setTimeout para garantir que o módulo já carregou e definiu window.toggleTheme
+    window._syncDrawerThemeIcon = syncDrawerThemeIcon;
+    window._toggleThemeWithDrawer = function() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
       localStorage.setItem('monvy_theme', next);
       if (typeof applyTheme === 'function') applyTheme(next);
+      syncDrawerThemeIcon();
     };
+    // Substituir após o módulo carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        window.toggleTheme = window._toggleThemeWithDrawer;
+      }, 200);
+    });
     // Sincronizar ao abrir drawer
     const _originalAbrirDrawer = abrirDrawer;
     window.abrirDrawer = function() {
       _originalAbrirDrawer();
-      if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('monvy_theme') || 'dark');
+      syncDrawerThemeIcon();
+      // Reseta scroll ao topo — rAF garante que ocorre após render
       requestAnimationFrame(function() {
         const drawer = document.getElementById('drawer');
         if (drawer) drawer.scrollTop = 0;
       });
     };
     // Sincronizar no carregamento
-    if (typeof applyTheme === 'function') applyTheme(localStorage.getItem('monvy_theme') || 'dark');
+    syncDrawerThemeIcon();
 
     // Preencher nome no mobile topbar e no drawer
     (function() {
@@ -2593,10 +1836,14 @@ bvRender();
       // Redirect rápido: se não tem sessão no localStorage, vai para auth imediatamente
   // (Firebase demora para confirmar, isso acelera a percepção)
   (function() {
-    // Mostrar overlay de loading enquanto Firebase confirma sessão
-    // Isso evita flash de conteúdo sem autenticação em novos dispositivos
-    const overlay = document.getElementById('app-loading-overlay');
-    if (overlay) overlay.style.display = 'flex';
+    const hasSession = localStorage.getItem('monvy_onboarding_done') ||
+                       localStorage.getItem('monvy_logado') ||
+                       localStorage.getItem('monvy_logged');
+    if (!hasSession) {
+      // Mostra loading enquanto Firebase confirma autenticação
+      document.documentElement.style.opacity = '0';
+      setTimeout(() => { document.documentElement.style.opacity = '1'; }, 50);
+    }
   })();
 
   function _irParaFallback(tela) {
@@ -2730,7 +1977,7 @@ bvRender();
     const container = document.getElementById('ios-picker-drums');
     Array.from(container.children).forEach(c=>{if(!c.classList.contains('ios-picker-highlight'))c.remove();});
     const baseYear=new Date().getFullYear(), years=[];
-    for (let y=1926; y<=baseYear+30; y++) years.push(String(y));
+    for (let y=1926; y<=baseYear; y++) years.push(String(y));
     if (mode==='month') {
       monthDrum=buildDrum(MONTHS_PT, selMonth, '2');
       yearDrum =buildDrum(years, years.indexOf(String(selYear)), '1.2');
@@ -2749,7 +1996,7 @@ bvRender();
 
   function getSelected() {
     const baseYear=new Date().getFullYear(), years=[];
-    for (let y=1926; y<=baseYear+30; y++) years.push(y);
+    for (let y=1926; y<=baseYear; y++) years.push(y);
     const year=years[parseInt(yearDrum.dataset.index||0)]||new Date().getFullYear();
     const month=parseInt(monthDrum.dataset.index||0);
     const day=pickerMode==='month'?1:parseInt(dayDrum.dataset.index||0)+1;
@@ -2888,10 +2135,6 @@ bvRender();
       </a>
       <!-- Separador — itens de conta ficam dentro do nav para aparecer no scroll -->
       <div style="height:1px;background:var(--border);margin:8px 0;flex-shrink:0;"></div>
-      <a href="onboarding_empresa.html" class="drawer-item" style="color:var(--primary)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        <span>Modo Empresa <span style="font-size:.7rem;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);padding:2px 7px;border-radius:99px;margin-left:4px">novo</span></span>
-      </a>
       <a href="javascript:void(0)" class="drawer-item drawer-perfil" onclick="abrirModalPerfil(); fecharDrawer(); return false;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span>Personalizar perfil</span>
@@ -2909,43 +2152,6 @@ bvRender();
       <div style="height:env(safe-area-inset-bottom,24px);min-height:24px;"></div>
     </nav>
   </div>
-
-
-  <!-- Toast global para notificações -->
-  <div id="toast-global" style="
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--surface,#1a2235);border:1px solid rgba(34,197,94,0.4);
-    border-radius:30px;padding:12px 24px;display:flex;align-items:center;gap:10px;
-    font-size:.88rem;font-weight:600;color:var(--white,#fff);
-    box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:99999;
-    opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
-    white-space:nowrap;max-width:90vw;
-  ">
-    <span id="toast-global-icon" style="font-size:1rem">✓</span>
-    <span id="toast-global-msg"></span>
-  </div>
-  <script>
-    var _toastGlobalTimer = null;
-    window.showToast = function(msg, tipo) {
-      var t = document.getElementById('toast-global');
-      var icon = document.getElementById('toast-global-icon');
-      var msgEl = document.getElementById('toast-global-msg');
-      if (!t) return;
-      var icons = { success: '✓', error: '✕', warn: '⚠' };
-      var borders = { success: 'rgba(34,197,94,0.4)', error: 'rgba(239,68,68,0.4)', warn: 'rgba(245,158,11,0.4)' };
-      tipo = tipo || 'success';
-      t.style.borderColor = borders[tipo] || borders.success;
-      if (icon) icon.textContent = icons[tipo] || icons.success;
-      if (msgEl) msgEl.textContent = msg || '';
-      t.style.opacity = '1';
-      t.style.transform = 'translateX(-50%) translateY(0)';
-      clearTimeout(_toastGlobalTimer);
-      _toastGlobalTimer = setTimeout(function() {
-        t.style.opacity = '0';
-        t.style.transform = 'translateX(-50%) translateY(20px)';
-      }, 3000);
-    };
-  </script>
 
 </body>
 </html>
