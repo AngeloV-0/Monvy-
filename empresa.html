@@ -220,7 +220,7 @@
       .emp-grid3 { grid-template-columns:1fr; }
     }
 
-    /* ── Consultor IA ── */
+    /* ── Klaus IA ── */
     .consultor-quick {
       padding:7px 14px;border-radius:99px;border:1px solid var(--border);
       background:var(--surface-2);color:var(--gray);font-size:.78rem;
@@ -307,7 +307,7 @@
         <img src="icone-investimento.png"> Calculadora
       </button>
       <button class="emp-drawer-item" id="di-consultor" onclick="irParaTela('consultor');fecharDrawerEmp()">
-        <img src="icone-cerebro.png"> Consultor IA
+        <img src="icone-cerebro.png"> Klaus IA
       </button>
       <div class="emp-drawer-divider"></div>
       <button class="emp-drawer-item" onclick="window.location.href='index.html'">
@@ -346,7 +346,7 @@
       <a class="nav-item" id="si-calculadora" onclick="irParaTela('calculadora')" title="Calculadora" data-label="Calculadora">
         <img src="icone-investimento.png">
       </a>
-      <a class="nav-item" id="si-consultor" onclick="irParaTela('consultor')" title="Consultor IA" data-label="Consultor IA">
+      <a class="nav-item" id="si-consultor" onclick="irParaTela('consultor')" title="Klaus IA" data-label="Klaus IA">
         <img src="icone-cerebro.png">
       </a>
     </nav>
@@ -415,7 +415,7 @@
         <button class="emp-tab" onclick="irParaTela('relatorio',this)">Relatório</button>
         <button class="emp-tab" onclick="irParaTela('dre',this)">DRE</button>
         <button class="emp-tab" onclick="irParaTela('calculadora',this)">Calculadora</button>
-      <button class="emp-tab" onclick="irParaTela('consultor',this)">Consultor IA</button>
+      <button class="emp-tab" onclick="irParaTela('consultor',this)">Klaus IA</button>
       </div>
 
       <!-- ===== PAINEL ===== -->
@@ -769,7 +769,7 @@
         <div style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(59,130,246,0.08));border:1px solid rgba(34,197,94,0.2);border-radius:20px;padding:24px;margin-bottom:24px;display:flex;align-items:center;gap:16px">
           <img src="icone-cerebro.png" style="width:48px;height:48px;object-fit:contain;flex-shrink:0">
           <div>
-            <div style="font-size:1.05rem;font-weight:800;color:var(--white);margin-bottom:4px">Consultor Financeiro IA</div>
+            <div style="font-size:1.05rem;font-weight:800;color:var(--white);margin-bottom:4px">Klaus — Consultor Financeiro IA</div>
             <div style="font-size:.82rem;color:var(--gray);line-height:1.5">Faça perguntas sobre seu negócio e receba análises estratégicas personalizadas com base nos seus dados financeiros.</div>
           </div>
         </div>
@@ -777,12 +777,14 @@
         <div style="margin-bottom:20px">
           <div style="font-size:.78rem;color:var(--gray);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Perguntas frequentes</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Por que meu lucro pode ter caído este mês?')">Por que meu lucro caiu?</button>
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Onde estou gastando demais no meu negócio?')">Onde gasto demais?</button>
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Quanto posso investir em marketing agora?')">Quanto investir em marketing?</button>
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Meus preços estão adequados para a margem que tenho?')">Meus preços estão certos?</button>
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Como melhorar minha margem de lucro?')">Como melhorar margem?</button>
-            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Estou no caminho certo para atingir minhas metas?')">Vou atingir minhas metas?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Como posso reduzir custos?')">Como reduzir custos?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Quais gastos estão mais altos?')">Quais gastos estão mais altos?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Como melhorar meu fluxo de caixa?')">Como melhorar meu caixa?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Quanto minha empresa lucrou esse mês?')">Quanto lucrei esse mês?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Existe risco financeiro na empresa?')">Existe risco financeiro?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Como aumentar minha margem de lucro?')">Como aumentar minha margem?</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Faça um diagnóstico financeiro completo')">Diagnóstico financeiro</button>
+            <button class="consultor-quick" onclick="fazerPerguntaConsultor('Quais categorias mais cresceram?')">Categorias que mais cresceram?</button>
           </div>
         </div>
         <!-- Chat -->
@@ -1427,7 +1429,7 @@
           ${desperd>0?`<li>Elimine os ${fmt(desperd)} em desperdícios identificados</li>`:''}
           ${d.saidas>d.entradas*0.7?`<li>Seus custos representam ${(d.saidas/d.entradas*100).toFixed(0)}% do faturamento — ideal abaixo de 70%</li>`:''}
           ${margem>=30?`<li>Ótima margem! Considere reinvestir em crescimento</li>`:''}
-          <li>Use o Consultor IA para análise detalhada</li>
+          <li>Use o Klaus IA para análise detalhada</li>
         </ul>
       `;
     }
@@ -1692,7 +1694,7 @@
     };
 
     // ── Exportar ──────────────────────────────────────
-    // ── Consultor IA ──────────────────────────────────────────────
+    // ── Klaus IA ──────────────────────────────────────────────
     function confirmarAcaoEmp(msg, cb) {
       const o=document.getElementById('confirm-overlay');if(o)o.remove();
       const ov=document.createElement('div');ov.id='confirm-overlay';
@@ -1710,6 +1712,11 @@
       row.appendChild(bNo);row.appendChild(bYes);box.appendChild(txt);box.appendChild(row);ov.appendChild(box);document.body.appendChild(ov);
     }
 
+    // Cache do Klaus empresa
+    const _klausCacheEmp = new Map();
+    function _klausCacheGet(p){const k=p.toLowerCase().trim().slice(0,60);const c=_klausCacheEmp.get(k);if(!c)return null;if(Date.now()-c.ts>30*60*1000){_klausCacheEmp.delete(k);return null;}return c.r;}
+    function _klausCacheSet(p,r){const k=p.toLowerCase().trim().slice(0,60);_klausCacheEmp.set(k,{r,ts:Date.now()});if(_klausCacheEmp.size>30){_klausCacheEmp.delete(_klausCacheEmp.keys().next().value);}}
+
     window.fazerPerguntaConsultor = function(pergunta) {
       document.getElementById('consultor-input').value = pergunta;
       enviarConsultor();
@@ -1726,6 +1733,14 @@
       // Mensagem do usuário
       chat.innerHTML += `<div class="msg-user"><div class="msg-user-bubble">${pergunta}</div></div>`;
 
+      // Verificar cache
+      const _cached = _klausCacheGet(pergunta);
+      if (_cached) {
+        const html = _cached.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').join('<br>');
+        chat.innerHTML += `<div class="msg-ia"><img src="icone-cerebro.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;margin-top:4px"><div class="msg-ia-bubble"><p>${html}</p></div></div>`;
+        chat.scrollTop = chat.scrollHeight;
+        return;
+      }
       // Loading
       const loadId = 'load-'+Date.now();
       chat.innerHTML += `<div class="msg-ia" id="${loadId}">
@@ -1759,9 +1774,15 @@ ${empresa.nomeNegocio?'- Nome do negócio: '+empresa.nomeNegocio:''}
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
-            model:'claude-sonnet-4-20250514',
-            max_tokens:1000,
-            system:`Você é um consultor financeiro especialista em pequenos negócios brasileiro. Analise os dados fornecidos e responda de forma consultiva, clara e prática. Use linguagem direta, seja objetivo. Formate com markdown simples (negrito com **texto**). Sempre dê recomendações concretas no final.`,
+            model:'claude-haiku-4-5-20251001',
+            max_tokens:800,
+            system:`Você é Klaus, um consultor financeiro empresarial inteligente, estratégico e direto ao ponto do aplicativo Monvay.
+
+Personalidade: profissional, claro e objetivo, inteligente sem parecer robótico, explica de forma simples como um consultor premium, sempre orientado para crescimento, lucro e organização financeira.
+
+Você pode: explicar gastos excessivos, identificar gargalos financeiros, criar metas, sugerir cortes inteligentes, mostrar tendências, comparar períodos, fazer previsões, alertar sobre risco de caixa, sugerir estratégias para aumentar lucro.
+
+Regras: Sempre responda baseado nos dados disponíveis. NUNCA invente números. Priorize respostas curtas e úteis. Gere análises práticas e acionáveis. Destaque riscos financeiros importantes. Use listas quando necessário. Negrito nos valores importantes. Máximo 350 palavras.`,
             messages:[{
               role:'user',
               content:`${context}
@@ -1782,6 +1803,7 @@ Pergunta do empresário: ${pergunta}`
           .replace(/
 /g,'<br>');
 
+        _klausCacheSet(pergunta, resposta);
         const loadEl = document.getElementById(loadId);
         if (loadEl) {
           loadEl.innerHTML = `

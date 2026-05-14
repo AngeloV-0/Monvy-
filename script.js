@@ -1,5 +1,353 @@
 const naoEQuitacao = m => m.classificacao !== 'quitacao_divida';
 
+// ── Sidebar mobile ────────────────────────────────────────────────
+// ── Configurações completas ───────────────────────────────────────
+
+// ── Klaus — Assistente Financeiro IA ────────────────────────────
+let klausHistorico = [];
+
+function klausContexto() {
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+  const ent = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const sai = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const totalEnt = movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const totalSai = movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const divAtivas = dividas.filter(d=>d.status!=='quitada');
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar');
+  const catGastos = {};
+  movMes.filter(m=>m.tipo==='gasto').forEach(m=>{
+    catGastos[m.categoria||'Outros']=(catGastos[m.categoria||'Outros']||0)+(m.valor||0);
+  });
+  const topCat = Object.entries(catGastos).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([c,v])=>c+': R$'+v.toFixed(2)).join(', ');
+  return `DADOS FINANCEIROS DO USUÁRIO (${hoje.toLocaleDateString('pt-BR')}):
+- Saldo atual: R$${(totalEnt-totalSai).toFixed(2)}
+- Este mês — Entradas: R$${ent.toFixed(2)} | Saídas: R$${sai.toFixed(2)} | Saldo do mês: R$${(ent-sai).toFixed(2)}
+- Total de movimentações: ${movimentacoes.length}
+- Top categorias de gasto (este mês): ${topCat||'nenhuma'}
+- Dívidas ativas: ${divAtivas.length} (total: R$${divAtivas.reduce((s,d)=>s+(d.valor||0),0).toFixed(2)})
+- Contas pendentes: ${contasPend.length} (total: R$${contasPend.reduce((s,c)=>s+(c.valor||0),0).toFixed(2)})
+- Metas ativas: ${metas.length}
+- Recorrentes: ${movimentacoes.filter(m=>m.recorrente).length} lançamentos`;
+}
+
+// ── Cache de respostas do Klaus ──────────────────────────────────
+const _klausCache = new Map();
+
+function klausCacheKey(pergunta) {
+  // Normalizar pergunta para cache (minúsculas, sem acentos, sem pontuação extra)
+  return pergunta.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9 ]/g,'')
+    .trim()
+    .split(' ').slice(0,8).join(' '); // primeiras 8 palavras
+}
+
+function klausCacheBuscar(pergunta) {
+  const key = klausCacheKey(pergunta);
+  const cached = _klausCache.get(key);
+  if (!cached) return null;
+  // Cache válido por 30 minutos
+  if (Date.now() - cached.ts > 30 * 60 * 1000) {
+    _klausCache.delete(key);
+    return null;
+  }
+  return cached.resposta;
+}
+
+function klausCacheSalvar(pergunta, resposta) {
+  const key = klausCacheKey(pergunta);
+  _klausCache.set(key, { resposta, ts: Date.now() });
+  // Limitar cache a 50 entradas
+  if (_klausCache.size > 50) {
+    const primeiraChave = _klausCache.keys().next().value;
+    _klausCache.delete(primeiraChave);
+  }
+}
+
+async function klausChamarIA(pergunta, modoEmpresa) {
+  const nomeUsuario = (window._firebaseExports?.auth?.currentUser?.displayName||'').split(' ')[0] || '';
+  const primeiro = nomeUsuario ? 'O nome do usuário é ' + nomeUsuario + '. ' : '';
+
+  const sistemaPersonal = `Você é Klaus, um assistente financeiro pessoal inteligente, amigável e estratégico do aplicativo Monvay.
+${primeiro}
+Sua personalidade: amigável e humano, inteligente e confiável, explica tudo de forma simples, motivador sem parecer coach, conversa de forma leve e moderna, nunca julga o usuário pelos gastos.
+
+Seu objetivo é ajudar o usuário a: controlar gastos, economizar dinheiro, sair do vermelho, criar metas financeiras, melhorar hábitos financeiros, organizar contas, planejar compras, investir melhor e entender para onde o dinheiro está indo.
+
+Regras: Nunca critique o usuário. Sempre explique de forma simples. Transforme números em insights fáceis de entender. Dê sugestões práticas. Evite respostas genéricas. Priorize clareza.
+
+Estilo de resposta: seja direto, use listas quando necessário, destaque valores em negrito, comemore pequenas conquistas financeiras. Máximo 300 palavras por resposta.
+
+NUNCA invente dados — use apenas os dados financeiros fornecidos.`;
+
+  const sistemaEmpresa = `Você é Klaus, um consultor financeiro empresarial inteligente, estratégico e direto ao ponto do aplicativo Monvay.
+${primeiro}
+Sua personalidade: profissional, claro e objetivo, inteligente sem parecer robótico, explica de forma simples, fala como um consultor premium, sempre orientado para crescimento, lucro e organização financeira.
+
+Seu objetivo é ajudar empresários a tomarem decisões financeiras melhores com base nos dados reais da empresa.
+
+Você pode: explicar gastos excessivos, identificar gargalos financeiros, criar metas, sugerir cortes inteligentes, mostrar tendências, comparar meses, fazer previsões, alertar sobre risco de caixa, sugerir estratégias para aumentar lucro.
+
+Regras: Sempre responda baseado nos dados disponíveis. Nunca invente números. Priorize respostas curtas e úteis. Gere análises práticas e acionáveis. Destaque riscos financeiros importantes.
+
+Estilo: direto, use listas, negrito nos valores importantes. Máximo 300 palavras.
+
+NUNCA invente dados — use apenas os dados financeiros fornecidos.`;
+
+  const ctx = klausContexto();
+  const historico = klausHistorico.slice(-8);
+  const mensagens = [
+    ...historico,
+    {role:'user', content: 'Dados financeiros atuais:\n' + ctx + '\n\nPergunta: ' + pergunta}
+  ];
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:800,
+      system: modoEmpresa ? sistemaEmpresa : sistemaPersonal,
+      messages: mensagens
+    })
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text || 'Não consegui processar sua pergunta. Tente novamente.';
+}
+
+function klausMensagem(texto, tipo) {
+  const el = document.getElementById('klaus-mensagens');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.style.cssText = tipo==='user'
+    ? 'display:flex;justify-content:flex-end'
+    : 'display:flex;gap:10px;align-items:flex-start';
+
+  if (tipo==='user') {
+    div.innerHTML = '<div style="max-width:80%;padding:12px 16px;border-radius:16px 16px 4px 16px;background:var(--primary);color:#000;font-size:.88rem;line-height:1.5;font-weight:500">' + texto + '</div>';
+  } else if (tipo==='loading') {
+    div.id = 'klaus-loading';
+    div.innerHTML = '<div style="width:32px;height:32px;border-radius:50%;background:var(--primary-dim);border:1.5px solid var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:16px;height:16px"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2z"/></svg></div><div style="padding:12px 16px;border-radius:4px 16px 16px 16px;background:var(--surface-2);border:1px solid var(--border);font-size:.85rem;color:var(--gray)">Klaus está pensando...</div>';
+  } else {
+    const md = texto.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n').join('<br>').replace(/^- (.+)/gm,'• $1');
+    div.innerHTML = '<div style="width:32px;height:32px;border-radius:50%;background:var(--primary-dim);border:1.5px solid var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:16px;height:16px"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div style="max-width:85%;padding:14px 16px;border-radius:4px 16px 16px 16px;background:var(--surface-2);border:1px solid var(--border);font-size:.85rem;line-height:1.6;color:var(--white)">' + md + '</div>';
+  }
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function klausProcessar(pergunta, modoEmpresa) {
+  document.getElementById('klaus-intro').style.display = 'none';
+  document.getElementById('klaus-chat').style.display = 'block';
+  klausMensagem(pergunta, 'user');
+
+  // Verificar cache primeiro
+  const respostaCache = klausCacheBuscar(pergunta);
+  if (respostaCache) {
+    klausMensagem(respostaCache, 'bot');
+    klausHistorico.push({role:'user',content:pergunta},{role:'assistant',content:respostaCache});
+    return;
+  }
+
+  klausMensagem('', 'loading');
+  try {
+    const resposta = await klausChamarIA(pergunta, modoEmpresa||false);
+    // Salvar no cache
+    klausCacheSalvar(pergunta, resposta);
+    const loading = document.getElementById('klaus-loading');
+    if (loading) loading.remove();
+    klausMensagem(resposta, 'bot');
+    klausHistorico.push({role:'user',content:pergunta},{role:'assistant',content:resposta});
+  } catch(e) {
+    const loading = document.getElementById('klaus-loading');
+    if (loading) loading.remove();
+    klausMensagem('Erro ao conectar com o Klaus. Verifique sua conexão e tente novamente.', 'bot');
+  }
+}
+
+window.klausPerguntar = function(pergunta, empresa) { klausProcessar(pergunta, empresa||false); };
+
+window.klausEnviar = function() {
+  const inp = document.getElementById('klaus-input');
+  const txt = inp?.value?.trim();
+  if (!txt) return;
+  inp.value = '';
+  klausProcessar(txt, false);
+};
+
+window.klausEnviarChat = function() {
+  const inp = document.getElementById('klaus-input-chat');
+  const txt = inp?.value?.trim();
+  if (!txt) return;
+  inp.value = '';
+  klausProcessar(txt, false);
+};
+
+window.klausReiniciar = function() {
+  klausHistorico = [];
+  document.getElementById('klaus-intro').style.display = 'block';
+  document.getElementById('klaus-chat').style.display = 'none';
+  document.getElementById('klaus-mensagens').innerHTML = '';
+};
+
+window.salvarPreferencia = function(chave, valor) {
+  localStorage.setItem('monvy_pref_' + chave, JSON.stringify(valor));
+  aplicarPreferencia(chave, valor);
+};
+
+function getPreferencia(chave, padrao) {
+  const v = localStorage.getItem('monvy_pref_' + chave);
+  return v !== null ? JSON.parse(v) : padrao;
+}
+
+function aplicarPreferencia(chave, valor) {
+  if (chave === 'notif_dica') {
+    const el = document.getElementById('dica-dia-card');
+    if (el) el.style.display = valor ? '' : 'none';
+  }
+  if (chave === 'notif_insights') {
+    const el = document.getElementById('insights-panel');
+    if (el && !valor) el.style.display = 'none';
+  }
+  if (chave === 'periodo_padrao') {
+    if (typeof setPeriodo === 'function') setPeriodo(valor);
+  }
+  if (chave === 'pergunta_nd') {
+    window._perguntaNDAtiva = valor;
+  }
+}
+
+function carregarTodasPreferencias() {
+  // Notificações
+  [['notif_contas','cfg-notif-contas'],
+   ['notif_dica','cfg-notif-dica'],
+   ['notif_insights','cfg-notif-insights'],
+   ['pergunta_nd','cfg-pergunta-nd']].forEach(([chave,id])=>{
+    const v = getPreferencia(chave, true);
+    const el = document.getElementById(id);
+    if (el) el.checked = v;
+    aplicarPreferencia(chave, v);
+  });
+  // Período padrão
+  const pd = getPreferencia('periodo_padrao','mes');
+  const elPd = document.getElementById('cfg-periodo-padrao');
+  if (elPd) elPd.value = pd;
+  // Empresa
+  const emp = getPreferencia('exibir_empresa', true);
+  const swEmp = document.getElementById('cfg-switch-empresa');
+  if (swEmp) swEmp.checked = emp;
+}
+
+window.configurarExibirEmpresa = function(exibir) {
+  salvarPreferencia('exibir_empresa', exibir);
+  const btn = document.getElementById('modo-empresa-btn');
+  if (btn) btn.style.display = exibir ? '' : 'none';
+};
+
+function renderizarConfiguracoes() {
+  // Dados do usuário
+  const auth = window._firebaseExports?.auth;
+  if (auth?.currentUser) {
+    const user = auth.currentUser;
+    const nome = document.getElementById('cfg-nome');
+    const email = document.getElementById('cfg-email');
+    const avatar = document.getElementById('cfg-avatar');
+    if (nome) nome.textContent = user.displayName || 'Sem nome';
+    if (email) email.textContent = user.email || '—';
+    if (avatar) {
+      if (user.photoURL) {
+        avatar.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+      } else {
+        avatar.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+      }
+    }
+    // Sessão
+    const sessao = document.getElementById('cfg-sessao-info');
+    if (sessao) {
+      const metodo = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'E-mail/Senha';
+      sessao.textContent = 'Conectado via ' + metodo + ' — ' + (user.email || '');
+    }
+  }
+  // Tema
+  const tema = localStorage.getItem('monvy_theme') || 'dark';
+  const btnD = document.getElementById('cfg-btn-dark');
+  const btnL = document.getElementById('cfg-btn-light');
+  if (btnD) btnD.classList.toggle('active', tema === 'dark');
+  if (btnL) btnL.classList.toggle('active', tema === 'light');
+  // Todas as preferências
+  carregarTodasPreferencias();
+}
+
+window.configurarTema = function(tema) {
+  if (typeof applyTheme === 'function') applyTheme(tema);
+  localStorage.setItem('monvy_theme', tema);
+  // Atualizar botões
+  const btnD = document.getElementById('cfg-btn-dark');
+  const btnL = document.getElementById('cfg-btn-light');
+  if (btnD) btnD.classList.toggle('active', tema === 'dark');
+  if (btnL) btnL.classList.toggle('active', tema === 'light');
+};
+
+window.exportarDadosCompleto = function() {
+  if (!movimentacoes.length) { alert('Nenhuma movimentação para exportar.'); return; }
+  const bom = '﻿';
+  const linhas = [
+    `# Monvay — Exportação completa`,
+    `# Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+    `# Total de movimentações: ${movimentacoes.length}`,
+    '',
+    'Descrição,Tipo,Valor,Data,Categoria,Classificação,Recorrente',
+    ...movimentacoes.map(m =>
+      `"${m.descricao||''}","${m.tipo==='ganho'?'Entrada':'Saída'}","${(m.valor||0).toFixed(2)}","${m.data||''}","${m.categoria||''}","${m.classificacao||''}","${m.recorrente?'Sim':'Não'}"`
+    )
+  ];
+  const blob = new Blob([bom + linhas.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'monvay-dados-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+};
+
+window.confirmarExcluirConta = function() {
+  confirmarAcao('Isso removerá TODOS os seus dados permanentemente. Esta ação não pode ser desfeita.', async () => {
+    const auth = window._firebaseExports?.auth;
+    if (!auth?.currentUser) return;
+    try {
+      // Deletar dados do Firestore seria ideal mas requer regras
+      await auth.currentUser.delete();
+      localStorage.clear();
+      window.location.replace('landing.html');
+    } catch(e) {
+      if (e.code === 'auth/requires-recent-login') {
+        alert('Por segurança, faça login novamente antes de excluir a conta.');
+        logout();
+      } else {
+        alert('Erro ao excluir conta: ' + e.message);
+      }
+    }
+  });
+};
+
+window.abrirSidebar = function() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  if (sb) sb.classList.add('open');
+  if (ov) ov.style.display = 'block';
+};
+window.fecharSidebar = function() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  if (sb) sb.classList.remove('open');
+  if (ov) ov.style.display = 'none';
+};
+// Fechar sidebar ao navegar
+document.querySelectorAll('.nav-item[data-tela]').forEach(item => {
+  item.addEventListener('click', () => window.fecharSidebar());
+});
+
 // Limpa movimentações de quitação de dívida geradas por versões antigas
 window.limparQuitacoesDuplicadas = async function() {
   if(!uidAtual){ alert('Faça login primeiro.'); return; }
@@ -264,31 +612,76 @@ function _inicializarRascunho() {
   }
 }
 
+// Mapeamento telas antigas → novas
+const _telaMap = {
+  contas:'compromissos', dividas:'compromissos',
+  score:'analise', relatorio:'analise'
+};
+const _subTabMap = {
+  contas:['compromissos','contas'], dividas:['compromissos','dividas'],
+  score:['analise','score'], relatorio:['analise','relatorio']
+};
+
+// Sub-abas
+window.setSubTab = function(pai, sub) {
+  const grupos = {compromissos:['contas','dividas'], analise:['score','relatorio']};
+  (grupos[pai]||[]).forEach(p=>{
+    const el=document.getElementById('sub-conteudo-'+p);
+    const btn=document.getElementById('sub-tab-'+p);
+    if(el) el.style.display='none';
+    if(btn) btn.classList.remove('active');
+  });
+  const alvo=document.getElementById('sub-conteudo-'+sub);
+  const btnA=document.getElementById('sub-tab-'+sub);
+  if(alvo) alvo.style.display='block';
+  if(btnA) btnA.classList.add('active');
+  // Mover conteúdo da tela original para sub-aba na primeira vez
+  function mover(telaId, subId){
+    const tela=document.getElementById('tela-'+telaId);
+    const subEl=document.getElementById(subId);
+    if(tela&&subEl&&subEl.children.length===0){
+      while(tela.firstChild) subEl.appendChild(tela.firstChild);
+    }
+  }
+  if(sub==='contas'){mover('contas','sub-conteudo-contas');renderizarContas();popularSelectContas();}
+  if(sub==='dividas'){mover('dividas','sub-conteudo-dividas');renderizarDividas();}
+  if(sub==='score'){mover('score','sub-conteudo-score');calcularScore();}
+  if(sub==='relatorio'){mover('relatorio','sub-conteudo-relatorio');renderizarRelatorio();}
+};
+
 function irPara(tela) {
+  const telaNova = _telaMap[tela] || tela;
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.tela').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll(`[data-tela="${tela}"]`).forEach(n=>n.classList.add('active'));
-  const telaEl=document.getElementById('tela-'+tela);
+  document.querySelectorAll(`[data-tela="${telaNova}"]`).forEach(n=>n.classList.add('active'));
+  const telaEl=document.getElementById('tela-'+telaNova);
   if(telaEl) telaEl.classList.add('active');
-  const t=pageTitles[tela]||'Monvay';
+  const tituloMapa = {
+    ...pageTitles,
+    compromissos:'Compromissos',
+    analise:'Análise'
+  };
+  const t=tituloMapa[telaNova]||tituloMapa[tela]||'Monvay';
   const pt=document.getElementById('page-title'); if(pt) pt.textContent=t;
   const mt=document.getElementById('topbar-mobile-tela'); if(mt) mt.textContent=t;
   if(tela==='gastos'){atualizarTelaCategorias();renderizarTabela();}
-  if(tela==='score') calcularScore();
-  if(tela==='relatorio') renderizarRelatorio();
-  if(tela==='contas'){renderizarContas();popularSelectContas();}
+  if(tela==='configuracoes') renderizarConfiguracoes();
   if(tela==='metas') renderizarMetas();
-  if(tela==='dividas') renderizarDividas();
-  // Mostrar insights ao VOLTAR para inicio (não na primeira vez)
+  // Sub-abas
+  if(_subTabMap[tela]){
+    setTimeout(()=>setSubTab(_subTabMap[tela][0],_subTabMap[tela][1]),10);
+  } else if(telaNova==='compromissos'){
+    setTimeout(()=>setSubTab('compromissos','contas'),10);
+  } else if(telaNova==='analise'){
+    setTimeout(()=>setSubTab('analise','score'),10);
+  }
   if(tela==='inicio' && _telaAnterior && _telaAnterior!=='inicio'){
     gerarInsights();
   } else if(tela==='inicio'){
-    // Esconder na primeira vez
     const panel=document.getElementById('insights-panel');
     if(panel) panel.style.display='none';
   }
   _telaAnterior = tela;
-  // bolsa integrada diretamente no HTML
 }
 document.querySelectorAll('.nav-item[data-tela]').forEach(item=>{
   item._monvayNavBound=true;
@@ -352,11 +745,16 @@ async function carregarTodosDados(){
     atualizarKPIs();atualizarChart();renderizarListaInicio();
     renderizarTabela();renderizarMetas();renderizarDividas();renderizarContas();popularSelectContas();
     renderizarRelatorio();calcularScore();gerarInsights();atualizarBanner();
-    carregarTaxasBCB();
+    carregarTaxasBCB();renderSaldoAcumulado();
+    // Inicializar período padrão como mês atual
+    if(typeof setPeriodo==='function') setPeriodo('mes');
   }catch(e){console.error('Erro ao carregar dados:',e);}
 }
 
 function atualizarUIUsuario(nome,foto){
+  // Atualizar nome na nova sidebar
+  const sbName = document.getElementById('sidebar-user-name');
+  if (sbName) sbName.textContent = nome ? nome.split(' ')[0] : 'Minha conta';
   const inicial=nome?nome[0].toUpperCase():'U';
   const mn=document.getElementById('topbar-mobile-name'); if(mn) mn.textContent='Olá, '+nome.split(' ')[0];
   const dn=document.getElementById('drawer-user-name'); if(dn) dn.textContent=nome;
@@ -372,14 +770,43 @@ function atualizarUIUsuario(nome,foto){
 
 // ── KPIs ─────────────────────────────────────────────────────────
 function atualizarKPIs(){
-  const ent=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
-  const sai=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
-  const sal=ent-sai;
-  const sd=document.getElementById('saldo-display'); if(sd){sd.textContent=fmtSaldo(sal);sd.style.color=sal<0?'#ef4444':'';}
-  const sm=document.getElementById('saldo-mes'); if(sm) sm.textContent=`Este mês: +${fmt(ent)} entrou`;
+  // Totais globais (saldo real = todas as movimentações)
+  const entTot=movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const saiTot=movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const sal=entTot-saiTot;
+
+  // Filtradas pelo período selecionado
+  const filtradas=filtrarPorPeriodo(movimentacoes);
+  const ent=filtradas.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const sai=filtradas.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+
+  // Falta pagar = contas pendentes não pagas
+  const faltaPagar=contas.filter(c=>!c.paga&&c.tipo==='pagar').reduce((s,c)=>s+(c.valor||0),0);
+
+  // Saldo disponível = saldo atual - falta pagar
+  const saldoDisp=sal-faltaPagar;
+
+  // Atualizar DOM
+  const sd=document.getElementById('saldo-display');
+  if(sd){sd.textContent=fmtSaldo(sal);sd.style.color=sal<0?'#ef4444':'';}
+
+  const sm=document.getElementById('saldo-mes');
+  if(sm){
+    const labels={semana:'Esta semana',mes:'Este mês','3meses':'3 meses',ano:'Este ano',tudo:'Total'};
+    sm.textContent=`${labels[filtroAtual]||'Este mês'}: +${fmt(ent)} entrou`;
+  }
+
   const ke=document.getElementById('kpi-entradas'); if(ke) ke.textContent=fmt(ent);
-  const ks=document.getElementById('kpi-saidas'); if(ks) ks.textContent=fmt(sai);
-  const km=document.getElementById('kpi-movs'); if(km) km.textContent=movimentacoes.length;
+  const ks=document.getElementById('kpi-saidas');   if(ks) ks.textContent=fmt(sai);
+  const km=document.getElementById('kpi-movs');     if(km) km.textContent=filtradas.length;
+
+  // Falta pagar
+  const kfp=document.getElementById('kpi-falta-pagar');
+  if(kfp){kfp.textContent=fmt(faltaPagar);kfp.style.color=faltaPagar>0?'#ef4444':'#22c55e';}
+
+  // Saldo disponível
+  const ksd=document.getElementById('kpi-saldo-disponivel');
+  if(ksd){ksd.textContent=fmtSaldo(saldoDisp);ksd.style.color=saldoDisp<0?'#ef4444':'';}
 }
 
 // ── Chart fluxo ──────────────────────────────────────────────────
@@ -609,6 +1036,54 @@ function atualizarChart(){
 }
 
 // ── Lista início ──────────────────────────────────────────────────
+// ── Gráfico saldo acumulado ───────────────────────────────────────
+let chartSaldoAcum = null;
+function renderSaldoAcumulado(){
+  const canvas = document.getElementById('chart-saldo-acumulado');
+  if(!canvas) return;
+  const filtradas = filtrarPorPeriodo(movimentacoes)
+    .sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  if(filtradas.length===0){canvas.style.display='none';return;}
+  canvas.style.display='block';
+  // Calcular saldo acumulado dia a dia
+  const ctx = canvas.getContext('2d');
+  if(chartSaldoAcum){chartSaldoAcum.destroy();chartSaldoAcum=null;}
+  const labels=[]; const data=[];
+  let acc=0;
+  filtradas.forEach(m=>{
+    acc += m.tipo==='ganho' ? (m.valor||0) : -(m.valor||0);
+    labels.push(fmtData(m.data).slice(0,5));
+    data.push(parseFloat(acc.toFixed(2)));
+  });
+  const isPositive = data[data.length-1] >= 0;
+  const cor = isPositive ? '#22c55e' : '#ef4444';
+  const g = ctx.createLinearGradient(0,0,0,100);
+  g.addColorStop(0, isPositive?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  chartSaldoAcum = new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{data,borderColor:cor,backgroundColor:g,borderWidth:2,fill:true,tension:0.4,pointRadius:0,pointHoverRadius:5}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(15,23,42,0.96)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+          titleColor:'#94a3b8',bodyColor:'#f1f5f9',
+          callbacks:{
+            label:item=>`Saldo: ${item.raw>=0?'+':''}${item.raw.toLocaleString('pt-BR',{minimumFractionDigits:2,style:'currency',currency:'BRL'})}`
+          }
+        }
+      },
+      scales:{
+        x:{display:false},
+        y:{display:false}
+      }
+    }
+  });
+}
+
 function renderizarListaInicio(){
   const el=document.getElementById('lista-inicio'); if(!el) return;
   const recentes=[...movimentacoes].slice(0,8);
@@ -799,16 +1274,45 @@ window.setFiltro=function(filtro,btn){
   atualizarTelaCategorias();renderizarTabela();
 };
 function filtrarPorPeriodo(lista){
-  const hoje=new Date();
+  const hoje=new Date(); hoje.setHours(23,59,59,999);
   return lista.filter(m=>{
     if(!m.data) return true;
     const d=new Date(m.data+'T00:00:00');
+    if(filtroAtual==='semana'){
+      const ini=new Date(hoje); ini.setDate(ini.getDate()-6); ini.setHours(0,0,0,0);
+      return d>=ini&&d<=hoje;
+    }
     if(filtroAtual==='mes') return d.getMonth()===hoje.getMonth()&&d.getFullYear()===hoje.getFullYear();
-    if(filtroAtual==='3meses'){const lim=new Date(hoje);lim.setMonth(lim.getMonth()-3);return d>=lim;}
+    if(filtroAtual==='3meses'){const lim=new Date(hoje);lim.setMonth(lim.getMonth()-3);lim.setHours(0,0,0,0);return d>=lim;}
     if(filtroAtual==='ano') return d.getFullYear()===hoje.getFullYear();
-    return true;
+    return true; // tudo
   });
 }
+
+// Seletor de período
+window.setPeriodo = function(periodo){
+  filtroAtual = periodo;
+  // Atualizar botões
+  ['semana','mes','3meses','ano','tudo'].forEach(p=>{
+    const btn=document.getElementById('periodo-btn-'+p);
+    if(btn) btn.classList.toggle('active', p===periodo);
+  });
+  // Atualizar tudo
+  atualizarKPIs();
+  atualizarChart();
+  renderizarListaInicio();
+  renderizarTabela();
+  atualizarTelaCategorias();
+  calcularScore();
+  renderSaldoAcumulado();
+  // Atualizar subtítulo dos KPIs
+  const labels={semana:'Esta semana',mes:'Este mês','3meses':'Últimos 3 meses',ano:'Este ano',tudo:'Todo período'};
+  const lbl=labels[periodo]||'no período';
+  const es=document.getElementById('kpi-entradas-sub');
+  const ss=document.getElementById('kpi-saidas-sub');
+  if(es) es.textContent=lbl;
+  if(ss) ss.textContent=lbl;
+};
 function renderizarTabela(){
   const tbody=document.getElementById('tabela-gastos');
   const cEl=document.getElementById('table-count');

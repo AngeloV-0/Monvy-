@@ -46,35 +46,33 @@
     /* ── LEFT PANEL ── */
     .left-panel {
       flex: 1;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+      background: linear-gradient(145deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
       display: flex;
       flex-direction: column;
-      padding: 48px 56px;
+      padding: 48px 52px;
       position: relative;
       overflow: hidden;
     }
 
-    /* Blobs */
+    /* Círculos decorativos */
     .left-panel::before,
     .left-panel::after {
       content: '';
       position: absolute;
       border-radius: 50%;
-      filter: blur(100px);
       pointer-events: none;
     }
 
     .left-panel::before {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(34,197,94,0.2), transparent 70%);
-      top: -150px; left: -150px;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.06);
+      top: -120px; right: -120px;
     }
 
     .left-panel::after {
-      width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(163,230,53,0.12), transparent 70%);
-      bottom: -100px; right: -80px;
+      width: 250px; height: 250px;
+      background: rgba(255,255,255,0.05);
+      bottom: -80px; left: -60px;
     }
 
     .left-logo {
@@ -85,7 +83,7 @@
       font-weight: 800;
       font-size: 1.1rem;
       text-decoration: none;
-      color: var(--white);
+      color: #fff;
       position: relative;
       z-index: 1;
     }
@@ -529,50 +527,48 @@
 
   <!-- LEFT -->
   <div class="left-panel">
-    <a href="landing.html" class="left-logo">
-      <img src="logo.png" alt="Monvay" style="height:32px;width:auto;display:block;">
+    <a href="landing.html" class="left-logo" style="position:relative;z-index:1">
+      <img src="logo.png" alt="Monvay" style="height:36px;width:auto;display:block;filter:brightness(0) invert(1)">
     </a>
 
-    <div class="left-content">
-      <h1>Seu dinheiro,<br><span class="grad-text">seu controle.</span></h1>
-      <p>Junte-se a quem já decidiu parar de deixar o dinheiro sumir no fim do mês.</p>
+    <div class="left-content" style="position:relative;z-index:1">
+      <h1 style="font-size:2rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:12px">
+        Seja Bem-vindo<br>ao Monvay
+      </h1>
+      <p style="color:rgba(255,255,255,0.85);font-size:.95rem;margin-bottom:40px;line-height:1.6">
+        Assuma o controle das suas finanças e transforme sua relação com o dinheiro.
+      </p>
 
       <div class="features-list">
-        <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
-          <span>Dashboard completo com saldo e fluxo financeiro</span>
+        <div class="feat-item" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.15)">
+          <div class="feat-icon" style="background:rgba(255,255,255,0.2);color:#fff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <span style="color:#fff">Acompanhe suas despesas e receitas em tempo real</span>
         </div>
-        <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-          <span>Metas de economia com barra de progresso visual</span>
+        <div class="feat-item" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.15)">
+          <div class="feat-icon" style="background:rgba(255,255,255,0.2);color:#fff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <span style="color:#fff">Defina metas financeiras e acompanhe seu progresso</span>
         </div>
-        <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-          <span>Simulador de investimentos e comparação de rendimentos</span>
+        <div class="feat-item" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.15)">
+          <div class="feat-icon" style="background:rgba(255,255,255,0.2);color:#fff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+          </div>
+          <span style="color:#fff">Acesse de qualquer dispositivo, a qualquer momento</span>
         </div>
-        <div class="feat-item">
-          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-          <span>Pergunta "necessidade ou desejo?" antes de cada gasto</span>
+        <div class="feat-item" style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.15)">
+          <div class="feat-icon" style="background:rgba(255,255,255,0.2);color:#fff">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <span style="color:#fff">Seus dados estão sempre seguros e protegidos</span>
         </div>
       </div>
+    </div>
 
-      <div class="preview-card">
-        <div class="preview-topbar">
-          <span class="preview-title">Saldo em tempo real</span>
-          <span class="preview-badge">↑ +12,4%</span>
-        </div>
-        <div class="preview-saldo">R$ 4.820,00</div>
-        <div class="preview-sub">Atualizado agora</div>
-        <div class="preview-bars">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-        </div>
-      </div>
+    <div style="position:relative;z-index:1;margin-top:auto;padding-top:24px">
+      <p style="font-size:.75rem;color:rgba(255,255,255,0.6)">Monvay © 2026 · Sistema Financeiro</p>
     </div>
   </div>
 
