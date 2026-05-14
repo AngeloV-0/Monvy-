@@ -1,5 +1,53 @@
 const naoEQuitacao = m => m.classificacao !== 'quitacao_divida';
 
+// ── Ocultar/mostrar saldo ────────────────────────────────────────
+let _saldoOculto = localStorage.getItem('monvy_ocultar_saldo') === '1';
+
+// IDs dos elementos que devem ser mascarados
+const _saldoIds = [
+  'saldo-display','kpi-entradas','kpi-saidas','kpi-movs',
+  'kpi-falta-pagar','kpi-saldo-disponivel',
+  'saldo-mes','kpi-entradas-sub','kpi-saidas-sub'
+];
+
+function aplicarMascaraSaldo() {
+  const ocultar = _saldoOculto;
+  const mask = '••••••';
+
+  _saldoIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (ocultar) {
+      if (!el.dataset.valorReal) el.dataset.valorReal = el.textContent;
+      el.textContent = mask;
+      el.style.filter = 'blur(0)';
+      el.style.userSelect = 'none';
+    } else {
+      if (el.dataset.valorReal) {
+        el.textContent = el.dataset.valorReal;
+        delete el.dataset.valorReal;
+      }
+      el.style.filter = '';
+      el.style.userSelect = '';
+    }
+  });
+
+  // Atualizar ícone do olho
+  const show = document.getElementById('icon-eye-show');
+  const hide = document.getElementById('icon-eye-hide');
+  if (show) show.style.display = ocultar ? 'none' : 'block';
+  if (hide) hide.style.display = ocultar ? 'block' : 'none';
+}
+
+window.toggleOcultarSaldo = function() {
+  _saldoOculto = !_saldoOculto;
+  localStorage.setItem('monvy_ocultar_saldo', _saldoOculto ? '1' : '0');
+  aplicarMascaraSaldo();
+};
+
+// Aplicar máscara após KPIs atualizarem
+const _origAtualizarKPIs = atualizarKPIs;
+
 // ── Sidebar mobile ────────────────────────────────────────────────
 // ── Configurações completas ───────────────────────────────────────
 
@@ -73,50 +121,25 @@ async function klausChamarIA(pergunta, modoEmpresa) {
 
   const sistemaPersonal = `Você é Klaus, um assistente financeiro pessoal inteligente, amigável e estratégico do aplicativo Monvay.
 ${primeiro}
-Sua personalidade: amigável e humano, inteligente e confiável, explica tudo de forma simples, motivador sem parecer coach, conversa de forma leve e moderna, nunca julga o usuário pelos gastos.
-
-Seu objetivo é ajudar o usuário a: controlar gastos, economizar dinheiro, sair do vermelho, criar metas financeiras, melhorar hábitos financeiros, organizar contas, planejar compras, investir melhor e entender para onde o dinheiro está indo.
-
-Regras: Nunca critique o usuário. Sempre explique de forma simples. Transforme números em insights fáceis de entender. Dê sugestões práticas. Evite respostas genéricas. Priorize clareza.
-
-Estilo de resposta: seja direto, use listas quando necessário, destaque valores em negrito, comemore pequenas conquistas financeiras. Máximo 300 palavras por resposta.
-
-NUNCA invente dados — use apenas os dados financeiros fornecidos.`;
+Personalidade: amigável e humano, inteligente e confiável, explica tudo de forma simples, motivador sem parecer coach, nunca julga o usuário pelos gastos.
+Objetivo: controlar gastos, economizar, sair do vermelho, criar metas, melhorar hábitos financeiros.
+Regras: Nunca critique. Explique de forma simples. Sugestões práticas. Máximo 300 palavras. NUNCA invente dados.`;
 
   const sistemaEmpresa = `Você é Klaus, um consultor financeiro empresarial inteligente, estratégico e direto ao ponto do aplicativo Monvay.
 ${primeiro}
-Sua personalidade: profissional, claro e objetivo, inteligente sem parecer robótico, explica de forma simples, fala como um consultor premium, sempre orientado para crescimento, lucro e organização financeira.
+Personalidade: profissional, claro e objetivo, consultor premium, orientado a crescimento e lucro.
+Objetivo: diagnóstico financeiro, gargalos, redução de custos, aumento de margem, alertas de risco.
+Regras: Basear-se nos dados. NUNCA invente números. Análises práticas. Máximo 350 palavras.`;
 
-Seu objetivo é ajudar empresários a tomarem decisões financeiras melhores com base nos dados reais da empresa.
-
-Você pode: explicar gastos excessivos, identificar gargalos financeiros, criar metas, sugerir cortes inteligentes, mostrar tendências, comparar meses, fazer previsões, alertar sobre risco de caixa, sugerir estratégias para aumentar lucro.
-
-Regras: Sempre responda baseado nos dados disponíveis. Nunca invente números. Priorize respostas curtas e úteis. Gere análises práticas e acionáveis. Destaque riscos financeiros importantes.
-
-Estilo: direto, use listas, negrito nos valores importantes. Máximo 300 palavras.
-
-NUNCA invente dados — use apenas os dados financeiros fornecidos.`;
-
+  const sistema = modoEmpresa ? sistemaEmpresa : sistemaPersonal;
   const ctx = klausContexto();
   const historico = klausHistorico.slice(-8);
-  const mensagens = [
-    ...historico,
-    {role:'user', content: 'Dados financeiros atuais:\n' + ctx + '\n\nPergunta: ' + pergunta}
-  ];
+  const perguntaComCtx = 'Dados financeiros:\n' + ctx + '\n\nPergunta: ' + pergunta;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model:'claude-haiku-4-5-20251001',
-      max_tokens:800,
-      system: modoEmpresa ? sistemaEmpresa : sistemaPersonal,
-      messages: mensagens
-    })
-  });
-  const data = await res.json();
-  return data.content?.[0]?.text || 'Não consegui processar sua pergunta. Tente novamente.';
+  // Usar Cloud Function (chave segura no servidor)
+  return await klausChamarCloud(perguntaComCtx, historico, sistema);
 }
+
 
 function klausMensagem(texto, tipo) {
   const el = document.getElementById('klaus-mensagens');
@@ -452,7 +475,8 @@ import {
   getMetas, adicionarMeta, atualizarMeta, deletarMeta,
   getDividas, adicionarDivida, atualizarDivida, deletarDivida,
   getContas, adicionarConta, atualizarConta, deletarConta,
-  verificarEResetarMes, getHistorico
+  verificarEResetarMes, getHistorico,
+  klausChamarCloud
 } from './firebase.js';
 
 // ── Estado global ──────────────────────────────────────────────
@@ -615,16 +639,16 @@ function _inicializarRascunho() {
 // Mapeamento telas antigas → novas
 const _telaMap = {
   contas:'compromissos', dividas:'compromissos',
-  score:'analise', relatorio:'analise'
+  score:'analise'
 };
 const _subTabMap = {
   contas:['compromissos','contas'], dividas:['compromissos','dividas'],
-  score:['analise','score'], relatorio:['analise','relatorio']
+  score:['analise','score']
 };
 
 // Sub-abas
 window.setSubTab = function(pai, sub) {
-  const grupos = {compromissos:['contas','dividas'], analise:['score','relatorio']};
+  const grupos = {compromissos:['contas','dividas'], analise:['score']};
   (grupos[pai]||[]).forEach(p=>{
     const el=document.getElementById('sub-conteudo-'+p);
     const btn=document.getElementById('sub-tab-'+p);
@@ -646,7 +670,6 @@ window.setSubTab = function(pai, sub) {
   if(sub==='contas'){mover('contas','sub-conteudo-contas');renderizarContas();popularSelectContas();}
   if(sub==='dividas'){mover('dividas','sub-conteudo-dividas');renderizarDividas();}
   if(sub==='score'){mover('score','sub-conteudo-score');calcularScore();}
-  if(sub==='relatorio'){mover('relatorio','sub-conteudo-relatorio');renderizarRelatorio();}
 };
 
 function irPara(tela) {
@@ -675,6 +698,7 @@ function irPara(tela) {
   } else if(telaNova==='analise'){
     setTimeout(()=>setSubTab('analise','score'),10);
   }
+  if(tela==='relatorio') renderizarRelatorio();
   if(tela==='inicio' && _telaAnterior && _telaAnterior!=='inicio'){
     gerarInsights();
   } else if(tela==='inicio'){
@@ -748,6 +772,8 @@ async function carregarTodosDados(){
     carregarTaxasBCB();renderSaldoAcumulado();
     // Inicializar período padrão como mês atual
     if(typeof setPeriodo==='function') setPeriodo('mes');
+    // Aplicar preferência de ocultar saldo
+    setTimeout(()=>{ if(typeof aplicarMascaraSaldo==='function') aplicarMascaraSaldo(); }, 300);
   }catch(e){console.error('Erro ao carregar dados:',e);}
 }
 
@@ -807,6 +833,9 @@ function atualizarKPIs(){
   // Saldo disponível
   const ksd=document.getElementById('kpi-saldo-disponivel');
   if(ksd){ksd.textContent=fmtSaldo(saldoDisp);ksd.style.color=saldoDisp<0?'#ef4444':'';}
+
+  // Aplicar máscara se saldo estiver oculto
+  if(typeof aplicarMascaraSaldo==='function') aplicarMascaraSaldo();
 }
 
 // ── Chart fluxo ──────────────────────────────────────────────────

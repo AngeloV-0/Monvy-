@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monvay Empresa</title>
-  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="icon" type="image/png" href="logo-02.png">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#060D0A">
   <meta name="mobile-web-app-capable" content="yes">
@@ -267,7 +267,7 @@
 
   <!-- Loading -->
   <div id="app-loading-overlay" style="display:flex;position:fixed;inset:0;background:var(--bg,#0A0F1A);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:14px">
-    <img src="logo.png" alt="Monvay" style="height:40px;width:auto;opacity:.8">
+    <img src="logo-01.png" alt="Monvay" style="height:40px;width:auto;opacity:.8">
     <div style="width:36px;height:36px;border:3px solid rgba(34,197,94,0.15);border-top-color:#22C55E;border-radius:50%;animation:appSpin .8s linear infinite"></div>
     <style>@keyframes appSpin{to{transform:rotate(360deg)}}</style>
   </div>
@@ -278,7 +278,7 @@
   <!-- Drawer menu mobile -->
   <div class="emp-drawer" id="emp-drawer">
     <div class="emp-drawer-header">
-      <img src="logo.png" class="emp-drawer-logo" alt="Monvay">
+      <img src="logo-01.png" class="emp-drawer-logo" alt="Monvay">
       <span class="empresa-badge">empresa</span>
     </div>
     <div class="emp-drawer-nav">
@@ -319,7 +319,7 @@
   <!-- Sidebar desktop -->
   <aside class="sidebar-emp">
     <div class="logo">
-      <img src="logo.png" alt="Monvay" style="height:32px;width:auto;display:block;">
+      <img src="logo-01.png" alt="Monvay" style="height:32px;width:auto;display:block;">
     </div>
     <nav>
       <a class="nav-item active" id="si-painel" onclick="irParaTela('painel')" title="Painel" data-label="Painel">
@@ -932,7 +932,8 @@
       getContasEmpresa, adicionarContaEmpresa, atualizarContaEmpresa, deletarContaEmpresa,
       getProdutos, adicionarProduto, atualizarProduto, deletarProduto,
       getMetas, adicionarMeta, atualizarMeta, deletarMeta,
-      getRecorrentesEmpresa, adicionarRecorrenteEmpresa, deletarRecorrenteEmpresa
+      getRecorrentesEmpresa, adicionarRecorrenteEmpresa, deletarRecorrenteEmpresa,
+      klausChamarCloud
     } from './firebase.js';
 
     // ── Estado ────────────────────────────────────────
@@ -1770,29 +1771,9 @@ ${empresa.nomeNegocio?'- Nome do negócio: '+empresa.nomeNegocio:''}
       `.trim();
 
       try {
-        const resp = await fetch('https://api.anthropic.com/v1/messages', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            model:'claude-haiku-4-5-20251001',
-            max_tokens:800,
-            system:`Você é Klaus, um consultor financeiro empresarial inteligente, estratégico e direto ao ponto do aplicativo Monvay.
-
-Personalidade: profissional, claro e objetivo, inteligente sem parecer robótico, explica de forma simples como um consultor premium, sempre orientado para crescimento, lucro e organização financeira.
-
-Você pode: explicar gastos excessivos, identificar gargalos financeiros, criar metas, sugerir cortes inteligentes, mostrar tendências, comparar períodos, fazer previsões, alertar sobre risco de caixa, sugerir estratégias para aumentar lucro.
-
-Regras: Sempre responda baseado nos dados disponíveis. NUNCA invente números. Priorize respostas curtas e úteis. Gere análises práticas e acionáveis. Destaque riscos financeiros importantes. Use listas quando necessário. Negrito nos valores importantes. Máximo 350 palavras.`,
-            messages:[{
-              role:'user',
-              content:`${context}
-
-Pergunta do empresário: ${pergunta}`
-            }]
-          })
-        });
-        const data = await resp.json();
-        const resposta = data.content?.[0]?.text || 'Não consegui analisar. Tente novamente.';
+        const sistemaEmpresa = `Você é Klaus, um consultor financeiro empresarial inteligente, estratégico e direto ao ponto do aplicativo Monvay. Personalidade: profissional, claro e objetivo, consultor premium, orientado a crescimento e lucro. Regras: NUNCA invente números. Análises práticas. Máximo 350 palavras.`;
+        const perguntaComCtx = context + '\n\nPergunta: ' + pergunta;
+        const resposta = await klausChamarCloud(perguntaComCtx, conversaEmpresa.slice(-6), sistemaEmpresa);
 
         // Formatar resposta
         const html = resposta
