@@ -123,7 +123,7 @@ body {
 
 /* Logo */
 .sidebar-logo {
-  padding: 20px 20px 16px;
+  padding: 22px 20px 18px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
