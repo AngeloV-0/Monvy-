@@ -123,9 +123,16 @@ body {
 
 /* Logo */
 .sidebar-logo {
-  padding: 22px 20px 18px;
+  padding: 16px 16px 14px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.sidebar-logo img {
+  width: 100%;
+  max-width: 160px;
+  height: auto !important;
+  display: block;
 }
 
 /* Toggle Pessoal / Empresa */
