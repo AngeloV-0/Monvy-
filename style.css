@@ -827,19 +827,14 @@ body {
 
 .klaus-widget-list {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   flex: 1;
   overflow-y: auto;
   scrollbar-width: none;
+  max-height: 420px;
 }
 .klaus-widget-list::-webkit-scrollbar { display: none; }
-
-.klaus-insight-item {
-  flex: 1;
-  min-width: 180px;
-}
 
 .klaus-insight-item {
   display: flex;
@@ -922,8 +917,12 @@ body {
 }
 
 /* Mobile — empilhar */
+@media (max-width: 1100px) {
+  .content-grid { grid-template-columns: 1.6fr 1fr; }
+  .klaus-widget { display: none; }
+}
 @media (max-width: 768px) {
-  .klaus-widget-list { flex-direction: column !important; }
+  .content-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Klaus chips ────────────────────────────────────────────────── */
