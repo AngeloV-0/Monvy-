@@ -4,7 +4,6 @@
 // ==============================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
@@ -27,6 +26,30 @@ const firebaseConfig = {
 };
 
 const app  = initializeApp(firebaseConfig);
+// ── Klaus via API Anthropic (Claude Haiku) ──────────────────────
+export async function klausChamarCloud(pergunta, historico, sistema) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': window._AK || '',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 800,
+      system: sistema,
+      messages: [
+        ...(historico||[]),
+        { role: 'user', content: pergunta }
+      ]
+    })
+  });
+  if (!res.ok) throw new Error('Erro na API: ' + res.status);
+  const data = await res.json();
+  return data.content?.[0]?.text || 'Sem resposta.';
+}
 const auth = getAuth(app);
 const db   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();

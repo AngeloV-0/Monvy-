@@ -1,0 +1,13 @@
+# Arquivo com chave da OpenAI — NUNCA subir para o GitHub
+config.js
+
+# Firebase
+.firebase/
+firebase-debug.log
+functions/node_modules/
+.runtimeconfig.json
+
+# Sistema
+.DS_Store
+*.DS_Store
+node_modules/

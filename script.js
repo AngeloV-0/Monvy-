@@ -137,7 +137,13 @@ Regras: Basear-se nos dados. NUNCA invente números. Análises práticas. Máxim
   const perguntaComCtx = 'Dados financeiros:\n' + ctx + '\n\nPergunta: ' + pergunta;
 
   // Usar Cloud Function (chave segura no servidor)
-  return await klausChamarCloud(perguntaComCtx, historico, sistema);
+  // Se a Cloud Function não estiver deployada ainda, retorna mensagem informativa
+  try {
+    return await klausChamarCloud(perguntaComCtx, historico, sistema);
+  } catch(e) {
+    console.warn('Klaus Cloud Function indisponível:', e.message);
+    return 'O Klaus ainda está sendo configurado. Por favor, faça o deploy da Cloud Function conforme o guia em functions/DEPLOY.md e tente novamente.';
+  }
 }
 
 
@@ -720,9 +726,18 @@ window.logout = async function() {
   await fazerLogout();
   window.location.href='landing.html';
 };
+// Timeout de segurança — remove loading após 6s mesmo se algo falhar
+setTimeout(()=>{
+  const ov=document.getElementById('app-loading-overlay');
+  if(ov&&ov.style.display!=='none') {
+    ov.style.display='none';
+    console.warn('Loading removido por timeout de segurança');
+  }
+},6000);
+
 waitAuthReady().then(()=>{
   onAuth(async user=>{
-    // Esconder overlay de loading
+    // Esconder overlay de loading imediatamente
     const appOverlay=document.getElementById('app-loading-overlay');
     if(appOverlay) appOverlay.style.display='none';
     if(!user){
@@ -751,7 +766,7 @@ waitAuthReady().then(()=>{
     window.perfilUsuario = perfilUsuario;
     try{await verificarEResetarMes(user.uid);}catch(e){}
     // app pronto
-    await carregarTodosDados();
+    try { await carregarTodosDados(); } catch(e) { console.error('carregarTodosDados erro:', e); }
     if(unsubMovs) unsubMovs();
     unsubMovs=ouvirMovimentacoes(user.uid,movs=>{
       movimentacoes=movs;
