@@ -51,6 +51,114 @@ const _origAtualizarKPIs = atualizarKPIs;
 // ── Sidebar mobile ────────────────────────────────────────────────
 // ── Configurações completas ───────────────────────────────────────
 
+// ── Klaus Widget — Insights automáticos no Dashboard ────────────
+function gerarInsightsKlausWidget() {
+  const el = document.getElementById('klaus-widget-insights');
+  if (!el) return;
+
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m => m.data && m.data.startsWith(anoMes));
+  const entMes = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const saiMes = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const saldo  = movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0)
+                - movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+
+  // Mês anterior
+  const mesAnt = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1);
+  const anoMesAnt = mesAnt.getFullYear() + '-' + String(mesAnt.getMonth()+1).padStart(2,'0');
+  const movAnt = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMesAnt));
+  const saiAnt = movAnt.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+
+  // Top categoria
+  const cats = {};
+  movMes.filter(m=>m.tipo==='gasto').forEach(m=>{ cats[m.categoria||'Outros']=(cats[m.categoria||'Outros']||0)+(m.valor||0); });
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  const pctTopCat = saiMes>0&&topCat ? Math.round(topCat[1]/saiMes*100) : 0;
+
+  // Dias restantes no mês
+  const diasMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate();
+  const diasPassados = hoje.getDate();
+  const diasRestantes = diasMes - diasPassados;
+
+  // Gasto diário médio e projeção
+  const gastoDiario = diasPassados > 0 ? saiMes / diasPassados : 0;
+  const projecao = saiMes + gastoDiario * diasRestantes;
+
+  // Contas pendentes
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar');
+  const totalPend = contasPend.reduce((s,c)=>s+(c.valor||0),0);
+
+  // Metas
+  const metasAtivas = metas.filter(m=>m.atual<m.valor);
+  const metaProxima = metasAtivas.sort((a,b)=>((b.atual/b.valor)-(a.atual/a.valor)))[0];
+
+  // Gerar insights
+  const insights = [];
+
+  // 1. Comparativo com mês anterior
+  if (saiAnt > 0 && saiMes > 0) {
+    const diff = ((saiMes - saiAnt) / saiAnt * 100);
+    if (diff > 10) {
+      insights.push({ icon:'📈', tag:'alerta', text:`Gastos ${Math.abs(diff).toFixed(0)}% maiores que o mês passado` });
+    } else if (diff < -10) {
+      insights.push({ icon:'🎉', tag:'dica', text:`Você economizou ${fmt(saiAnt-saiMes)} comparado ao mês passado` });
+    }
+  }
+
+  // 2. Top categoria
+  if (topCat && pctTopCat > 30) {
+    insights.push({ icon:'💡', tag:'info', text:`${topCat[0]} representa ${pctTopCat}% dos seus gastos este mês` });
+  }
+
+  // 3. Projeção de saldo
+  if (gastoDiario > 0 && saldo > 0) {
+    const diasSaldo = Math.floor(saldo / gastoDiario);
+    if (diasSaldo < 15) {
+      insights.push({ icon:'⚠️', tag:'alerta', text:`Seu saldo pode durar ~${diasSaldo} dias no ritmo atual` });
+    } else {
+      insights.push({ icon:'✅', tag:'dica', text:`Seu saldo cobre os próximos ${diasSaldo} dias de gastos` });
+    }
+  }
+
+  // 4. Contas pendentes
+  if (totalPend > 0) {
+    insights.push({ icon:'📅', tag:'alerta', text:`${contasPend.length} conta(s) pendente(s) — total de ${fmt(totalPend)}` });
+  }
+
+  // 5. Meta mais próxima
+  if (metaProxima) {
+    const pct = Math.round((metaProxima.atual / metaProxima.valor) * 100);
+    insights.push({ icon:'🎯', tag:'meta', text:`Meta "${metaProxima.nome}" — ${pct}% concluída` });
+  }
+
+  // 6. Saldo do mês
+  if (entMes > 0) {
+    const sobra = entMes - saiMes;
+    if (sobra > 0) {
+      insights.push({ icon:'💰', tag:'dica', text:`Você guardou ${fmt(sobra)} este mês` });
+    }
+  }
+
+  // Fallback
+  if (insights.length === 0) {
+    insights.push({ icon:'📊', tag:'info', text:'Adicione movimentações para ver seus insights financeiros' });
+    insights.push({ icon:'💡', tag:'dica', text:'Registre seus gastos diários para análises precisas' });
+  }
+
+  // Renderizar
+  el.innerHTML = insights.slice(0,5).map(i => `
+    <div class="klaus-insight-item" onclick="(window.irPara||irPara)('klaus')">
+      <div class="klaus-insight-icon" style="background:${
+        i.tag==='alerta'?'rgba(239,68,68,0.1)':
+        i.tag==='dica'?'rgba(34,197,94,0.1)':
+        i.tag==='meta'?'rgba(139,92,246,0.1)':'rgba(245,158,11,0.1)'}">${i.icon}</div>
+      <div class="klaus-insight-text">${i.text}</div>
+      <span class="klaus-insight-tag tag-${i.tag}">${
+        i.tag==='alerta'?'Alerta':i.tag==='dica'?'Dica':i.tag==='meta'?'Meta':'Info'}</span>
+    </div>`).join('');
+}
+
 // ── Klaus — Assistente Financeiro IA ────────────────────────────
 let klausHistorico = [];
 
@@ -789,6 +897,8 @@ async function carregarTodosDados(){
     if(typeof setPeriodo==='function') setPeriodo('mes');
     // Aplicar preferência de ocultar saldo
     setTimeout(()=>{ if(typeof aplicarMascaraSaldo==='function') aplicarMascaraSaldo(); }, 300);
+    // Gerar insights do widget Klaus
+    setTimeout(()=>{ if(typeof gerarInsightsKlausWidget==='function') gerarInsightsKlausWidget(); }, 800);
   }catch(e){console.error('Erro ao carregar dados:',e);}
 }
 
