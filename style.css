@@ -546,12 +546,16 @@ body {
    KPI ROW
    ============================== */
 
+/* kpi-row nas abas (Dívidas, Relatório, Contas, etc) */
 .kpi-row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
   margin-bottom: 24px;
 }
+
+/* Dashboard usa db-row-main e db-row-secondary — kpi-row oculto */
+#tela-inicio .kpi-row { display: none !important; }
 
 .kpi-card {
   background: var(--surface);
