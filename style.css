@@ -129,8 +129,8 @@ body {
 }
 
 .sidebar-logo img {
-  width: calc(var(--sidebar-w) - 40px);
-  max-width: 200px;
+  width: 160px;
+  max-width: 100%;
   height: auto !important;
   display: block;
 }
