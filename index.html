@@ -286,42 +286,45 @@
           </div>
         </div>
 
-        <!-- ROW 2: Fluxo + Score + Meta + Previsão -->
+        <!-- ROW 2: 4 cards secundários -->
         <div class="db-row-secondary">
 
-          <!-- Card 3: Fluxo Financeiro -->
+          <!-- Card 3: Fluxo resumido -->
           <div class="db-card db-card-fluxo">
             <div class="db-card-label">FLUXO DO MÊS</div>
-            <div id="chart-fluxo-container" style="position:relative;width:100%;height:100px;margin:10px 0">
-              <canvas id="chart-fluxo" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
-            </div>
-            <div class="chart-empty" id="chart-empty" style="height:100px">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:32px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span style="font-size:.75rem">Sem dados recentes</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-              <div style="display:flex;gap:8px">
-                <button id="btn-fluxo-recentes" onclick="window.setFluxoModo('recentes')" class="db-tab active">8 dias</button>
-                <button id="btn-fluxo-todas" onclick="window.setFluxoModo('todas')" class="db-tab">Mês</button>
+            <div style="margin:10px 0">
+              <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+                <div>
+                  <div class="db-mini-label">↑ ENTRADAS</div>
+                  <div style="font-size:1.1rem;font-weight:800;color:#22c55e" id="db-ent-fluxo">R$ 0,00</div>
+                </div>
+                <div>
+                  <div class="db-mini-label">↓ SAÍDAS</div>
+                  <div style="font-size:1.1rem;font-weight:800;color:#ef4444" id="db-sai-fluxo">R$ 0,00</div>
+                </div>
               </div>
-              <div class="db-fluxo-saldo">
-                <span id="db-fluxo-resultado" style="font-size:.82rem;font-weight:700;color:var(--primary)">–</span>
+              <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
+              <div>
+                <div class="db-mini-label">SALDO DO MÊS</div>
+                <div id="db-fluxo-resultado" style="font-size:1.2rem;font-weight:800;color:var(--primary)">–</div>
               </div>
             </div>
             <div style="display:none">
               <div id="fluxo-sub"></div>
               <div id="kpi-entradas-sub"></div>
               <div id="kpi-saidas-sub"></div>
-              <canvas id="chart-saldo-acumulado"></canvas>
             </div>
           </div>
 
           <!-- Card 4: Score Financeiro -->
           <div class="db-card db-card-score" onclick="(window.irPara||irPara)('analise')" style="cursor:pointer">
             <div class="db-card-label">SCORE MONVAY</div>
-            <div class="db-score-main">
-              <div class="db-score-num" id="kpi-score-mini">–</div>
-              <div class="db-score-badge" id="kpi-score-mini-label">Calculando...</div>
+            <div style="display:flex;align-items:center;gap:12px;margin:6px 0 10px">
+              <img src="icone-score-estavel.png" id="kpi-score-mini-img" alt="Score" style="width:44px;height:44px;object-fit:contain;flex-shrink:0">
+              <div>
+                <div class="db-score-num" id="kpi-score-mini">–</div>
+                <div class="db-score-badge" id="kpi-score-mini-label">Calculando...</div>
+              </div>
             </div>
             <div class="db-score-bar-wrap">
               <div class="db-score-bar" id="db-score-bar" style="width:0%"></div>
@@ -366,14 +369,52 @@
           </div>
         </div>
 
-        <!-- ROW 3: Últimas Movimentações (full width) -->
-        <div class="db-row-movs">
-          <div class="recent-card" style="width:100%">
+        <!-- ROW 3: Fluxo + Últimas Movimentações (original) -->
+        <div class="content-grid">
+          <div class="chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Fluxo Financeiro</div>
+                <div class="card-sub" id="fluxo-sub">Entradas e saídas</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+                <div class="chart-legend">
+                  <span class="legend-dot green"></span> Entrada
+                  <span class="legend-dot red"></span> Saída
+                </div>
+                <div style="display:flex;background:rgba(255,255,255,0.05);border-radius:8px;padding:2px;gap:2px">
+                  <button id="btn-fluxo-recentes" onclick="window.setFluxoModo('recentes')"
+                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:#22c55e;color:#000;transition:all .2s">
+                    Recentes
+                  </button>
+                  <button id="btn-fluxo-todas" onclick="window.setFluxoModo('todas')"
+                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:transparent;color:#64748b;transition:all .2s">
+                    Todas
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="chart-fluxo-container" style="position:relative;width:100%;height:180px;">
+              <canvas id="chart-fluxo" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+            </div>
+            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+              <div style="font-size:.8rem;font-weight:700;color:var(--white);margin-bottom:10px">Evolução do saldo acumulado</div>
+              <div style="position:relative;width:100%;height:100px">
+                <canvas id="chart-saldo-acumulado" style="width:100%;height:100%"></canvas>
+              </div>
+            </div>
+            <div class="chart-empty" id="chart-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Registre movimentações para ver o gráfico</span>
+            </div>
+          </div>
+
+          <div class="recent-card">
             <div class="card-header">
               <div class="card-title">Últimas Movimentações</div>
               <span class="see-all" onclick="(window.irPara||irPara)('gastos')">Ver todas →</span>
             </div>
-            <div id="lista-inicio" class="lista-movs lista-movs-horizontal">
+            <div id="lista-inicio" class="lista-movs">
               <div class="vazio">Nenhuma movimentação ainda.</div>
             </div>
           </div>
