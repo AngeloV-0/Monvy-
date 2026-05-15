@@ -357,6 +357,24 @@
           </div>
         </div>
 
+        <!-- Painel "O que fazer agora" -->
+        <div id="insights-panel" style="margin-bottom:20px;display:none">
+          <div class="card-header" style="margin-bottom:12px">
+            <div>
+              <div class="card-title">
+                <img src="icone-urgente.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:8px;margin-top:-2px">
+                O que fazer agora
+              </div>
+              <div class="card-sub">Insights personalizados para você</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
+              <button onclick="ocultarInsights()" title="Ocultar" style="background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;padding:0 4px" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--gray)'">×</button>
+            </div>
+          </div>
+          <div id="insights-list" class="insights-list"></div>
+        </div>
+
         <!-- ROW 3: Fluxo + Últimas Movimentações (original) -->
         <div class="content-grid">
           <div class="chart-card">
@@ -408,23 +426,7 @@
           </div>
         </div>
 
-        <!-- Painel "O que fazer agora" -->
-        <div id="insights-panel" style="margin-bottom:20px;display:none">
-          <div class="card-header" style="margin-bottom:12px">
-            <div>
-              <div class="card-title">
-                <img src="icone-urgente.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:8px;margin-top:-2px">
-                O que fazer agora
-              </div>
-              <div class="card-sub">Insights personalizados para você</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
-              <button onclick="ocultarInsights()" title="Ocultar" style="background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;padding:0 4px" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--gray)'">×</button>
-            </div>
-          </div>
-          <div id="insights-list" class="insights-list"></div>
-        </div>
+
 
 
       </section>
