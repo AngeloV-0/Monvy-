@@ -1216,7 +1216,8 @@ async function carregarTodosDados(){
     movimentacoes=movs;metas=mts;dividas=divs;contas=cnts;
     atualizarKPIs();atualizarChart();renderizarListaInicio();
     renderizarTabela();renderizarMetas();renderizarDividas();renderizarContas();popularSelectContas();
-    renderizarRelatorio();calcularScore();gerarInsights();atualizarBanner();
+    renderizarRelatorio();calcularScore();atualizarBanner();
+    // Insights só aparecem ao VOLTAR para o dashboard, não na primeira vez
     carregarTaxasBCB();renderSaldoAcumulado();
     // Inicializar período padrão como mês atual
     if(typeof setPeriodo==='function') setPeriodo('mes');
@@ -3066,6 +3067,75 @@ window.fecharBannerEmpresa=function(resposta){
 };
 
 // ── Banner perfil ─────────────────────────────────────────────────
+// ── Dicas do Dia com IA ──────────────────────────────────────────
+let _dicasIA = [];
+let _dicaIdx = 0;
+let _dicasCarregando = false;
+
+const _dicasEstaticas = [
+  'Antes de investir, tenha uma reserva de emergência de pelo menos 3 meses de gastos.',
+  'LCI e LCA são isentos de IR para pessoa física — ótimos para renda fixa.',
+  'A regra 50-30-20: 50% necessidades, 30% desejos, 20% poupança.',
+  'Pequenos gastos diários somam muito. R$10/dia = R$3.600/ano.',
+  'Invista primeiro, depois gaste o restante — não o contrário.',
+  'Cartão de crédito não é extensão de renda. Use só o que você tem.',
+  'Revise suas assinaturas mensais — provavelmente tem uma que não usa.',
+  'O melhor investimento é quitar dívidas com juros altos primeiro.',
+  'Automatize seus investimentos para não depender da disciplina.',
+  'Inflação corrói seu dinheiro. Dinheiro parado perde valor todo mês.',
+  'Compare preços antes de comprar. A diferença pode surpreender.',
+  'Tenha um fundo de emergência separado dos seus investimentos.',
+];
+
+async function carregarDicasIA() {
+  if (_dicasCarregando) return;
+  _dicasCarregando = true;
+  const hoje = new Date();
+  const idx = hoje.getDate() % _dicasEstaticas.length;
+  _dicasIA = [..._dicasEstaticas.slice(idx), ..._dicasEstaticas.slice(0, idx)];
+  renderizarDicaAtual();
+  try {
+    const ctx = typeof klausContexto === 'function' ? klausContexto() : '';
+    const sistema = 'Você é educador financeiro do Monvay. Gere 5 dicas financeiras curtas e práticas. Responda APENAS com JSON array: ["dica1","dica2","dica3","dica4","dica5"]. Máximo 120 chars cada. Sem markdown.';
+    const resp = await klausChamarCloud(ctx + '\n\nGere 5 dicas financeiras personalizadas para este usuário.', [], sistema);
+    const match = resp.match(/\[[\s\S]*?\]/);
+    if (match) {
+      const dicas = JSON.parse(match[0]);
+      if (Array.isArray(dicas) && dicas.length > 0) {
+        _dicasIA = [...dicas, ..._dicasEstaticas];
+        _dicaIdx = 0;
+        renderizarDicaAtual();
+      }
+    }
+  } catch(e) { console.log('Dicas: usando estaticas'); }
+  _dicasCarregando = false;
+}
+
+function renderizarDicaAtual() {
+  const el = document.getElementById('dica-dia-texto');
+  const dots = document.getElementById('dica-dots');
+  if (!el || _dicasIA.length === 0) return;
+  el.style.opacity = '0';
+  setTimeout(() => { el.textContent = _dicasIA[_dicaIdx]; el.style.opacity = '1'; el.style.transition = 'opacity .3s'; }, 150);
+  if (dots) {
+    const total = Math.min(_dicasIA.length, 8);
+    dots.innerHTML = Array.from({length: total}, (_, i) =>
+      '<div style="width:' + (i===_dicaIdx%total?16:6) + 'px;height:6px;border-radius:3px;background:' + (i===_dicaIdx%total?'var(--primary)':'rgba(255,255,255,0.2)') + ';transition:all .3s"></div>'
+    ).join('');
+  }
+}
+
+window.proximaDica = function() {
+  if (_dicasIA.length === 0) return;
+  _dicaIdx = (_dicaIdx + 1) % _dicasIA.length;
+  renderizarDicaAtual();
+};
+
+setInterval(() => {
+  const card = document.getElementById('dica-dia-card');
+  if (card && card.style.display !== 'none' && _dicasIA.length > 0) window.proximaDica();
+}, 15000);
+
 function atualizarBanner(){
   const banner=document.getElementById('banner-rotina-contas'); if(!banner) return;
   const rotina=perfilUsuario?.perfilVida?.rotina||[];

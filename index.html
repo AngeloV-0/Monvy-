@@ -181,7 +181,7 @@
       <section id="tela-inicio" class="tela active">
 
         <!-- Dica do Dia -->
-        <div class="dica-dia-card" id="dica-dia-card">
+        <div class="dica-dia-card" id="dica-dia-card" style="cursor:default">
           <div class="dica-dia-icon" id="dica-dia-icon"><img src="icone-lampada.png" style="width:28px;height:28px;object-fit:contain;"></div>
           <div class="dica-dia-body">
             <div class="dica-dia-label">Dica do dia</div>
@@ -285,23 +285,15 @@
         <!-- ROW 2: 4 cards secundários -->
         <div class="db-row-secondary">
 
-          <!-- Card 3: Insight — Descoberta -->
-          <div class="db-card db-card-insight" id="db-insight" onclick="(window.irPara||irPara)('relatorio')" style="cursor:pointer">
-            <div class="db-card-label">INSIGHT DO DIA</div>
-            <div id="db-insight-content" style="margin-top:8px">
-              <div class="db-loading">
-                <div class="klaus-dot-pulse"><span></span><span></span><span></span></div>
-                <span>Analisando...</span>
-              </div>
-            </div>
-            <div style="display:none">
-              <div id="fluxo-sub"></div>
-              <div id="kpi-entradas-sub"></div>
-              <div id="kpi-saidas-sub"></div>
-              <div id="db-ent-fluxo"></div>
-              <div id="db-sai-fluxo"></div>
-              <div id="db-fluxo-resultado"></div>
-            </div>
+          <!-- IDs ocultos para compatibilidade -->
+          <div style="display:none">
+            <div id="fluxo-sub"></div>
+            <div id="kpi-entradas-sub"></div>
+            <div id="kpi-saidas-sub"></div>
+            <div id="db-ent-fluxo"></div>
+            <div id="db-sai-fluxo"></div>
+            <div id="db-fluxo-resultado"></div>
+            <div id="db-insight-content"></div>
           </div>
 
           <!-- Card 4: Score Financeiro -->
