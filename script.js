@@ -180,11 +180,83 @@ function renderCardPrevisao(saiMes, saldo, hoje) {
 
 function renderDashboardPremium() {
   renderDbSaldo();
-  renderDbFluxo();
+  renderDbContas();
   renderDbScore();
   renderDbMeta();
-  renderDbPrevisao();
+  renderDbInsight();
   gerarInsightsKlausWidget();
+}
+
+// Card Contas — Controle
+function renderDbContas() {
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar');
+  const iconEl = document.getElementById('db-contas-icon');
+  const txtEl  = document.getElementById('db-contas-txt');
+  const subEl  = document.getElementById('db-contas-sub');
+  if (!txtEl) return;
+  if (contasPend.length === 0) {
+    if (iconEl) iconEl.textContent = '🎉';
+    txtEl.textContent = 'Tudo em dia!'; txtEl.style.color = 'var(--primary)';
+    if (subEl) subEl.textContent = 'Nenhuma conta pendente';
+  } else {
+    const total = contasPend.reduce((s,c)=>s+(c.valor||0),0);
+    // Verificar vencimentos próximos
+    const hoje = new Date().toISOString().slice(0,10);
+    const semana = new Date(); semana.setDate(semana.getDate()+7);
+    const proximas = contasPend.filter(c=>c.vencimento&&c.vencimento<=semana.toISOString().slice(0,10));
+    if (iconEl) iconEl.textContent = proximas.length > 0 ? '⚠️' : '📅';
+    txtEl.textContent = fmt(total); txtEl.style.color = '#ef4444';
+    if (subEl) subEl.textContent = proximas.length > 0
+      ? proximas.length + ' vencem esta semana'
+      : contasPend.length + ' conta(s) pendente(s)';
+  }
+}
+
+// Card Insight — Descoberta
+function renderDbInsight() {
+  const el = document.getElementById('db-insight-content');
+  if (!el) return;
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+  const sai = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const ent = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  // Top categoria
+  const cats = {};
+  movMes.filter(m=>m.tipo==='gasto').forEach(m=>{cats[m.categoria||'Outros']=(cats[m.categoria||'Outros']||0)+(m.valor||0);});
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+  // Mês anterior
+  const mesAnt = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1);
+  const anoMesAnt = mesAnt.getFullYear()+'-'+String(mesAnt.getMonth()+1).padStart(2,'0');
+  const saiAnt = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMesAnt)&&m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+
+  let insight = { icon:'💡', texto:'', destaque:'' };
+
+  if (sai === 0) {
+    insight = { icon:'📊', texto:'Adicione gastos para ver descobertas financeiras', destaque:'' };
+  } else if (topCat && (topCat[1]/sai) > 0.4) {
+    const pct = Math.round(topCat[1]/sai*100);
+    insight = { icon:'🔍', texto:`${topCat[0]} concentra`, destaque:`${pct}% dos seus gastos` };
+  } else if (saiAnt > 0 && sai < saiAnt * 0.9) {
+    insight = { icon:'🎯', texto:'Você gastou menos que o mês passado', destaque:`-${fmt(saiAnt-sai)} economizados` };
+  } else if (saiAnt > 0 && sai > saiAnt * 1.1) {
+    const pct = Math.round((sai-saiAnt)/saiAnt*100);
+    insight = { icon:'📈', texto:'Gastos acima do mês passado', destaque:`+${pct}% a mais` };
+  } else if (ent > 0 && sai/ent < 0.5) {
+    insight = { icon:'💚', texto:'Você está guardando mais da metade da sua renda', destaque:`${Math.round((1-sai/ent)*100)}% de economia` };
+  } else {
+    insight = { icon:'✨', texto:'Suas finanças estão equilibradas este mês', destaque:`${fmt(ent-sai)} de saldo` };
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-top:4px">
+      <span style="font-size:1.6rem;flex-shrink:0">${insight.icon}</span>
+      <div>
+        <div style="font-size:.82rem;color:var(--gray);line-height:1.4">${insight.texto}</div>
+        ${insight.destaque ? `<div style="font-size:1rem;font-weight:800;color:var(--primary);margin-top:4px">${insight.destaque}</div>` : ''}
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:.7rem;color:var(--gray)">Ver relatório completo →</div>`;
 }
 
 // Card Saldo — já atualizado pelo atualizarKPIs
@@ -195,16 +267,34 @@ function renderDbSaldo() {
 
 // Card Fluxo — resultado
 function renderDbFluxo() {
-  const el = document.getElementById('db-fluxo-resultado');
-  if (!el) return;
   const hoje = new Date();
   const anoMes = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
   const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
   const ent = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
   const sai = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
   const saldo = ent - sai;
-  el.textContent = (saldo >= 0 ? '+' : '') + fmt(saldo);
-  el.style.color = saldo >= 0 ? 'var(--primary)' : '#ef4444';
+  // Atualizar entradas e saídas do card fluxo resumido
+  const elEnt = document.getElementById('db-ent-fluxo');
+  const elSai = document.getElementById('db-sai-fluxo');
+  const elRes = document.getElementById('db-fluxo-resultado');
+  if (elEnt) elEnt.textContent = fmt(ent);
+  if (elSai) elSai.textContent = fmt(sai);
+  if (elRes) { elRes.textContent = (saldo>=0?'+':'')+fmt(saldo); elRes.style.color = saldo>=0?'var(--primary)':'#ef4444'; }
+  // Atualizar contas pendentes
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar');
+  const iconEl = document.getElementById('db-contas-icon');
+  const txtEl  = document.getElementById('db-contas-txt');
+  const subEl  = document.getElementById('db-contas-sub');
+  if (contasPend.length === 0) {
+    if (iconEl) iconEl.textContent = '🎉';
+    if (txtEl)  txtEl.textContent = 'Tudo em dia!'; if (txtEl) txtEl.style.color = 'var(--primary)';
+    if (subEl)  subEl.textContent = 'Nenhuma conta pendente';
+  } else {
+    const total = contasPend.reduce((s,c)=>s+(c.valor||0),0);
+    if (iconEl) iconEl.textContent = '📅';
+    if (txtEl)  { txtEl.textContent = fmt(total); txtEl.style.color = '#ef4444'; }
+    if (subEl)  subEl.textContent = contasPend.length + ' conta(s) pendente(s)';
+  }
 }
 
 // Card Score

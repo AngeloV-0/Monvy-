@@ -289,30 +289,22 @@
         <!-- ROW 2: 4 cards secundários -->
         <div class="db-row-secondary">
 
-          <!-- Card 3: Fluxo resumido -->
-          <div class="db-card db-card-fluxo">
-            <div class="db-card-label">FLUXO DO MÊS</div>
-            <div style="margin:10px 0">
-              <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-                <div>
-                  <div class="db-mini-label">↑ ENTRADAS</div>
-                  <div style="font-size:1.1rem;font-weight:800;color:#22c55e" id="db-ent-fluxo">R$ 0,00</div>
-                </div>
-                <div>
-                  <div class="db-mini-label">↓ SAÍDAS</div>
-                  <div style="font-size:1.1rem;font-weight:800;color:#ef4444" id="db-sai-fluxo">R$ 0,00</div>
-                </div>
-              </div>
-              <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
-              <div>
-                <div class="db-mini-label">SALDO DO MÊS</div>
-                <div id="db-fluxo-resultado" style="font-size:1.2rem;font-weight:800;color:var(--primary)">–</div>
+          <!-- Card 3: Insight — Descoberta -->
+          <div class="db-card db-card-insight" id="db-insight" onclick="(window.irPara||irPara)('relatorio')" style="cursor:pointer">
+            <div class="db-card-label">INSIGHT DO DIA</div>
+            <div id="db-insight-content" style="margin-top:8px">
+              <div class="db-loading">
+                <div class="klaus-dot-pulse"><span></span><span></span><span></span></div>
+                <span>Analisando...</span>
               </div>
             </div>
             <div style="display:none">
               <div id="fluxo-sub"></div>
               <div id="kpi-entradas-sub"></div>
               <div id="kpi-saidas-sub"></div>
+              <div id="db-ent-fluxo"></div>
+              <div id="db-sai-fluxo"></div>
+              <div id="db-fluxo-resultado"></div>
             </div>
           </div>
 
@@ -344,28 +336,24 @@
           </div>
 
           <!-- Card 4: Contas Pendentes -->
-          <div class="db-card db-card-contas" id="db-contas" onclick="(window.irPara||irPara)('compromissos')">
+          <!-- Card 5: Contas — Controle -->
+          <div class="db-card db-card-contas" id="db-contas" onclick="(window.irPara||irPara)('compromissos')" style="cursor:pointer">
             <div class="db-card-label">CONTAS PENDENTES</div>
-            <div id="db-contas-content">
-              <div class="db-contas-ok">
-                <div class="db-contas-ok-icon">🎉</div>
-                <div class="db-contas-ok-txt">Tudo em dia!</div>
-                <div class="db-contas-ok-sub">Nenhuma conta pendente</div>
+            <div id="db-contas-content" style="margin-top:10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:1.6rem" id="db-contas-icon">🎉</span>
+                <div>
+                  <div style="font-size:.95rem;font-weight:800;color:var(--primary)" id="db-contas-txt">Tudo em dia!</div>
+                  <div style="font-size:.75rem;color:var(--gray);margin-top:2px" id="db-contas-sub">Nenhuma conta pendente</div>
+                </div>
               </div>
             </div>
-            <!-- IDs ocultos para compatibilidade -->
             <div style="display:none">
               <span id="kpi-movs">0</span>
               <span id="kpi-saldo-disponivel">R$ 0,00</span>
+              <div id="db-previsao-texto"></div>
+              <div id="db-previsao-valor"></div>
             </div>
-          </div>
-
-          <!-- Card 6: Previsão do Mês -->
-          <div class="db-card db-card-previsao" id="db-previsao">
-            <div class="db-card-label">PREVISÃO DO MÊS</div>
-            <div class="db-previsao-icon">🔮</div>
-            <div class="db-previsao-texto" id="db-previsao-texto">Adicione movimentações para ver a previsão.</div>
-            <div class="db-previsao-valor" id="db-previsao-valor"></div>
           </div>
         </div>
 
