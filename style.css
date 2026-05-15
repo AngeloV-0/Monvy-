@@ -248,16 +248,13 @@ body {
 
 .sidebar-user:hover { background: var(--surface-2); }
 
-/* Remover qualquer borda/linha verde no rodapé da sidebar */
-.sidebar-footer .nav-item.active,
-.sidebar-footer .nav-item.active::before,
-.sidebar-footer .sidebar-user::before,
-.sidebar-footer .sidebar-user::after {
-  border: none !important;
-  background: none !important;
-  box-shadow: none !important;
-  display: none !important;
+/* Rodapé da sidebar — sem efeitos ativos */
+.sidebar-footer * { border-bottom: none !important; }
+.sidebar-footer .nav-item.active {
+  background: transparent !important;
+  color: var(--gray) !important;
 }
+.sidebar-footer .nav-item.active::before { display: none !important; }
 
 .nav-item-sair { color: var(--gray); }
 .nav-item-sair:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
@@ -2334,6 +2331,28 @@ select option { background: var(--surface-2); }
   border-color: rgba(255,255,255,0.6);
   transform: scale(1.05);
 }
+/* Novo botão menu mobile com efeito verde */
+.menu-btn-mobile {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(34,197,94,0.4);
+  background: rgba(34,197,94,0.08);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .18s;
+  box-shadow: 0 0 10px rgba(34,197,94,0.1);
+}
+.menu-btn-mobile:hover {
+  background: rgba(34,197,94,0.15);
+  box-shadow: 0 0 16px rgba(34,197,94,0.2);
+}
+.menu-btn-mobile svg { width: 18px; height: 18px; }
+
 .hamburger-btn {
   display: none;
   flex-direction: column;
