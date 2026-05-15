@@ -127,11 +127,8 @@
           <button class="hamburger-btn" onclick="abrirSidebar()" aria-label="Menu">
             <span></span><span></span><span></span>
           </button>
-          <img id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" width="40" height="40" src="" alt="Perfil" style="width:48px!important;height:48px!important;min-width:48px;max-width:48px;min-height:48px;max-height:48px;aspect-ratio:1/1;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;align-self:center;border:2px solid rgba(255,255,255,0.3);display:block;margin-left:2px;margin-right:14px;">
-          <div class="topbar-mobile-user">
-            <span class="topbar-mobile-brand" id="topbar-mobile-tela">Dashboard</span>
-            <span class="topbar-mobile-name" id="topbar-mobile-name">Olá, Usuário</span>
-          </div>
+          <img src="logo-01.png" alt="Monvay" style="height:28px;width:auto;flex-shrink:0;">
+          <img id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" width="40" height="40" src="" alt="Perfil" style="width:36px!important;height:36px!important;min-width:36px;max-width:36px;min-height:36px;max-height:36px;aspect-ratio:1/1;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;align-self:center;border:2px solid rgba(255,255,255,0.3);display:block;margin-left:auto;">
         </div>
         <div class="topbar-desktop-title">
           <h2 class="page-title" id="page-title">Dashboard</h2>
@@ -235,119 +232,157 @@
           <button class="periodo-btn" id="periodo-btn-tudo" onclick="setPeriodo('tudo')">Tudo</button>
         </div>
 
-        <!-- KPI Row -->
-        <div class="kpi-row">
-          <div class="kpi-card primary-card">
-            <div class="kpi-label">Saldo Atual</div>
-            <div class="kpi-value" id="saldo-display">R$ 0,00</div>
-            <div class="kpi-sub" id="saldo-mes">Este mês: +R$ 0,00 entrou</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon green" style="background:rgba(34,197,94,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" style="width:26px;height:26px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-            <div class="kpi-label">Entradas</div>
-            <div class="kpi-value green" id="kpi-entradas">R$ 0,00</div>
-            <div class="kpi-sub" id="kpi-entradas-sub">no período</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon red" style="background:rgba(239,68,68,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="width:26px;height:26px"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div>
-            <div class="kpi-label">Saídas</div>
-            <div class="kpi-value red" id="kpi-saidas">R$ 0,00</div>
-            <div class="kpi-sub" id="kpi-saidas-sub">no período</div>
-          </div>
-          <div class="kpi-card" onclick="(window.irPara||irPara)('contas')" style="cursor:pointer">
-            <div class="kpi-icon" style="background:rgba(239,68,68,0.1);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="width:26px;height:26px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-            <div class="kpi-label">Falta Pagar</div>
-            <div class="kpi-value red" id="kpi-falta-pagar">R$ 0,00</div>
-            <div class="kpi-sub">contas pendentes</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon yellow" style="background:rgba(245,158,11,0.15);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" style="width:26px;height:26px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div class="kpi-label">Movimentações</div>
-            <div class="kpi-value yellow" id="kpi-movs">0</div>
-            <div class="kpi-sub">registradas</div>
-          </div>
-          <div class="kpi-card" style="cursor:pointer;position:relative;overflow:hidden" onclick="(window.irPara||irPara)('contas')">
-            <div class="kpi-icon" style="background:rgba(34,197,94,0.1);border-radius:14px;width:52px;height:52px"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" style="width:26px;height:26px"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-            <div class="kpi-label">Saldo Disponível</div>
-            <div class="kpi-value green" id="kpi-saldo-disponivel">R$ 0,00</div>
-            <div class="kpi-sub">após contas pendentes</div>
-          </div>
-          <div class="kpi-card score-mini-card" onclick="(window.irPara||irPara)('score')" style="cursor:pointer;position:relative;overflow:hidden">
-            <div class="kpi-icon yellow" id="kpi-score-mini-icon"><img src="icone-score-estavel.png" id="kpi-score-mini-img" alt="Score" style="width:40px;height:40px;object-fit:contain"></div>
-            <div class="kpi-label">Score Financeiro</div>
-            <div class="kpi-value" id="kpi-score-mini" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">–</div>
-            <div class="kpi-sub" id="kpi-score-mini-label">Ver detalhes →</div>
-          </div>
-        </div>
+        <!-- ══ DASHBOARD PREMIUM ══════════════════════════════════ -->
 
+        <!-- ROW 1: Saldo + Klaus IA (cards principais) -->
+        <div class="db-row-main">
 
-        <!-- MANUAL ENGINE — INSIGHTS PANEL -->
-        <div id="insights-panel" style="margin-bottom:20px;display:none">
-          <div class="card-header" style="margin-bottom:12px">
-            <div>
-              <div class="card-title"><img src="icone-urgente.png" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;margin-right:8px;margin-top:-2px"> O que fazer agora</div>
-              <div class="card-sub">Insights personalizados para você</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px">
-              <span style="font-size:0.75rem;color:var(--gray)" id="insights-count"></span>
-              <button onclick="ocultarInsights()" title="Ocultar" style="background:none;border:none;color:var(--gray);font-size:1.3rem;cursor:pointer;line-height:1;padding:0 4px;display:flex;align-items:center" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--gray)'">×</button>
-            </div>
-          </div>
-          <div id="insights-list" class="insights-list"></div>
-        </div>
-
-                <!-- Chart + Recent -->
-        <div class="content-grid">
-          <div class="chart-card">
-            <div class="card-header">
+          <!-- Card 1: Saldo Atual -->
+          <div class="db-card db-card-saldo" id="db-saldo">
+            <div class="db-card-label">SALDO ATUAL</div>
+            <div class="db-saldo-valor" id="saldo-display">R$ 0,00</div>
+            <div class="db-saldo-sub" id="saldo-mes">Este mês: +R$ 0,00 entrou</div>
+            <div class="db-saldo-divider"></div>
+            <div class="db-saldo-row">
               <div>
-                <div class="card-title">Fluxo Financeiro</div>
-                <div class="card-sub" id="fluxo-sub">Entradas e saídas</div>
+                <div class="db-mini-label">↑ ENTRADAS</div>
+                <div class="db-mini-val green" id="kpi-entradas">R$ 0,00</div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
-                <div class="chart-legend">
-                  <span class="legend-dot green"></span> Entrada
-                  <span class="legend-dot red"></span> Saída
-                </div>
-                <div style="display:flex;background:rgba(255,255,255,0.05);border-radius:8px;padding:2px;gap:2px">
-                  <button id="btn-fluxo-recentes" onclick="window.setFluxoModo('recentes')"
-                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:#22c55e;color:#000;transition:all .2s">
-                    Recentes
-                  </button>
-                  <button id="btn-fluxo-todas" onclick="window.setFluxoModo('todas')"
-                    style="padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-family:inherit;cursor:pointer;font-weight:600;background:transparent;color:#64748b;transition:all .2s">
-                    Todas
-                  </button>
-                </div>
+              <div>
+                <div class="db-mini-label">↓ SAÍDAS</div>
+                <div class="db-mini-val red" id="kpi-saidas">R$ 0,00</div>
+              </div>
+              <div>
+                <div class="db-mini-label">📅 FALTA PAGAR</div>
+                <div class="db-mini-val red" id="kpi-falta-pagar">R$ 0,00</div>
               </div>
             </div>
-            <div id="chart-fluxo-container" style="position:relative;width:100%;height:180px;">
+          </div>
+
+          <!-- Card 2: Klaus IA -->
+          <div class="db-card db-card-klaus" id="db-klaus">
+            <div class="db-card-header">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="db-klaus-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:20px;height:20px"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </div>
+                <div>
+                  <div class="db-card-title">Klaus IA</div>
+                  <div class="db-card-sub">Seu assistente financeiro</div>
+                </div>
+              </div>
+              <div class="db-klaus-badge">IA</div>
+            </div>
+            <div id="db-klaus-insight" class="db-klaus-insight">
+              <div class="db-klaus-loading">
+                <div class="klaus-dot-pulse"><span></span><span></span><span></span></div>
+                <span>Analisando suas finanças...</span>
+              </div>
+            </div>
+            <div class="db-klaus-actions">
+              <button onclick="(window.irPara||irPara)('klaus')" class="db-btn-primary">Conversar com Klaus</button>
+              <button onclick="gerarInsightsKlausWidget()" class="db-btn-secondary">Atualizar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: Fluxo + Score + Meta + Previsão -->
+        <div class="db-row-secondary">
+
+          <!-- Card 3: Fluxo Financeiro -->
+          <div class="db-card db-card-fluxo">
+            <div class="db-card-label">FLUXO DO MÊS</div>
+            <div id="chart-fluxo-container" style="position:relative;width:100%;height:100px;margin:10px 0">
               <canvas id="chart-fluxo" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
             </div>
-
-            <!-- Gráfico saldo acumulado -->
-            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-              <div style="font-size:.8rem;font-weight:700;color:var(--white);margin-bottom:10px">Evolução do saldo acumulado</div>
-              <div style="position:relative;width:100%;height:100px">
-                <canvas id="chart-saldo-acumulado" style="width:100%;height:100%"></canvas>
+            <div class="chart-empty" id="chart-empty" style="height:100px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:32px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span style="font-size:.75rem">Sem dados recentes</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+              <div style="display:flex;gap:8px">
+                <button id="btn-fluxo-recentes" onclick="window.setFluxoModo('recentes')" class="db-tab active">8 dias</button>
+                <button id="btn-fluxo-todas" onclick="window.setFluxoModo('todas')" class="db-tab">Mês</button>
+              </div>
+              <div class="db-fluxo-saldo">
+                <span id="db-fluxo-resultado" style="font-size:.82rem;font-weight:700;color:var(--primary)">–</span>
               </div>
             </div>
-            <div class="chart-empty" id="chart-empty">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;opacity:.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span>Registre movimentações para ver o gráfico</span>
+            <div style="display:none">
+              <div id="fluxo-sub"></div>
+              <div id="kpi-entradas-sub"></div>
+              <div id="kpi-saidas-sub"></div>
+              <canvas id="chart-saldo-acumulado"></canvas>
             </div>
           </div>
 
-          <div class="recent-card">
+          <!-- Card 4: Score Financeiro -->
+          <div class="db-card db-card-score" onclick="(window.irPara||irPara)('analise')" style="cursor:pointer">
+            <div class="db-card-label">SCORE MONVAY</div>
+            <div class="db-score-main">
+              <div class="db-score-num" id="kpi-score-mini">–</div>
+              <div class="db-score-badge" id="kpi-score-mini-label">Calculando...</div>
+            </div>
+            <div class="db-score-bar-wrap">
+              <div class="db-score-bar" id="db-score-bar" style="width:0%"></div>
+            </div>
+            <div class="db-score-sub" id="db-score-evolucao">Ver detalhes →</div>
+          </div>
+
+          <!-- Card 5: Meta Financeira -->
+          <div class="db-card db-card-meta" id="db-meta-card" onclick="(window.irPara||irPara)('metas')" style="cursor:pointer">
+            <div class="db-card-label">META FINANCEIRA</div>
+            <div id="db-meta-content">
+              <div class="db-meta-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;opacity:.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <span style="font-size:.75rem;color:var(--gray)">Criar meta</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Contas Pendentes -->
+          <div class="db-card db-card-contas" id="db-contas" onclick="(window.irPara||irPara)('compromissos')">
+            <div class="db-card-label">CONTAS PENDENTES</div>
+            <div id="db-contas-content">
+              <div class="db-contas-ok">
+                <div class="db-contas-ok-icon">🎉</div>
+                <div class="db-contas-ok-txt">Tudo em dia!</div>
+                <div class="db-contas-ok-sub">Nenhuma conta pendente</div>
+              </div>
+            </div>
+            <!-- IDs ocultos para compatibilidade -->
+            <div style="display:none">
+              <span id="kpi-movs">0</span>
+              <span id="kpi-saldo-disponivel">R$ 0,00</span>
+            </div>
+          </div>
+
+          <!-- Card 6: Previsão do Mês -->
+          <div class="db-card db-card-previsao" id="db-previsao">
+            <div class="db-card-label">PREVISÃO DO MÊS</div>
+            <div class="db-previsao-icon">🔮</div>
+            <div class="db-previsao-texto" id="db-previsao-texto">Adicione movimentações para ver a previsão.</div>
+            <div class="db-previsao-valor" id="db-previsao-valor"></div>
+          </div>
+        </div>
+
+        <!-- ROW 3: Últimas Movimentações (full width) -->
+        <div class="db-row-movs">
+          <div class="recent-card" style="width:100%">
             <div class="card-header">
               <div class="card-title">Últimas Movimentações</div>
               <span class="see-all" onclick="(window.irPara||irPara)('gastos')">Ver todas →</span>
             </div>
-            <div id="lista-inicio" class="lista-movs">
+            <div id="lista-inicio" class="lista-movs lista-movs-horizontal">
               <div class="vazio">Nenhuma movimentação ainda.</div>
             </div>
           </div>
+        </div>
 
+        <!-- Insights panel oculto (compatibilidade) -->
+        <div id="insights-panel" style="display:none">
+          <div id="insights-list" class="insights-list"></div>
+          <span id="insights-count"></span>
         </div>
 
 

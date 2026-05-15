@@ -51,6 +51,234 @@ const _origAtualizarKPIs = atualizarKPIs;
 // ── Sidebar mobile ────────────────────────────────────────────────
 // ── Configurações completas ───────────────────────────────────────
 
+// ── Dashboard Premium — Atualizar cards ──────────────────────────
+function atualizarDashboardPremium() {
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+  const entMes = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const saiMes = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const saldoTotal = movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0)
+                   - movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+
+  // Card Saldo
+  const sd = document.getElementById('saldo-display');
+  if(sd) { sd.textContent = fmtSaldo(saldoTotal); sd.style.color = saldoTotal<0?'#ef4444':''; }
+  const sm = document.getElementById('saldo-mes');
+  if(sm) sm.textContent = `+${fmt(entMes)} entrou este mês`;
+
+  // Entradas/Saídas
+  const ke = document.getElementById('kpi-entradas'); if(ke) ke.textContent=fmt(entMes);
+  const ks = document.getElementById('kpi-saidas');   if(ks) ks.textContent=fmt(saiMes);
+
+  // Falta pagar
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar');
+  const totalPend = contasPend.reduce((s,c)=>s+(c.valor||0),0);
+  const kfp = document.getElementById('kpi-falta-pagar');
+  if(kfp){kfp.textContent=fmt(totalPend);kfp.style.color=totalPend>0?'#ef4444':'#22c55e';}
+
+  // Card Score
+  const scoreEl = document.getElementById('kpi-score-mini');
+  const scoreLbl = document.getElementById('kpi-score-mini-label');
+  const scoreBar = document.getElementById('db-score-bar');
+  // Score já calculado pelo calcularScore() — pegar valor do DOM
+  const scoreVal = parseInt(scoreEl?.textContent)||0;
+  if(scoreBar) scoreBar.style.width = Math.min(scoreVal/10, 100)+'%';
+
+  // Card Contas Pendentes
+  renderCardContas(contasPend, totalPend, hoje);
+
+  // Card Meta
+  renderCardMeta();
+
+  // Card Previsão
+  renderCardPrevisao(saiMes, saldoTotal, hoje);
+
+  // Fluxo resultado
+  const res = entMes - saiMes;
+  const dbFluxo = document.getElementById('db-fluxo-resultado');
+  if(dbFluxo) {
+    dbFluxo.textContent = (res>=0?'+':'')+fmt(res);
+    dbFluxo.style.color = res>=0?'var(--primary)':'#ef4444';
+  }
+
+  // KPIs ocultos para compatibilidade
+  const km = document.getElementById('kpi-movs'); if(km) km.textContent=movimentacoes.length;
+  const ksd = document.getElementById('kpi-saldo-disponivel');
+  if(ksd) ksd.textContent=fmtSaldo(saldoTotal-totalPend);
+}
+
+function renderCardContas(pendentes, total, hoje) {
+  const el = document.getElementById('db-contas-content');
+  if(!el) return;
+  const hojeStr = hoje.toISOString().slice(0,10);
+  const proxSemana = new Date(hoje); proxSemana.setDate(proxSemana.getDate()+7);
+  const proxStr = proxSemana.toISOString().slice(0,10);
+  const proxSemanaContas = pendentes.filter(c=>c.vencimento&&c.vencimento<=proxStr);
+
+  if(pendentes.length===0){
+    el.innerHTML=`<div class="db-contas-ok">
+      <div class="db-contas-ok-icon">🎉</div>
+      <div class="db-contas-ok-txt">Tudo em dia!</div>
+      <div class="db-contas-ok-sub">Nenhuma conta pendente</div>
+    </div>`;
+  } else {
+    el.innerHTML=`<div class="db-contas-alerta">
+      <div class="db-contas-valor">${fmt(total)}</div>
+      <div class="db-contas-desc">${pendentes.length} conta(s) pendente(s)</div>
+      ${proxSemanaContas.slice(0,2).map(c=>`<div class="db-contas-item">
+        <span>${c.descricao||'Conta'}</span>
+        <span style="color:#ef4444;font-weight:700">${fmt(c.valor)}</span>
+      </div>`).join('')}
+      ${proxSemanaContas.length>2?`<div style="font-size:.7rem;color:var(--gray);text-align:center">+${proxSemanaContas.length-2} mais esta semana</div>`:''}
+    </div>`;
+  }
+}
+
+function renderCardMeta() {
+  const el = document.getElementById('db-meta-content');
+  if(!el) return;
+  const ativas = metas.filter(m=>(m.atual||0)<(m.valor||1));
+  if(!ativas.length){
+    el.innerHTML=`<div class="db-meta-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;opacity:.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span style="font-size:.75rem;color:var(--gray)">Criar meta</span>
+    </div>`;
+    return;
+  }
+  const m = ativas.sort((a,b)=>((b.atual||0)/b.valor)-((a.atual||0)/a.valor))[0];
+  const pct = Math.min(Math.round(((m.atual||0)/m.valor)*100),100);
+  el.innerHTML=`<div>
+    <div class="db-meta-nome">${m.nome}</div>
+    <div class="db-meta-valores"><span>${fmt(m.atual||0)}</span><span>${fmt(m.valor)}</span></div>
+    <div class="db-meta-bar-wrap"><div class="db-meta-bar" style="width:${pct}%"></div></div>
+    <div class="db-meta-pct">${pct}% concluído</div>
+  </div>`;
+}
+
+function renderCardPrevisao(saiMes, saldo, hoje) {
+  const el = document.getElementById('db-previsao-texto');
+  const elVal = document.getElementById('db-previsao-valor');
+  if(!el) return;
+  const diasMes = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate();
+  const diasPassados = hoje.getDate();
+  const diasRestantes = diasMes - diasPassados;
+  if(diasPassados===0||saiMes===0){el.textContent='Adicione movimentações para ver a previsão.';return;}
+  const gastoDiario = saiMes/diasPassados;
+  const projecaoGasto = saiMes + gastoDiario*diasRestantes;
+  const saldoFinal = saldo - gastoDiario*diasRestantes;
+  if(saldoFinal>0){
+    el.textContent=`Se continuar assim, terminará o mês no positivo.`;
+    if(elVal){elVal.textContent=`+${fmt(saldoFinal)} estimado`;elVal.style.color='#22c55e';}
+  } else {
+    el.textContent=`Atenção: seu ritmo de gastos pode comprometer o saldo.`;
+    if(elVal){elVal.textContent=`${fmt(saldoFinal)} estimado`;elVal.style.color='#ef4444';}
+  }
+}
+
+// ══ Dashboard Premium ════════════════════════════════════════════
+
+function renderDashboardPremium() {
+  renderDbSaldo();
+  renderDbFluxo();
+  renderDbScore();
+  renderDbMeta();
+  renderDbPrevisao();
+  gerarInsightsKlausWidget();
+}
+
+// Card Saldo — já atualizado pelo atualizarKPIs
+function renderDbSaldo() {
+  // saldo-display, saldo-mes, kpi-entradas, kpi-saidas, kpi-falta-pagar
+  // já são atualizados pelo atualizarKPIs() existente
+}
+
+// Card Fluxo — resultado
+function renderDbFluxo() {
+  const el = document.getElementById('db-fluxo-resultado');
+  if (!el) return;
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+  const ent = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const sai = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const saldo = ent - sai;
+  el.textContent = (saldo >= 0 ? '+' : '') + fmt(saldo);
+  el.style.color = saldo >= 0 ? 'var(--primary)' : '#ef4444';
+}
+
+// Card Score
+function renderDbScore() {
+  // kpi-score-mini e kpi-score-mini-label já atualizados por calcularScore()
+  // Atualizar barra de progresso
+  const scoreEl = document.getElementById('kpi-score-mini');
+  const barEl   = document.getElementById('db-score-bar');
+  if (!scoreEl || !barEl) return;
+  const score = parseInt(scoreEl.textContent) || 0;
+  setTimeout(() => { barEl.style.width = Math.min(score/10, 100) + '%'; }, 200);
+}
+
+// Card Meta
+function renderDbMeta() {
+  const el = document.getElementById('db-meta-content');
+  if (!el) return;
+  if (!metas || metas.length === 0) {
+    el.innerHTML = '<div class="db-meta-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;opacity:.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span style="font-size:.75rem;color:var(--gray)">Criar meta →</span></div>';
+    return;
+  }
+  // Pegar meta mais próxima de ser concluída
+  const meta = [...metas].filter(m=>m.valor>0).sort((a,b)=>((b.atual||0)/b.valor)-((a.atual||0)/a.valor))[0];
+  if (!meta) return;
+  const pct = Math.min(Math.round(((meta.atual||0)/meta.valor)*100), 100);
+  el.innerHTML = `
+    <div class="db-meta-nome">${meta.nome}</div>
+    <div class="db-meta-vals">${fmt(meta.atual||0)} / ${fmt(meta.valor)}</div>
+    <div class="db-meta-bar-wrap"><div class="db-meta-bar" style="width:${pct}%"></div></div>
+    <div class="db-meta-pct">${pct}% concluído</div>`;
+}
+
+// Card Previsão
+function renderDbPrevisao() {
+  const textoEl = document.getElementById('db-previsao-texto');
+  const valorEl = document.getElementById('db-previsao-valor');
+  const iconEl  = document.querySelector('.db-previsao-icon');
+  if (!textoEl) return;
+
+  const hoje = new Date();
+  const anoMes = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+  const movMes = movimentacoes.filter(m=>m.data&&m.data.startsWith(anoMes));
+  const sai = movMes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const ent = movMes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const totalEnt = movimentacoes.filter(m=>m.tipo==='ganho').reduce((s,m)=>s+(m.valor||0),0);
+  const totalSai = movimentacoes.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).reduce((s,m)=>s+(m.valor||0),0);
+  const saldoAtual = totalEnt - totalSai;
+
+  const diasMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate();
+  const diasRestantes = diasMes - hoje.getDate();
+  const gastoDiario = hoje.getDate() > 0 ? sai / hoje.getDate() : 0;
+  const projecaoGasto = gastoDiario * diasRestantes;
+  const saldoFim = saldoAtual - projecaoGasto;
+  const contasPend = contas.filter(c=>!c.paga&&c.tipo==='pagar').reduce((s,c)=>s+(c.valor||0),0);
+  const disponivelReal = saldoFim - contasPend;
+
+  if (sai === 0) {
+    if (iconEl) iconEl.textContent = '💡';
+    textoEl.textContent = 'Comece a registrar seus gastos para ver a previsão';
+    if (valorEl) valorEl.textContent = '';
+    return;
+  }
+
+  if (disponivelReal >= 0) {
+    if (iconEl) iconEl.textContent = '✅';
+    textoEl.textContent = 'Você terminará o mês no positivo';
+    if (valorEl) { valorEl.textContent = fmt(disponivelReal) + ' disponível'; valorEl.style.color = 'var(--primary)'; }
+  } else {
+    if (iconEl) iconEl.textContent = '⚠️';
+    textoEl.textContent = 'Atenção: projeção de saldo negativo';
+    if (valorEl) { valorEl.textContent = fmt(disponivelReal); valorEl.style.color = '#ef4444'; }
+  }
+}
+
 // ── Klaus Widget — Insights automáticos no Dashboard ────────────
 function gerarInsightsKlausWidget() {
   const el = document.getElementById('klaus-widget-insights');
@@ -146,17 +374,22 @@ function gerarInsightsKlausWidget() {
     insights.push({ icon:'💡', tag:'dica', text:'Registre seus gastos diários para análises precisas' });
   }
 
-  // Renderizar
-  el.innerHTML = insights.slice(0,5).map(i => `
-    <div class="klaus-insight-item" onclick="(window.irPara||irPara)('klaus')">
-      <div class="klaus-insight-icon" style="background:${
-        i.tag==='alerta'?'rgba(239,68,68,0.1)':
-        i.tag==='dica'?'rgba(34,197,94,0.1)':
-        i.tag==='meta'?'rgba(139,92,246,0.1)':'rgba(245,158,11,0.1)'}">${i.icon}</div>
-      <div class="klaus-insight-text">${i.text}</div>
-      <span class="klaus-insight-tag tag-${i.tag}">${
+  // Renderizar no novo formato premium
+  const dest = document.getElementById('db-klaus-insight') || document.getElementById('klaus-widget-insights');
+  if (!dest) { el.innerHTML = insights.slice(0,5).map(i=>`<div class="klaus-insight-item"><div class="klaus-insight-icon">${i.icon}</div><div class="klaus-insight-text">${i.text}</div></div>`).join(''); return; }
+
+  dest.innerHTML = insights.slice(0,3).map(i => `
+    <div class="db-insight-bubble" onclick="(window.irPara||irPara)('klaus')">
+      <span class="db-insight-emoji">${i.icon}</span>
+      <span class="db-insight-text">${i.text}</span>
+      <span class="db-insight-tag-pill" style="background:${
+        i.tag==='alerta'?'rgba(239,68,68,0.12)':i.tag==='dica'?'rgba(34,197,94,0.12)':
+        i.tag==='meta'?'rgba(139,92,246,0.12)':'rgba(245,158,11,0.12)'};color:${
+        i.tag==='alerta'?'#ef4444':i.tag==='dica'?'#22c55e':
+        i.tag==='meta'?'#a78bfa':'#f59e0b'}">${
         i.tag==='alerta'?'Alerta':i.tag==='dica'?'Dica':i.tag==='meta'?'Meta':'Info'}</span>
     </div>`).join('');
+  if (el !== dest) el.innerHTML = dest.innerHTML;
 }
 
 // ── Klaus — Assistente Financeiro IA ────────────────────────────
@@ -897,7 +1130,8 @@ async function carregarTodosDados(){
     if(typeof setPeriodo==='function') setPeriodo('mes');
     // Aplicar preferência de ocultar saldo
     setTimeout(()=>{ if(typeof aplicarMascaraSaldo==='function') aplicarMascaraSaldo(); }, 300);
-    // Gerar insights do widget Klaus
+    // Dashboard premium
+    setTimeout(()=>{ if(typeof atualizarDashboardPremium==='function') atualizarDashboardPremium(); }, 500);
     setTimeout(()=>{ if(typeof gerarInsightsKlausWidget==='function') gerarInsightsKlausWidget(); }, 800);
   }catch(e){console.error('Erro ao carregar dados:',e);}
 }

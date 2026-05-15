@@ -529,6 +529,8 @@ body {
 .main {
   padding: 28px 32px;
   flex: 1;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* Telas */
@@ -627,6 +629,7 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 16px;
+  width: 100%;
 }
 
 .chart-card {
@@ -773,6 +776,407 @@ body {
 .cfg-action-danger svg { color: #ef4444; }
 .cfg-action-danger div div:first-child { color: #ef4444; }
 
+
+/* ══ DASHBOARD PREMIUM ══════════════════════════════════════════ */
+
+/* Row 1 — Saldo + Klaus (2 cards principais) */
+.db-row-main {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Row 2 — 4 cards secundários */
+.db-row-secondary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Row 3 — Movimentações full width */
+.db-row-movs {
+  margin-bottom: 16px;
+}
+
+/* Card base */
+.db-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.db-card:hover { border-color: var(--border-hover); }
+
+.db-card-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--gray);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.db-card-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.db-card-sub {
+  font-size: .72rem;
+  color: var(--gray);
+  margin-top: 1px;
+}
+
+.db-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+/* ── Card Saldo ── */
+.db-card-saldo {
+  background: linear-gradient(135deg, #0f2010 0%, #0a1a0d 100%);
+  border-color: rgba(34,197,94,0.25);
+}
+
+.db-card-saldo::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.db-saldo-valor {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.02em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.db-saldo-sub {
+  font-size: .8rem;
+  color: rgba(34,197,94,0.8);
+  margin-bottom: 16px;
+}
+
+.db-saldo-divider {
+  height: 1px;
+  background: rgba(34,197,94,0.15);
+  margin-bottom: 14px;
+}
+
+.db-saldo-row {
+  display: flex;
+  gap: 20px;
+}
+
+.db-mini-label {
+  font-size: .62rem;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 3px;
+}
+
+.db-mini-val {
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+/* ── Card Klaus ── */
+.db-card-klaus {
+  background: var(--surface);
+  border-color: rgba(34,197,94,0.2);
+}
+
+.db-card-klaus::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.db-klaus-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--primary-dim);
+  border: 1.5px solid rgba(34,197,94,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(34,197,94,0.2);
+  flex-shrink: 0;
+}
+
+.db-klaus-badge {
+  font-size: .65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--primary-dim);
+  color: var(--primary);
+  border: 1px solid rgba(34,197,94,0.3);
+  letter-spacing: .05em;
+}
+
+.db-klaus-insight {
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.db-insight-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  animation: fadeUp .3s ease;
+}
+
+.db-insight-bubble:hover {
+  background: rgba(34,197,94,0.04);
+  border-color: rgba(34,197,94,0.15);
+}
+
+.db-insight-emoji { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+.db-insight-text {
+  font-size: .82rem;
+  color: var(--white);
+  line-height: 1.45;
+}
+
+.db-insight-tag-pill {
+  font-size: .62rem;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 700;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.db-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gray);
+  font-size: .8rem;
+  padding: 8px 0;
+}
+
+.db-klaus-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.db-btn-primary {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: #000;
+  font-size: .78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity .18s;
+}
+.db-btn-primary:hover { opacity: .85; }
+
+.db-btn-secondary {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  font-size: .78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .18s;
+}
+.db-btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── Card Fluxo ── */
+.db-card-fluxo { padding: 18px 20px; }
+
+.db-tab {
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  font-size: .7rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .18s;
+}
+.db-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+}
+
+/* ── Card Score ── */
+.db-score-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.db-score-num {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.db-score-badge {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.db-score-bar-wrap {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.db-score-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #86efac);
+  border-radius: 4px;
+  transition: width .8s ease;
+}
+
+.db-score-sub {
+  font-size: .72rem;
+  color: var(--gray);
+}
+
+/* ── Card Meta ── */
+.db-meta-nome {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-meta-vals {
+  font-size: .75rem;
+  color: var(--gray);
+  margin-bottom: 10px;
+}
+
+.db-meta-bar-wrap {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.db-meta-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #86efac);
+  border-radius: 5px;
+  transition: width .8s ease;
+}
+
+.db-meta-pct {
+  font-size: .7rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.db-meta-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 0;
+  opacity: .6;
+}
+
+/* ── Card Previsão ── */
+.db-card-previsao { text-align: center; }
+
+.db-previsao-icon {
+  font-size: 1.8rem;
+  margin: 4px 0 8px;
+}
+
+.db-previsao-texto {
+  font-size: .78rem;
+  color: var(--gray);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.db-previsao-valor {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* ── Movimentações horizontal ── */
+.lista-movs-horizontal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 1100px) {
+  .db-row-secondary { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .db-row-main { grid-template-columns: 1fr; }
+  .db-row-secondary { grid-template-columns: repeat(2, 1fr); }
+  .db-saldo-valor { font-size: 1.8rem; }
+  .lista-movs-horizontal { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .db-row-secondary { grid-template-columns: 1fr; }
+}
+
 /* ── Klaus Widget Dashboard ─────────────────────────────────────── */
 .content-grid {
   grid-template-columns: 1.6fr 1fr 1fr !important;
@@ -917,12 +1321,8 @@ body {
 }
 
 /* Mobile — empilhar */
-@media (max-width: 1100px) {
-  .content-grid { grid-template-columns: 1.6fr 1fr; }
-  .klaus-widget { display: none; }
-}
 @media (max-width: 768px) {
-  .content-grid { grid-template-columns: 1fr; }
+  .content-grid { grid-template-columns: 1fr !important; }
 }
 
 /* ── Klaus chips ────────────────────────────────────────────────── */
@@ -3937,4 +4337,379 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   height: 220px;
   color: #64748b;
   font-size: .85rem;
+}
+
+/* ══════════════════════════════════════════════════
+   DASHBOARD PREMIUM — Monvay IA-First
+   ══════════════════════════════════════════════════ */
+
+/* Row principal: Saldo + Klaus */
+.db-row-main {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Row secundária: Fluxo + Contas + Score + Meta */
+.db-row-secondary {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Row movimentações */
+.db-row-movs {
+  margin-bottom: 16px;
+}
+
+/* Base card */
+.db-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  transition: border-color .2s, transform .2s;
+  position: relative;
+  overflow: hidden;
+}
+.db-card:hover { border-color: var(--border-hover); }
+
+.db-card-label {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: var(--gray);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.db-card-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.db-card-sub {
+  font-size: .72rem;
+  color: var(--gray);
+  margin-top: 1px;
+}
+
+.db-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+/* ── Card 1: Saldo ── */
+.db-card-saldo {
+  background: linear-gradient(135deg, #0d2818 0%, #0a1f14 50%, #071510 100%);
+  border-color: rgba(34,197,94,0.2);
+}
+.db-card-saldo::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+  pointer-events: none;
+}
+.db-saldo-valor {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.02em;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.db-saldo-sub {
+  font-size: .8rem;
+  color: rgba(34,197,94,0.8);
+  margin-bottom: 16px;
+}
+.db-saldo-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+}
+.db-saldo-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.db-mini-label {
+  font-size: .65rem;
+  color: var(--gray);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.db-mini-val {
+  font-size: .92rem;
+  font-weight: 700;
+}
+
+/* ── Card 2: Klaus IA ── */
+.db-card-klaus {
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(34,197,94,0.04) 100%);
+  border-color: rgba(34,197,94,0.15);
+}
+.db-card-klaus::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; right: -40px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.06), transparent 70%);
+  pointer-events: none;
+}
+.db-klaus-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--primary-dim);
+  border: 1.5px solid rgba(34,197,94,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(34,197,94,0.15);
+}
+.db-klaus-badge {
+  font-size: .65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--primary);
+  color: #000;
+  letter-spacing: .05em;
+}
+.db-klaus-insight {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.db-insight-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid transparent;
+  font-size: .8rem;
+  color: var(--white);
+  line-height: 1.4;
+  animation: fadeUp .3s ease;
+}
+.db-insight-line.verde { border-left-color: #22c55e; }
+.db-insight-line.vermelho { border-left-color: #ef4444; }
+.db-insight-line.amarelo { border-left-color: #f59e0b; }
+.db-insight-line.roxo { border-left-color: #a78bfa; }
+.db-insight-emoji { flex-shrink: 0; font-size: .9rem; }
+.db-klaus-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray);
+  font-size: .78rem;
+  padding: 8px 0;
+}
+.db-klaus-actions {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+.db-btn-primary {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: #000;
+  font-size: .78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity .18s;
+}
+.db-btn-primary:hover { opacity: .85; }
+.db-btn-secondary {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  font-size: .78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .18s;
+}
+.db-btn-secondary:hover { color: var(--white); border-color: var(--border-hover); }
+
+/* ── Card 3: Fluxo ── */
+.db-card-fluxo {}
+.db-tab {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  font-size: .7rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s;
+}
+.db-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+}
+
+/* ── Card 4: Contas ── */
+.db-card-contas { cursor: pointer; }
+.db-contas-ok {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  gap: 6px;
+  text-align: center;
+}
+.db-contas-ok-icon { font-size: 1.8rem; }
+.db-contas-ok-txt { font-size: .78rem; color: var(--primary); font-weight: 600; }
+.db-contas-ok-sub { font-size: .72rem; color: var(--gray); }
+.db-contas-alerta { display: flex; flex-direction: column; gap: 8px; }
+.db-contas-valor { font-size: 1.4rem; font-weight: 800; color: #ef4444; }
+.db-contas-desc { font-size: .78rem; color: var(--gray); }
+.db-contas-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.12);
+  font-size: .75rem;
+}
+
+/* ── Card 5: Score ── */
+.db-card-score { cursor: pointer; }
+.db-score-main {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 8px 0;
+}
+.db-score-num {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+.db-score-badge {
+  font-size: .72rem;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  font-weight: 700;
+}
+.db-score-bar-wrap {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  margin: 10px 0 8px;
+  overflow: hidden;
+}
+.db-score-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #22c55e, #a3e635);
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.db-score-sub {
+  font-size: .72rem;
+  color: var(--gray);
+}
+
+/* ── Card 6: Meta ── */
+.db-card-meta { cursor: pointer; }
+.db-meta-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  gap: 6px;
+  color: var(--gray);
+}
+.db-meta-nome {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.db-meta-valores {
+  display: flex;
+  justify-content: space-between;
+  font-size: .75rem;
+  color: var(--gray);
+  margin-bottom: 8px;
+}
+.db-meta-bar-wrap {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.db-meta-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--primary), #a3e635);
+  transition: width .8s ease;
+}
+.db-meta-pct {
+  font-size: .72rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Previsão (oculto agora) */
+.db-card-previsao {}
+.db-previsao-icon { font-size: 1.6rem; margin-bottom: 8px; }
+.db-previsao-texto { font-size: .82rem; color: var(--white); line-height: 1.5; margin-bottom: 6px; }
+.db-previsao-valor { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+
+/* Movimentações horizontal */
+.lista-movs-horizontal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.lista-movs-horizontal .mov-item {
+  min-width: 0;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .db-row-main { grid-template-columns: 1fr; }
+  .db-row-secondary { grid-template-columns: 1fr 1fr; }
+  .lista-movs-horizontal { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .db-row-secondary { grid-template-columns: 1fr; }
 }
