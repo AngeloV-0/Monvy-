@@ -1179,9 +1179,6 @@ body {
 }
 
 /* ── Klaus Widget Dashboard ─────────────────────────────────────── */
-.content-grid {
-  grid-template-columns: 1.6fr 1fr 1fr !important;
-}
 
 .klaus-widget {
   display: flex;

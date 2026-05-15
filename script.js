@@ -319,10 +319,12 @@ function renderDbMeta() {
   // Pegar meta mais próxima de ser concluída
   const meta = [...metas].filter(m=>m.valor>0).sort((a,b)=>((b.atual||0)/b.valor)-((a.atual||0)/a.valor))[0];
   if (!meta) return;
-  const pct = Math.min(Math.round(((meta.atual||0)/meta.valor)*100), 100);
+  const atual = parseFloat(meta.atual)||0;
+  const valor = parseFloat(meta.valor)||1;
+  const pct = Math.min(Math.round((atual/valor)*100), 100);
   el.innerHTML = `
-    <div class="db-meta-nome">${meta.nome}</div>
-    <div class="db-meta-vals">${fmt(meta.atual||0)} / ${fmt(meta.valor)}</div>
+    <div class="db-meta-nome">${meta.nome||'Meta'}</div>
+    <div class="db-meta-vals">${fmt(atual)} / ${fmt(valor)}</div>
     <div class="db-meta-bar-wrap"><div class="db-meta-bar" style="width:${pct}%"></div></div>
     <div class="db-meta-pct">${pct}% concluído</div>`;
 }
