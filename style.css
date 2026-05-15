@@ -2109,16 +2109,20 @@ select option { background: var(--surface-2); }
   .topbar-logo-mobile {
     display: flex !important;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 1;
+    gap: 10px;
+    flex: 1;
     min-width: 0;
     overflow: hidden;
-    max-width: calc(100vw - 230px); /* garante espaço para os botões da direita */
   }
   .topbar-logo-mobile img:not(#topbar-avatar-mobile) {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    height: 26px !important;
+    width: auto !important;
+    max-width: 110px;
+  }
+  #topbar-avatar-mobile {
+    flex-shrink: 0;
+    margin-left: auto;
   }
   .topbar-left {
     min-width: 0 !important;
