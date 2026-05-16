@@ -2311,10 +2311,10 @@ select option { background: var(--surface-2); }
    HAMBURGER BUTTON
    ============================== */
 .topbar-avatar-mobile {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
-  max-width: 46px;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  max-width: 60px;
   border-radius: 50%;
   background: var(--primary);
   background-size: cover !important;
@@ -2349,8 +2349,8 @@ select option { background: var(--surface-2); }
 .topbar-perfil-desktop:hover { background: var(--surface-2); }
 
 .topbar-avatar-desktop {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(34,197,94,0.4);
@@ -2970,12 +2970,12 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
 
   /* Avatar mobile - garante dimensões fixas */
   .topbar-avatar-mobile {
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
-    max-width: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     overflow: hidden !important;
@@ -2995,12 +2995,12 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   /* Avatar mobile - tamanho fixo igual ao emoji */
   #topbar-avatar-mobile {
     display: block !important;
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     object-fit: cover !important;
