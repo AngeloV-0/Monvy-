@@ -2026,7 +2026,7 @@ select option { background: var(--surface-2); }
    MOBILE
    ============================== */
 @media (max-width: 768px) {
-  :root { --sidebar-w: 0px; --topbar-h: 72px; }
+  :root { --sidebar-w: 0px; --topbar-h: 60px; }
   .sidebar { transform: translateX(-220px); width: 220px !important; transition: transform 0.28s ease; }
   .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
 
@@ -2040,7 +2040,7 @@ select option { background: var(--surface-2); }
     height: var(--topbar-h);
     min-height: var(--topbar-h);
     padding-bottom: 0;
-    overflow: visible;
+    overflow: hidden;
     justify-content: space-between;
     border-bottom: 2px solid var(--primary) !important;
     box-shadow: 0 2px 12px rgba(34,197,94,0.15);
@@ -2131,7 +2131,7 @@ select option { background: var(--surface-2); }
     gap: 10px;
     flex: 1;
     min-width: 0;
-    overflow: visible;
+    overflow: hidden;
   }
   .topbar-logo-mobile img:not(#topbar-avatar-mobile) {
     flex-shrink: 0;
@@ -2311,10 +2311,10 @@ select option { background: var(--surface-2); }
    HAMBURGER BUTTON
    ============================== */
 .topbar-avatar-mobile {
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  max-width: 60px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  max-width: 46px;
   border-radius: 50%;
   background: var(--primary);
   background-size: cover !important;
@@ -2913,7 +2913,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     max-width: 100% !important;
   }
   .topbar {
-    overflow: visible !important;
+    overflow: hidden !important;
     max-width: 100vw !important;
     width: 100% !important;
   }
@@ -2939,7 +2939,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     width: 100% !important;
     max-width: 100vw !important;
     padding: 0 10px !important;
@@ -2970,12 +2970,12 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
 
   /* Avatar mobile - garante dimensões fixas */
   .topbar-avatar-mobile {
-    width: 60px !important;
-    height: 60px !important;
-    min-width: 60px !important;
-    max-width: 60px !important;
-    min-height: 60px !important;
-    max-height: 60px !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     overflow: hidden !important;
@@ -2995,12 +2995,12 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   /* Avatar mobile - tamanho fixo igual ao emoji */
   #topbar-avatar-mobile {
     display: block !important;
-    width: 60px !important;
-    height: 60px !important;
-    min-width: 60px !important;
-    max-width: 60px !important;
-    min-height: 60px !important;
-    max-height: 60px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     aspect-ratio: 1 / 1 !important;
     border-radius: 50% !important;
     object-fit: cover !important;
