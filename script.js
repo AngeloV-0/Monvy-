@@ -324,7 +324,7 @@ function renderDbMeta() {
       </div>`;
     return;
   }
-  const meta = [...metas].filter(m=>m.valor>0).sort((a,b)=>((b.atual||0)/b.valor)-((a.atual||0)/a.valor))[0];
+  const meta = [...metas].filter(m=>(parseFloat(m.valor)||0)>0).sort((a,b)=>((parseFloat(b.atual)||0)/parseFloat(b.valor)) - ((parseFloat(a.atual)||0)/parseFloat(a.valor)))[0];
   if (!meta) return;
   const atual = parseFloat(meta.atual)||0;
   const valor = parseFloat(meta.valor)||1;
@@ -2134,7 +2134,7 @@ window.criarMeta=async function(){
   const dataAlvo=document.getElementById('meta-data-alvo').value;
   if(!nome||!valor||valor<=0){alert('Preencha nome e valor da meta.');return;}
   try{
-    await adicionarMeta(uidAtual,{nome,valor,atual,dataAlvo:dataAlvo||null});
+    await adicionarMeta(uidAtual,{nome,valor:parseFloat(valor)||0,atual:parseFloat(atual)||0,dataAlvo:dataAlvo&&dataAlvo!=='undefined'?dataAlvo:null});
     ['meta-nome','meta-valor','meta-atual','meta-data-alvo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     metas=await getMetas(uidAtual);renderizarMetas();
   }catch(e){alert('Erro ao criar meta.');console.error(e);}
@@ -2145,7 +2145,7 @@ function renderizarMetas(){
   el.innerHTML=metas.map(m=>{
     const pct=m.valor>0?Math.min(100,((m.atual||0)/m.valor)*100):0;
     const faltam=Math.max(0,m.valor-(m.atual||0));
-    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(m.atual||0)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${m.dataAlvo?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${m.dataAlvo?fmtData(m.dataAlvo):"—"}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
+    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(m.atual||0)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${m.dataAlvo?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${m.dataAlvo&&m.dataAlvo!=='undefined'?fmtData(m.dataAlvo):'—'}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
   }).join('');
 }
 window.abrirModalMeta=function(id){
