@@ -645,7 +645,6 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 16px;
-  align-items: stretch;
 }
 
 .chart-card, .recent-card {
@@ -654,25 +653,6 @@ body {
   border-radius: var(--radius);
   padding: 22px 24px;
 }
-
-.recent-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.recent-card .card-header {
-  flex-shrink: 0;
-}
-
-.recent-card .lista-movs {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none;
-  align-content: start;
-}
-
-.recent-card .lista-movs::-webkit-scrollbar { display: none; }
 
 .card-header {
   display: flex;
@@ -740,6 +720,9 @@ body {
    ============================== */
 
 .lista-movs { display: flex; flex-direction: column; gap: 8px; }
+
+/* Dashboard: recent-card não estica junto com chart-card */
+#tela-inicio .content-grid { align-items: start; }
 
 /* ── Tela de Configurações ──────────────────────────────────────── */
 .cfg-row {
