@@ -662,7 +662,11 @@ body {
 }
 .recent-card {
   align-self: start;
+  max-height: 520px;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
+.recent-card::-webkit-scrollbar { display: none; }
 
 .card-header {
   display: flex;
@@ -729,7 +733,7 @@ body {
    LISTA MOVIMENTAÇÕES
    ============================== */
 
-.lista-movs { display: flex; flex-direction: column; gap: 12px; }
+.lista-movs { display: flex; flex-direction: column; gap: 8px; }
 
 /* ── Tela de Configurações ──────────────────────────────────────── */
 .cfg-row {
@@ -1490,7 +1494,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px;
+  padding: 12px 14px;
   border-radius: 12px;
   background: var(--surface-2);
   border: 1px solid transparent;
@@ -1500,10 +1504,10 @@ body {
 
 .mov-item:hover { border-color: var(--border-hover); }
 
-.mov-left { display: flex; align-items: center; gap: 14px; }
+.mov-left { display: flex; align-items: center; gap: 10px; }
 
 .mov-dot {
-  width: 10px; height: 10px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1511,9 +1515,9 @@ body {
 .mov-dot.g { background: var(--primary); box-shadow: 0 0 6px var(--primary-glow); }
 .mov-dot.r { background: var(--red); }
 
-.mov-info { display: flex; flex-direction: column; gap: 5px; }
-.mov-desc { font-size: 0.9rem; font-weight: 600; color: var(--white); }
-.mov-cat  { font-size: 0.75rem; color: var(--gray); }
+.mov-info { display: flex; flex-direction: column; gap: 2px; }
+.mov-desc { font-size: 0.85rem; font-weight: 500; color: var(--white); }
+.mov-cat  { font-size: 0.72rem; color: var(--gray); }
 
 .mov-valor {
   font-family: var(--font-title);
