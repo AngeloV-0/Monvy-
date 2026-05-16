@@ -645,7 +645,7 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 16px;
-  width: 100%;
+  align-items: start;
 }
 
 .chart-card {
@@ -660,17 +660,6 @@ body {
   border-radius: var(--radius);
   padding: 22px 24px;
 }
-.recent-card {
-  display: flex;
-  flex-direction: column;
-}
-.recent-card .lista-movs {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none;
-  max-height: 420px;
-}
-.recent-card .lista-movs::-webkit-scrollbar { display: none; }
 
 .card-header {
   display: flex;
