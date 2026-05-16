@@ -2027,6 +2027,24 @@ select option { background: var(--surface-2); }
    ============================== */
 @media (max-width: 768px) {
   :root { --sidebar-w: 0px; --topbar-h: 60px; }
+
+  /* Esconde scrollbars nativas no mobile */
+  * {
+    scrollbar-width: none !important;
+  }
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Two-col: coluna única, ordem natural (formulário em cima, lista embaixo) */
+  #tela-contas .two-col,
+  #tela-dividas .two-col {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
   .sidebar { transform: translateX(-220px); width: 220px !important; transition: transform 0.28s ease; }
   .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.4); }
 
@@ -2209,7 +2227,7 @@ select option { background: var(--surface-2); }
   /* Grids */
   .content-grid { grid-template-columns: 1fr; gap: 12px; }
   .chart-card, .recent-card, .table-card, .form-card, .resultado-card { padding: 16px; }
-  .two-col { grid-template-columns: 1fr; gap: 12px; }
+  .two-col { grid-template-columns: 1fr; gap: 0; }
 
   /* Categorias: 3 colunas cabe bem no mobile */
   .categorias-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -2918,9 +2936,13 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     width: 100% !important;
   }
   /* Garante que nenhum elemento filho quebre o layout */
-  .kpi-row, .content-grid, .two-col, .categorias-grid {
+  .kpi-row, .content-grid, .categorias-grid {
     max-width: 100% !important;
     overflow: hidden !important;
+  }
+  .two-col {
+    max-width: 100% !important;
+    overflow: visible !important;
   }
 }
 
@@ -4126,7 +4148,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
   .two-col {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -4137,7 +4159,7 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    padding: 18px 16px !important;
+    padding: 16px !important;
   }
 
   /* ---- Lista de dívidas: largura total ---- */
@@ -4173,7 +4195,24 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    padding: 18px 16px !important;
+    padding: 16px !important;
+  }
+
+  /* Todos os filhos diretos do two-col devem ter largura idêntica */
+  #tela-contas .two-col > div,
+  #tela-dividas .two-col > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Inputs e selects dentro do form-card respeitam o box-sizing */
+  #tela-contas .form-card input,
+  #tela-contas .form-card select,
+  #tela-dividas .form-card input,
+  #tela-dividas .form-card select {
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* ---- Inputs da tela de dívidas: nunca excedem o container ---- */
