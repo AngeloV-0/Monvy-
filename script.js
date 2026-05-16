@@ -984,6 +984,15 @@ window.setFluxoModo = setFluxoModo;
 function fmt(valor) {
   return 'R$ ' + Math.abs(Number(valor)||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
 }
+// Converte input numérico BR (ex: "10.000,50" ou "10000.50") para float
+function parseBR(str) {
+  if(!str && str !== 0) return 0;
+  const s = String(str).trim()
+    .replace(/[R$\s]/g,'')   // remove R$ e espaços
+    .replace(/\./g,'')        // remove pontos de milhar
+    .replace(',','.');         // vírgula decimal → ponto
+  return parseFloat(s) || 0;
+}
 function fmtSaldo(valor) {
   const v = Number(valor)||0;
   return (v<0?'-':'')+'R$ '+Math.abs(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
@@ -2139,8 +2148,8 @@ window.fecharBuscaMobile = function() {
 // ── Metas ─────────────────────────────────────────────────────────
 window.criarMeta=async function(){
   const nome=document.getElementById('meta-nome').value.trim();
-  const valor=parseFloat(document.getElementById('meta-valor').value);
-  const atual=parseFloat(document.getElementById('meta-atual').value)||0;
+  const valor=parseBR(document.getElementById('meta-valor').value);
+  const atual=parseBR(document.getElementById('meta-atual').value)||0;
   const dataAlvoRaw=document.getElementById('meta-data-alvo').value;
   const dataAlvo = dataAlvoRaw && dataAlvoRaw !== '' && dataAlvoRaw !== 'undefined' ? dataAlvoRaw : null;
   if(!nome){alert('Preencha o nome da meta.');return;}
@@ -2180,7 +2189,7 @@ window.abrirModalMetaPorId=window.abrirModalMeta;
 window.fecharModalMeta=function(){document.getElementById('modal-meta').classList.add('hidden');metaEditandoId=null;};
 window.adicionarValorMeta=async function(){
   if(!metaEditandoId) return;
-  const val=parseFloat(document.getElementById('modal-meta-valor').value);
+  const val=parseBR(document.getElementById('modal-meta-valor').value);
   if(!val||val<=0){alert('Informe um valor válido.');return;}
   const m=metas.find(x=>x.id===metaEditandoId); if(!m) return;
   const novoAtual = (parseFloat(m.atual)||0) + val;
