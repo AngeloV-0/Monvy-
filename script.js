@@ -3278,10 +3278,12 @@ window.abrirModalSimulacao=function(){
   if(!modal) return;
   modal.classList.remove('hidden');
   // Renderizar tabela e gráfico de crescimento mês a mês
-  const ini=parseFloat(document.getElementById('inv-inicial').value)||0;
-  const apt=parseFloat(document.getElementById('inv-aporte').value)||0;
-  const mes=parseInt(document.getElementById('inv-periodo').value)||12;
-  const selic=taxasLive.selic||14.75;
+  const ini=parseBR(document.getElementById('inv-inicial').value)||0;
+  const apt=parseBR(document.getElementById('inv-aporte').value)||0;
+  const mes=parseInt(document.getElementById('inv-meses').value)||12;
+  if(!ini && !apt){ alert('Preencha pelo menos o valor inicial ou o aporte mensal.'); modal.classList.add('hidden'); return; }
+  const subheader=document.getElementById('sim-modal-subheader');
+  if(subheader) subheader.innerHTML=`<span style="font-size:.82rem;color:var(--gray)">Inicial: <b style="color:var(--white)">${fmt(ini)}</b> · Aporte: <b style="color:var(--white)">${fmt(apt)}/mês</b> · Período: <b style="color:var(--white)">${mes} meses</b></span>`;
   const melhorTaxa=selic*1.2; // CDB 120% CDI como referência
   const ir=true;
   // Gerar tabela mês a mês
