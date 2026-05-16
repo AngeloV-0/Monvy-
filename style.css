@@ -135,6 +135,10 @@ body {
   display: block;
 }
 
+[data-theme="light"] .sidebar-logo img {
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)) drop-shadow(0 0 8px rgba(34,197,94,0.3));
+}
+
 /* Toggle Pessoal / Empresa */
 .sidebar-modo-toggle {
   display: flex;
@@ -2042,6 +2046,7 @@ select option { background: var(--surface-2); }
     box-shadow: 0 2px 12px rgba(34,197,94,0.15);
   }
   .topbar-desktop-title { display: none !important; }
+  .menu-btn-mobile { display: none; }
   /* Remover borda verde do sidebar quando aberto */
   .sidebar.open { border-right: 1px solid var(--border); }
   /* nav-item active no mobile sem barra lateral */
@@ -2331,6 +2336,33 @@ select option { background: var(--surface-2); }
   border-color: rgba(255,255,255,0.6);
   transform: scale(1.05);
 }
+/* Avatar + saudação desktop */
+.topbar-perfil-desktop {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 10px;
+  transition: background .18s;
+}
+.topbar-perfil-desktop:hover { background: var(--surface-2); }
+
+.topbar-avatar-desktop {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(34,197,94,0.4);
+  flex-shrink: 0;
+  transition: border-color .2s;
+}
+.topbar-perfil-desktop:hover .topbar-avatar-desktop { border-color: var(--primary); }
+
+@media (min-width: 769px) {
+  .topbar-perfil-desktop { display: flex; }
+}
+
 /* Novo botão menu mobile com efeito verde */
 .menu-btn-mobile {
   width: 38px;

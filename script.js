@@ -1254,6 +1254,15 @@ function atualizarUIUsuario(nome,foto){
   const sa=document.getElementById('user-avatar');
   if(sa){if(foto)sa.innerHTML=`<img src="${foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;else sa.textContent=inicial;}
   const ma=document.getElementById('topbar-avatar-mobile');
+  const da=document.getElementById('topbar-avatar-desktop');
+  if(da&&foto) da.src=foto;
+  // Saudação por hora
+  const hora = new Date().getHours();
+  const saudacao = hora>=5&&hora<12 ? 'Bom dia,' : hora>=12&&hora<18 ? 'Boa tarde,' : 'Boa noite,';
+  const elSaud = document.getElementById('topbar-saudacao');
+  const elNome = document.getElementById('topbar-nome-desktop');
+  if(elSaud) elSaud.textContent = saudacao;
+  if(elNome) elNome.textContent = nome||'Usuário';
   if(ma){if(foto)ma.src=foto;else{const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="%2300c853"/><text x="18" y="24" text-anchor="middle" font-size="16" font-weight="800" font-family="Arial,sans-serif" fill="%23000000">${inicial}</text></svg>`;ma.src='data:image/svg+xml,'+svg;}}
   const gr=document.getElementById('topbar-greeting');
   if(gr){const h=new Date().getHours();const s=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';gr.textContent=`${s}, ${nome.split(' ')[0]}!`;}
@@ -2143,9 +2152,12 @@ function renderizarMetas(){
   const el=document.getElementById('lista-metas'); if(!el) return;
   if(metas.length===0){el.innerHTML='<div class="vazio">Nenhuma meta ainda.</div>';return;}
   el.innerHTML=metas.map(m=>{
-    const pct=m.valor>0?Math.min(100,((m.atual||0)/m.valor)*100):0;
-    const faltam=Math.max(0,m.valor-(m.atual||0));
-    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(m.atual||0)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${m.dataAlvo?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${m.dataAlvo&&m.dataAlvo!=='undefined'?fmtData(m.dataAlvo):'—'}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
+    const atual = parseFloat(m.atual)||0;
+    const valor = parseFloat(m.valor)||0;
+    const pct = valor>0 ? Math.min(100,(atual/valor)*100) : 0;
+    const faltam = Math.max(0, valor-atual);
+    const prazoOk = m.dataAlvo && m.dataAlvo!=='undefined' && m.dataAlvo!=='null';
+    return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(atual)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${prazoOk?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${fmtData(m.dataAlvo)}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
   }).join('');
 }
 window.abrirModalMeta=function(id){

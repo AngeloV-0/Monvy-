@@ -126,9 +126,18 @@
           </button>
           <img id="topbar-avatar-mobile" onclick="abrirModalPerfil()" title="Meu perfil" src="" alt="Perfil" style="width:34px;height:34px;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;border:2px solid rgba(255,255,255,0.3);margin-left:auto;display:block;">
         </div>
-        <div class="topbar-desktop-title">
-          <h2 class="page-title" id="page-title">Dashboard</h2>
-          <div id="topbar-greeting" style="font-size:.75rem;color:var(--gray);margin-top:2px"></div>
+        <!-- IDs mantidos para compatibilidade -->
+        <div style="display:none">
+          <h2 id="page-title">Dashboard</h2>
+          <div id="topbar-greeting"></div>
+        </div>
+        <!-- Avatar + saudação desktop -->
+        <div class="topbar-perfil-desktop" onclick="abrirModalPerfil()" title="Meu perfil">
+          <img id="topbar-avatar-desktop" src="" alt="Perfil" class="topbar-avatar-desktop">
+          <div>
+            <div id="topbar-saudacao" style="font-size:.72rem;color:var(--gray);font-weight:500"></div>
+            <div id="topbar-nome-desktop" style="font-size:.88rem;font-weight:700;color:var(--white)">Carregando...</div>
+          </div>
         </div>
       </div>
       <div class="topbar-center" style="position:relative">
@@ -163,6 +172,7 @@
           <svg id="icon-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           <svg id="icon-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </div>
+
       </div>
     </header>
 
