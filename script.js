@@ -3284,6 +3284,7 @@ window.abrirModalSimulacao=function(){
   if(!ini && !apt){ alert('Preencha pelo menos o valor inicial ou o aporte mensal.'); modal.classList.add('hidden'); return; }
   const subheader=document.getElementById('sim-modal-subheader');
   if(subheader) subheader.innerHTML=`<span style="font-size:.82rem;color:var(--gray)">Inicial: <b style="color:var(--white)">${fmt(ini)}</b> · Aporte: <b style="color:var(--white)">${fmt(apt)}/mês</b> · Período: <b style="color:var(--white)">${mes} meses</b></span>`;
+  const selic=taxasLive.selic||14.75;
   const melhorTaxa=selic*1.2; // CDB 120% CDI como referência
   const ir=true;
   // Gerar tabela mês a mês
