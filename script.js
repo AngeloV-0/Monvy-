@@ -3318,19 +3318,22 @@ window.abrirModalSimulacao=function(){
       </tbody>
     </table>`;
   // Gráfico de crescimento
-  const canvas=document.getElementById('sim-chart');
-  if(canvas){
-    if(window._simChart) window._simChart.destroy();
-    const labels=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>'M'+r.m);
-    const dataSaldo=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.saldo);
-    const dataTotInv=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.totInv);
-    const ctx=canvas.getContext('2d');
-    const g=ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(34,197,94,0.3)');g.addColorStop(1,'rgba(34,197,94,0)');
-    window._simChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
-      {label:'Saldo líquido',data:dataSaldo,borderColor:'#22c55e',backgroundColor:g,fill:true,tension:0.4,borderWidth:2,pointRadius:3},
-      {label:'Total investido',data:dataTotInv,borderColor:'rgba(255,255,255,0.2)',fill:false,tension:0.4,borderWidth:1,borderDash:[4,4],pointRadius:0}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:8}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}}}}});
-  }
+  setTimeout(()=>{
+    const canvas=document.getElementById('sim-chart');
+    if(canvas){
+      if(window._simChart){window._simChart.destroy();window._simChart=null;}
+      const labels=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>'M'+r.m);
+      const dataSaldo=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.saldo);
+      const dataTotInv=rows.filter((_,idx)=>idx%Math.max(1,Math.floor(mes/6))===0||idx===mes-1).map(r=>r.totInv);
+      const ctx=canvas.getContext('2d');
+      const h=canvas.offsetHeight||280;
+      const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(34,197,94,0.35)');g.addColorStop(1,'rgba(34,197,94,0)');
+      window._simChart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+        {label:'Saldo líquido',data:dataSaldo,borderColor:'#22c55e',backgroundColor:g,fill:true,tension:0.4,borderWidth:2,pointRadius:3},
+        {label:'Total investido',data:dataTotInv,borderColor:'rgba(255,255,255,0.25)',fill:false,tension:0.4,borderWidth:1.5,borderDash:[5,4],pointRadius:0}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:11},boxWidth:10}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#64748b',font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')}}}}});
+    }
+  },50);
 };
 window.fecharModalSimulacao=function(){document.getElementById('modal-simulacao')?.classList.add('hidden');};
 
