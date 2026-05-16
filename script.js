@@ -2141,10 +2141,13 @@ window.criarMeta=async function(){
   const nome=document.getElementById('meta-nome').value.trim();
   const valor=parseFloat(document.getElementById('meta-valor').value);
   const atual=parseFloat(document.getElementById('meta-atual').value)||0;
-  const dataAlvo=document.getElementById('meta-data-alvo').value;
-  if(!nome||!valor||valor<=0){alert('Preencha nome e valor da meta.');return;}
+  const dataAlvoRaw=document.getElementById('meta-data-alvo').value;
+  const dataAlvo = dataAlvoRaw && dataAlvoRaw !== '' && dataAlvoRaw !== 'undefined' ? dataAlvoRaw : null;
+  if(!nome){alert('Preencha o nome da meta.');return;}
+  if(!valor||isNaN(valor)||valor<=0){alert('Preencha o valor objetivo da meta.');return;}
+  if(atual>valor){alert('O valor já guardado não pode ser maior que o objetivo.');return;}
   try{
-    await adicionarMeta(uidAtual,{nome,valor:parseFloat(valor)||0,atual:parseFloat(atual)||0,dataAlvo:dataAlvo&&dataAlvo!=='undefined'?dataAlvo:null});
+    await adicionarMeta(uidAtual,{nome,valor:valor,atual:atual,dataAlvo:dataAlvo});
     ['meta-nome','meta-valor','meta-atual','meta-data-alvo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     metas=await getMetas(uidAtual);renderizarMetas();
   }catch(e){alert('Erro ao criar meta.');console.error(e);}
@@ -2157,7 +2160,7 @@ function renderizarMetas(){
     const valor = parseFloat(m.valor)||0;
     const pct = valor>0 ? Math.min(100,(atual/valor)*100) : 0;
     const faltam = Math.max(0, valor-atual);
-    const prazoOk = m.dataAlvo && m.dataAlvo!=='undefined' && m.dataAlvo!=='null';
+    const prazoOk = m.dataAlvo && m.dataAlvo!=='' && m.dataAlvo!=='undefined' && m.dataAlvo!=='null' && m.dataAlvo!==null;
     return `<div class="meta-card"><div class="meta-header"><span class="meta-nome">${m.nome}</span><span class="meta-pct">${pct.toFixed(0)}%</span></div><div class="meta-bar-wrap"><div class="meta-bar" style="width:${pct}%"></div></div><div class="meta-valores"><span class="green">${fmt(atual)} guardados</span><span class="gray">Faltam ${fmt(faltam)}</span></div>${prazoOk?`<div style="font-size:.75rem;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:4px"><img src="icone-meta.png" style="width:14px;height:14px;object-fit:contain"> Prazo: ${fmtData(m.dataAlvo)}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm-green" onclick="abrirModalMeta('${m.id}')">+ Adicionar</button><button class="btn-sm-red" onclick="excluirMeta('${m.id}')">Excluir</button></div></div>`;
   }).join('');
 }
@@ -2165,6 +2168,11 @@ window.abrirModalMeta=function(id){
   metaEditandoId=id;
   const m=metas.find(x=>x.id===id); if(!m) return;
   document.getElementById('modal-meta-nome-display').textContent=m.nome;
+  const atual=parseFloat(m.atual)||0;
+  const valor=parseFloat(m.valor)||0;
+  const pct=valor>0?Math.min(100,Math.round((atual/valor)*100)):0;
+  const prog=document.getElementById('modal-meta-progresso-display');
+  if(prog) prog.textContent=`${fmt(atual)} de ${fmt(valor)} guardados (${pct}%)`;
   document.getElementById('modal-meta-valor').value='';
   document.getElementById('modal-meta').classList.remove('hidden');
 };
@@ -2175,7 +2183,13 @@ window.adicionarValorMeta=async function(){
   const val=parseFloat(document.getElementById('modal-meta-valor').value);
   if(!val||val<=0){alert('Informe um valor válido.');return;}
   const m=metas.find(x=>x.id===metaEditandoId); if(!m) return;
-  try{await atualizarMeta(uidAtual,metaEditandoId,{atual:(m.atual||0)+val});metas=await getMetas(uidAtual);renderizarMetas();fecharModalMeta();}
+  const novoAtual = (parseFloat(m.atual)||0) + val;
+  const valorObjetivo = parseFloat(m.valor)||0;
+  if(valorObjetivo > 0 && novoAtual > valorObjetivo){
+    alert(`Valor excede o objetivo de ${fmt(valorObjetivo)}. Máximo a adicionar: ${fmt(valorObjetivo - (parseFloat(m.atual)||0))}`);
+    return;
+  }
+  try{await atualizarMeta(uidAtual,metaEditandoId,{atual:novoAtual});metas=await getMetas(uidAtual);renderizarMetas();fecharModalMeta();}
   catch(e){alert('Erro ao atualizar meta.');console.error(e);}
 };
 window.excluirMeta=function(id){
