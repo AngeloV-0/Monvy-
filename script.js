@@ -1255,7 +1255,8 @@ function atualizarUIUsuario(nome,foto){
   if(sa){if(foto)sa.innerHTML=`<img src="${foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;else sa.textContent=inicial;}
   const ma=document.getElementById('topbar-avatar-mobile');
   const daDesktop=document.getElementById('topbar-avatar-desktop');
-  if(da&&foto) da.src=foto;
+  if(daDesktop&&foto){ daDesktop.src=foto; }
+  else if(daDesktop){ daDesktop.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="%2300c853"/><text x="18" y="24" text-anchor="middle" font-size="16" font-weight="800" font-family="Arial,sans-serif" fill="%23000000">'+inicial+'</text></svg>'; }
   // Saudação por hora
   const hora = new Date().getHours();
   const saudacao = hora>=5&&hora<12 ? 'Bom dia,' : hora>=12&&hora<18 ? 'Boa tarde,' : 'Boa noite,';
