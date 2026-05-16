@@ -1599,7 +1599,7 @@ function renderSaldoAcumulado(){
 
 function renderizarListaInicio(){
   const el=document.getElementById('lista-inicio'); if(!el) return;
-  const recentes=[...movimentacoes].slice(0,5);
+  const recentes=[...movimentacoes].slice(0,8);
   if(recentes.length===0){el.innerHTML='<div class="vazio">Nenhuma movimentação ainda.</div>';return;}
   el.innerHTML=recentes.map(m=>`
     <div class="mov-item" onclick="abrirModalEditar('${m.id}')">

@@ -645,21 +645,34 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
-.chart-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px 24px;
-}
 .chart-card, .recent-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px 24px;
 }
+
+.recent-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.recent-card .card-header {
+  flex-shrink: 0;
+}
+
+.recent-card .lista-movs {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  align-content: start;
+}
+
+.recent-card .lista-movs::-webkit-scrollbar { display: none; }
 
 .card-header {
   display: flex;
