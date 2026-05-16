@@ -1254,7 +1254,7 @@ function atualizarUIUsuario(nome,foto){
   const sa=document.getElementById('user-avatar');
   if(sa){if(foto)sa.innerHTML=`<img src="${foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;else sa.textContent=inicial;}
   const ma=document.getElementById('topbar-avatar-mobile');
-  const da=document.getElementById('topbar-avatar-desktop');
+  const daDesktop=document.getElementById('topbar-avatar-desktop');
   if(da&&foto) da.src=foto;
   // Saudação por hora
   const hora = new Date().getHours();
