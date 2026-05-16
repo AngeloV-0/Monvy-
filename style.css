@@ -1619,6 +1619,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
   gap: 20px;
+  align-items: start;
 }
 
 /* ==============================
@@ -4143,6 +4144,11 @@ input[type="date"]:focus { border-color: rgba(57,255,121,0.5); }
    ============================================================ */
 
 @media (max-width: 768px) {
+
+  /* Separador entre form e lista — só aparece no mobile */
+  .separador-mobile {
+    display: block !important;
+  }
 
   /* ---- Two-col stacking: forma correta sem depender do bloco anterior ---- */
   .two-col {
