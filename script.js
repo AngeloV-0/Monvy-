@@ -313,10 +313,17 @@ function renderDbMeta() {
   const el = document.getElementById('db-meta-content');
   if (!el) return;
   if (!metas || metas.length === 0) {
-    el.innerHTML = '<div class="db-meta-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:28px;opacity:.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span style="font-size:.75rem;color:var(--gray)">Criar meta →</span></div>';
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px 0;text-align:center">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-dim);border:1.5px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </div>
+        <div style="font-size:.8rem;font-weight:600;color:var(--white)">Sem metas ativas</div>
+        <div style="font-size:.72rem;color:var(--gray)">Defina um objetivo financeiro</div>
+        <button onclick="(window.irPara||irPara)('metas')" style="margin-top:2px;padding:5px 14px;border-radius:8px;border:1px solid rgba(34,197,94,0.3);background:var(--primary-dim);color:var(--primary);font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer">+ Criar meta</button>
+      </div>`;
     return;
   }
-  // Pegar meta mais próxima de ser concluída
   const meta = [...metas].filter(m=>m.valor>0).sort((a,b)=>((b.atual||0)/b.valor)-((a.atual||0)/a.valor))[0];
   if (!meta) return;
   const atual = parseFloat(meta.atual)||0;
@@ -1217,6 +1224,12 @@ async function carregarTodosDados(){
     atualizarKPIs();atualizarChart();renderizarListaInicio();
     renderizarTabela();renderizarMetas();renderizarDividas();renderizarContas();popularSelectContas();
     renderizarRelatorio();calcularScore();atualizarBanner();
+    // Atualizar cards premium com dados reais
+    if(typeof renderDbMeta==='function') renderDbMeta();
+    if(typeof renderDbScore==='function') renderDbScore();
+    if(typeof renderDbContas==='function') renderDbContas();
+    if(typeof renderDbPrevisao==='function') renderDbPrevisao();
+    if(typeof renderDbFluxo==='function') renderDbFluxo();
     // Insights só aparecem ao VOLTAR para o dashboard, não na primeira vez
     carregarTaxasBCB();renderSaldoAcumulado();
     // Inicializar período padrão como mês atual
