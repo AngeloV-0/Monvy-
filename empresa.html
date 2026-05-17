@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7697">
+  <link rel="stylesheet" href="style.css?v=7698">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -374,9 +374,9 @@
         <span class="nav-label">Klaus IA</span>
         <span style="font-size:.6rem;padding:2px 5px;border-radius:99px;background:var(--primary);color:#000;font-weight:700;margin-left:auto">IA</span>
       </a>
-      <a class="nav-item nav-item-sair" onclick="window.location.href='index.html'" style="color:var(--gray)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-        <span class="nav-label">Modo pessoal</span>
+      <a class="nav-item" id="si-configuracoes" onclick="irParaTela('configuracoes')" style="color:var(--gray)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="nav-label">Configurações</span>
       </a>
     </div>
   </aside>
@@ -833,6 +833,61 @@
         </div>
       </div>
 
+      <!-- ===== TELA: CONFIGURAÇÕES ===== -->
+      <div class="emp-tela" id="emp-tela-configuracoes">
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px">Configurações</h2>
+
+        <!-- Dados do negócio -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:16px">
+          <div style="font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:16px">Dados do negócio</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Nome do negócio</label>
+              <input type="text" id="cfg-nome-negocio" placeholder="Nome do seu negócio" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+            </div>
+            <div>
+              <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Segmento</label>
+              <select id="cfg-segmento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+                <option value="">Selecione...</option>
+                <option value="comercio">Comércio</option>
+                <option value="servicos">Serviços</option>
+                <option value="industria">Indústria</option>
+                <option value="alimentacao">Alimentação</option>
+                <option value="saude">Saúde</option>
+                <option value="educacao">Educação</option>
+                <option value="tecnologia">Tecnologia</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <button onclick="salvarConfigEmpresa()" style="align-self:flex-start;padding:10px 20px;background:var(--primary);color:#000;border:none;border-radius:10px;font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer">Salvar alterações</button>
+          </div>
+        </div>
+
+        <!-- Tema -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:16px">
+          <div style="font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:16px">Aparência</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:var(--white)">Tema escuro / claro</div>
+              <div style="font-size:.78rem;color:var(--gray)">Alterne entre os modos de cor</div>
+            </div>
+            <button onclick="toggleTheme()" style="padding:8px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--white);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer">Alternar tema</button>
+          </div>
+        </div>
+
+        <!-- Zona de perigo -->
+        <div style="background:var(--surface);border:1px solid rgba(239,68,68,0.3);border-radius:16px;padding:22px 24px">
+          <div style="font-size:.95rem;font-weight:700;color:#ef4444;margin-bottom:16px">Zona de perigo</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:var(--white)">Sair da conta</div>
+              <div style="font-size:.78rem;color:var(--gray)">Encerra sua sessão atual</div>
+            </div>
+            <button onclick="fazerLogoutEmpresa()" style="padding:8px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;color:#ef4444;font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer">Sair</button>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -1109,6 +1164,40 @@
       }
     });
     }); // waitAuthReady
+
+    window.salvarConfigEmpresa = async function() {
+      const nome = document.getElementById('cfg-nome-negocio').value.trim();
+      const segmento = document.getElementById('cfg-segmento').value;
+      if (!nome) { alert('Preencha o nome do negócio.'); return; }
+      try {
+        await salvarEmpresa(uid, { nomeNegocio: nome, segmento });
+        empresa = { ...empresa, nomeNegocio: nome, segmento };
+        localStorage.setItem('monvy_nome_negocio', nome);
+        const dnn = document.getElementById('desktop-negocio-nome');
+        const mnn = document.getElementById('mobile-negocio-nome');
+        if (dnn) dnn.textContent = nome;
+        if (mnn) mnn.textContent = nome;
+        alert('Configurações salvas!');
+      } catch(e) { alert('Erro ao salvar.'); console.error(e); }
+    };
+
+    window.fazerLogoutEmpresa = function() {
+      import('./firebase.js').then(m => m.fazerLogout()).then(() => {
+        window.location.href = 'landing.html';
+      });
+    };
+
+    // Preencher campos de configuração quando a tela abrir
+    const _origIrParaTela = window.irParaTela;
+    window.irParaTela = function(tela, btn) {
+      _origIrParaTela(tela, btn);
+      if (tela === 'configuracoes') {
+        const n = document.getElementById('cfg-nome-negocio');
+        const s = document.getElementById('cfg-segmento');
+        if (n) n.value = empresa.nomeNegocio || '';
+        if (s) s.value = empresa.segmento || '';
+      }
+    };
 
     window.salvarSetupEmpresa = async function() {
       const nome = document.getElementById('setup-nome-negocio').value.trim();
@@ -1602,7 +1691,7 @@
         btn.classList.add('active');
       }
       // Sidebar
-      ['painel','caixa','contas','produtos','metas','relatorio','dre','calculadora','consultor'].forEach(t=>{
+      ['painel','caixa','contas','produtos','metas','relatorio','dre','calculadora','consultor','configuracoes'].forEach(t=>{
         const si=document.getElementById('si-'+t); if(si) si.classList.toggle('active',t===tela);
         const di=document.getElementById('di-'+t); if(di) di.classList.toggle('active',t===tela);
       });
