@@ -2640,9 +2640,9 @@ function renderizarRelatorio(){
   if(rSa){rSa.textContent=fmtSaldo(sal);rSa.style.color=sal<0?'#ef4444':'#22c55e';}
   if(rT)rT.textContent=movs.length;
   const topEl=document.getElementById('relatorio-top-gastos');
-  if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
+  if(topEl){const gastos=movs.filter(m=>m.tipo==='gasto'&&naoEQuitacao(m)).sort((a,b)=>b.valor-a.valor).slice(0,5);if(gastos.length===0)topEl.innerHTML='<div class="vazio">Nenhum gasto neste período.</div>';else topEl.innerHTML=gastos.map(m=>`<div class="mov-item" style="padding:16px 14px;"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.categoria||''} · ${fmtData(m.data)}</div></div><div class="mov-valor red">-${fmt(m.valor)}</div></div>`).join('');}
   const rEl=document.getElementById('lista-recorrentes');
-  if(rEl){const recs=movimentacoes.filter(m=>m.recorrente);if(recs.length===0)rEl.innerHTML='<div class="vazio">Nenhum lançamento recorrente cadastrado.</div>';else rEl.innerHTML=recs.map(m=>`<div class="mov-item"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.tipo==='ganho'?'Entrada':'Saída'} recorrente</div></div><div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div></div>`).join('');}
+  if(rEl){const recs=movimentacoes.filter(m=>m.recorrente);if(recs.length===0)rEl.innerHTML='<div class="vazio">Nenhum lançamento recorrente cadastrado.</div>';else rEl.innerHTML=recs.map(m=>`<div class="mov-item" style="padding:16px 14px;"><div class="mov-info"><div class="mov-desc">${m.descricao}</div><div class="mov-cat">${m.tipo==='ganho'?'Entrada':'Saída'} recorrente</div></div><div class="mov-valor ${m.tipo==='ganho'?'green':'red'}">${m.tipo==='ganho'?'+':'-'}${fmt(m.valor)}</div></div>`).join('');}
   // ── Necessidade vs Desejo ────────────────────────────────────────
   const ndEl = document.getElementById('rel-nd-content');
   if(ndEl){
@@ -2733,7 +2733,7 @@ function renderizarTodasMovsRelatorio(movs, tipo) {
     const icone = png
       ? `<img src="${png}" style="width:28px;height:28px;object-fit:contain">`
       : `<svg viewBox="0 0 24 24" fill="none" stroke="${isGanho?'#22c55e':'#ef4444'}" stroke-width="2" style="width:16px;height:16px"><polyline points="${isGanho?'23 6 13.5 15.5 8.5 10.5 1 18':'23 18 13.5 8.5 8.5 13.5 1 6'}"/></svg>`;
-    return `<div class="mov-item" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+    return `<div class="mov-item" style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--border)">
       <div class="mov-icon ${isGanho?'green':'red'}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${isGanho?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.12)'}">
         ${icone}
       </div>
