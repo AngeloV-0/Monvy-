@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7706">
+  <link rel="stylesheet" href="style.css?v=7707">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -1522,28 +1522,29 @@
     };
 
     // Preencher campos ao abrir configurações
-    const _origIrParaTela = window.irParaTela;
-    window.irParaTela = function(tela, btn) {
-      _origIrParaTela(tela, btn);
-      if (tela === 'configuracoes') {
-        const n = document.getElementById('cfg-nome-negocio');
-        const s = document.getElementById('cfg-segmento');
-        const f = document.getElementById('cfg-faturamento');
-        const fn = document.getElementById('cfg-funcionarios');
-        const r = document.getElementById('cfg-regime');
-        const nd = document.getElementById('cfg-emp-nome-display');
-        const sd = document.getElementById('cfg-emp-segmento-display');
-        const si = document.getElementById('cfg-emp-sessao-info');
-        if (n) n.value = empresa.nomeNegocio || '';
-        if (s) s.value = empresa.segmento || '';
-        if (f) f.value = empresa.faturamento || '';
-        if (fn) fn.value = empresa.funcionarios || '';
-        if (r) r.value = empresa.regime || 'mei';
-        if (nd) nd.textContent = empresa.nomeNegocio || 'Meu negócio';
-        if (sd) sd.textContent = empresa.segmento || '—';
-        if (si) si.textContent = 'Logado como ' + (empresa.nomeNegocio || 'usuário');
-      }
-    };
+    window.irParaTela = (function(orig) {
+      return function(tela, btn) {
+        if (orig) orig(tela, btn);
+        if (tela === 'configuracoes') {
+          const n = document.getElementById('cfg-nome-negocio');
+          const s = document.getElementById('cfg-segmento');
+          const f = document.getElementById('cfg-faturamento');
+          const fn = document.getElementById('cfg-funcionarios');
+          const r = document.getElementById('cfg-regime');
+          const nd = document.getElementById('cfg-emp-nome-display');
+          const sd = document.getElementById('cfg-emp-segmento-display');
+          const si = document.getElementById('cfg-emp-sessao-info');
+          if (n) n.value = empresa.nomeNegocio || '';
+          if (s) s.value = empresa.segmento || '';
+          if (f) f.value = empresa.faturamento || '';
+          if (fn) fn.value = empresa.funcionarios || '';
+          if (r) r.value = empresa.regime || 'mei';
+          if (nd) nd.textContent = empresa.nomeNegocio || 'Meu negócio';
+          if (sd) sd.textContent = empresa.segmento || '—';
+          if (si) si.textContent = 'Logado como ' + (empresa.nomeNegocio || 'usuário');
+        }
+      };
+    })(window.irParaTela);
 
     // ── Modal Perfil Empresa ──────────────────────────
     let _empCampoAtual = null;
