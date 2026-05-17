@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7692">
+  <link rel="stylesheet" href="style.css?v=7694">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -164,24 +164,14 @@
     .emp-drawer-divider { height:1px;background:var(--border);margin:12px 0; }
 
     /* ── Sidebar empresa ── */
-    .sidebar-emp { width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:20px 0;position:fixed;top:0;left:0;bottom:0;z-index:50; }
-    .sidebar-emp .logo { margin-bottom:24px; }
-    .sidebar-emp nav { display:flex;flex-direction:column;gap:6px;width:100%;padding:0 8px; }
-    .sidebar-emp .nav-item { display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;color:var(--gray);text-decoration:none;transition:all .2s;margin:0 auto;cursor:pointer; }
+    .sidebar-emp { width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;bottom:0;z-index:50; }
+    .sidebar-emp .logo { padding:0 20px;margin-bottom:24px; }
+    .sidebar-emp nav { display:flex;flex-direction:column;gap:2px;width:100%;padding:0 10px;flex:1;overflow-y:auto;scrollbar-width:none; }
+    .sidebar-emp .nav-item { display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;color:var(--gray);text-decoration:none;transition:all .2s;cursor:pointer;font-size:.88rem;font-weight:600;font-family:inherit;border:none;background:transparent;text-align:left; }
     .sidebar-emp .nav-item:hover,.sidebar-emp .nav-item.active { background:rgba(34,197,94,.12);color:var(--primary); }
-    .sidebar-emp .nav-item svg,.sidebar-emp .nav-item img { width:20px;height:20px;object-fit:contain; }
-    .sidebar-emp .nav-item { position:relative; }
-    .sidebar-emp .nav-item::after {
-      content: attr(data-label);
-      position:absolute; left:58px; top:50%; transform:translateY(-50%);
-      background:#0f172a; color:#fff; font-size:.72rem; font-weight:600;
-      padding:4px 8px; border-radius:6px; white-space:nowrap;
-      border:1px solid rgba(255,255,255,0.1);
-      opacity:0; pointer-events:none; transition:opacity .15s;
-      z-index:200;
-    }
-    .sidebar-emp .nav-item:hover::after { opacity:1; }
-    .sidebar-emp-bottom { margin-top:auto;padding:0 8px 8px; }
+    .sidebar-emp .nav-item.active { border-left:3px solid var(--primary);padding-left:9px; }
+    .sidebar-emp .nav-item svg,.sidebar-emp .nav-item img { width:20px;height:20px;object-fit:contain;flex-shrink:0; }
+    .sidebar-emp-bottom { margin-top:auto;padding:0 10px 8px; }
 
     /* ── Exportar ── */
     .btn-exportar { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s; }
@@ -327,44 +317,67 @@
   </div>
 
   <!-- Sidebar desktop -->
-  <aside class="sidebar-emp">
-    <div class="logo">
-      <img src="logo-01.png" alt="Monvay" style="height:32px;width:auto;display:block;">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo-01.png" alt="Monvay">
     </div>
-    <nav>
-      <a class="nav-item active" id="si-painel" onclick="irParaTela('painel')" title="Painel" data-label="Painel">
-        <img src="icone-grafico-01.png">
+
+    <div class="sidebar-modo-toggle">
+      <button class="modo-btn" onclick="window.location.href='index.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Pessoal
+      </button>
+      <button class="modo-btn active" onclick="window.location.href='empresa.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Empresa
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" id="si-painel" onclick="irParaTela('painel')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="nav-label">Painel</span>
       </a>
-      <a class="nav-item" id="si-caixa" onclick="irParaTela('caixa')" title="Caixa" data-label="Caixa">
-        <img src="icone-dinheiro-01.png">
+      <a class="nav-item" id="si-caixa" onclick="irParaTela('caixa')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span class="nav-label">Caixa</span>
       </a>
-      <a class="nav-item" id="si-contas" onclick="irParaTela('contas')" title="Contas" data-label="Contas">
-        <img src="icone-conta.png">
+      <a class="nav-item" id="si-contas" onclick="irParaTela('contas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        <span class="nav-label">Contas</span>
       </a>
-      <a class="nav-item" id="si-produtos" onclick="irParaTela('produtos')" title="Produtos" data-label="Produtos">
-        <img src="icone-produto.png">
+      <a class="nav-item" id="si-produtos" onclick="irParaTela('produtos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-label">Produtos</span>
       </a>
-      <a class="nav-item" id="si-metas" onclick="irParaTela('metas')" title="Metas" data-label="Metas">
-        <img src="icone-meta.png">
+      <a class="nav-item" id="si-metas" onclick="irParaTela('metas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span class="nav-label">Metas</span>
       </a>
-      <a class="nav-item" id="si-relatorio" onclick="irParaTela('relatorio')" title="Relatório" data-label="Relatório">
-        <img src="icone-dre.png">
+      <a class="nav-item" id="si-relatorio" onclick="irParaTela('relatorio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="nav-label">Relatório</span>
       </a>
-      <a class="nav-item" id="si-dre" onclick="irParaTela('dre')" title="DRE" data-label="DRE">
-        <img src="icone-grafico-02.png">
+      <a class="nav-item" id="si-dre" onclick="irParaTela('dre')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span class="nav-label">DRE</span>
       </a>
-      <a class="nav-item" id="si-calculadora" onclick="irParaTela('calculadora')" title="Calculadora" data-label="Calculadora">
-        <img src="icone-investimento.png">
-      </a>
-      <a class="nav-item" id="si-consultor" onclick="irParaTela('consultor')" title="Klaus IA" data-label="Klaus IA">
-        <img src="icone-cerebro.png">
+      <a class="nav-item" id="si-calculadora" onclick="irParaTela('calculadora')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        <span class="nav-label">Calculadora</span>
       </a>
     </nav>
-    <div class="sidebar-emp-bottom">
-      <a class="nav-item" href="index.html" title="Modo pessoal" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;color:var(--gray)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+
+    <div class="sidebar-footer">
+      <a class="nav-item" id="si-consultor" onclick="irParaTela('consultor')" style="color:var(--gray)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        <span class="nav-label">Klaus IA</span>
+        <span style="font-size:.6rem;padding:2px 5px;border-radius:99px;background:var(--primary);color:#000;font-weight:700;margin-left:auto">IA</span>
       </a>
-      <div class="avatar-mini" id="user-avatar-sidebar" style="cursor:pointer;margin-top:8px">U</div>
+      <a class="nav-item nav-item-sair" onclick="window.location.href='index.html'" style="color:var(--gray)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+        <span class="nav-label">Modo pessoal</span>
+      </a>
     </div>
   </aside>
 
