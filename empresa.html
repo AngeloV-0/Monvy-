@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7705">
+  <link rel="stylesheet" href="style.css?v=7706">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -1032,7 +1032,7 @@
 
   <!-- Modal lançamento -->
   <!-- Modal Perfil Empresa -->
-  <div id="modal-perfil-empresa" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalPerfilEmpresa()">
+  <div id="modal-perfil-empresa" class="modal-overlay hidden" style="z-index:9999" onclick="if(event.target===this)fecharModalPerfilEmpresa()">
     <div class="modal-box" style="max-width:480px;position:relative">
       <button class="modal-fechar" onclick="fecharModalPerfilEmpresa()">×</button>
       <h2 style="margin-bottom:16px;font-size:1.1rem;padding-right:36px">Personalizar perfil</h2>
@@ -1550,25 +1550,33 @@
     let _empPerfilUser = null;
 
     window.abrirModalPerfilEmpresa = function() {
-      const modal = document.getElementById('modal-perfil-empresa');
-      modal.classList.remove('hidden');
-      // Preencher aba conta
-      const u = _empPerfilUser;
-      if (u) {
-        document.getElementById('emp-perfil-nome-display').textContent = u.displayName || '—';
-        document.getElementById('emp-perfil-email-display').textContent = u.email || '—';
-        const img = document.getElementById('emp-perfil-avatar-img');
-        const letra = document.getElementById('emp-perfil-avatar-letra');
-        if (u.photoURL) { img.src = u.photoURL; img.style.display = 'block'; letra.style.display = 'none'; }
-        else { img.style.display = 'none'; letra.style.display = 'flex'; letra.textContent = (u.displayName || u.email || 'U')[0].toUpperCase(); }
-      }
-      // Preencher aba negócio
-      document.getElementById('emp-perfil-negocio-display').textContent = empresa.nomeNegocio || '—';
-      document.getElementById('emp-perfil-segmento-display').textContent = empresa.segmento || '—';
-      document.getElementById('emp-perfil-cnpj-display').textContent = empresa.cnpj || '—';
-      document.getElementById('emp-perfil-endereco-display').textContent = empresa.endereco || '—';
-      document.getElementById('emp-perfil-tel-display').textContent = empresa.telefone || '—';
-      abrirTabPerfilEmp('conta');
+      try {
+        const modal = document.getElementById('modal-perfil-empresa');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        // Preencher aba conta
+        const u = _empPerfilUser;
+        if (u) {
+          const nd = document.getElementById('emp-perfil-nome-display');
+          const ed = document.getElementById('emp-perfil-email-display');
+          if (nd) nd.textContent = u.displayName || '—';
+          if (ed) ed.textContent = u.email || '—';
+          const img = document.getElementById('emp-perfil-avatar-img');
+          const letra = document.getElementById('emp-perfil-avatar-letra');
+          if (u.photoURL) {
+            if (img) { img.src = u.photoURL; img.style.display = 'block'; }
+            if (letra) letra.style.display = 'none';
+          } else {
+            if (img) img.style.display = 'none';
+            if (letra) { letra.style.display = 'flex'; letra.textContent = (u.displayName || u.email || 'U')[0].toUpperCase(); }
+          }
+        }
+        // Preencher aba negócio
+        const fields = { 'emp-perfil-negocio-display': empresa.nomeNegocio, 'emp-perfil-segmento-display': empresa.segmento, 'emp-perfil-cnpj-display': empresa.cnpj, 'emp-perfil-endereco-display': empresa.endereco, 'emp-perfil-tel-display': empresa.telefone };
+        Object.entries(fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; });
+        abrirTabPerfilEmp('conta');
+      } catch(e) { console.error('[perfil empresa]', e); }
     };
 
     window.fecharModalPerfilEmpresa = function() {
