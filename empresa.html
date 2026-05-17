@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7708">
+  <link rel="stylesheet" href="style.css?v=7709">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -398,7 +398,7 @@
           </div>
         </div>
         <!-- Desktop: avatar + saudação + nome negócio (tudo unificado) -->
-        <div class="topbar-perfil-desktop" style="cursor:pointer" onclick="abrirModalPerfilEmpresa()">
+        <div class="topbar-perfil-desktop" id="btn-perfil-empresa" style="cursor:pointer">
           <img id="topbar-avatar-desktop-emp" src="" alt="" class="topbar-avatar-desktop" style="display:none">
           <div id="topbar-avatar-desktop-emp-letra" class="topbar-avatar-desktop" style="display:flex;align-items:center;justify-content:center;background:var(--primary);color:#000;font-weight:700;font-size:.95rem;flex-shrink:0"></div>
           <div>
@@ -1526,6 +1526,15 @@
     // ── Modal Perfil Empresa ──────────────────────────
     let _empCampoAtual = null;
     let _empPerfilUser = null;
+
+    // Bind avatar click after module loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-perfil-empresa');
+      if (btn) btn.addEventListener('click', () => window.abrirModalPerfilEmpresa());
+    });
+    // Fallback if DOMContentLoaded already fired
+    const _btnPerfil = document.getElementById('btn-perfil-empresa');
+    if (_btnPerfil) _btnPerfil.addEventListener('click', () => window.abrirModalPerfilEmpresa());
 
     window.abrirModalPerfilEmpresa = function() {
       try {
