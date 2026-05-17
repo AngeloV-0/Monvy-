@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7698">
+  <link rel="stylesheet" href="style.css?v=7702">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -395,6 +395,14 @@
           <div>
             <div style="font-size:.82rem;font-weight:700;color:var(--white)" id="mobile-negocio-nome">Meu negócio</div>
             <span class="empresa-badge" style="font-size:.65rem;padding:1px 7px">empresa</span>
+          </div>
+        </div>
+        <!-- Desktop: avatar + saudação -->
+        <div class="topbar-perfil-desktop" style="cursor:pointer" onclick="abrirModalPerfilEmpresa()">
+          <img id="topbar-avatar-desktop-emp" src="" alt="Perfil" class="topbar-avatar-desktop">
+          <div>
+            <div id="topbar-saudacao-emp" style="font-size:.72rem;color:var(--gray);font-weight:500"></div>
+            <div id="topbar-nome-desktop-emp" style="font-size:.88rem;font-weight:700;color:var(--white)">Carregando...</div>
           </div>
         </div>
         <!-- Desktop: título -->
@@ -835,56 +843,188 @@
 
       <!-- ===== TELA: CONFIGURAÇÕES ===== -->
       <div class="emp-tela" id="emp-tela-configuracoes">
-        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px">Configurações</h2>
+        <div style="max-width:640px">
 
-        <!-- Dados do negócio -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:16px">
-          <div style="font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:16px">Dados do negócio</div>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div>
-              <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Nome do negócio</label>
-              <input type="text" id="cfg-nome-negocio" placeholder="Nome do seu negócio" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+          <!-- NEGÓCIO -->
+          <div class="cfg-section-title">Negócio</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+              <div class="avatar-mini" style="width:64px;height:64px;font-size:1.5rem;flex-shrink:0;background:var(--primary);color:#000">🏢</div>
+              <div style="flex:1">
+                <div style="font-weight:700;color:var(--white);font-size:1rem" id="cfg-emp-nome-display">Meu negócio</div>
+                <div style="font-size:.78rem;color:var(--gray);margin-top:3px" id="cfg-emp-segmento-display">—</div>
+              </div>
             </div>
-            <div>
-              <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Segmento</label>
-              <select id="cfg-segmento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
-                <option value="">Selecione...</option>
-                <option value="comercio">Comércio</option>
-                <option value="servicos">Serviços</option>
-                <option value="industria">Indústria</option>
-                <option value="alimentacao">Alimentação</option>
-                <option value="saude">Saúde</option>
-                <option value="educacao">Educação</option>
-                <option value="tecnologia">Tecnologia</option>
-                <option value="outro">Outro</option>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Nome do negócio</label>
+                <input type="text" id="cfg-nome-negocio" placeholder="Nome do seu negócio" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+              </div>
+              <div>
+                <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Segmento</label>
+                <select id="cfg-segmento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+                  <option value="">Selecione...</option>
+                  <option value="comercio">Comércio</option>
+                  <option value="servicos">Serviços</option>
+                  <option value="industria">Indústria</option>
+                  <option value="alimentacao">Alimentação</option>
+                  <option value="saude">Saúde</option>
+                  <option value="educacao">Educação</option>
+                  <option value="tecnologia">Tecnologia</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Faturamento médio mensal</label>
+                <select id="cfg-faturamento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+                  <option value="">Selecione...</option>
+                  <option value="ate5k">Até R$ 5.000</option>
+                  <option value="5k-20k">R$ 5.000 – R$ 20.000</option>
+                  <option value="20k-50k">R$ 20.000 – R$ 50.000</option>
+                  <option value="50k-100k">R$ 50.000 – R$ 100.000</option>
+                  <option value="acima100k">Acima de R$ 100.000</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:.78rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Número de funcionários</label>
+                <select id="cfg-funcionarios" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+                  <option value="">Selecione...</option>
+                  <option value="1">Só eu (MEI)</option>
+                  <option value="2-5">2 a 5</option>
+                  <option value="6-20">6 a 20</option>
+                  <option value="21-50">21 a 50</option>
+                  <option value="51+">Mais de 50</option>
+                </select>
+              </div>
+              <button onclick="salvarConfigEmpresa()" style="align-self:flex-start;padding:10px 20px;background:var(--primary);color:#000;border:none;border-radius:10px;font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer">Salvar alterações</button>
+            </div>
+          </div>
+
+          <!-- APARÊNCIA -->
+          <div class="cfg-section-title">Aparência</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div class="cfg-row">
+              <div>
+                <div class="cfg-label">Tema do aplicativo</div>
+                <div class="cfg-desc">Escolha entre modo claro e escuro</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="cfg-toggle-btn" id="cfg-emp-btn-dark" onclick="toggleTheme('dark')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>Escuro
+                </button>
+                <button class="cfg-toggle-btn" id="cfg-emp-btn-light" onclick="toggleTheme('light')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>Claro
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICAÇÕES -->
+          <div class="cfg-section-title">Notificações</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div class="cfg-row">
+              <div>
+                <div class="cfg-label">Contas vencendo</div>
+                <div class="cfg-desc">Alerta quando há contas próximas do vencimento</div>
+              </div>
+              <label class="cfg-switch">
+                <input type="checkbox" id="cfg-emp-notif-contas" checked>
+                <span class="cfg-switch-slider"></span>
+              </label>
+            </div>
+            <div class="cfg-row" style="border-top:1px solid var(--border)">
+              <div>
+                <div class="cfg-label">Alertas de caixa negativo</div>
+                <div class="cfg-desc">Notificar quando o saldo em caixa ficar negativo</div>
+              </div>
+              <label class="cfg-switch">
+                <input type="checkbox" id="cfg-emp-notif-caixa" checked>
+                <span class="cfg-switch-slider"></span>
+              </label>
+            </div>
+            <div class="cfg-row" style="border-top:1px solid var(--border)">
+              <div>
+                <div class="cfg-label">Diagnóstico mensal</div>
+                <div class="cfg-desc">Análise automática dos resultados do mês</div>
+              </div>
+              <label class="cfg-switch">
+                <input type="checkbox" id="cfg-emp-notif-diagnostico" checked>
+                <span class="cfg-switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- FINANCEIRO -->
+          <div class="cfg-section-title">Financeiro</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div class="cfg-row">
+              <div>
+                <div class="cfg-label">Moeda padrão</div>
+                <div class="cfg-desc">Moeda utilizada em todos os valores</div>
+              </div>
+              <span style="font-size:.85rem;font-weight:600;color:var(--white)">R$ (BRL)</span>
+            </div>
+            <div class="cfg-row" style="border-top:1px solid var(--border)">
+              <div>
+                <div class="cfg-label">Regime tributário</div>
+                <div class="cfg-desc">Usado para cálculos e relatórios fiscais</div>
+              </div>
+              <select id="cfg-regime" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--white);font-size:.78rem;font-family:inherit">
+                <option value="mei">MEI</option>
+                <option value="simples">Simples Nacional</option>
+                <option value="lucro_presumido">Lucro Presumido</option>
+                <option value="lucro_real">Lucro Real</option>
               </select>
             </div>
-            <button onclick="salvarConfigEmpresa()" style="align-self:flex-start;padding:10px 20px;background:var(--primary);color:#000;border:none;border-radius:10px;font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer">Salvar alterações</button>
           </div>
-        </div>
 
-        <!-- Tema -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:16px">
-          <div style="font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:16px">Aparência</div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div>
-              <div style="font-size:.88rem;font-weight:600;color:var(--white)">Tema escuro / claro</div>
-              <div style="font-size:.78rem;color:var(--gray)">Alterne entre os modos de cor</div>
+          <!-- DADOS -->
+          <div class="cfg-section-title">Dados e privacidade</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button onclick="exportarDadosEmpresa()" class="cfg-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <div>
+                  <div style="font-weight:600;font-size:.85rem">Exportar dados da empresa</div>
+                  <div style="font-size:.75rem;color:var(--gray)">Baixar CSV com todas as movimentações</div>
+                </div>
+              </button>
             </div>
-            <button onclick="toggleTheme()" style="padding:8px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;color:var(--white);font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer">Alternar tema</button>
           </div>
-        </div>
 
-        <!-- Zona de perigo -->
-        <div style="background:var(--surface);border:1px solid rgba(239,68,68,0.3);border-radius:16px;padding:22px 24px">
-          <div style="font-size:.95rem;font-weight:700;color:#ef4444;margin-bottom:16px">Zona de perigo</div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div>
-              <div style="font-size:.88rem;font-weight:600;color:var(--white)">Sair da conta</div>
-              <div style="font-size:.78rem;color:var(--gray)">Encerra sua sessão atual</div>
+          <!-- SEGURANÇA -->
+          <div class="cfg-section-title">Segurança</div>
+          <div class="chart-card" style="margin-bottom:16px">
+            <div class="cfg-row">
+              <div>
+                <div class="cfg-label">Sessão ativa</div>
+                <div class="cfg-desc" id="cfg-emp-sessao-info">Verificando...</div>
+              </div>
+              <button onclick="fazerLogoutEmpresa()" style="padding:7px 14px;border-radius:9px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#ef4444;font-size:.78rem;font-weight:600;font-family:inherit;cursor:pointer">Sair</button>
             </div>
-            <button onclick="fazerLogoutEmpresa()" style="padding:8px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;color:#ef4444;font-size:.82rem;font-weight:600;font-family:inherit;cursor:pointer">Sair</button>
           </div>
+
+          <!-- SOBRE -->
+          <div class="cfg-section-title">Sobre</div>
+          <div class="chart-card">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+              <img src="logo-02.png" style="height:48px;width:auto;">
+              <div>
+                <div style="font-weight:700;color:var(--white)">Monvay Empresa</div>
+                <div style="font-size:.75rem;color:var(--gray)">Gestão financeira para negócios</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:.82rem">
+              <div class="cfg-row" style="padding:0"><span style="color:var(--gray)">Versão</span><span style="color:var(--white);font-weight:600">2.0.0</span></div>
+              <div class="cfg-row" style="padding:0"><span style="color:var(--gray)">Plataforma</span><span style="color:var(--white)">Web App (PWA)</span></div>
+              <div class="cfg-row" style="padding:0"><span style="color:var(--gray)">Backend</span><span style="color:var(--white)">Firebase / Firestore</span></div>
+              <div class="cfg-row" style="padding:0"><span style="color:var(--gray)">Segurança</span><span style="color:var(--white)">SSL + Auth Google</span></div>
+              <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--border);text-align:center;color:var(--gray);font-size:.75rem">
+                Monvay © 2026 · monvay.com.br · Todos os direitos reservados
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -895,8 +1035,142 @@
   <button class="fab-empresa" onclick="abrirModal('entrada')" title="Nova entrada">+</button>
 
   <!-- Modal lançamento -->
+  <!-- Modal Perfil Empresa -->
+  <div id="modal-perfil-empresa" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalPerfilEmpresa()">
+    <div class="modal-box" style="max-width:480px;position:relative">
+      <button class="modal-fechar" onclick="fecharModalPerfilEmpresa()">×</button>
+      <h2 style="margin-bottom:16px;font-size:1.1rem;padding-right:36px">Personalizar perfil</h2>
+
+      <div id="perfil-emp-toast" style="display:none;position:absolute;top:16px;left:50%;transform:translateX(-50%);background:#22c55e;color:#000;font-size:.85rem;font-weight:700;padding:10px 22px;border-radius:30px;z-index:100;white-space:nowrap;box-shadow:0 4px 20px rgba(34,197,94,0.4)">
+        ✓ Salvo com sucesso!
+      </div>
+
+      <!-- Abas -->
+      <div class="perfil-tabs-wrap">
+        <button class="perfil-tab active" id="emp-tab-conta" onclick="abrirTabPerfilEmp('conta')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:5px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="tab-label">Conta</span>
+        </button>
+        <button class="perfil-tab" id="emp-tab-negocio" onclick="abrirTabPerfilEmp('negocio')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:5px"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+          <span class="tab-label">Negócio</span>
+        </button>
+      </div>
+
+      <!-- Tab: Conta -->
+      <div id="emp-perfil-tab-conta">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 0 24px">
+          <div style="position:relative">
+            <div id="emp-perfil-avatar-preview" style="width:88px;height:88px;border-radius:50%;background:var(--primary);color:#000;font-size:2.2rem;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid var(--primary)">
+              <span id="emp-perfil-avatar-letra">U</span>
+              <img id="emp-perfil-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+            </div>
+            <label for="emp-perfil-foto-input" style="position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--card-bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;color:var(--gray)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </label>
+          </div>
+          <input type="file" id="emp-perfil-foto-input" accept="image/*" style="display:none" onchange="empPreviewFoto(this)">
+        </div>
+
+        <div style="border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+          <div onclick="abrirEditarCampoEmp('nome')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">Nome</div>
+              <div id="emp-perfil-nome-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 16px"></div>
+          <div style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--card-bg)">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">E-mail</div>
+              <div id="emp-perfil-email-display" style="font-size:.95rem;color:var(--gray)">—</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 16px"></div>
+          <div onclick="abrirEditarCampoEmp('telefone')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.1 1.18 2 2 0 012.11 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.45-.45a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">Telefone</div>
+              <div id="emp-perfil-tel-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Negócio -->
+      <div id="emp-perfil-tab-negocio" style="display:none">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-top:16px">
+          <div onclick="abrirEditarCampoEmp('nomeNegocio')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">Nome do negócio</div>
+              <div id="emp-perfil-negocio-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 16px"></div>
+          <div onclick="abrirEditarCampoEmp('segmento')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">Segmento</div>
+              <div id="emp-perfil-segmento-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 16px"></div>
+          <div onclick="abrirEditarCampoEmp('cnpj')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">CNPJ / CPF</div>
+              <div id="emp-perfil-cnpj-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 16px"></div>
+          <div onclick="abrirEditarCampoEmp('endereco')" style="display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer;background:var(--card-bg)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='var(--card-bg)'">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--gray)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:.75rem;color:var(--gray);margin-bottom:2px">Endereço</div>
+              <div id="emp-perfil-endereco-display" style="font-size:.95rem;color:var(--white);font-weight:500">—</div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--gray)"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal editar campo empresa -->
+      <div id="emp-modal-campo" style="display:none;margin-top:20px;padding:16px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border)">
+        <div id="emp-campo-label" style="font-size:.78rem;font-weight:600;color:var(--gray);margin-bottom:8px"></div>
+        <input type="text" id="emp-campo-input" style="width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button onclick="salvarCampoEmp()" style="flex:1;padding:10px;background:var(--primary);color:#000;border:none;border-radius:10px;font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer">Salvar</button>
+          <button onclick="fecharCampoEmp()" style="padding:10px 16px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--gray);font-size:.85rem;font-family:inherit;cursor:pointer">Cancelar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Modal Setup Empresa (obrigatório — não pode ser fechado sem preencher) -->
-  <div class="modal-overlay" id="modal-setup-empresa" style="z-index:10000;background:rgba(0,0,0,0.85);display:none" onclick="event.stopPropagation()">
+  <div class="modal-overlay" id="modal-setup-empresa" style="z-index:10000;background:rgba(0,0,0,0.85);display:none" onclick="event.stopPropagation()" onkeydown="event.key==='Escape'&&event.stopPropagation()">
     <div class="modal-sheet" style="max-width:480px;padding:32px 28px">
       <div style="text-align:center;margin-bottom:24px">
         <div style="font-size:2.5rem;margin-bottom:8px">🏢</div>
@@ -1116,11 +1390,24 @@
       if (o) o.style.display = 'none';
       if (!user) { window.location.replace('landing.html'); return; }
       uid = user.uid;
+      _empPerfilUser = user;
       try {
+        // Avatar mobile
         if (user.photoURL) {
           const am = document.getElementById('topbar-avatar-mobile');
           if (am) { am.src = user.photoURL; am.style.display = 'block'; }
+          // Avatar desktop
+          const ad = document.getElementById('topbar-avatar-desktop-emp');
+          if (ad) { ad.src = user.photoURL; ad.style.display = 'block'; }
         }
+        // Saudação
+        const h = new Date().getHours();
+        const saudacao = h < 12 ? 'Bom dia,' : h < 18 ? 'Boa tarde,' : 'Boa noite,';
+        const sEl = document.getElementById('topbar-saudacao-emp');
+        if (sEl) sEl.textContent = saudacao;
+        const nEl = document.getElementById('topbar-nome-desktop-emp');
+        if (nEl) nEl.textContent = user.displayName || user.email || 'Usuário';
+
         const as = document.getElementById('user-avatar-sidebar');
         if (as) as.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
 
@@ -1129,7 +1416,30 @@
 
         // Mostrar questionário se empresa ainda não foi configurada
         if (!nome) {
-          document.getElementById('modal-setup-empresa').style.display = 'flex';
+          const setupModal = document.getElementById('modal-setup-empresa');
+          setupModal.style.display = 'flex';
+
+          // Guardar flag — ainda não configurado
+          sessionStorage.removeItem('monvy_empresa_setup_done');
+
+          // Observar se alguém fecha o modal sem preencher
+          const _setupObserver = new MutationObserver(() => {
+            if (!sessionStorage.getItem('monvy_empresa_setup_done')) {
+              const m = document.getElementById('modal-setup-empresa');
+              if (m && m.style.display === 'none') {
+                m.style.display = 'flex';
+              }
+            }
+          });
+          _setupObserver.observe(document.getElementById('modal-setup-empresa'), { attributes: true, attributeFilter: ['style','class'] });
+
+          // Bloquear tecla Escape globalmente enquanto não configurado
+          const _escapeGuard = function(e) {
+            if (e.key === 'Escape' && !sessionStorage.getItem('monvy_empresa_setup_done')) {
+              e.preventDefault(); e.stopPropagation();
+            }
+          };
+          document.addEventListener('keydown', _escapeGuard, true);
         }
 
         const nomeExibir = nome || 'Meu negócio';
@@ -1168,17 +1478,32 @@
     window.salvarConfigEmpresa = async function() {
       const nome = document.getElementById('cfg-nome-negocio').value.trim();
       const segmento = document.getElementById('cfg-segmento').value;
+      const faturamento = document.getElementById('cfg-faturamento').value;
+      const funcionarios = document.getElementById('cfg-funcionarios').value;
+      const regime = document.getElementById('cfg-regime').value;
       if (!nome) { alert('Preencha o nome do negócio.'); return; }
       try {
-        await salvarEmpresa(uid, { nomeNegocio: nome, segmento });
-        empresa = { ...empresa, nomeNegocio: nome, segmento };
+        await salvarEmpresa(uid, { nomeNegocio: nome, segmento, faturamento, funcionarios, regime });
+        empresa = { ...empresa, nomeNegocio: nome, segmento, faturamento, funcionarios, regime };
         localStorage.setItem('monvy_nome_negocio', nome);
-        const dnn = document.getElementById('desktop-negocio-nome');
-        const mnn = document.getElementById('mobile-negocio-nome');
-        if (dnn) dnn.textContent = nome;
-        if (mnn) mnn.textContent = nome;
+        ['desktop-negocio-nome','mobile-negocio-nome','cfg-emp-nome-display'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.textContent=nome;
+        });
+        const sd=document.getElementById('cfg-emp-segmento-display');
+        if(sd) sd.textContent = segmento||'—';
         alert('Configurações salvas!');
       } catch(e) { alert('Erro ao salvar.'); console.error(e); }
+    };
+
+    window.exportarDadosEmpresa = function() {
+      if (!movimentacoesEmpresa || !movimentacoesEmpresa.length) { alert('Nenhuma movimentação para exportar.'); return; }
+      const rows = [['Data','Descrição','Tipo','Categoria','Valor']];
+      movimentacoesEmpresa.forEach(m => rows.push([m.data||'',m.descricao||'',m.tipo||'',m.categoria||'',m.valor||0]));
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'monvay_empresa_' + new Date().toISOString().split('T')[0] + '.csv';
+      a.click();
     };
 
     window.fazerLogoutEmpresa = function() {
@@ -1187,16 +1512,127 @@
       });
     };
 
-    // Preencher campos de configuração quando a tela abrir
+    window.toggleTheme = function(forceTheme) {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nxt = forceTheme || (cur === 'dark' ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', nxt);
+      localStorage.setItem('monvy_theme', nxt);
+    };
+
+    // Preencher campos ao abrir configurações
     const _origIrParaTela = window.irParaTela;
     window.irParaTela = function(tela, btn) {
       _origIrParaTela(tela, btn);
       if (tela === 'configuracoes') {
         const n = document.getElementById('cfg-nome-negocio');
         const s = document.getElementById('cfg-segmento');
+        const f = document.getElementById('cfg-faturamento');
+        const fn = document.getElementById('cfg-funcionarios');
+        const r = document.getElementById('cfg-regime');
+        const nd = document.getElementById('cfg-emp-nome-display');
+        const sd = document.getElementById('cfg-emp-segmento-display');
+        const si = document.getElementById('cfg-emp-sessao-info');
         if (n) n.value = empresa.nomeNegocio || '';
         if (s) s.value = empresa.segmento || '';
+        if (f) f.value = empresa.faturamento || '';
+        if (fn) fn.value = empresa.funcionarios || '';
+        if (r) r.value = empresa.regime || 'mei';
+        if (nd) nd.textContent = empresa.nomeNegocio || 'Meu negócio';
+        if (sd) sd.textContent = empresa.segmento || '—';
+        if (si) si.textContent = 'Logado como ' + (empresa.nomeNegocio || 'usuário');
       }
+    };
+
+    // ── Modal Perfil Empresa ──────────────────────────
+    let _empCampoAtual = null;
+    let _empPerfilUser = null;
+
+    window.abrirModalPerfilEmpresa = function() {
+      const modal = document.getElementById('modal-perfil-empresa');
+      modal.classList.remove('hidden');
+      // Preencher aba conta
+      const u = _empPerfilUser;
+      if (u) {
+        document.getElementById('emp-perfil-nome-display').textContent = u.displayName || '—';
+        document.getElementById('emp-perfil-email-display').textContent = u.email || '—';
+        const img = document.getElementById('emp-perfil-avatar-img');
+        const letra = document.getElementById('emp-perfil-avatar-letra');
+        if (u.photoURL) { img.src = u.photoURL; img.style.display = 'block'; letra.style.display = 'none'; }
+        else { img.style.display = 'none'; letra.style.display = 'flex'; letra.textContent = (u.displayName || u.email || 'U')[0].toUpperCase(); }
+      }
+      // Preencher aba negócio
+      document.getElementById('emp-perfil-negocio-display').textContent = empresa.nomeNegocio || '—';
+      document.getElementById('emp-perfil-segmento-display').textContent = empresa.segmento || '—';
+      document.getElementById('emp-perfil-cnpj-display').textContent = empresa.cnpj || '—';
+      document.getElementById('emp-perfil-endereco-display').textContent = empresa.endereco || '—';
+      document.getElementById('emp-perfil-tel-display').textContent = empresa.telefone || '—';
+      abrirTabPerfilEmp('conta');
+    };
+
+    window.fecharModalPerfilEmpresa = function() {
+      document.getElementById('modal-perfil-empresa').classList.add('hidden');
+      fecharCampoEmp();
+    };
+
+    window.abrirTabPerfilEmp = function(tab) {
+      ['conta','negocio'].forEach(t => {
+        document.getElementById('emp-perfil-tab-' + t).style.display = t === tab ? 'block' : 'none';
+        document.getElementById('emp-tab-' + t).classList.toggle('active', t === tab);
+      });
+      fecharCampoEmp();
+    };
+
+    window.abrirEditarCampoEmp = function(campo) {
+      _empCampoAtual = campo;
+      const labels = { nome: 'Nome', telefone: 'Telefone', nomeNegocio: 'Nome do negócio', segmento: 'Segmento', cnpj: 'CNPJ / CPF', endereco: 'Endereço' };
+      const valores = { nome: _empPerfilUser?.displayName || '', telefone: empresa.telefone || '', nomeNegocio: empresa.nomeNegocio || '', segmento: empresa.segmento || '', cnpj: empresa.cnpj || '', endereco: empresa.endereco || '' };
+      document.getElementById('emp-campo-label').textContent = labels[campo] || campo;
+      document.getElementById('emp-campo-input').value = valores[campo] || '';
+      document.getElementById('emp-modal-campo').style.display = 'block';
+      document.getElementById('emp-campo-input').focus();
+    };
+
+    window.fecharCampoEmp = function() {
+      document.getElementById('emp-modal-campo').style.display = 'none';
+      _empCampoAtual = null;
+    };
+
+    window.salvarCampoEmp = async function() {
+      const val = document.getElementById('emp-campo-input').value.trim();
+      if (!val) return;
+      try {
+        if (_empCampoAtual === 'nome') {
+          // Atualiza displayName — só possível via Firebase Auth updateProfile
+          document.getElementById('emp-perfil-nome-display').textContent = val;
+          document.getElementById('topbar-nome-desktop-emp').textContent = val;
+        } else {
+          await salvarEmpresa(uid, { [_empCampoAtual]: val });
+          empresa = { ...empresa, [_empCampoAtual]: val };
+          const map = { nomeNegocio: 'emp-perfil-negocio-display', segmento: 'emp-perfil-segmento-display', cnpj: 'emp-perfil-cnpj-display', endereco: 'emp-perfil-endereco-display', telefone: 'emp-perfil-tel-display' };
+          if (map[_empCampoAtual]) document.getElementById(map[_empCampoAtual]).textContent = val;
+          if (_empCampoAtual === 'nomeNegocio') {
+            ['desktop-negocio-nome','mobile-negocio-nome','cfg-emp-nome-display'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=val; });
+            localStorage.setItem('monvy_nome_negocio', val);
+          }
+        }
+        fecharCampoEmp();
+        const toast = document.getElementById('perfil-emp-toast');
+        if (toast) { toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000); }
+      } catch(e) { alert('Erro ao salvar.'); console.error(e); }
+    };
+
+    window.empPreviewFoto = function(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById('emp-perfil-avatar-img');
+        const letra = document.getElementById('emp-perfil-avatar-letra');
+        img.src = e.target.result; img.style.display = 'block'; letra.style.display = 'none';
+        // Atualizar avatar na topbar
+        const ad = document.getElementById('topbar-avatar-desktop-emp');
+        if (ad) { ad.src = e.target.result; ad.style.display = 'block'; }
+      };
+      reader.readAsDataURL(input.files[0]);
     };
 
     window.salvarSetupEmpresa = async function() {
@@ -1209,6 +1645,7 @@
         await salvarEmpresa(uid, { nomeNegocio: nome, segmento, faturamento, funcionarios });
         empresa = { ...empresa, nomeNegocio: nome, segmento, faturamento, funcionarios };
         localStorage.setItem('monvy_nome_negocio', nome);
+        sessionStorage.setItem('monvy_empresa_setup_done', '1');
         const dnn = document.getElementById('desktop-negocio-nome');
         const mnn = document.getElementById('mobile-negocio-nome');
         if (dnn) dnn.textContent = nome;
