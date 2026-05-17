@@ -2733,7 +2733,7 @@ function renderizarTodasMovsRelatorio(movs, tipo) {
     const icone = png
       ? `<img src="${png}" style="width:28px;height:28px;object-fit:contain">`
       : `<svg viewBox="0 0 24 24" fill="none" stroke="${isGanho?'#22c55e':'#ef4444'}" stroke-width="2" style="width:16px;height:16px"><polyline points="${isGanho?'23 6 13.5 15.5 8.5 10.5 1 18':'23 18 13.5 8.5 8.5 13.5 1 6'}"/></svg>`;
-    return `<div class="mov-item" style="display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--border)">
+    return `<div class="mov-item" style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)">
       <div class="mov-icon ${isGanho?'green':'red'}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${isGanho?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.12)'}">
         ${icone}
       </div>
