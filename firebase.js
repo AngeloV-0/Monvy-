@@ -235,6 +235,28 @@ export async function deletarMeta(uid, id) {
   await deleteDoc(doc(db, 'usuarios', uid, 'metas', id));
 }
 
+// ── Metas Empresa (coleção separada) ──────────────────────────
+
+export async function getMetasEmpresa(uid) {
+  const snap = await getDocs(collection(db, 'usuarios', uid, 'empresa_metas'));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+}
+
+export async function adicionarMetaEmpresa(uid, meta) {
+  const ref = await addDoc(collection(db, 'usuarios', uid, 'empresa_metas'), {
+    ...meta, criadoEm: serverTimestamp()
+  });
+  return ref.id;
+}
+
+export async function atualizarMetaEmpresa(uid, id, dados) {
+  await updateDoc(doc(db, 'usuarios', uid, 'empresa_metas', id), dados);
+}
+
+export async function deletarMetaEmpresa(uid, id) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'empresa_metas', id));
+}
+
 // ── Dívidas ───────────────────────────────────────────────────
 
 export async function getDividas(uid) {

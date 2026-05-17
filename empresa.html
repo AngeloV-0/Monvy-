@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7694">
+  <link rel="stylesheet" href="style.css?v=7697">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -840,6 +840,60 @@
   <button class="fab-empresa" onclick="abrirModal('entrada')" title="Nova entrada">+</button>
 
   <!-- Modal lançamento -->
+  <!-- Modal Setup Empresa (obrigatório — não pode ser fechado sem preencher) -->
+  <div class="modal-overlay" id="modal-setup-empresa" style="z-index:10000;background:rgba(0,0,0,0.85);display:none" onclick="event.stopPropagation()">
+    <div class="modal-sheet" style="max-width:480px;padding:32px 28px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:2.5rem;margin-bottom:8px">🏢</div>
+        <h2 style="font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:6px">Configure seu negócio</h2>
+        <p style="font-size:.85rem;color:var(--gray)">Vamos personalizar o Monvay Empresa para você</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Nome do negócio *</label>
+          <input type="text" id="setup-nome-negocio" placeholder="Ex: Loja da Maria, Studio João..." style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Segmento</label>
+          <select id="setup-segmento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+            <option value="">Selecione...</option>
+            <option value="comercio">Comércio</option>
+            <option value="servicos">Serviços</option>
+            <option value="industria">Indústria</option>
+            <option value="alimentacao">Alimentação</option>
+            <option value="saude">Saúde</option>
+            <option value="educacao">Educação</option>
+            <option value="tecnologia">Tecnologia</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Faturamento médio mensal</label>
+          <select id="setup-faturamento" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+            <option value="">Selecione...</option>
+            <option value="ate5k">Até R$ 5.000</option>
+            <option value="5k-20k">R$ 5.000 – R$ 20.000</option>
+            <option value="20k-50k">R$ 20.000 – R$ 50.000</option>
+            <option value="50k-100k">R$ 50.000 – R$ 100.000</option>
+            <option value="acima100k">Acima de R$ 100.000</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--gray);display:block;margin-bottom:6px">Número de funcionários</label>
+          <select id="setup-funcionarios" style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--white);font-size:.9rem;outline:none;box-sizing:border-box">
+            <option value="">Selecione...</option>
+            <option value="1">Só eu (MEI)</option>
+            <option value="2-5">2 a 5</option>
+            <option value="6-20">6 a 20</option>
+            <option value="21-50">21 a 50</option>
+            <option value="51+">Mais de 50</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="salvarSetupEmpresa()" style="width:100%;margin-top:24px;padding:14px;background:var(--primary);color:#000;border:none;border-radius:12px;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer">Começar →</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-lancamento" onclick="fecharModalSeOverlay(event,'modal-lancamento')">
     <div class="modal-sheet">
       <div class="modal-title">
@@ -950,11 +1004,12 @@
   <script type="module">
     import {
       onAuth, getPerfil, waitAuthReady,
-      getEmpresa,
+      getEmpresa, salvarEmpresa,
       ouvirMovimentacoesEmpresa, adicionarMovimentacaoEmpresa, deletarMovimentacaoEmpresa,
       getContasEmpresa, adicionarContaEmpresa, atualizarContaEmpresa, deletarContaEmpresa,
       getProdutos, adicionarProduto, atualizarProduto, deletarProduto,
-      getMetas, adicionarMeta, atualizarMeta, deletarMeta,
+      getMetasEmpresa as getMetas, adicionarMetaEmpresa as adicionarMeta,
+      atualizarMetaEmpresa as atualizarMeta, deletarMetaEmpresa as deletarMeta,
       getRecorrentesEmpresa, adicionarRecorrenteEmpresa, deletarRecorrenteEmpresa,
       klausChamarCloud
     } from './firebase.js';
@@ -1015,11 +1070,18 @@
         if (as) as.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
 
         empresa = await getEmpresa(uid) || {};
-        const nome = empresa.nomeNegocio || localStorage.getItem('monvy_nome_negocio') || 'Meu negócio';
+        const nome = empresa.nomeNegocio || localStorage.getItem('monvy_nome_negocio') || '';
+
+        // Mostrar questionário se empresa ainda não foi configurada
+        if (!nome) {
+          document.getElementById('modal-setup-empresa').style.display = 'flex';
+        }
+
+        const nomeExibir = nome || 'Meu negócio';
         const dnn = document.getElementById('desktop-negocio-nome');
         const mnn = document.getElementById('mobile-negocio-nome');
-        if (dnn) dnn.textContent = nome;
-        if (mnn) mnn.textContent = nome;
+        if (dnn) dnn.textContent = nomeExibir;
+        if (mnn) mnn.textContent = nomeExibir;
 
         const agora = new Date();
         const pl = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -1047,6 +1109,25 @@
       }
     });
     }); // waitAuthReady
+
+    window.salvarSetupEmpresa = async function() {
+      const nome = document.getElementById('setup-nome-negocio').value.trim();
+      if (!nome) { alert('Preencha o nome do negócio.'); return; }
+      const segmento = document.getElementById('setup-segmento').value;
+      const faturamento = document.getElementById('setup-faturamento').value;
+      const funcionarios = document.getElementById('setup-funcionarios').value;
+      try {
+        await salvarEmpresa(uid, { nomeNegocio: nome, segmento, faturamento, funcionarios });
+        empresa = { ...empresa, nomeNegocio: nome, segmento, faturamento, funcionarios };
+        localStorage.setItem('monvy_nome_negocio', nome);
+        const dnn = document.getElementById('desktop-negocio-nome');
+        const mnn = document.getElementById('mobile-negocio-nome');
+        if (dnn) dnn.textContent = nome;
+        if (mnn) mnn.textContent = nome;
+        document.getElementById('modal-setup-empresa').style.display = 'none';
+        atualizarTudo();
+      } catch(e) { alert('Erro ao salvar. Tente novamente.'); console.error(e); }
+    };
 
     // ── Helpers ───────────────────────────────────────
     function fmt(v) { return 'R$\u00a0' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2}); }
