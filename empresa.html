@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Monvay Empresa</title>
   <script>
     const _c1="sk-ant-api03-Q5XoZAamlp9JkrxdmDeQskk";
@@ -17,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=7687">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -1070,24 +1073,28 @@
 
     // ── Render principal ──────────────────────────────
     function atualizarTudo() {
-      const d = calcularDados();
-      renderKPIs(d);
-      renderScore(d);
-      renderScoreDetalhado(d);
-      renderDiagnostico(d);
-      renderGraficoCaixa(d);
-      renderInsightsEmpresa(d);
-      renderPainelContas();
-      renderPontoEquilibrio(d);
-      renderCaixa(d);
-      renderContas();
-      renderRiscoInadimplencia();
-      renderProdutos();
-      renderDRE(d);
-      renderMetas();
-      renderRecorrentes();
-      renderRelatorio();
-      renderAlertas(d);
+      try {
+        const d = calcularDados();
+        renderKPIs(d);
+        renderScore(d);
+        renderScoreDetalhado(d);
+        renderDiagnostico(d);
+        renderGraficoCaixa(d);
+        renderInsightsEmpresa(d);
+        renderPainelContas();
+        renderPontoEquilibrio(d);
+        renderCaixa(d);
+        renderContas();
+        renderRiscoInadimplencia();
+        renderProdutos();
+        renderDRE(d);
+        renderMetas();
+        renderRecorrentes();
+        renderRelatorio();
+        renderAlertas(d);
+      } catch(e) {
+        console.error('[atualizarTudo] erro:', e);
+      }
     }
 
     // ── Alertas automáticos inteligentes ────────────────────────
