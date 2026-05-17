@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7702">
+  <link rel="stylesheet" href="style.css?v=7704">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -397,21 +397,17 @@
             <span class="empresa-badge" style="font-size:.65rem;padding:1px 7px">empresa</span>
           </div>
         </div>
-        <!-- Desktop: avatar + saudação -->
+        <!-- Desktop: avatar + saudação + nome negócio (tudo unificado) -->
         <div class="topbar-perfil-desktop" style="cursor:pointer" onclick="abrirModalPerfilEmpresa()">
-          <img id="topbar-avatar-desktop-emp" src="" alt="Perfil" class="topbar-avatar-desktop">
+          <img id="topbar-avatar-desktop-emp" src="" alt="" class="topbar-avatar-desktop" style="display:none">
+          <div id="topbar-avatar-desktop-emp-letra" class="topbar-avatar-desktop" style="display:flex;align-items:center;justify-content:center;background:var(--primary);color:#000;font-weight:700;font-size:.95rem;flex-shrink:0"></div>
           <div>
             <div id="topbar-saudacao-emp" style="font-size:.72rem;color:var(--gray);font-weight:500"></div>
-            <div id="topbar-nome-desktop-emp" style="font-size:.88rem;font-weight:700;color:var(--white)">Carregando...</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span id="desktop-negocio-nome" style="font-size:.88rem;font-weight:700;color:var(--white)">Meu negócio</span>
+              <span class="empresa-badge" style="font-size:.6rem;padding:2px 6px">empresa</span>
+            </div>
           </div>
-        </div>
-        <!-- Desktop: título -->
-        <div class="topbar-desktop-title">
-          <h2 class="page-title" style="display:flex;align-items:center;gap:8px">
-            <span id="desktop-negocio-nome">Meu negócio</span>
-            <span class="empresa-badge">empresa</span>
-          </h2>
-          <div id="topbar-periodo" style="font-size:.75rem;color:var(--gray);margin-top:2px"></div>
         </div>
       </div>
       <div class="topbar-right" style="display:flex;align-items:center;gap:8px">
@@ -1396,17 +1392,23 @@
         if (user.photoURL) {
           const am = document.getElementById('topbar-avatar-mobile');
           if (am) { am.src = user.photoURL; am.style.display = 'block'; }
-          // Avatar desktop
+          // Avatar desktop com foto
           const ad = document.getElementById('topbar-avatar-desktop-emp');
+          const al = document.getElementById('topbar-avatar-desktop-emp-letra');
           if (ad) { ad.src = user.photoURL; ad.style.display = 'block'; }
+          if (al) al.style.display = 'none';
+        } else {
+          // Sem foto — mostrar letra inicial
+          const ad = document.getElementById('topbar-avatar-desktop-emp');
+          const al = document.getElementById('topbar-avatar-desktop-emp-letra');
+          if (ad) ad.style.display = 'none';
+          if (al) { al.style.display = 'flex'; al.textContent = (user.displayName || user.email || 'U')[0].toUpperCase(); }
         }
         // Saudação
         const h = new Date().getHours();
         const saudacao = h < 12 ? 'Bom dia,' : h < 18 ? 'Boa tarde,' : 'Boa noite,';
         const sEl = document.getElementById('topbar-saudacao-emp');
         if (sEl) sEl.textContent = saudacao;
-        const nEl = document.getElementById('topbar-nome-desktop-emp');
-        if (nEl) nEl.textContent = user.displayName || user.email || 'Usuário';
 
         const as = document.getElementById('user-avatar-sidebar');
         if (as) as.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
@@ -1443,6 +1445,10 @@
         }
 
         const nomeExibir = nome || 'Meu negócio';
+        const dnn = document.getElementById('desktop-negocio-nome');
+        const mnn = document.getElementById('mobile-negocio-nome');
+        if (dnn) dnn.textContent = nomeExibir;
+        if (mnn) mnn.textContent = nomeExibir;
         const dnn = document.getElementById('desktop-negocio-nome');
         const mnn = document.getElementById('mobile-negocio-nome');
         if (dnn) dnn.textContent = nomeExibir;
