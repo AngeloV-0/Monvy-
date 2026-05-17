@@ -1602,7 +1602,7 @@ function renderizarListaInicio(){
   const recentes=[...movimentacoes].slice(0,8);
   if(recentes.length===0){el.innerHTML='<div class="vazio">Nenhuma movimentação ainda.</div>';return;}
   el.innerHTML=recentes.map(m=>`
-    <div class="mov-item" onclick="abrirModalEditar('${m.id}')">
+    <div class="mov-item" style="padding:16px 14px;" onclick="abrirModalEditar('${m.id}')">
       <div class="mov-left">
         <div class="mov-dot ${m.tipo==='ganho'?'g':'r'}"></div>
         <div class="mov-info">
