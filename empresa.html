@@ -20,7 +20,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7690">
+  <link rel="stylesheet" href="style.css?v=7692">
   <script src="chart.min.js"></script>
   <style>
     /* ── Empresa badge ── */
@@ -34,6 +34,7 @@
     /* ── Telas ── */
     .emp-tela { display:none;animation:fadeUp .25s ease; }
     .emp-tela.active { display:block; }
+    @keyframes fadeOutLoading { to { opacity:0; pointer-events:none; display:none; } }
 
     /* ── Score banner ── */
     .score-banner { display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:20px; }
@@ -275,7 +276,7 @@
 <body>
 
   <!-- Loading -->
-  <div id="app-loading-overlay" style="display:flex;position:fixed;inset:0;background:var(--bg,#0A0F1A);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+  <div id="app-loading-overlay" style="display:flex;position:fixed;inset:0;background:var(--bg,#0A0F1A);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:fadeOutLoading 0.3s ease 2s forwards">
     <img src="logo-02.png" alt="Monvay" style="height:64px;width:auto;">
     <div style="width:36px;height:36px;border:3px solid rgba(34,197,94,0.15);border-top-color:#22C55E;border-radius:50%;animation:appSpin .8s linear infinite"></div>
     <style>@keyframes appSpin{to{transform:rotate(360deg)}}</style>
@@ -979,11 +980,11 @@
     };
 
     // ── Auth ──────────────────────────────────────────
-    // Fallback: remove loading após 1.5s caso onAuth não dispare
+    // Fallback agressivo: remove loading em 500ms
     const _loadingTimer = setTimeout(() => {
       const o = document.getElementById('app-loading-overlay');
       if (o) o.style.display = 'none';
-    }, 1500);
+    }, 500);
 
     waitAuthReady().then(() => {
     onAuth(async user => {
@@ -1797,11 +1798,8 @@ ${empresa.nomeNegocio?'- Nome do negócio: '+empresa.nomeNegocio:''}
         // Formatar resposta
         const html = resposta
           .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-          .replace(/
-
-/g,'</p><p style="margin-top:8px">')
-          .replace(/
-/g,'<br>');
+          .replace(/\n\n/g,'</p><p style="margin-top:8px">')
+          .replace(/\n/g,'<br>');
 
         _klausCacheSet(pergunta, resposta);
         const loadEl = document.getElementById(loadId);
